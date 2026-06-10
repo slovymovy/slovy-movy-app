@@ -1,6 +1,9 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.server.lists.LanguageListsResponse
+import com.slovy.slovymovyapp.server.lists.ListsVersionResponse
 import io.ktor.http.*
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
@@ -9,6 +12,7 @@ import kotlinx.serialization.json.Json
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.isRegularFile
 
 private const val TEST_DB_DIR_ENV = "TEST_DB_DIR"
@@ -32,6 +36,91 @@ private data class TestDbFileEntry(
     val name: String,
     val sizeBytes: Long
 )
+
+/**
+ * In-memory replacement for the GitHub-backed lists data. Tests populate it via
+ * `PUT /test/lists/{lang}` and the test-mode `/lists/{lang}` endpoints serve from it,
+ * so client/server lists tests stay hermetic (no GitHub token or network needed).
+ */
+private object TestLanguageListsStore {
+    private val bundles = ConcurrentHashMap<String, LanguageListsResponse>()
+
+    fun get(lang: String): LanguageListsResponse? = bundles[lang]
+
+    fun put(lang: String, bundle: LanguageListsResponse) {
+        bundles[lang] = bundle
+    }
+
+    fun remove(lang: String) {
+        bundles.remove(lang)
+    }
+}
+
+fun Routing.testListsEndpoints() {
+    // explicitNulls=false lets test payloads omit nullable fields like `icon`.
+    val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
+
+    route("/test/lists") {
+        put("/{lang}") {
+            val lang = call.parameters["lang"]?.trim()
+            if (lang.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                return@put
+            }
+            val bundle = try {
+                json.decodeFromString(LanguageListsResponse.serializer(), call.receiveText())
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid lists payload: ${e.message}")
+                return@put
+            }
+            TestLanguageListsStore.put(lang, bundle)
+            call.respond(HttpStatusCode.NoContent)
+        }
+        delete("/{lang}") {
+            val lang = call.parameters["lang"]?.trim()
+            if (lang.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                return@delete
+            }
+            TestLanguageListsStore.remove(lang)
+            call.respond(HttpStatusCode.NoContent)
+        }
+    }
+
+    get("/lists/{lang}/version") {
+        val lang = call.parameters["lang"]?.trim()
+        if (lang.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+            return@get
+        }
+        val bundle = TestLanguageListsStore.get(lang)
+        if (bundle == null) {
+            call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
+            return@get
+        }
+        call.respondText(
+            json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(bundle.version)),
+            ContentType.Application.Json
+        )
+    }
+
+    get("/lists/{lang}") {
+        val lang = call.parameters["lang"]?.trim()
+        if (lang.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+            return@get
+        }
+        val bundle = TestLanguageListsStore.get(lang)
+        if (bundle == null) {
+            call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
+            return@get
+        }
+        call.respondText(
+            json.encodeToString(LanguageListsResponse.serializer(), bundle),
+            ContentType.Application.Json
+        )
+    }
+}
 
 fun Routing.testDataEndpoints() {
     route("/test/db") {

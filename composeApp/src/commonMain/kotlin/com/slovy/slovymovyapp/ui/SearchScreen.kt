@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -26,16 +27,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.slovy.slovymovyapp.data.lists.ListsService
+import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -63,9 +72,11 @@ import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.uuid.Uuid
@@ -81,12 +92,14 @@ data class SearchUiState(
     val isLanguageDropdownExpanded: Boolean = false,
     val isSuggestionsRefreshing: Boolean = false,
     val wordSuggestions: List<String> = emptyList(),
-    val favoriteLemmas: List<String> = emptyList()
+    val favoriteLemmas: List<String> = emptyList(),
+    val curatedLists: List<WordList> = emptyList()
 )
 
 class SearchViewModel(
     private val repository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
+    private val listsService: ListsService,
 ) : ViewModel() {
 
     data class Search(
@@ -114,6 +127,7 @@ class SearchViewModel(
     val noDictionaryScrollState = ScrollState(0)
     private var suggestionsInitialized = false
     private var savedSearchLanguage: Language? = null
+    private var listsJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -172,8 +186,12 @@ class SearchViewModel(
             val savedLang = savedCode?.let { Language.fromCodeOrNull(it) }
             savedSearchLanguage = savedLang
             if (savedLang != null && savedLang in state.availableLanguages && savedLang != state.selectedLanguage) {
-                state = state.copy(selectedLanguage = savedLang)
+                // This bypasses setSelectedLanguage (the preference must not be re-saved),
+                // so drop anything the screen-open refresh loaded for the pre-restore
+                // language and reload lists for the restored one.
+                state = state.copy(selectedLanguage = savedLang, curatedLists = emptyList())
                 queryFlow.value = queryFlow.value.copy(language = savedLang)
+                refreshLists()
             }
             loadSuggestionsForCurrentLanguage()
             suggestionsInitialized = true
@@ -204,6 +222,25 @@ class SearchViewModel(
                 loadSuggestionsForCurrentLanguage()
             } finally {
                 state = state.copy(isSuggestionsRefreshing = false)
+            }
+        }
+    }
+
+    fun refreshLists() {
+        listsJob?.cancel()
+        listsJob = viewModelScope.launch {
+            val language = state.selectedLanguage ?: return@launch
+            // Serve whatever the DB already holds, then sync with the server and
+            // re-read only when new content was actually stored.
+            val cached = listsService.getLists(language)
+            if (state.selectedLanguage == language) {
+                state = state.copy(curatedLists = cached)
+            }
+            if (listsService.sync(language)) {
+                val updated = listsService.getLists(language)
+                if (state.selectedLanguage == language) {
+                    state = state.copy(curatedLists = updated)
+                }
             }
         }
     }
@@ -277,11 +314,11 @@ class SearchViewModel(
                 resetFocus = langChanged
             )
         }
-        // Load suggestions for new language
+        // Load suggestions and lists for new language
         if (langChanged) {
-            viewModelScope.launch {
-                loadSuggestionsForCurrentLanguage()
-            }
+            state = state.copy(curatedLists = emptyList())
+            viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
+            refreshLists()
         }
     }
 
@@ -304,16 +341,18 @@ fun SearchScreen(
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
+    onListClick: (WordList) -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     // restore after process death
     val savedQuery = rememberSaveable { viewModel.state.query }
 
-    // Refresh language indicators, recent favorites, and search results when screen is opened
+    // Refresh language indicators, recent favorites, search results, and lists when screen is opened
     LaunchedEffect(Unit) {
         viewModel.refreshLanguageIndicators()
         viewModel.refreshRecentFavorites()
         viewModel.refreshResults()
+        viewModel.refreshLists()
     }
 
     LaunchedEffect(savedQuery) {
@@ -359,6 +398,7 @@ fun SearchScreen(
         },
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
+        onListClick = onListClick,
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
@@ -377,6 +417,7 @@ fun SearchScreenContent(
     onLanguageSelected: (Language?) -> Unit = {},
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
+    onListClick: (WordList) -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -510,7 +551,9 @@ fun SearchScreenContent(
                                 EmptySearchState(
                                     wordSuggestions = state.wordSuggestions,
                                     favoriteLemmas = state.favoriteLemmas,
-                                    onWordClick = onSuggestionSelected
+                                    curatedLists = state.curatedLists,
+                                    onWordClick = onSuggestionSelected,
+                                    onListClick = onListClick
                                 )
                             }
                         }
@@ -614,8 +657,11 @@ private fun SearchResultCard(
 private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
-    onWordClick: (String) -> Unit
+    curatedLists: List<WordList>,
+    onWordClick: (String) -> Unit,
+    onListClick: (WordList) -> Unit
 ) {
+    val isDark = LocalIsDarkTheme.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -629,9 +675,10 @@ private fun EmptySearchState(
                 text = stringResource(Res.string.search_section_explore).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.2.sp
+                    letterSpacing = 1.6.sp,
+                    fontSize = 10.5.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
             )
             wordSuggestions.forEach { lemma ->
@@ -661,7 +708,29 @@ private fun EmptySearchState(
             }
         }
 
-        if (favoriteLemmas.isNotEmpty()) {
+        if (curatedLists.isNotEmpty()) {
+            Text(
+                text = stringResource(Res.string.search_section_lists_for_you).uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.6.sp,
+                    fontSize = 10.5.sp,
+                ),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(
+                    top = if (wordSuggestions.isNotEmpty()) 12.dp else 8.dp,
+                    bottom = 2.dp
+                )
+            )
+            curatedLists.forEachIndexed { index, list ->
+                ListCard(
+                    list = list,
+                    featured = index == 0,
+                    isDark = isDark,
+                    onClick = { onListClick(list) }
+                )
+            }
+        } else if (favoriteLemmas.isNotEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -689,7 +758,7 @@ private fun EmptySearchState(
             }
         }
 
-        if (wordSuggestions.isEmpty() && favoriteLemmas.isEmpty()) {
+        if (wordSuggestions.isEmpty() && curatedLists.isEmpty() && favoriteLemmas.isEmpty()) {
             Text(
                 text = stringResource(Res.string.search_empty_start_typing),
                 style = MaterialTheme.typography.bodyMedium,
@@ -701,6 +770,121 @@ private fun EmptySearchState(
             )
         }
     }
+}
+
+@Composable
+private fun ListCard(
+    list: WordList,
+    featured: Boolean,
+    isDark: Boolean,
+    onClick: () -> Unit
+) {
+    val localeCode = Locale.current.language
+    val title = list.title[localeCode] ?: list.title["en"] ?: list.id
+    val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
+    val badge = list.labels[localeCode]?.firstOrNull() ?: list.labels["en"]?.firstOrNull()
+    val wordCount = list.senseIds.size
+    val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
+    val titleFontSize = if (featured) 19.sp else 18.sp
+    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
+    val shadowElevation = if (isDark) 3.dp else 4.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = shadowElevation,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = shadowColor,
+                spotColor = shadowColor,
+            )
+            .background(bgColor)
+            .clickable(onClickLabel = title, onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                if (badge != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(fgColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 9.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = badge.uppercase(),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.4.sp,
+                            color = fgColor,
+                        )
+                    }
+                }
+                Text(
+                    text = title,
+                    fontSize = titleFontSize,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.3).sp,
+                    lineHeight = (titleFontSize.value * 1.2f).sp,
+                    color = fgColor,
+                )
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 13.5.sp,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        lineHeight = (13.5f * 1.38f).sp,
+                        color = fgColor.copy(alpha = 0.76f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Text(
+                    text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = fgColor.copy(alpha = 0.62f),
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+
+            WordListEmblem(
+                fgColor = fgColor,
+                modifier = Modifier
+                    .size(48.dp)
+                    .alpha(0.82f),
+            )
+        }
+    }
+}
+
+internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Color> {
+    var h = 0L
+    for (i in id.indices) {
+        h = (h + id[i].code.toLong() * (i + 1)) and 0xFFFFFFFFL
+    }
+    // light (bg, fg) to dark (bg, fg) — 8 slots from the design palette
+    val slots = listOf(
+        Pair(Color(0xFFC46A3D), Color(0xFFFFF0E8)) to Pair(Color(0xFFA55530), Color(0xFFFFE4D4)), // 0 Terracotta
+        Pair(Color(0xFFD4A03A), Color(0xFFFFF6EE)) to Pair(Color(0xFFA87A1E), Color(0xFFFFF0DC)), // 1 Mustard
+        Pair(Color(0xFF3D7A7A), Color(0xFFE8F5F5)) to Pair(Color(0xFF2E5E5E), Color(0xFFD0ECEC)), // 2 Teal
+        Pair(Color(0xFF7A4A6E), Color(0xFFF5E8F2)) to Pair(Color(0xFF5C3854), Color(0xFFEDD6E8)), // 3 Plum
+        Pair(Color(0xFF6E7C3D), Color(0xFFF0F5E0)) to Pair(Color(0xFF525C2E), Color(0xFFE4EED0)), // 4 Olive
+        Pair(Color(0xFFA04A28), Color(0xFFFFF1E8)) to Pair(Color(0xFF7A3A20), Color(0xFFFFE4D4)), // 5 Rust
+        Pair(Color(0xFF8B6E7C), Color(0xFFFBF4F8)) to Pair(Color(0xFF6A5360), Color(0xFFF2E2EA)), // 6 Mauve
+        Pair(Color(0xFF3A4A5C), Color(0xFFE8EEF5)) to Pair(Color(0xFF2A3848), Color(0xFFD4DCE8)), // 7 Ink
+    )
+    val (light, dark) = slots[(h % 8L).toInt()]
+    return if (isDark) dark else light
 }
 
 @Composable
@@ -867,6 +1051,34 @@ private fun SearchScreenPreviewEmptyQuery(
                 selectedLanguage = Language.ENGLISH,
                 wordSuggestions = listOf("the", "be", "to", "of", "and"),
                 favoriteLemmas = listOf("world", "time", "love")
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SearchScreenPreviewWithLists(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        SearchScreenContent(
+            state = SearchUiState(
+                query = "",
+                results = emptyList(),
+                showNoResults = false,
+                availableLanguages = listOf(Language.DUTCH),
+                selectedLanguage = Language.DUTCH,
+                wordSuggestions = listOf("de", "het", "een", "zijn", "hebben"),
+                curatedLists = listOf(
+                    WordList(
+                        id = "nl_a1_basic",
+                        title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
+                        subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),
+                        labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1", "Basis")),
+                        senseIds = List(500) { it.toString() }
+                    )
+                )
             ),
         )
     }

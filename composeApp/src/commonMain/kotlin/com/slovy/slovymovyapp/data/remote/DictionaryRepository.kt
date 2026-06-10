@@ -157,6 +157,14 @@ class DictionaryRepository(
         ONLINE_ONLY,
     }
 
+    data class ListSenseItem(
+        val senseId: String,
+        val lemma: String,
+        val definition: String,
+        val learnerLevel: LearnerLevel,
+        val frequency: SenseFrequency,
+    )
+
     // Cache for loaded senses - reusable across the app
     private val senseCache = linkedMapOf<String, SenseWithPos>()
 
@@ -1156,6 +1164,29 @@ class DictionaryRepository(
         return suggestions to recentFavorites
     }
 
+    suspend fun getListSenses(language: Language, senseIds: List<String>): List<ListSenseItem> =
+        withContext(Dispatchers.IO) {
+            dataDbManager.withDictionaryReadOnlyIfExists(language) { db ->
+                if (db == null) return@withDictionaryReadOnlyIfExists emptyList()
+                val uuids = senseIds.mapNotNull { runCatching { Uuid.parse(it) }.getOrNull() }
+                if (uuids.isEmpty()) return@withDictionaryReadOnlyIfExists emptyList()
+                val byId = uuids.chunked(999).flatMap { chunk ->
+                    db.dictionaryQueries.selectSensesForList(chunk).executeAsList()
+                }.associateBy { it.sense_id.toString() }
+                senseIds.mapNotNull { id ->
+                    byId[id]?.let { row ->
+                        ListSenseItem(
+                            senseId = id,
+                            lemma = row.lemma,
+                            definition = row.sense_definition,
+                            learnerLevel = LearnerLevel.valueOf(row.learner_level.name),
+                            frequency = SenseFrequency.valueOf(row.frequency.name),
+                        )
+                    }
+                }
+            }
+        }
+
     /**
      * Gets recent favorite lemmas for the given language, most recent first.
      * Accepts pre-fetched [favorites] to avoid redundant DB reads when the caller
@@ -1214,7 +1245,7 @@ class DictionaryRepository(
                 // Sample non-favorite rows with gaps, then fill remaining from unused candidates.
                 val candidates = batch.filter { it.lemma.lowercase() !in favoriteLemmas }
                 if (candidates.isNotEmpty()) {
-                    val startIndex = (0 until candidates.size).random()
+                    val startIndex = candidates.indices.random()
                     var index = startIndex
                     val step = (2..50).random()
                     while (suggestions.size < count && index < candidates.size) {
@@ -1386,15 +1417,11 @@ class DictionaryRepository(
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
             val localLemmaIds: Set<Uuid> = localDbManager.withLocalDictionaryIfExists { localDb ->
-                if (localDb == null) {
-                    emptySet()
-                } else {
-                    localDb.dictionaryQueries
-                        .selectLemmasByIds(onlineOnlyIds)
-                        .executeAsList()
-                        .map { it.id }
-                        .toSet()
-                }
+                localDb?.dictionaryQueries
+                    ?.selectLemmasByIds(onlineOnlyIds)
+                    ?.executeAsList()
+                    ?.map { it.id }
+                    ?.toSet() ?: emptySet()
             }
 
             result = result.map { item ->

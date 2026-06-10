@@ -1,0 +1,129 @@
+-- Curated word lists downloaded from the server (`/lists/{lang}`), stored relationally
+-- so the feed and list detail screens are served from the local DB. `word_list_meta`
+-- keeps the server bundle version per language; `ListsService` refetches only when the
+-- `/lists/{lang}/version` endpoint reports a different version.
+
+CREATE TABLE word_list (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  PRIMARY KEY (lang_code, list_id)
+);
+
+-- Localized display text keyed by UI locale. Title or subtitle may be NULL when the
+-- server provides no value for that locale; NULL entries are skipped when rebuilding
+-- the locale maps so the "en" fallback still applies.
+CREATE TABLE word_list_text (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  locale TEXT NOT NULL,
+  title TEXT,
+  subtitle TEXT,
+  PRIMARY KEY (lang_code, list_id, locale)
+);
+
+CREATE TABLE word_list_label (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  locale TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  PRIMARY KEY (lang_code, list_id, locale, position)
+);
+
+CREATE TABLE word_list_sense (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  sense_id TEXT NOT NULL,
+  PRIMARY KEY (lang_code, list_id, position)
+);
+
+-- A sense may appear only once per list; the list detail screen keys its rows by
+-- sense_id, so a duplicate from a malformed server bundle must fail the replace
+-- transaction instead of reaching the UI.
+CREATE UNIQUE INDEX idx_word_list_sense_unique ON word_list_sense(lang_code, list_id, sense_id);
+
+CREATE TABLE word_list_meta (
+  lang_code TEXT NOT NULL PRIMARY KEY,
+  version TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+-- Meta queries.
+
+selectVersion:
+SELECT version FROM word_list_meta WHERE lang_code = ?;
+
+upsertMeta:
+INSERT OR REPLACE INTO word_list_meta(lang_code, version, updated_at)
+VALUES (?, ?, ?);
+
+-- Replace queries (run inside one transaction by WordListsRepository).
+
+deleteListsByLang:
+DELETE FROM word_list WHERE lang_code = ?;
+
+deleteTextsByLang:
+DELETE FROM word_list_text WHERE lang_code = ?;
+
+deleteLabelsByLang:
+DELETE FROM word_list_label WHERE lang_code = ?;
+
+deleteSensesByLang:
+DELETE FROM word_list_sense WHERE lang_code = ?;
+
+insertList:
+INSERT INTO word_list(lang_code, list_id, position)
+VALUES (?, ?, ?);
+
+insertText:
+INSERT INTO word_list_text(lang_code, list_id, locale, title, subtitle)
+VALUES (?, ?, ?, ?, ?);
+
+insertLabel:
+INSERT INTO word_list_label(lang_code, list_id, locale, position, label)
+VALUES (?, ?, ?, ?, ?);
+
+insertSense:
+INSERT INTO word_list_sense(lang_code, list_id, position, sense_id)
+VALUES (?, ?, ?, ?);
+
+-- Read queries.
+
+selectListIdsByLang:
+SELECT list_id FROM word_list
+WHERE lang_code = ?
+ORDER BY position ASC;
+
+selectTextsByLang:
+SELECT list_id, locale, title, subtitle FROM word_list_text
+WHERE lang_code = ?;
+
+selectLabelsByLang:
+SELECT list_id, locale, label FROM word_list_label
+WHERE lang_code = ?
+ORDER BY position ASC;
+
+selectSensesByLang:
+SELECT list_id, sense_id FROM word_list_sense
+WHERE lang_code = ?
+ORDER BY position ASC;
+
+selectListId:
+SELECT list_id FROM word_list
+WHERE lang_code = ? AND list_id = ?;
+
+selectTextsByList:
+SELECT locale, title, subtitle FROM word_list_text
+WHERE lang_code = ? AND list_id = ?;
+
+selectLabelsByList:
+SELECT locale, label FROM word_list_label
+WHERE lang_code = ? AND list_id = ?
+ORDER BY position ASC;
+
+selectSensesByList:
+SELECT sense_id FROM word_list_sense
+WHERE lang_code = ? AND list_id = ?
+ORDER BY position ASC;

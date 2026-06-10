@@ -23,6 +23,7 @@
     <string name="search_section_explore">Odkrywaj</string>
     <string name="search_pull_to_refresh_hint">Pociągnij w dół, aby zobaczyć nowe słowa</string>
     <string name="search_section_recently_saved">Ostatnio zapisane</string>
+    <string name="search_section_lists_for_you">Listy dla ciebie</string>
     <string name="search_empty_start_typing">Zacznij pisać, aby wyszukać</string>
     <string name="search_no_dictionary_title">Brak pobranego słownika</string>
     <string name="search_no_dictionary_description">Pobierz słownik, aby zacząć szukać słów</string>
@@ -55,6 +56,14 @@
     <string name="stats_today_label">dziś</string>
     <string name="stats_this_week_label">w tym tygodniu</string>
     <string name="stats_library_section">Moje słownictwo</string>
+    <string name="list_detail_load_error">Nie udało się wczytać listy. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="list_detail_empty">Słowa z tej listy nie są dostępne w pobranym słowniku.</string>
+    <plurals name="search_list_word_count">
+        <item quantity="one">%1$d słowo</item>
+        <item quantity="few">%1$d słowa</item>
+        <item quantity="many">%1$d słów</item>
+        <item quantity="other">%1$d słów</item>
+    </plurals>
     <plurals name="stats_words_label">
         <item quantity="one">słowo</item>
         <item quantity="few">słowa</item>
@@ -120,6 +129,7 @@
     <string name="download_content_desc_loading_info">Ładowanie informacji o pobieraniu</string>
     <string name="download_content_desc_preparing">Przygotowywanie pobierania</string>
     <string name="download_finalizing_recovering_progress">Odświeżanie ulubionych (%1$d/%2$d)</string>
+    <string name="download_finalizing_updating_lists">Aktualizowanie list słów…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>
         <item quantity="few">Odświeżanie ulubionych (%1$d/%2$d, błędów: %3$d)</item>

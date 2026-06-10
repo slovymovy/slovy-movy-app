@@ -305,15 +305,21 @@ The app drives study via an FSRS-backed pipeline. Domain types live in `shared` 
 ### Schema Locations
 
 - App DB schema (`appdb`): `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
-    - Files: `Settings.sq` (key/value JSON store), `Favorites.sq` (`favorites`, `card`, `review_log` tables).
+    - Files: `Settings.sq` (key/value JSON store), `Favorites.sq` (`favorites`, `card`, `review_log` tables),
+      `WordLists.sq` (`word_list`, `word_list_text`, `word_list_label`, `word_list_sense`, `word_list_meta` —
+      relational cache of server-curated word lists plus per-language bundle version).
     - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`
-    - Verification DBs: `1.db` … `5.db` alongside the schema files
+    - Verification DBs: `1.db` … `7.db` alongside the schema files; regenerate the newest one with
+      `gradlew :shared:generateCommonMainAppDatabaseSchema` after schema changes
 - Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
     - Includes `lemma`, `lemma_pos`, `lemma_pos_sense_hint` (routes senses to the correct cluster — adapter wired in
       `DatabaseProvider`), `lemma_word_family`, `sense`, `form`, `form_tag`, and per-sense detail tables.
 - Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
 - Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`,
-  `FavoritesRepository` in `shared/.../data/favorites/`. `Setting.Name` is the canonical list of setting keys
+  `FavoritesRepository` in `shared/.../data/favorites/`, `WordListsRepository` in `shared/.../data/lists/`.
+  Curated word lists are served from the DB via `ListsService` (`composeApp/.../data/lists/`), which syncs against
+  `/lists/{lang}/version` and refetches the bundle only on version mismatch (`ListsClient` is the HTTP layer).
+  `Setting.Name` is the canonical list of setting keys
   (LANGUAGE, DICTIONARY, DATA_VERSION, ENABLED_VOICES, VOICE_SETUP_SHOWN, WELCOME_COMPLETED, plus per-screen language
   persistence: SEARCH_LANGUAGE, FAVORITES_LANGUAGE, STATS_LANGUAGE).
 - Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/` —
@@ -479,6 +485,10 @@ if (GitHubClient.isAvailable()) {
   `GET /test/db/list` enumerates DB files in `TEST_DB_DIR` (defaulting to `.test-db-files`) and `GET /test/db/file/{name}`
   serves them. `TestServerDataProvider` in `commonTest` is the client side of this API and replaces
   `GoogleStorageBucketDataProvider` for tests.
+- Test mode also mounts `Routing.testListsEndpoints()` and skips the GitHub-backed `/lists/{lang}` routes:
+  `PUT /test/lists/{lang}` stages a `LanguageListsResponse` JSON bundle in an in-memory store,
+  `DELETE /test/lists/{lang}` removes it, and `GET /lists/{lang}` + `GET /lists/{lang}/version` serve from that store.
+  `ListsServiceServerTest` in `commonTest` uses this to exercise the full client → server → DB sync path.
 
 ### Server Test Patterns
 
