@@ -15,6 +15,9 @@ internal data class RawListFile(
     val labels: Map<String, List<String>> = emptyMap(),
     val icon: String? = null,
     val senseIds: List<String> = emptyList(),
+    // Curator-controlled feed position; lists are shown by ascending [order]. Absent
+    // (null) sorts to the end, with id as the alphabetical tiebreaker.
+    val order: Int? = null,
 )
 
 @Serializable
@@ -36,6 +39,9 @@ data class ListContent(
     val labels: Map<String, List<String>>,
     val icon: IconPayload?,
     val senseIds: List<String>,
+    // Curator-controlled feed position; clients render by ascending [order] with absent
+    // (null) sorted to the end. The server also emits lists already in this order.
+    val order: Int? = null,
 )
 
 data class LanguageListsBundle(

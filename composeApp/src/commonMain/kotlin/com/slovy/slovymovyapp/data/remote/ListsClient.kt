@@ -22,7 +22,10 @@ data class RemoteList(
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>> = emptyMap(),
     val icon: RemoteIconPayload? = null,
-    val senseIds: List<String>
+    val senseIds: List<String>,
+    // Curator-controlled feed position; the feed is sorted by ascending [order] with
+    // absent (null) sorted to the end. See ListsService.sync.
+    val order: Int? = null,
 )
 
 @Serializable

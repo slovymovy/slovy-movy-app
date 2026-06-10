@@ -64,7 +64,7 @@ class LanguageListsLoader {
         val lists: List<ListContent> = coroutineScope {
             listFiles.map { listFile ->
                 async { decodeList(lang, listFile, iconsByName) }
-            }.awaitAll().sortedBy { it.id }
+            }.awaitAll().sortedWith(compareBy({ it.order ?: Int.MAX_VALUE }, { it.id }))
         }
 
         LanguageListsBundle(version = treeSha, lists = lists)
@@ -96,6 +96,7 @@ class LanguageListsLoader {
             labels = raw.labels,
             icon = iconPayload,
             senseIds = raw.senseIds,
+            order = raw.order,
         )
     }
 }

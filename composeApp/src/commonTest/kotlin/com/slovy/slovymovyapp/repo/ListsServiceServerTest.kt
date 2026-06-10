@@ -43,6 +43,7 @@ class ListsServiceServerTest : BaseTest() {
         val subtitle: Map<String, String>,
         val labels: Map<String, List<String>>,
         val senseIds: List<String>,
+        val order: Int? = null,
     )
 
     @Serializable
@@ -187,6 +188,52 @@ class ListsServiceServerTest : BaseTest() {
                 assertEquals(
                     listOf(updatedContent.toWordList(), newContent.toWordList()),
                     service.getLists(language),
+                )
+            }
+        } finally {
+            deleteServerLists(language)
+        }
+    }
+
+    @Test
+    fun sync_ordersListsByOrderField_withAbsentLast() = runBlocking {
+        val language = Language.POLISH
+        try {
+            // Staged out of feed order: the client must sort by ascending `order`, with the
+            // unordered list (`order = null`) falling to the end and id as the tiebreaker.
+            val second = TestListContent(
+                id = "z_second",
+                title = mapOf("en" to "Second"),
+                subtitle = mapOf("en" to ""),
+                labels = emptyMap(),
+                senseIds = listOf("sense-2"),
+                order = 2,
+            )
+            val first = TestListContent(
+                id = "a_first",
+                title = mapOf("en" to "First"),
+                subtitle = mapOf("en" to ""),
+                labels = emptyMap(),
+                senseIds = listOf("sense-1"),
+                order = 1,
+            )
+            val unordered = TestListContent(
+                id = "m_unordered",
+                title = mapOf("en" to "Unordered"),
+                subtitle = mapOf("en" to ""),
+                labels = emptyMap(),
+                senseIds = listOf("sense-3"),
+                order = null,
+            )
+            putServerLists(
+                language,
+                TestListsBundle(version = "v1", lists = listOf(unordered, second, first)),
+            )
+            withService(serverUrl()) { service, _ ->
+                assertTrue(service.sync(language), "first sync must store new content")
+                assertEquals(
+                    listOf(first.id, second.id, unordered.id),
+                    service.getLists(language).map { it.id },
                 )
             }
         } finally {

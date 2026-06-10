@@ -222,8 +222,14 @@ val generateDebugLists = tasks.register("generateDebugLists") {
                     )
                 }
                 list["senseIds"] = raw["senseIds"] ?: emptyList<String>()
+                (raw["order"] as? Number)?.let { list["order"] = it.toInt() }
                 list
-            }
+            }.sortedWith(
+                compareBy(
+                    { (it["order"] as? Int) ?: Int.MAX_VALUE },
+                    { it["id"] as String },
+                ),
+            )
             val version = digest.digest().joinToString("") { "%02x".format(it) }.take(16)
             val bundle = mapOf("version" to version, "lists" to lists)
             outDir.resolve("${langDir.name}.json").writeText(JsonOutput.toJson(bundle))

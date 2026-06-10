@@ -36,10 +36,16 @@ class ListsService(
         if (remoteVersion == repository.getVersion(language)) return false
         val response = client.getLists(language) ?: return false
         try {
+            // Persist in feed order: ascending `order`, with absent (null) sorted to the
+            // end and id as the alphabetical tiebreaker. `replaceLists` encodes this into
+            // each row's `position`, so the feed and detail screens read it back directly.
+            val ordered = response.lists.sortedWith(
+                compareBy({ it.order ?: Int.MAX_VALUE }, { it.id }),
+            )
             repository.replaceLists(
                 language = language,
                 version = response.version,
-                lists = response.lists.map { it.toWordList() },
+                lists = ordered.map { it.toWordList() },
             )
             true
         } catch (e: CancellationException) {
