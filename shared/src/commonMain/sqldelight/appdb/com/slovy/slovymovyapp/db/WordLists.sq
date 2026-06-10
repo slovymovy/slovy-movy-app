@@ -7,6 +7,7 @@ CREATE TABLE word_list (
   lang_code TEXT NOT NULL,
   list_id TEXT NOT NULL,
   position INTEGER NOT NULL,
+  icon_svg TEXT,
   PRIMARY KEY (lang_code, list_id)
 );
 
@@ -74,8 +75,8 @@ deleteSensesByLang:
 DELETE FROM word_list_sense WHERE lang_code = ?;
 
 insertList:
-INSERT INTO word_list(lang_code, list_id, position)
-VALUES (?, ?, ?);
+INSERT INTO word_list(lang_code, list_id, position, icon_svg)
+VALUES (?, ?, ?, ?);
 
 insertText:
 INSERT INTO word_list_text(lang_code, list_id, locale, title, subtitle)
@@ -92,7 +93,7 @@ VALUES (?, ?, ?, ?);
 -- Read queries.
 
 selectListIdsByLang:
-SELECT list_id FROM word_list
+SELECT list_id, icon_svg FROM word_list
 WHERE lang_code = ?
 ORDER BY position ASC;
 
@@ -111,7 +112,7 @@ WHERE lang_code = ?
 ORDER BY position ASC;
 
 selectListId:
-SELECT list_id FROM word_list
+SELECT list_id, icon_svg FROM word_list
 WHERE lang_code = ? AND list_id = ?;
 
 selectTextsByList:

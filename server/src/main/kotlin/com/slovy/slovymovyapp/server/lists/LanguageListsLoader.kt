@@ -78,9 +78,10 @@ class LanguageListsLoader {
         val text = GitHubClient.readText(listFile)
         val raw = json.decodeFromString(RawListFile.serializer(), text)
         val id = listFile.name.removeSuffix(".json")
-        val iconPayload = raw.icon?.let { iconsByName[it] }
+        val iconPayload = ICON_EXTENSIONS.keys.firstNotNullOfOrNull { ext -> iconsByName["$id.$ext"] }
+            ?: raw.icon?.let { iconsByName[it] }
         if (raw.icon != null && iconPayload == null) {
-            log.warn("List '{}' in lists/{}/ references missing icon '{}'", id, lang, raw.icon)
+            log.warn("List '{}' in lists/{}/ references icon '{}' but no matching file was found", id, lang, raw.icon)
         }
         if (!raw.title.containsKey(BASE_LOCALE) || !raw.subtitle.containsKey(BASE_LOCALE)) {
             log.warn(

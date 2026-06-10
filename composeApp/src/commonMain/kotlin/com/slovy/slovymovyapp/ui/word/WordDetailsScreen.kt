@@ -1282,7 +1282,7 @@ private fun LemmaHeadlineText(lemma: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ChapterRule() {
+internal fun ChapterRule() {
     val color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
     Row(
         modifier = Modifier

@@ -22,6 +22,7 @@ open class WordListsRepositoryTest : BaseTest() {
         subtitle = mapOf("en" to "This is where your journey begins"),
         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1")),
         senseIds = listOf("sense-3", "sense-1", "sense-2"),
+        iconSvg = null,
     )
 
     private val travelList = WordList(
@@ -30,6 +31,7 @@ open class WordListsRepositoryTest : BaseTest() {
         subtitle = emptyMap(),
         labels = emptyMap(),
         senseIds = listOf("sense-9"),
+        iconSvg = null,
     )
 
     private fun openApp(): AppHandle {

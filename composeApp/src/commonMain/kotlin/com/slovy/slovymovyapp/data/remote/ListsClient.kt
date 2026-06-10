@@ -10,11 +10,18 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
+data class RemoteIconPayload(
+    val mimeType: String,
+    val data: String,
+)
+
+@Serializable
 data class RemoteList(
     val id: String,
     val title: Map<String, String>,
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>> = emptyMap(),
+    val icon: RemoteIconPayload? = null,
     val senseIds: List<String>
 )
 

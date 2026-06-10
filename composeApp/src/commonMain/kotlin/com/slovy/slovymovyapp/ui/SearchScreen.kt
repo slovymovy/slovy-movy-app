@@ -857,12 +857,24 @@ private fun ListCard(
                 )
             }
 
-            WordListEmblem(
-                fgColor = fgColor,
-                modifier = Modifier
-                    .size(48.dp)
-                    .alpha(0.82f),
-            )
+            val listIcon = remember(list.iconSvg) { list.iconSvg?.let { parseSvgIcon(it) } }
+            if (listIcon != null) {
+                Icon(
+                    imageVector = listIcon,
+                    contentDescription = null,
+                    tint = fgColor,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .alpha(0.82f),
+                )
+            } else {
+                WordListEmblem(
+                    fgColor = fgColor,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .alpha(0.82f),
+                )
+            }
         }
     }
 }
@@ -1076,7 +1088,8 @@ private fun SearchScreenPreviewWithLists(
                         title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
                         subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),
                         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1", "Basis")),
-                        senseIds = List(500) { it.toString() }
+                        senseIds = List(500) { it.toString() },
+                        iconSvg = null,
                     )
                 )
             ),

@@ -76,6 +76,7 @@ class ListsServiceServerTest : BaseTest() {
         subtitle = subtitle,
         labels = labels,
         senseIds = senseIds,
+        iconSvg = null,
     )
 
     private suspend fun putServerLists(language: Language, bundle: TestListsBundle) {
