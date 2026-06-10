@@ -4,7 +4,8 @@ expect class AppDataImporter(androidContext: Any? = null) {
     val isSupported: Boolean
     val sourceDescription: String
 
-    suspend fun stageAppDataImport(): AppDataImportStageResult
+    /** Returns null when the user dismissed the picker without choosing a file. */
+    suspend fun stageAppDataImport(): AppDataImportStageResult?
 }
 
 data class AppDataImportStageResult(

@@ -340,7 +340,8 @@ The app drives study via an FSRS-backed pipeline. Domain types live in `shared` 
 - `DownloadCoordinator` manages per-key download state (`Idle/Running/Done/Failed/Cancelled`) for setup and
   settings-triggered downloads.
 - `FavoriteLemmaRecovery` re-fetches favorite lemmas after a data-version download so locally cached translations stay
-  populated; it runs under `platform.runWithProcessKeepAlive` to survive backgrounding.
+  populated; `FavoriteRecoveryController` holds a `ProcessKeepAlive` for the duration of each run so it survives
+  backgrounding.
 - `NetworkErrorClassifier` translates exceptions into `NetworkError` enums (Offline, Timeout, ServerError(status),
   InsufficientStorage, Unknown). Use it (not raw `e.message`) when surfacing user-visible network errors.
 

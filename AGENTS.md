@@ -340,7 +340,8 @@ The app drives study via an FSRS-backed pipeline. Domain types live in `shared` 
 - `DownloadCoordinator` manages per-key download state (`Idle/Running/Done/Failed/Cancelled`) for setup and
   settings-triggered downloads.
 - `FavoriteLemmaRecovery` re-fetches favorite lemmas after a data-version download so locally cached translations stay
-  populated; it runs under `platform.runWithProcessKeepAlive` to survive backgrounding.
+  populated; `FavoriteRecoveryController` holds a `ProcessKeepAlive` for the duration of each run so it survives
+  backgrounding.
 - `NetworkErrorClassifier` translates exceptions into `NetworkError` enums (Offline, Timeout, ServerError(status),
   InsufficientStorage, Unknown). Use it (not raw `e.message`) when surfacing user-visible network errors.
 
@@ -501,6 +502,10 @@ if (GitHubClient.isAvailable()) {
 
 - Avoid adding free-standing helper methods (top-level functions or private extensions) in unrelated files. Place new
   methods on the actual class/service that owns the behaviour, in the file where that class is implemented.
+- Do not declare extension functions on stdlib/runtime types you don't own (`String`, `Collection`, `List`, `Map`,
+  etc.) — a helper like `Collection<String>.filterSelfReferences(...)` reads as general-purpose API while encoding
+  class-specific logic. Write a regular function and pass the data as a parameter. Extensions on project-owned or
+  generated types (e.g. `DictionaryQueries.resolveRelatedForm`) are fine.
 - Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
   refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
   obvious meaning that all callers genuinely share.

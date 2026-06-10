@@ -263,7 +263,11 @@ class DeveloperViewModel(
     fun stageAppDataImport() {
         runAction(actionName = "Stage data import") {
             val result = appDataImporter.stageAppDataImport()
-            "Import staged from ${result.artifactName}. Restart the app to apply it."
+            if (result == null) {
+                "Import cancelled."
+            } else {
+                "Import staged from ${result.artifactName}. Restart the app to apply it."
+            }
         }
     }
 
@@ -984,7 +988,7 @@ private fun DeveloperDangerCard(
             )
             FilledTonalButton(
                 onClick = onStageAppDataImport,
-                enabled = !isBusy && isImportSupported,
+                enabled = !isBusy && isDebugBuild && isImportSupported,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,

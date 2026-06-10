@@ -16,10 +16,11 @@ internal val standardAppDataDatabaseFileNames: List<String> = listOf(
     LocalDbManager.LOCAL_TRANSLATION_FILENAME
 )
 
+internal fun appDataFileNameWithSidecars(name: String): List<String> =
+    listOf(name, "$name-wal", "$name-shm")
+
 internal val standardAppDataFileNamesWithSidecars: List<String> =
-    standardAppDataDatabaseFileNames.flatMap { name ->
-        listOf(name, "$name-wal", "$name-shm")
-    }
+    standardAppDataDatabaseFileNames.flatMap { appDataFileNameWithSidecars(it) }
 
 internal inline fun <T> withAppDataSnapshots(
     platform: PlatformDbSupport,

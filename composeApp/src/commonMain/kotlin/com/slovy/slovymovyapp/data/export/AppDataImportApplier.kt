@@ -7,8 +7,9 @@ import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.PlatformFileInput
 import com.slovy.slovymovyapp.data.remote.PlatformFileOutput
+import com.slovy.slovymovyapp.data.remote.appDataFileNameWithSidecars
 import com.slovy.slovymovyapp.data.remote.standardAppDataDatabaseFileNames
-import com.slovy.slovymovyapp.data.remote.standardAppDataFileNamesWithSidecars
+import com.slovy.slovymovyapp.data.remote.use
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
@@ -27,26 +28,32 @@ data class AppDataImportApplyResult(
 object AppDataImportApplier {
     const val STAGED_IMPORT_FILENAME = "slovymovy-db-import-staged.tar"
 
+    /**
+     * Databases absent from the archive are left untouched; only databases present in the archive
+     * (and their -wal/-shm sidecars) are backed up and swapped.
+     */
     suspend fun applyStagedImportIfPresent(platform: PlatformDbSupport): AppDataImportApplyResult? =
         withContext(Dispatchers.IO) {
+            sweepStaleTempFiles(platform)
             val archivePath = stagedImportPath(platform)
             if (!platform.fileExists(archivePath)) return@withContext null
 
             val extracted = mutableMapOf<String, Path>()
             val backups = mutableMapOf<String, Path>()
+            val installed = mutableSetOf<String>()
             val restoredBackups = mutableSetOf<Path>()
             var importSucceeded = false
             try {
                 extractArchive(platform, archivePath, extracted)
                 require("app.db" in extracted) { "Import archive is missing app.db." }
                 validateExtractedDatabases(platform, extracted)
-                replaceAppDataFiles(platform, extracted, backups)
+                replaceAppDataFiles(platform, extracted, backups, installed)
                 writePostImportSettings(platform)
                 platform.deleteFile(archivePath)
                 importSucceeded = true
                 AppDataImportApplyResult(importedFiles = extracted.keys.sorted())
             } catch (t: Throwable) {
-                restoredBackups += restoreBackups(platform, backups)
+                restoredBackups += restoreBackups(platform, installed, backups)
                 platform.deleteFile(archivePath)
                 throw t
             } finally {
@@ -59,13 +66,22 @@ object AppDataImportApplier {
     internal fun stagedImportPath(platform: PlatformDbSupport): Path =
         platform.getDatabasePath(STAGED_IMPORT_FILENAME)
 
+    private fun sweepStaleTempFiles(platform: PlatformDbSupport) {
+        val databasesDir = platform.getDatabasePath("")
+        if (!platform.fileExists(databasesDir)) return
+        platform.listFiles(databasesDir).forEach { file ->
+            if (file.name.startsWith(TEMP_FILE_PREFIX) && file.name.endsWith(TEMP_FILE_SUFFIX)) {
+                platform.deleteFile(file)
+            }
+        }
+    }
+
     private fun extractArchive(
         platform: PlatformDbSupport,
         archivePath: Path,
         extracted: MutableMap<String, Path>,
     ) {
-        val input = platform.openInput(archivePath)
-        try {
+        platform.openInput(archivePath).use { input ->
             val header = ByteArray(TAR_BLOCK_SIZE)
             while (true) {
                 val headerBytes = input.readFullyOrEnd(header)
@@ -81,18 +97,16 @@ object AppDataImportApplier {
 
                 val size = header.readTarOctal(124, 12)
                 require(size >= 0) { "Import archive contains an invalid size for $name." }
-                val tempPath = platform.getDatabasePath("slovymovy-import-${name}.part")
+                val tempPath = platform.getDatabasePath("$TEMP_FILE_PREFIX$name$TEMP_FILE_SUFFIX")
                 if (platform.fileExists(tempPath)) {
                     platform.deleteFile(tempPath)
                 }
-                platform.openOutput(tempPath).useOutput { output ->
+                platform.openOutput(tempPath).use { output ->
                     input.copyExactlyTo(output, size)
                 }
                 extracted[name] = tempPath
                 input.skipTarPadding(size)
             }
-        } finally {
-            input.close()
         }
     }
 
@@ -127,6 +141,7 @@ object AppDataImportApplier {
         }
     }
 
+    @Suppress("SqlNoDataSourceInspection")
     private fun validateSqliteDatabase(
         name: String,
         validation: ImportedDatabaseValidation,
@@ -134,7 +149,7 @@ object AppDataImportApplier {
         val driver = validation.driver
         val integrity = driver.executeQuery(
             identifier = null,
-            sql = sqliteIntegrityCheckSql(),
+            sql = "PRAGMA integrity_check",
             mapper = { cursor ->
                 cursor.next()
                 QueryResult.Value(cursor.getString(0) ?: "")
@@ -145,7 +160,7 @@ object AppDataImportApplier {
 
         val schemaVersion = driver.executeQuery(
             identifier = null,
-            sql = sqliteUserVersionSql(),
+            sql = "PRAGMA user_version",
             mapper = { cursor ->
                 cursor.next()
                 QueryResult.Value(cursor.getLong(0) ?: 0L)
@@ -161,56 +176,44 @@ object AppDataImportApplier {
         }
     }
 
-    private fun SqlDriver.hasTable(table: String): Boolean {
-        var hasTable = false
+    @Suppress("SqlNoDataSourceInspection")
+    private fun SqlDriver.hasTable(table: String): Boolean =
         executeQuery(
             identifier = null,
-            sql = sqliteTableExistsSql(),
-            mapper = { cursor ->
-                val nextResult = cursor.next()
-                val hasRow = when (nextResult) {
-                    is QueryResult.Value -> nextResult.value
-                    else -> nextResult.value
-                }
-                hasTable = hasRow
-                QueryResult.Value(hasRow)
-            },
+            sql = "SELECT 1 FROM sqlite_master WHERE type='table' AND name=? LIMIT 1",
+            mapper = { cursor -> QueryResult.Value(cursor.next().value) },
             parameters = 1,
             binders = { bindString(0, table) },
-        )
-        return hasTable
-    }
+        ).value
 
     private fun replaceAppDataFiles(
         platform: PlatformDbSupport,
         extracted: Map<String, Path>,
         backups: MutableMap<String, Path>,
+        installed: MutableSet<String>,
     ) {
         platform.ensureDatabasesDir()
-        backupExistingAppDataFiles(platform, backups)
+        backupExistingAppDataFiles(platform, extracted.keys, backups)
 
-        standardAppDataDatabaseFileNames.forEach { fileName ->
+        extracted.forEach { (fileName, extractedPath) ->
             val destination = platform.getDatabasePath(fileName)
-            val extractedPath = extracted[fileName]
-            if (extractedPath == null) {
-                return@forEach
-            }
-
             if (!platform.moveFile(extractedPath, destination)) {
                 error("Failed to install imported $fileName.")
             }
+            installed += fileName
         }
     }
 
     private fun backupExistingAppDataFiles(
         platform: PlatformDbSupport,
+        importedNames: Set<String>,
         backups: MutableMap<String, Path>,
     ) {
-        standardAppDataFileNamesWithSidecars.forEach { fileName ->
+        importedNames.flatMap { appDataFileNameWithSidecars(it) }.forEach { fileName ->
             val sourcePath = platform.getDatabasePath(fileName)
             if (!platform.fileExists(sourcePath)) return@forEach
 
-            val backupPath = platform.getDatabasePath("slovymovy-import-backup-$fileName")
+            val backupPath = platform.getDatabasePath("$BACKUP_FILE_PREFIX$fileName")
             if (platform.fileExists(backupPath)) {
                 platform.deleteFile(backupPath)
             }
@@ -236,21 +239,27 @@ object AppDataImportApplier {
 
     private fun restoreBackups(
         platform: PlatformDbSupport,
+        installed: Set<String>,
         backups: Map<String, Path>,
     ): Set<Path> {
-        val restored = mutableSetOf<Path>()
-        standardAppDataFileNamesWithSidecars.forEach { fileName ->
+        // Remove what the failed import installed — including sidecars the new databases may have
+        // created since — so restored backups never pair with foreign -wal/-shm files. Files that
+        // were never backed up or installed must stay untouched.
+        installed.flatMap { appDataFileNameWithSidecars(it) }.forEach { fileName ->
             val destination = platform.getDatabasePath(fileName)
             if (platform.fileExists(destination)) {
                 platform.deleteFile(destination)
             }
         }
+        val restored = mutableSetOf<Path>()
         backups.forEach { (fileName, backupPath) ->
+            if (!platform.fileExists(backupPath)) return@forEach
             val destination = platform.getDatabasePath(fileName)
-            if (platform.fileExists(backupPath)) {
-                if (platform.moveFile(backupPath, destination)) {
-                    restored += backupPath
-                }
+            if (platform.fileExists(destination)) {
+                platform.deleteFile(destination)
+            }
+            if (platform.moveFile(backupPath, destination)) {
+                restored += backupPath
             }
         }
         return restored
@@ -289,14 +298,6 @@ object AppDataImportApplier {
         require(read == padding) { "Truncated tar padding." }
     }
 
-    private inline fun PlatformFileOutput.useOutput(block: (PlatformFileOutput) -> Unit) {
-        try {
-            block(this)
-        } finally {
-            close()
-        }
-    }
-
     private fun ByteArray.readTarString(offset: Int, length: Int): String {
         val end = (offset until offset + length)
             .firstOrNull { this[it] == 0.toByte() }
@@ -310,15 +311,6 @@ object AppDataImportApplier {
         return value.toLong(radix = 8)
     }
 
-    private fun sqliteIntegrityCheckSql(): String =
-        "PRAGMA" + " integrity_check"
-
-    private fun sqliteUserVersionSql(): String =
-        "PRAGMA" + " user_version"
-
-    private fun sqliteTableExistsSql(): String =
-        "SELECT 1 FROM " + "sqlite_master WHERE type='table' AND name=? LIMIT 1"
-
     private data class ImportedDatabaseValidation(
         val driver: SqlDriver,
         val maxSchemaVersion: Long,
@@ -327,4 +319,7 @@ object AppDataImportApplier {
 
     private const val TAR_BLOCK_SIZE = 512
     private const val COPY_BUFFER_SIZE = 8 * 1024
+    private const val TEMP_FILE_PREFIX = "slovymovy-import-"
+    private const val TEMP_FILE_SUFFIX = ".part"
+    private const val BACKUP_FILE_PREFIX = "slovymovy-import-backup-"
 }

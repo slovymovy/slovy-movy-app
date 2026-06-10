@@ -7,7 +7,9 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
-import com.slovy.slovymovyapp.data.remote.PlatformFileOutput
+import com.slovy.slovymovyapp.data.remote.PlatformFileInput
+import com.slovy.slovymovyapp.data.remote.copyTo
+import com.slovy.slovymovyapp.data.remote.use
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -23,17 +25,19 @@ actual class AppDataImporter actual constructor(androidContext: Any?) {
     actual val isSupported: Boolean = true
     actual val sourceDescription: String = "System file picker"
 
-    actual suspend fun stageAppDataImport(): AppDataImportStageResult {
+    actual suspend fun stageAppDataImport(): AppDataImportStageResult? {
         val uri = withContext(Dispatchers.Main) {
             AppDataImportPickerActivity.pick(context)
-        }
+        } ?: return null
         return withContext(Dispatchers.IO) {
             val artifactName = displayName(uri) ?: uri.lastPathSegment ?: "selected archive"
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                platform.openOutput(AppDataImportApplier.stagedImportPath(platform)).useOutput { output ->
-                    copyToPlatformOutput(input, output)
+            val input = context.contentResolver.openInputStream(uri)
+                ?: error("Failed to open selected import archive.")
+            input.use { stream ->
+                platform.openOutput(AppDataImportApplier.stagedImportPath(platform)).use { output ->
+                    platformFileInput(stream).copyTo(output)
                 }
-            } ?: error("Failed to open selected import archive.")
+            }
             AppDataImportStageResult(
                 artifactName = artifactName,
                 sourceLabel = sourceDescription,
@@ -54,26 +58,15 @@ actual class AppDataImporter actual constructor(androidContext: Any?) {
         }
     }
 
-    private fun copyToPlatformOutput(
-        input: InputStream,
-        output: PlatformFileOutput,
-    ) {
-        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-        while (true) {
-            val read = input.read(buffer)
-            if (read <= 0) break
-            output.write(buffer, offset = 0, length = read)
-        }
-        output.flush()
-    }
+    private fun platformFileInput(input: InputStream): PlatformFileInput =
+        object : PlatformFileInput {
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int =
+                input.read(buffer, offset, length)
 
-    private inline fun PlatformFileOutput.useOutput(block: (PlatformFileOutput) -> Unit) {
-        try {
-            block(this)
-        } finally {
-            close()
+            override fun close() {
+                input.close()
+            }
         }
-    }
 }
 
 class AppDataImportPickerActivity : Activity() {
@@ -92,15 +85,13 @@ class AppDataImportPickerActivity : Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            val uri = data?.data
+        if (requestCode == REQUEST_CODE) {
+            val uri = if (resultCode == RESULT_OK) data?.data else null
             if (uri != null) {
                 AppDataImportPickerBridge.complete(uri)
             } else {
-                AppDataImportPickerBridge.fail(IllegalStateException("No file was selected."))
+                AppDataImportPickerBridge.dismiss()
             }
-        } else {
-            AppDataImportPickerBridge.cancel()
         }
         finish()
     }
@@ -108,7 +99,8 @@ class AppDataImportPickerActivity : Activity() {
     companion object {
         private const val REQUEST_CODE = 4817
 
-        suspend fun pick(context: Context): Uri = suspendCancellableCoroutine { continuation ->
+        /** Returns null when the user dismissed the picker without choosing a file. */
+        suspend fun pick(context: Context): Uri? = suspendCancellableCoroutine { continuation ->
             AppDataImportPickerBridge.start(context, continuation)
         }
     }
@@ -116,11 +108,11 @@ class AppDataImportPickerActivity : Activity() {
 
 private object AppDataImportPickerBridge {
     private val lock = Any()
-    private var continuation: kotlinx.coroutines.CancellableContinuation<Uri>? = null
+    private var continuation: kotlinx.coroutines.CancellableContinuation<Uri?>? = null
 
     fun start(
         context: Context,
-        nextContinuation: kotlinx.coroutines.CancellableContinuation<Uri>,
+        nextContinuation: kotlinx.coroutines.CancellableContinuation<Uri?>,
     ) {
         synchronized(lock) {
             if (continuation != null) {
@@ -158,17 +150,12 @@ private object AppDataImportPickerBridge {
         target?.resume(uri)
     }
 
-    fun fail(error: Throwable) {
+    fun dismiss() {
         val target = takeContinuation()
-        target?.resumeWithException(error)
+        target?.resume(null)
     }
 
-    fun cancel() {
-        val target = takeContinuation()
-        target?.cancel()
-    }
-
-    private fun takeContinuation(): kotlinx.coroutines.CancellableContinuation<Uri>? =
+    private fun takeContinuation(): kotlinx.coroutines.CancellableContinuation<Uri?>? =
         synchronized(lock) {
             continuation.also { continuation = null }
         }

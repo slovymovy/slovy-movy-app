@@ -131,7 +131,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
             } else {
                 val currentVersion = driver.executeQuery(
                     identifier = null,
-                    sql = sqliteUserVersionSql(),
+                    sql = "PRAGMA user_version",
                     mapper = { cursor ->
                         QueryResult.Value(cursor.getLong(0) ?: 0)
                     },
@@ -155,19 +155,14 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
     }
 
+    @Suppress("SqlNoDataSourceInspection")
     private fun setVersion(driver: SqlDriver, version: Long) {
         driver.execute(
             identifier = null,
-            sql = sqliteSetUserVersionSql(version),
+            sql = "PRAGMA user_version = $version",
             parameters = 0
         )
     }
-
-    private fun sqliteUserVersionSql(): String =
-        "PRAGMA" + " user_version"
-
-    private fun sqliteSetUserVersionSql(version: Long): String =
-        "PRAGMA" + " user_version = $version"
 
     private fun jdbcConnectionString(path: Path, readOnly: Boolean): String {
         val url = "jdbc:sqlite:file:${path}" + if (readOnly) "?mode=ro" else ""
