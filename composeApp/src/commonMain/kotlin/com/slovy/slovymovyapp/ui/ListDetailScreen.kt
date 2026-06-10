@@ -57,6 +57,8 @@ import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -104,6 +106,10 @@ class ListDetailViewModel(
     val scrollState = LazyListState()
     private var loadJob: Job? = null
 
+    companion object {
+        private const val PREFETCH_LIMIT = 16
+    }
+
     init {
         load()
     }
@@ -133,12 +139,18 @@ class ListDetailViewModel(
             val favoritedIds = allFavorites.map { it.senseId }.toSet()
             val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
             val items = senses.map { sense ->
+                // Seed from cache so already-loaded senses render their translation
+                // immediately, mirroring FavoritesViewModel.buildSenseItem.
+                val cached = repository.getCachedSense(sense.senseId)
                 ListWordItem(
                     senseId = sense.senseId,
                     lemma = sense.lemma,
                     definition = sense.definition,
                     learnerLevel = sense.learnerLevel,
                     frequency = sense.frequency,
+                    sense = cached?.sense,
+                    relatedWords = cached?.relatedWords ?: emptyMap(),
+                    pos = cached?.pos,
                     isFavorited = sense.senseId in favoritedIds,
                 )
             }
@@ -147,7 +159,28 @@ class ListDetailViewModel(
                 isLoading = false,
                 favoriteLemmas = favoriteLemmas,
             )
+            // Prefetch the first screenful so translations show without expanding,
+            // like the favorites list. The rest is prefetched on scroll.
+            prefetchSenses(items.take(PREFETCH_LIMIT))
         }
+    }
+
+    /** Loads full senses (with translations) for not-yet-loaded items. Mirrors
+     *  FavoritesViewModel.prefetchSenses. */
+    private fun prefetchSenses(items: List<ListWordItem>) {
+        val toLoad = items.filter { it.sense == null && !it.loading && it.error == null }
+        toLoad.forEach { item ->
+            viewModelScope.launch { loadSense(item) }
+        }
+    }
+
+    /** Prefetches senses for the visible range as the user scrolls. Mirrors
+     *  FavoritesViewModel.prefetchVisibleRange. */
+    fun prefetchVisibleRange(items: List<ListWordItem>, range: IntRange) {
+        if (items.isEmpty() || range.isEmpty()) return
+        val safeRange = range.first.coerceAtLeast(0)..minOf(range.last, items.lastIndex)
+        if (safeRange.isEmpty()) return
+        prefetchSenses(items.slice(safeRange).take(PREFETCH_LIMIT))
     }
 
     private fun updateItem(senseId: String, transform: (ListWordItem) -> ListWordItem) {
@@ -251,6 +284,7 @@ fun ListDetailScreen(
             onBack = onBack,
             onSenseToggle = viewModel::toggleSense,
             onFavoriteToggle = viewModel::toggleFavorite,
+            onPrefetchVisible = viewModel::prefetchVisibleRange,
             onNavigateToWordDetail = { lemma, senseId ->
                 onNavigateToWordDetail(viewModel.language, lemma, senseId)
             },
@@ -346,9 +380,26 @@ fun ListDetailContent(
     onBack: () -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
+    onPrefetchVisible: (List<ListWordItem>, IntRange) -> Unit = { _, _ -> },
     onNavigateToWordDetail: (lemma: String, senseId: String?) -> Unit = { _, _ -> },
 ) {
     val isDark = LocalIsDarkTheme.current
+
+    // Prefetch full senses (with translations) for the visible range as the user
+    // scrolls, mirroring FavoritesScreenContent. Index 0 is the header item.
+    LaunchedEffect(state.items, scrollState) {
+        snapshotFlow { scrollState.layoutInfo.visibleItemsInfo.map { it.index } }
+            .distinctUntilChanged()
+            .collectLatest { indices ->
+                if (indices.isEmpty()) return@collectLatest
+                val first = indices.minOrNull() ?: return@collectLatest
+                val last = indices.maxOrNull() ?: return@collectLatest
+                val lookahead = 5
+                val firstItem = (first - 1).coerceAtLeast(0)
+                val lastItem = last - 1 + lookahead
+                onPrefetchVisible(state.items, firstItem..lastItem)
+            }
+    }
     val localeCode = androidx.compose.ui.text.intl.Locale.current.language
     val title = list.title[localeCode] ?: list.title["en"] ?: list.id
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
@@ -443,9 +494,6 @@ private fun ListWordSenseCard(
             pos = item.pos,
             loading = item.loading,
             error = item.error?.resolve(),
-            collapsedDefinition = item.definition,
-            collapsedLearnerLevel = item.learnerLevel,
-            collapsedFrequency = item.frequency,
         ),
         state = SenseUiState(
             senseId = item.senseId,

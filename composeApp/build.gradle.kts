@@ -1,8 +1,12 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+import java.security.MessageDigest
+import java.util.Base64
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -173,6 +177,68 @@ val generateIosVersionXcconfig = tasks.register<WriteIosVersionXcconfigTask>("ge
 
 kotlin.sourceSets.commonMain {
     kotlin.srcDir(generateAppVersion.map { it.outputDir })
+}
+
+// Converts the project-root `lists/` debug folder into per-language bundles matching the
+// server's `RemoteListsResponse` shape (icons inlined as base64). The bundles are written
+// into compose resources at `files/debug-lists/{lang}.json` (gitignored) and read by
+// `ResourceListsSource` in debug builds. Release builds never read them (gated by
+// AppBuildConfig.isDebug). Generated into the convention resources dir rather than via
+// `compose.resources { customDirectory(...) }`, because a custom directory on a source set
+// disables that set's default `composeResources` location (dropping the app's strings).
+val generateDebugLists = tasks.register("generateDebugLists") {
+    val listsDir = rootProject.layout.projectDirectory.dir("lists").asFile
+    val outDir = layout.projectDirectory.dir("src/commonMain/composeResources/files/debug-lists").asFile
+    if (listsDir.exists()) inputs.dir(listsDir)
+    outputs.dir(outDir)
+    doLast {
+        outDir.deleteRecursively()
+        outDir.mkdirs()
+        if (!listsDir.exists()) return@doLast
+        listsDir.listFiles()?.filter { it.isDirectory }?.forEach { langDir ->
+            val jsonFiles = langDir.listFiles { f -> f.extension.equals("json", ignoreCase = true) }
+                ?.sortedBy { it.name }
+                ?: emptyList()
+            if (jsonFiles.isEmpty()) return@forEach
+            val digest = MessageDigest.getInstance("SHA-256")
+            val lists = jsonFiles.map { jsonFile ->
+                val id = jsonFile.nameWithoutExtension
+                @Suppress("UNCHECKED_CAST")
+                val raw = JsonSlurper().parse(jsonFile) as Map<String, Any?>
+                digest.update(jsonFile.readBytes())
+                val list = linkedMapOf<String, Any?>(
+                    "id" to id,
+                    "title" to (raw["title"] ?: emptyMap<String, String>()),
+                    "subtitle" to (raw["subtitle"] ?: emptyMap<String, String>()),
+                    "labels" to (raw["labels"] ?: emptyMap<String, List<String>>()),
+                )
+                val svg = langDir.resolve("$id.svg")
+                if (svg.exists()) {
+                    val svgBytes = svg.readBytes()
+                    digest.update(svgBytes)
+                    list["icon"] = mapOf(
+                        "mimeType" to "image/svg+xml",
+                        "data" to Base64.getEncoder().encodeToString(svgBytes),
+                    )
+                }
+                list["senseIds"] = raw["senseIds"] ?: emptyList<String>()
+                list
+            }
+            val version = digest.digest().joinToString("") { "%02x".format(it) }.take(16)
+            val bundle = mapOf("version" to version, "lists" to lists)
+            outDir.resolve("${langDir.name}.json").writeText(JsonOutput.toJson(bundle))
+        }
+    }
+}
+
+// Ensure the bundles exist before compose resources are collected/packaged. Covers every
+// task that reads the convention `composeResources` dir (prepare/accessors/value-resource
+// copy/convert and per-platform copies).
+tasks.matching {
+    val n = it.name
+    n.contains("ComposeResources") || n.contains("ResourceAccessors") || n.contains("ValueResources")
+}.configureEach {
+    dependsOn(generateDebugLists)
 }
 
 tasks.withType<KotlinCompilationTask<*>>().configureEach {

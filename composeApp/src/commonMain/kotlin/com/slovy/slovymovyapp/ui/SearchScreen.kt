@@ -129,6 +129,8 @@ class SearchViewModel(
     private var savedSearchLanguage: Language? = null
     private var listsJob: Job? = null
 
+    private val suggestionsLoadedForLanguage = MutableStateFlow<Language?>(null)
+
     init {
         viewModelScope.launch {
             @OptIn(kotlinx.coroutines.FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -200,8 +202,13 @@ class SearchViewModel(
 
     private suspend fun loadSuggestionsForCurrentLanguage() {
         val language = state.selectedLanguage ?: return
-        val (suggestions, favorites) = repository.getSearchEmptyStateData(language)
-        state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
+        try {
+            val (suggestions, favorites) = repository.getSearchEmptyStateData(language)
+            state = state.copy(wordSuggestions = suggestions, favoriteLemmas = favorites)
+        } finally {
+            // Mark loaded even on empty/failed results so lists still render afterwards.
+            suggestionsLoadedForLanguage.value = language
+        }
     }
 
     fun refreshRecentFavorites() {
@@ -233,6 +240,8 @@ class SearchViewModel(
             // Serve whatever the DB already holds, then sync with the server and
             // re-read only when new content was actually stored.
             val cached = listsService.getLists(language)
+            // Render suggestions for this language first, then lists below them.
+            suggestionsLoadedForLanguage.first { it == language }
             if (state.selectedLanguage == language) {
                 state = state.copy(curatedLists = cached)
             }

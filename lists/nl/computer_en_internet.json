@@ -1,0 +1,40 @@
+{
+  "title": {
+    "en": "Digital Life",
+    "nl": "Computer & internet",
+    "ru": "Компьютер и интернет",
+    "pl": "Komputer i internet"
+  },
+  "subtitle": {
+    "en": "Words for surfing the web, sending emails, and staying connected.",
+    "nl": "Woorden voor surfen op het web, mailen en online blijven.",
+    "ru": "Слова для поиска в сети, отправки писем и общения онлайн.",
+    "pl": "Słowa do surfowania w sieci, wysyłania e-maili i bycia online."
+  },
+  "senseIds": [
+    "b3a44aef-0902-38c8-81fb-8ba82e4a8df1",
+    "fe813cd9-5f12-3b4e-8a73-672dd482b4cf",
+    "2fa843aa-2540-302f-bca6-f4529e092d79",
+    "d61bae3c-429b-3e7b-b3f5-e2c313ff0616",
+    "909898a3-f803-3e9f-ace6-34880d4ea026",
+    "d3a60977-06c8-3b67-a07b-7947a6aabf06",
+    "931ae888-f87c-3b72-8e1f-d6b3704ea22b",
+    "66b1980c-5ba3-321e-a55b-cd96e1277540",
+    "1bbd2e11-1dd4-3c3e-a036-2a41fa24f189",
+    "ee587cf6-4d64-361a-ad90-8b5a448f06cf",
+    "e898a60f-1086-3a35-b156-b23be7de6593",
+    "580aceca-99eb-3dff-b9e8-89709714feb8",
+    "15e43613-c725-3adc-9a3b-99089a4ae3da",
+    "f7b59636-ac59-3681-a9bf-de0fd9063f11",
+    "4a3df2e3-f628-3b36-9b56-61a9c2d7a7fb",
+    "22b71c88-9719-34dd-b5d2-e3db0956bbcf",
+    "5fb59fb1-aca0-31e2-b1d9-3f4c33b0daa7",
+    "7d320625-100f-3f20-ac2d-9c542ece1a4e",
+    "5f374d2c-8244-38e3-b7e2-0742e28aa271",
+    "f52d386c-8be8-37eb-a86f-6da5c11006b8",
+    "9f5a4490-7d17-3643-81ea-1e5f5e4d274c",
+    "207513cc-bbd8-3d7a-bf06-b65abf608eb4",
+    "098c35a7-c189-3e07-a990-b67d04c217cb",
+    "8648fc2e-4310-33a8-b48b-884875109e66"
+  ]
+}

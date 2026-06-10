@@ -43,12 +43,12 @@ private data class RemoteListsVersionResponse(
 class ListsClient(
     private val platform: PlatformDbSupport,
     baseUrl: String = DictionaryClient.PRODUCTION_SERVER_URL
-) {
+) : ListsSource {
     private val serverBaseUrl = baseUrl.trimEnd('/')
     private val httpClient by lazy { platform.createHttpClient() }
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun getListsVersion(language: Language): String? = try {
+    override suspend fun getListsVersion(language: Language): String? = try {
         val response = httpClient.get("$serverBaseUrl/lists/${language.code}/version")
         if (!response.status.isSuccess()) {
             AppLogger.warn(TAG, "Lists version request for ${language.code} failed: HTTP ${response.status.value}", null)
@@ -63,7 +63,7 @@ class ListsClient(
         null
     }
 
-    suspend fun getLists(language: Language): RemoteListsResponse? = try {
+    override suspend fun getLists(language: Language): RemoteListsResponse? = try {
         val response = httpClient.get("$serverBaseUrl/lists/${language.code}")
         if (!response.status.isSuccess()) {
             AppLogger.warn(TAG, "Lists request for ${language.code} failed: HTTP ${response.status.value}", null)

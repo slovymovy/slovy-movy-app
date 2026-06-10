@@ -497,6 +497,99 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun listSenseIds_resolve_to_lemma_and_translated_senses() {
+        // Curated word lists carry only sense IDs. The list detail screen resolves the
+        // lemma for each via getListSenses, then loads the full sense (with translations)
+        // via getSenses — the same translation path Favorites uses. This verifies that
+        // contract end to end against the read-only dictionary.
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        val dictPath = runBlocking { mgr.ensureDictionary(Language.ENGLISH) }
+        try {
+            assertTrue(platform.fileExists(dictPath), "Dictionary file should exist: $dictPath")
+
+            // A real sense ID from the read-only dictionary, as a curated list would reference.
+            val (lemmaRowId, firstLemmaPosId, senseId) = runBlocking {
+                mgr.withDictionaryReadOnly(Language.ENGLISH) { roDb ->
+                    val lemmaRow = roDb.dictionaryQueries.selectLemmasByWord("en", "simultaneously")
+                        .executeAsList().firstOrNull()
+                    assertNotNull(lemmaRow, "Should find 'simultaneously' in RO dictionary")
+                    val lemmaPosIds = roDb.dictionaryQueries.selectLemmaPosIdByLemmaId(lemmaRow.id).executeAsList()
+                    assertTrue(lemmaPosIds.isNotEmpty(), "Should have lemma_pos entries")
+                    val senses = roDb.dictionaryQueries.selectSensesByLemmaPosId(lemmaPosIds.first()).executeAsList()
+                    assertTrue(senses.isNotEmpty(), "Should have senses")
+                    Triple(lemmaRow.id, lemmaPosIds.first(), senses.first().sense_id)
+                }
+            }
+
+            // Provide a Russian translation locally so the result is deterministic.
+            val tq = localMgr.openLocalTranslation().translationQueries
+            tq.insertSenseTargetDefinition(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                definition = "Локальное определение",
+            )
+            tq.insertSenseTranslation(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "Одновременно",
+                target_lang_word_normalized = "одновременно",
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaRowId,
+                lemma_pos_id = firstLemmaPosId,
+            )
+
+            val settingsRepo = settingsRepository()
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(id = Setting.Name.LANGUAGE, value = JsonArray(listOf(JsonPrimitive("ru")))),
+                )
+            }
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepo)
+
+            // Step 1: list sense IDs resolve to their lemma (collapsed-row resolution).
+            val listSenses = runBlocking { repo.getListSenses(Language.ENGLISH, listOf(senseId.toString())) }
+            assertEquals(1, listSenses.size, "List sense ID should resolve to one item")
+            assertEquals("simultaneously", listSenses.first().lemma)
+
+            // Step 2: loading the full sense yields the translation, like Favorites.
+            val loaded = runBlocking {
+                repo.getSenses(Language.ENGLISH, "simultaneously", setOf(senseId.toString()))
+            }
+            val sense = loaded[senseId.toString()]?.sense?.sense
+            assertNotNull(sense, "Should load the list sense")
+            assertEquals(
+                "Одновременно",
+                sense.translations[Language.RUSSIAN]?.firstOrNull()?.targetLangWord,
+                "List senses should carry translations resolved from settings targets",
+            )
+        } finally {
+            runBlocking {
+                mgr.deleteDictionary(Language.ENGLISH)
+                localMgr.closeAll()
+            }
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
+            }
+        }
+    }
+
+    @Test
     fun getSenses_respects_empty_translation_language_setting() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()

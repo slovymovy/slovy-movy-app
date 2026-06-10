@@ -293,10 +293,16 @@ fun App(
     val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
     }
-    val listsClient = remember(platform) { ListsClient(platform) }
+    // In debug builds, serve curated lists from bundles generated out of the project-root
+    // `lists/` folder (see the `generateDebugLists` Gradle task) and fall back to the
+    // backend for languages without a local bundle. Release builds always use HTTP.
+    val listsSource = remember(platform, appBuildConfig.isDebug) {
+        val http = ListsClient(platform)
+        if (appBuildConfig.isDebug) ResourceListsSource(http) else http
+    }
     val wordListsRepository = remember(appDatabase) { WordListsRepository(appDatabase) }
-    val listsService = remember(wordListsRepository, listsClient) {
-        ListsService(wordListsRepository, listsClient)
+    val listsService = remember(wordListsRepository, listsSource) {
+        ListsService(wordListsRepository, listsSource)
     }
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
