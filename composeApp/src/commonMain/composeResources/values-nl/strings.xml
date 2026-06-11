@@ -23,7 +23,7 @@
     <string name="search_section_explore">Ontdekken</string>
     <string name="search_pull_to_refresh_hint">Sleep omlaag voor nieuwe woorden</string>
     <string name="search_section_recently_saved">Onlangs opgeslagen</string>
-    <string name="search_section_lists_for_you">Lijsten voor jou</string>
+    <string name="search_section_lists_for_you">Klaar om te leren</string>
     <string name="search_empty_start_typing">Begin met typen om te zoeken</string>
     <string name="search_no_dictionary_title">Geen woordenboek gedownload</string>
     <string name="search_no_dictionary_description">Download een woordenboek om te beginnen met zoeken</string>

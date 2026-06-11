@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -27,9 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
@@ -662,6 +661,7 @@ private fun SearchResultCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EmptySearchState(
     wordSuggestions: List<String>,
@@ -690,8 +690,16 @@ private fun EmptySearchState(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
             )
-            wordSuggestions.forEach { lemma ->
-                SuggestionCard(lemma = lemma, onClick = { onWordClick(lemma) })
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                wordSuggestions.forEach { lemma ->
+                    WordChip(lemma = lemma, onClick = { onWordClick(lemma) })
+                }
             }
             Row(
                 modifier = Modifier
@@ -793,28 +801,46 @@ private fun ListCard(
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
     val badge = list.labels[localeCode]?.firstOrNull() ?: list.labels["en"]?.firstOrNull()
     val wordCount = list.senseIds.size
-    val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
-    val titleFontSize = if (featured) 19.sp else 18.sp
-    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
-    val shadowElevation = if (isDark) 3.dp else 4.dp
+    // The list's stable brand color; it now lives only in the icon and accents, while the
+    // card field becomes a quiet wash of the same hue.
+    val hue = listHue(list.id)
+    val fieldColor = if (isDark) {
+        mixColors(over = hue, base = MaterialTheme.colorScheme.surfaceContainer, overFraction = 0.09f)
+    } else {
+        mixColors(over = hue, base = MaterialTheme.colorScheme.background, overFraction = 0.09f)
+    }
+    val iconColor = if (isDark) {
+        mixColors(over = hue, base = Color(0xFFFFFFFF), overFraction = 0.55f)
+    } else {
+        mixColors(over = hue, base = Color(0xFF2D2620), overFraction = 0.80f)
+    }
+    // Contrast-safe accent for the small (10sp) badge text: a darkened hue on the pale
+    // light field, a lightened hue on the dark field — keeps the brand tint while passing
+    // AA. The vivid [iconColor] is fine for the 38dp icon but too light/dark for small text.
+    val badgeTextColor = if (isDark) {
+        mixColors(over = Color(0xFFFFFFFF), base = hue, overFraction = 0.55f)
+    } else {
+        mixColors(over = Color(0xFF2D2620), base = hue, overFraction = 0.55f)
+    }
+    val titleFontSize = if (featured) 18.sp else 17.sp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = shadowElevation,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = shadowColor,
-                spotColor = shadowColor,
+            .clip(RoundedCornerShape(16.dp))
+            .background(fieldColor)
+            .border(
+                0.5.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
+                RoundedCornerShape(16.dp)
             )
-            .background(bgColor)
             .clickable(onClickLabel = title, onClick = onClick)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
@@ -825,7 +851,8 @@ private fun ListCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(fgColor.copy(alpha = 0.15f))
+                            .background(hue.copy(alpha = 0.14f))
+                            .border(0.5.dp, hue.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 9.dp, vertical = 3.dp)
                     ) {
                         Text(
@@ -833,7 +860,7 @@ private fun ListCard(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.4.sp,
-                            color = fgColor,
+                            color = badgeTextColor,
                         )
                     }
                 }
@@ -843,39 +870,51 @@ private fun ListCard(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.3).sp,
                     lineHeight = (titleFontSize.value * 1.2f).sp,
-                    color = fgColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 if (subtitle.isNotEmpty()) {
                     Text(
                         text = subtitle,
-                        fontSize = 13.5.sp,
+                        fontSize = 13.sp,
                         fontStyle = FontStyle.Italic,
                         fontFamily = MaterialTheme.serifFontFamily,
-                        lineHeight = (13.5f * 1.38f).sp,
-                        color = fgColor.copy(alpha = 0.76f),
+                        lineHeight = (13f * 1.38f).sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Text(
                     text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
-                    fontSize = 12.sp,
+                    fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
-                    color = fgColor.copy(alpha = 0.62f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
 
             WordListIcon(
                 iconSvg = list.iconSvg,
-                fgColor = fgColor,
-                modifier = Modifier
-                    .size(48.dp)
-                    .alpha(0.82f),
+                fgColor = iconColor,
+                modifier = Modifier.size(38.dp),
             )
         }
     }
 }
+
+/**
+ * The list's stable saturated brand hue (terracotta, teal, …), derived from the same
+ * id→color assignment as [vibrantColorsForList] so a list keeps its color across the
+ * redesign. Reused as the icon tint and badge accent over the calm card field.
+ */
+internal fun listHue(id: String): Color = vibrantColorsForList(id, isDark = false).first
+
+/** Linear per-channel blend of [overFraction] of [over] onto [base]. */
+private fun mixColors(over: Color, base: Color, overFraction: Float): Color = Color(
+    red = base.red * (1f - overFraction) + over.red * overFraction,
+    green = base.green * (1f - overFraction) + over.green * overFraction,
+    blue = base.blue * (1f - overFraction) + over.blue * overFraction,
+)
 
 internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Color> {
     var h = 0L
@@ -895,6 +934,39 @@ internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Colo
     )
     val (light, dark) = slots[(h % 8L).toInt()]
     return if (isDark) dark else light
+}
+
+@Composable
+private fun WordChip(lemma: String, onClick: () -> Unit) {
+    // Single quiet sage tint for every chip — one color reads as "just words". The border
+    // does the heavy lifting so the edge survives on both the cream and near-black surfaces.
+    val isDark = LocalIsDarkTheme.current
+    val bgColor = if (isDark) Color(0xFF2A3326) else Color(0xFFE6EBDD)
+    val lineColor = if (isDark) Color(0xFF3A4636) else Color(0xFFD2DCC4)
+    val textColor = if (isDark) Color(0xFFD4DEC8) else Color(0xFF2D2620)
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(9.dp))
+            .background(bgColor)
+            .border(0.5.dp, lineColor, RoundedCornerShape(9.dp))
+            .semantics { role = Role.Button }
+            .clickable(
+                onClickLabel = stringResource(Res.string.search_open_item, lemma),
+                onClick = onClick
+            )
+            // Taller vertical padding lifts the tap target without the empty centering gap
+            // that a reserved 48dp slot leaves between wrapped rows.
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Text(
+            text = lemma,
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontSize = 15.sp,
+            lineHeight = 17.25.sp,
+            letterSpacing = (-0.1).sp,
+            color = textColor
+        )
+    }
 }
 
 @Composable
@@ -1079,7 +1151,7 @@ private fun SearchScreenPreviewWithLists(
                 showNoResults = false,
                 availableLanguages = listOf(Language.DUTCH),
                 selectedLanguage = Language.DUTCH,
-                wordSuggestions = listOf("de", "het", "een", "zijn", "hebben"),
+                wordSuggestions = listOf("de", "het", "een", "zijn", "hebben", "gezelligheid", "fiets"),
                 curatedLists = listOf(
                     WordList(
                         id = "nl_a1_basic",
@@ -1087,6 +1159,22 @@ private fun SearchScreenPreviewWithLists(
                         subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),
                         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1", "Basis")),
                         senseIds = List(500) { it.toString() },
+                        iconSvg = null,
+                    ),
+                    WordList(
+                        id = "nl_doctor",
+                        title = mapOf("en" to "At the doctor's", "nl" to "Bij de huisarts"),
+                        subtitle = mapOf("en" to "Words for your next appointment", "nl" to "Woorden voor je afspraak"),
+                        labels = mapOf("en" to listOf("A2")),
+                        senseIds = List(64) { it.toString() },
+                        iconSvg = null,
+                    ),
+                    WordList(
+                        id = "nl_digital_life",
+                        title = mapOf("en" to "Digital life", "nl" to "Digitaal leven"),
+                        subtitle = mapOf("en" to "Phones, apps and the web", "nl" to "Telefoons, apps en het web"),
+                        labels = emptyMap(),
+                        senseIds = List(120) { it.toString() },
                         iconSvg = null,
                     )
                 )
