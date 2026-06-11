@@ -680,12 +680,14 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun getDatabasePath(name: String): Path
     fun ensureDatabasesDir()
     fun fileExists(path: Path): Boolean
+    fun openInput(sourcePath: Path): PlatformFileInput
     fun openOutput(destPath: Path): PlatformFileOutput
     fun copyFile(from: Path, to: Path): Boolean
     fun deleteFile(path: Path)
     fun moveFile(from: Path, to: Path): Boolean
     fun markNoBackup(path: Path)
     fun createAppDataDriver(path: Path): SqlDriver
+    fun createAppDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createTranslationDataDriver(path: Path, readOnly: Boolean): SqlDriver
     fun createHttpClient(): HttpClient
@@ -720,23 +722,42 @@ interface ProcessKeepAlive {
     fun release()
 }
 
-/**
- * Convenience wrapper that acquires a keep-alive for the duration of [block]. The release runs in
- * a finally block so it survives cancellation of [block].
- */
-suspend fun PlatformDbSupport.runWithProcessKeepAlive(block: suspend () -> Unit) {
-    val handle = acquireProcessKeepAlive()
-    try {
-        block()
-    } finally {
-        handle.release()
-    }
+interface PlatformFileInput {
+    fun read(buffer: ByteArray, offset: Int, length: Int): Int
+    fun close()
 }
 
 interface PlatformFileOutput {
     fun write(buffer: ByteArray, offset: Int, length: Int)
     fun flush()
     fun close()
+}
+
+inline fun <T> PlatformFileInput.use(block: (PlatformFileInput) -> T): T {
+    try {
+        return block(this)
+    } finally {
+        close()
+    }
+}
+
+inline fun <T> PlatformFileOutput.use(block: (PlatformFileOutput) -> T): T {
+    try {
+        return block(this)
+    } finally {
+        close()
+    }
+}
+
+/** Copies everything remaining in this input to [output] and flushes it. Closes neither side. */
+fun PlatformFileInput.copyTo(output: PlatformFileOutput) {
+    val buffer = ByteArray(8 * 1024)
+    while (true) {
+        val read = read(buffer, 0, buffer.size)
+        if (read <= 0) break
+        output.write(buffer, 0, read)
+    }
+    output.flush()
 }
 
 // Query-only enforcement is identical across platforms

@@ -195,6 +195,7 @@
     <string name="app_data_version_mismatch_title">Your dictionaries need a refresh</string>
     <string name="app_data_version_mismatch_body">We've improved the dictionary format. Re-download to get the latest version—it takes a couple of minutes on Wi-Fi. Your saved words and progress are safe.</string>
     <string name="app_data_version_mismatch_action">Re-download dictionaries</string>
+    <string name="startup_import_error">Failed to import staged app data: %1$s</string>
 
     <string name="word_details_title">Word Details</string>
     <string name="word_details_action_stop">Stop</string>
@@ -296,9 +297,11 @@
     <string name="developer_intake_daily">Daily</string>
     <string name="developer_intake_continue_now">Continue now</string>
     <string name="developer_danger_title">Danger</string>
-    <string name="developer_danger_description">Delete learning card rows for debugging. These actions cannot be undone.</string>
+    <string name="developer_danger_description">Delete learning data or stage a full app-data restore for debugging. These actions cannot be undone.</string>
     <string name="developer_remove_suspended_cards">Remove suspended</string>
     <string name="developer_remove_all_learning_cards">Remove all learning cards</string>
+    <string name="developer_import_app_data">Import exported data</string>
+    <string name="developer_import_app_data_unavailable">Import is not available on this platform yet.</string>
     <string name="developer_stats_title">Stats</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Clear</string>

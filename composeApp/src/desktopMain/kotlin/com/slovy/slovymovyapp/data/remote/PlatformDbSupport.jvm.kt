@@ -33,6 +33,18 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
 
     actual fun fileExists(path: Path): Boolean = File(path.toString()).exists()
 
+    actual fun openInput(sourcePath: Path): PlatformFileInput {
+        val input = File(sourcePath.toString()).inputStream()
+        return object : PlatformFileInput {
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int =
+                input.read(buffer, offset, length)
+
+            override fun close() {
+                input.close()
+            }
+        }
+    }
+
     actual fun openOutput(destPath: Path): PlatformFileOutput {
         File(destPath.toString()).parentFile?.mkdirs()
         val fos = FileOutputStream(File(destPath.toString()))
@@ -84,7 +96,11 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
     }
 
     actual fun createAppDataDriver(path: Path): SqlDriver {
-        return jdbcSqliteDriver(path, false, AppDatabase.Schema)
+        return createAppDataDriver(path, readOnly = false)
+    }
+
+    actual fun createAppDataDriver(path: Path, readOnly: Boolean): SqlDriver {
+        return jdbcSqliteDriver(path, readOnly, AppDatabase.Schema)
     }
 
     actual fun createDictionaryDataDriver(path: Path, readOnly: Boolean): SqlDriver {
@@ -95,6 +111,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         return jdbcSqliteDriver(path, readOnly, TranslationDatabase.Schema)
     }
 
+    @Suppress("SqlNoDataSourceInspection")
     private fun jdbcSqliteDriver(
         path: Path,
         readOnly: Boolean,
@@ -138,6 +155,7 @@ actual class PlatformDbSupport actual constructor(androidContext: Any?) {
         }
     }
 
+    @Suppress("SqlNoDataSourceInspection")
     private fun setVersion(driver: SqlDriver, version: Long) {
         driver.execute(
             identifier = null,
