@@ -110,6 +110,22 @@ open class WordListsRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun clearAll_dropsListsAndVersionsForEveryLanguage() = runBlocking {
+        withRepository { repo ->
+            repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
+            repo.replaceLists(Language.POLISH, "p7", listOf(travelList))
+
+            val removed = repo.clearAll()
+
+            assertEquals(2L, removed, "clearAll must report the number of removed lists")
+            assertNull(repo.getVersion(Language.DUTCH), "version must be dropped so the next sync refetches")
+            assertNull(repo.getVersion(Language.POLISH))
+            assertEquals(emptyList(), repo.getLists(Language.DUTCH))
+            assertEquals(emptyList(), repo.getLists(Language.POLISH))
+        }
+    }
+
+    @Test
     fun sense_order_is_preserved() = runBlocking {
         withRepository { repo ->
             val manySenses = basicList.copy(senseIds = (0 until 500).map { "sense-$it" })

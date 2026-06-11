@@ -60,6 +60,27 @@ upsertMeta:
 INSERT OR REPLACE INTO word_list_meta(lang_code, version, updated_at)
 VALUES (?, ?, ?);
 
+-- Cache reset queries (run inside one transaction by WordListsRepository.clearAll;
+-- dropping word_list_meta too makes the next sync refetch every language).
+
+countAllLists:
+SELECT COUNT(*) FROM word_list;
+
+deleteAllLists:
+DELETE FROM word_list;
+
+deleteAllTexts:
+DELETE FROM word_list_text;
+
+deleteAllLabels:
+DELETE FROM word_list_label;
+
+deleteAllSenses:
+DELETE FROM word_list_sense;
+
+deleteAllMeta:
+DELETE FROM word_list_meta;
+
 -- Replace queries (run inside one transaction by WordListsRepository).
 
 deleteListsByLang:

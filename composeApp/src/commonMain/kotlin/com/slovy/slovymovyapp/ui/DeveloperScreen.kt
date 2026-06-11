@@ -65,6 +65,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
 import com.slovy.slovymovyapp.data.learning.intake.IntakeRunMode
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
+import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.logging.AppLogLevel
 import com.slovy.slovymovyapp.logging.AppLogSink
 import com.slovy.slovymovyapp.logging.AppLogger
@@ -188,6 +189,7 @@ private data class DeveloperCardTablePageResult(
 class DeveloperViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val intake: LearningIntake,
+    private val listsService: ListsService,
     private val learningLanguagesProvider: suspend () -> List<Language>,
 ) : ViewModel() {
 
@@ -249,6 +251,13 @@ class DeveloperViewModel(
         runAction(actionName = "Remove all learning cards") {
             val removed = favoritesRepository.removeAllLearningCards()
             "Removed $removed learning cards"
+        }
+    }
+
+    fun clearListsCache() {
+        runAction(actionName = "Clear lists cache") {
+            val removed = listsService.clearCache()
+            "Cleared word lists cache ($removed lists); next sync refetches from the server"
         }
     }
 
@@ -553,6 +562,7 @@ fun DeveloperScreen(
         snackbarHostState = viewModel.snackbarHostState,
         onShiftTimeBack = viewModel::shiftTimeBack,
         onRunIntake = viewModel::runIntake,
+        onClearListsCache = viewModel::clearListsCache,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -575,6 +585,7 @@ fun DeveloperScreenContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onShiftTimeBack: (TimeShiftOption) -> Unit = {},
     onRunIntake: (IntakeRunMode) -> Unit = {},
+    onClearListsCache: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -651,6 +662,19 @@ fun DeveloperScreenContent(
                         modes = intakeModes,
                         isBusy = state.isBusy,
                         onRun = onRunIntake,
+                    )
+                }
+
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.developer_caches_title),
+                        modifier = Modifier.padding(top = AppSpacing.sm),
+                    )
+                }
+                item {
+                    DeveloperCachesCard(
+                        isBusy = state.isBusy,
+                        onClearListsCache = onClearListsCache,
                     )
                 }
 
@@ -918,6 +942,41 @@ private fun IntakeCard(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeveloperCachesCard(
+    isBusy: Boolean,
+    onClearListsCache: () -> Unit,
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        ) {
+            Text(
+                text = stringResource(Res.string.developer_caches_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FilledTonalButton(
+                onClick = onClearListsCache,
+                enabled = !isBusy,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(Res.string.developer_clear_lists_cache))
             }
         }
     }

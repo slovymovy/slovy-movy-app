@@ -292,6 +292,9 @@
     <string name="developer_intake_description">Aktywuj oczekujące ulubione dla każdego zainstalowanego języka nauki.</string>
     <string name="developer_intake_daily">Codziennie</string>
     <string name="developer_intake_continue_now">Kontynuuj teraz</string>
+    <string name="developer_caches_title">Pamięć podręczna</string>
+    <string name="developer_caches_description">Wyczyść lokalnie zapisane dane z serwera; zostaną pobrane ponownie przy następnej synchronizacji.</string>
+    <string name="developer_clear_lists_cache">Wyczyść pamięć podręczną list słów</string>
     <string name="developer_danger_title">Niebezpieczne</string>
     <string name="developer_danger_description">Usuń wiersze kart nauki do debugowania. Tych akcji nie można cofnąć.</string>
     <string name="developer_remove_suspended_cards">Usuń wstrzymane</string>

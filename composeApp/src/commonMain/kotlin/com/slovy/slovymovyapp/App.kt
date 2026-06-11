@@ -1026,6 +1026,7 @@ fun App(
                         DeveloperViewModel(
                             favoritesRepository = favoritesRepository,
                             intake = intakeService,
+                            listsService = listsService,
                             learningLanguagesProvider = {
                                 dataManager.listDownloadedDatabases()
                                     .filterIsInstance<DatabaseFileInfo.Dictionary>()

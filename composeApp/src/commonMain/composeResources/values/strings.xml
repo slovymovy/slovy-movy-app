@@ -293,6 +293,9 @@
     <string name="developer_intake_description">Activate pending favorites for every installed learning language.</string>
     <string name="developer_intake_daily">Daily</string>
     <string name="developer_intake_continue_now">Continue now</string>
+    <string name="developer_caches_title">Caches</string>
+    <string name="developer_caches_description">Clear locally cached server data; it is refetched on the next sync.</string>
+    <string name="developer_clear_lists_cache">Clear word lists cache</string>
     <string name="developer_danger_title">Danger</string>
     <string name="developer_danger_description">Delete learning card rows for debugging. These actions cannot be undone.</string>
     <string name="developer_remove_suspended_cards">Remove suspended</string>

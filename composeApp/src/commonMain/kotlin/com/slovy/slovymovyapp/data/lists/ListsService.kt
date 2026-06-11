@@ -54,6 +54,13 @@ class ListsService(
         }
     }
 
+    /**
+     * Developer tooling: drops every stored list bundle and version (all languages), so
+     * the next [sync] does a full refetch. Returns the number of lists removed. Takes the
+     * sync mutex so it cannot interleave with a concurrent [sync].
+     */
+    suspend fun clearCache(): Long = syncMutex.withLock { repository.clearAll() }
+
     private fun RemoteList.toWordList() = WordList(
         id = id,
         title = title,

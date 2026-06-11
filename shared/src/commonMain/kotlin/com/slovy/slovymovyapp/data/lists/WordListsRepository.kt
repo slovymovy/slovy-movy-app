@@ -91,4 +91,22 @@ class WordListsRepository(private val db: AppDatabase) {
                 queries.upsertMeta(language.code, version, updatedAt)
             }
         }
+
+    /**
+     * Drops every stored list bundle and per-language version (all languages), so the next
+     * sync refetches from the server. Returns the number of lists removed. Developer
+     * tooling only — regular cache invalidation goes through [replaceLists].
+     */
+    suspend fun clearAll(): Long = withContext(Dispatchers.IO) {
+        val queries = db.wordListsQueries
+        queries.transactionWithResult {
+            val count = queries.countAllLists().executeAsOne()
+            queries.deleteAllLists()
+            queries.deleteAllTexts()
+            queries.deleteAllLabels()
+            queries.deleteAllSenses()
+            queries.deleteAllMeta()
+            count
+        }
+    }
 }
