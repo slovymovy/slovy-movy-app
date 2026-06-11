@@ -29,6 +29,7 @@ fun Project.registerTestServer(
         parameters.workingDir.set(rootProject.projectDir.absolutePath)
         parameters.port.set(port)
         parameters.dbDir.set(File(rootProject.projectDir, ".test-db-files").absolutePath)
+        parameters.listsDir.set(File(rootProject.projectDir, ".test-lists-files").absolutePath)
         maxParallelUsages.set(1)
     }
 

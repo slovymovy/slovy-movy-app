@@ -25,7 +25,3 @@ captures
 .aistudio_key*
 .openai_api_key
 .github_key
-
-304# Debug-only curated word-list bundles, generated from the project-root `lists/` folder
-# by the `generateDebugLists` Gradle task. Not checked in; regenerated on build.
-/composeApp/src/commonMain/composeResources/files/debug-lists/

@@ -22,6 +22,7 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
         val workingDir: Property<String>
         val port: Property<Int>
         val dbDir: Property<String>
+        val listsDir: Property<String>
     }
 
     private var process: Process? = null
@@ -51,6 +52,7 @@ abstract class TestServerService : BuildService<TestServerService.Parameters>, A
         env["IS_TEST"] = "true"
         env["SERVER_PORT"] = port.toString()
         env["TEST_DB_DIR"] = parameters.dbDir.get()
+        env["TEST_LISTS_DIR"] = parameters.listsDir.get()
 
         process = builder.start()
         logger.lifecycle("Server process started (PID: ${process?.pid()}), waiting for health check...")

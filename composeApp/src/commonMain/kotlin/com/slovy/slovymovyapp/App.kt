@@ -13,6 +13,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.svg.SvgDecoder
 import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
@@ -276,6 +279,13 @@ fun App(
     appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
 ) {
+    // Word-list icons arrive from the server as SVG text; Coil needs the SVG decoder
+    // registered to render them (see WordListIcon).
+    setSingletonImageLoaderFactory { context ->
+        ImageLoader.Builder(context)
+            .components { add(SvgDecoder.Factory()) }
+            .build()
+    }
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
@@ -293,16 +303,10 @@ fun App(
     val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
         DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
     }
-    // In debug builds, serve curated lists from bundles generated out of the project-root
-    // `lists/` folder (see the `generateDebugLists` Gradle task) and fall back to the
-    // backend for languages without a local bundle. Release builds always use HTTP.
-    val listsSource = remember(platform, appBuildConfig.isDebug) {
-        val http = ListsClient(platform)
-        if (appBuildConfig.isDebug) ResourceListsSource(http) else http
-    }
+    val listsClient = remember(platform) { ListsClient(platform) }
     val wordListsRepository = remember(appDatabase) { WordListsRepository(appDatabase) }
-    val listsService = remember(wordListsRepository, listsSource) {
-        ListsService(wordListsRepository, listsSource)
+    val listsService = remember(wordListsRepository, listsClient) {
+        ListsService(wordListsRepository, listsClient)
     }
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)

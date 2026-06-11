@@ -242,6 +242,29 @@ class ListsServiceServerTest : BaseTest() {
     }
 
     @Test
+    fun sync_servesCommittedListsFromDisk() = runBlocking {
+        // No staged bundle for nl: the test server falls back to the committed
+        // `.test-lists-files/nl/` directory (TEST_LISTS_DIR), pairing `{id}.svg`
+        // icons by file name like the production GitHub loader does.
+        val language = Language.DUTCH
+        deleteServerLists(language)
+        withService(serverUrl()) { service, repository ->
+            assertTrue(service.sync(language), "sync must store the committed nl lists")
+            val version = repository.getVersion(language)
+            assertTrue(!version.isNullOrBlank(), "directory-backed bundle must carry a content-hash version")
+            val lists = service.getLists(language)
+            assertTrue(lists.isNotEmpty(), "committed nl lists must be served from disk")
+            for (list in lists) {
+                assertTrue(list.senseIds.isNotEmpty(), "list '${list.id}' must carry sense ids")
+            }
+            assertTrue(
+                lists.any { it.iconSvg != null },
+                "committed nl lists include svg icons; at least one must survive the round trip",
+            )
+        }
+    }
+
+    @Test
     fun sync_returnsFalse_whenLanguageUnknownOnServer() = runBlocking {
         val language = Language.ITALIAN
         deleteServerLists(language)

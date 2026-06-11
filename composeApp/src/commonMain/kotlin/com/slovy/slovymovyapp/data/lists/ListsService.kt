@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.data.lists
 
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.remote.ListsSource
+import com.slovy.slovymovyapp.data.remote.ListsClient
 import com.slovy.slovymovyapp.data.remote.RemoteList
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlin.coroutines.cancellation.CancellationException
@@ -17,7 +17,7 @@ import kotlinx.coroutines.sync.withLock
  */
 class ListsService(
     private val repository: WordListsRepository,
-    private val client: ListsSource,
+    private val client: ListsClient,
 ) {
     private val syncMutex = Mutex()
 

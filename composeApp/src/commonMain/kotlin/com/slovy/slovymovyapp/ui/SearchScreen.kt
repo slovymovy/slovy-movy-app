@@ -866,24 +866,13 @@ private fun ListCard(
                 )
             }
 
-            val listIcon = remember(list.iconSvg) { list.iconSvg?.let { parseSvgIcon(it) } }
-            if (listIcon != null) {
-                Icon(
-                    imageVector = listIcon,
-                    contentDescription = null,
-                    tint = fgColor,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .alpha(0.82f),
-                )
-            } else {
-                WordListEmblem(
-                    fgColor = fgColor,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .alpha(0.82f),
-                )
-            }
+            WordListIcon(
+                iconSvg = list.iconSvg,
+                fgColor = fgColor,
+                modifier = Modifier
+                    .size(48.dp)
+                    .alpha(0.82f),
+            )
         }
     }
 }

@@ -267,6 +267,8 @@ The app drives study via an FSRS-backed pipeline. Domain types live in `shared` 
   illustrations — `Icon()` flattens colors into a solid tint, making detailed SVGs appear as filled rectangles.
 - The `EmptyState` component has two overloads: one taking `ImageVector` (renders with `Icon` + tint), and one taking
   `iconContent: @Composable () -> Unit` for custom rendering (e.g., `Image()` for illustrations).
+- **Runtime SVGs** (server-delivered, e.g. curated word-list icons) cannot go through Valkyrie; they are decoded with
+  Coil 3 (`coil-svg`) via the singleton image loader configured in `App` and rendered tinted by `WordListIcon`.
 
 ### Analytics
 
@@ -488,7 +490,10 @@ if (GitHubClient.isAvailable()) {
 - Test mode also mounts `Routing.testListsEndpoints()` and skips the GitHub-backed `/lists/{lang}` routes:
   `PUT /test/lists/{lang}` stages a `LanguageListsResponse` JSON bundle in an in-memory store,
   `DELETE /test/lists/{lang}` removes it, and `GET /lists/{lang}` + `GET /lists/{lang}/version` serve from that store.
-  `ListsServiceServerTest` in `commonTest` uses this to exercise the full client → server → DB sync path.
+  Languages without a staged bundle fall back to the committed `TEST_LISTS_DIR` directory (default
+  `.test-lists-files/{lang}/`), which `LocalDirectoryListsLoader` reads in the same `{id}.json` + `{id}.svg`
+  layout as the production GitHub `lists/{lang}/` folder. `ListsServiceServerTest` in `commonTest` uses both
+  paths to exercise the full client → server → DB sync flow.
 
 ### Server Test Patterns
 
@@ -501,6 +506,10 @@ if (GitHubClient.isAvailable()) {
 
 - Avoid adding free-standing helper methods (top-level functions or private extensions) in unrelated files. Place new
   methods on the actual class/service that owns the behaviour, in the file where that class is implemented.
+- Do not declare extension functions on stdlib/runtime types you don't own (`String`, `Collection`, `List`, `Map`,
+  etc.) — a helper like `Collection<String>.filterSelfReferences(...)` reads as general-purpose API while encoding
+  class-specific logic. Write a regular function and pass the data as a parameter. Extensions on project-owned or
+  generated types (e.g. `DictionaryQueries.resolveRelatedForm`) are fine.
 - Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
   refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
   obvious meaning that all callers genuinely share.
@@ -543,6 +552,7 @@ if (GitHubClient.isAvailable()) {
 - Downloads are served from the `slovymovy` GCS bucket under the version prefix; `GoogleStorageBucketDataProvider`
   builds URLs and list calls. In tests the bucket is swapped out for `TestServerDataProvider`, which talks to the
   in-process server's `/test/db/*` endpoints.
-- Gradle test service `TestServerService` starts the Ktor server for tests with `IS_TEST`, `SERVER_PORT`, and
-  `TEST_DB_DIR`; it kills any existing listener on the port and tails logs at `build/test-server.log`.
+- Gradle test service `TestServerService` starts the Ktor server for tests with `IS_TEST`, `SERVER_PORT`,
+  `TEST_DB_DIR`, and `TEST_LISTS_DIR`; it kills any existing listener on the port and tails logs at
+  `build/test-server.log`.
 - Production server URL (`DictionaryClient.PRODUCTION_SERVER_URL`): `https://backend.openwords.ai`.

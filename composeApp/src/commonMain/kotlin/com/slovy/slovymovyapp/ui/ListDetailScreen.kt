@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -405,7 +404,6 @@ fun ListDetailContent(
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
     val wordCount = list.senseIds.size
     val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
-    val listIcon = remember(list.iconSvg) { list.iconSvg?.let { parseSvgIcon(it) } }
     val showTitleInBar by remember(scrollState) {
         derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
     }
@@ -436,7 +434,7 @@ fun ListDetailContent(
                     wordCount = wordCount,
                     bgColor = bgColor,
                     fgColor = fgColor,
-                    icon = listIcon,
+                    iconSvg = list.iconSvg,
                     isDark = isDark,
                 )
             }
@@ -520,7 +518,7 @@ private fun ListDetailHeader(
     wordCount: Int,
     bgColor: Color,
     fgColor: Color,
-    icon: ImageVector?,
+    iconSvg: String?,
     isDark: Boolean,
 ) {
     val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
@@ -548,16 +546,11 @@ private fun ListDetailHeader(
                     .background(bgColor),
                 contentAlignment = Alignment.Center,
             ) {
-                if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = fgColor,
-                        modifier = Modifier.size(48.dp).alpha(0.82f),
-                    )
-                } else {
-                    WordListEmblem(fgColor = fgColor, modifier = Modifier.size(48.dp).alpha(0.82f))
-                }
+                WordListIcon(
+                    iconSvg = iconSvg,
+                    fgColor = fgColor,
+                    modifier = Modifier.size(48.dp).alpha(0.82f),
+                )
             }
 
             Column(modifier = Modifier.weight(1f)) {
