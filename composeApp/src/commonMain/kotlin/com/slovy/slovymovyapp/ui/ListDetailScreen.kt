@@ -56,8 +56,6 @@ import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -74,14 +72,14 @@ data class ListWordItem(
     val definition: String? = null,
     val learnerLevel: LearnerLevel? = null,
     val frequency: SenseFrequency? = null,
-    val sense: LanguageCardResponseSense? = null,
+    override val sense: LanguageCardResponseSense? = null,
     val relatedWords: Map<String, RelatedWord> = emptyMap(),
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
-    val loading: Boolean = false,
-    val error: UiText? = null,
+    override val loading: Boolean = false,
+    override val error: UiText? = null,
     val isFavorited: Boolean = false,
-)
+) : PrefetchableSenseItem
 
 data class ListDetailUiState(
     val items: List<ListWordItem> = emptyList(),
@@ -104,10 +102,7 @@ class ListDetailViewModel(
         private set
     val scrollState = LazyListState()
     private var loadJob: Job? = null
-
-    companion object {
-        private const val PREFETCH_LIMIT = 16
-    }
+    private val prefetcher = SensePrefetcher(viewModelScope, ::loadSense)
 
     init {
         load()
@@ -160,26 +155,12 @@ class ListDetailViewModel(
             )
             // Prefetch the first screenful so translations show without expanding,
             // like the favorites list. The rest is prefetched on scroll.
-            prefetchSenses(items.take(PREFETCH_LIMIT))
+            prefetcher.prefetchHead(items)
         }
     }
 
-    /** Loads full senses (with translations) for not-yet-loaded items. Mirrors
-     *  FavoritesViewModel.prefetchSenses. */
-    private fun prefetchSenses(items: List<ListWordItem>) {
-        val toLoad = items.filter { it.sense == null && !it.loading && it.error == null }
-        toLoad.forEach { item ->
-            viewModelScope.launch { loadSense(item) }
-        }
-    }
-
-    /** Prefetches senses for the visible range as the user scrolls. Mirrors
-     *  FavoritesViewModel.prefetchVisibleRange. */
     fun prefetchVisibleRange(items: List<ListWordItem>, range: IntRange) {
-        if (items.isEmpty() || range.isEmpty()) return
-        val safeRange = range.first.coerceAtLeast(0)..minOf(range.last, items.lastIndex)
-        if (safeRange.isEmpty()) return
-        prefetchSenses(items.slice(safeRange).take(PREFETCH_LIMIT))
+        prefetcher.prefetchVisibleRange(items, range)
     }
 
     private fun updateItem(senseId: String, transform: (ListWordItem) -> ListWordItem) {
@@ -385,20 +366,13 @@ fun ListDetailContent(
     val isDark = LocalIsDarkTheme.current
 
     // Prefetch full senses (with translations) for the visible range as the user
-    // scrolls, mirroring FavoritesScreenContent. Index 0 is the header item.
-    LaunchedEffect(state.items, scrollState) {
-        snapshotFlow { scrollState.layoutInfo.visibleItemsInfo.map { it.index } }
-            .distinctUntilChanged()
-            .collectLatest { indices ->
-                if (indices.isEmpty()) return@collectLatest
-                val first = indices.minOrNull() ?: return@collectLatest
-                val last = indices.maxOrNull() ?: return@collectLatest
-                val lookahead = 5
-                val firstItem = (first - 1).coerceAtLeast(0)
-                val lastItem = last - 1 + lookahead
-                onPrefetchVisible(state.items, firstItem..lastItem)
-            }
-    }
+    // scrolls. Index 0 is the header item.
+    PrefetchVisibleRangeEffect(
+        items = state.items,
+        scrollState = scrollState,
+        headerItemCount = 1,
+        onPrefetchVisible = onPrefetchVisible,
+    )
     val localeCode = androidx.compose.ui.text.intl.Locale.current.language
     val title = list.title[localeCode] ?: list.title["en"] ?: list.id
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
