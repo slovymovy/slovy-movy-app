@@ -135,11 +135,6 @@ object GitHubClient {
     fun readText(content: GHContent): String = readContentText(content)
 
     /**
-     * Reads the raw bytes of a GitHub file entry. Used for binary assets like list icons.
-     */
-    fun readBytes(content: GHContent): ByteArray = readContentBinary(content)
-
-    /**
      * Loads pre-processed word content from the words repository.
      * Pre-processed files are already in LanguageCardResponse format.
      *
@@ -629,22 +624,5 @@ object GitHubClient {
             }
         }
         return content.read().bufferedReader().use { it.readText() }
-    }
-
-    private fun readContentBinary(content: GHContent): ByteArray {
-        val encoding = content.encoding
-        if (encoding == null || encoding == "none") {
-            val downloadUrl = content.downloadUrl
-                ?: throw IllegalStateException("Missing download URL for content with encoding '$encoding'")
-            val safeUrl = encodeUrl(downloadUrl)
-            return runBlocking {
-                val response = httpClient.get(safeUrl)
-                if (!response.status.isSuccess()) {
-                    throw IllegalStateException("Failed to download $safeUrl: HTTP ${response.status.value}")
-                }
-                response.readRawBytes()
-            }
-        }
-        return content.read().use { it.readBytes() }
     }
 }

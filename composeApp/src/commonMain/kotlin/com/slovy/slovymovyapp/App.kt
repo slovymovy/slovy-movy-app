@@ -13,6 +13,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.svg.SvgDecoder
 import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
@@ -276,6 +279,13 @@ fun App(
     appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
 ) {
+    // Word-list icons arrive from the server as SVG text; Coil needs the SVG decoder
+    // registered to render them (see WordListIcon).
+    setSingletonImageLoaderFactory { context ->
+        ImageLoader.Builder(context)
+            .components { add(SvgDecoder.Factory()) }
+            .build()
+    }
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
@@ -1016,6 +1026,7 @@ fun App(
                         DeveloperViewModel(
                             favoritesRepository = favoritesRepository,
                             intake = intakeService,
+                            listsService = listsService,
                             learningLanguagesProvider = {
                                 dataManager.listDownloadedDatabases()
                                     .filterIsInstance<DatabaseFileInfo.Dictionary>()

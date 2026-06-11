@@ -295,6 +295,9 @@
     <string name="developer_intake_description">Активировать ожидающие избранные слова для каждого установленного языка обучения.</string>
     <string name="developer_intake_daily">Ежедневно</string>
     <string name="developer_intake_continue_now">Продолжить сейчас</string>
+    <string name="developer_caches_title">Кэши</string>
+    <string name="developer_caches_description">Очистить локально кэшированные данные сервера; они будут загружены заново при следующей синхронизации.</string>
+    <string name="developer_clear_lists_cache">Очистить кэш списков слов</string>
     <string name="developer_danger_title">Опасное</string>
     <string name="developer_danger_description">Удалить строки учебных карточек для отладки. Эти действия нельзя отменить.</string>
     <string name="developer_remove_suspended_cards">Удалить скрытые</string>

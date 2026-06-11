@@ -91,13 +91,13 @@ data class FavoriteSenseItem(
     val targetLang: Language,
     val lemma: String,
     val createdAt: Long,
-    val sense: LanguageCardResponseSense? = null,
+    override val sense: LanguageCardResponseSense? = null,
     val relatedWords: Map<String, RelatedWord> = emptyMap(),
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
-    val loading: Boolean = false,
-    val error: UiText? = null
-)
+    override val loading: Boolean = false,
+    override val error: UiText? = null
+) : PrefetchableSenseItem
 
 data class FavoritesStudyUiState(
     val language: Language,
@@ -219,8 +219,9 @@ class FavoritesViewModel(
 
     companion object {
         private const val QUERY_DEBOUNCE_MS = 200L
-        private const val PREFETCH_LIMIT = 16
     }
+
+    private val prefetcher = SensePrefetcher(viewModelScope, ::loadSense)
 
     private var started = false
 
@@ -285,7 +286,7 @@ class FavoritesViewModel(
                         )
                     }
                     applyNewState(newState)
-                    prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
+                    prefetcher.prefetchHead(newState.senses)
                 }
         }
     }
@@ -630,7 +631,7 @@ class FavoritesViewModel(
             val uiSnapshot = state as? FavoritesUiState.Content
             val newState = withContext(Dispatchers.Default) { computeFavoritesState(content.query, uiSnapshot) }
             applyNewState(newState)
-            prefetchSenses(newState.senses.take(PREFETCH_LIMIT))
+            prefetcher.prefetchHead(newState.senses)
 
             // Show snackbar with an undo option
             val result = snackbarHostState.showSnackbar(
@@ -686,18 +687,8 @@ class FavoritesViewModel(
         }
     }
 
-    private fun prefetchSenses(items: List<FavoriteSenseItem>) {
-        val toLoad = items.filter { it.sense == null && !it.loading && it.error == null }
-        toLoad.forEach { item ->
-            viewModelScope.launch { loadSense(item) }
-        }
-    }
-
     fun prefetchVisibleRange(senses: List<FavoriteSenseItem>, range: IntRange) {
-        if (senses.isEmpty() || range.isEmpty()) return
-        val safeRange = range.first.coerceAtLeast(0)..minOf(range.last, senses.lastIndex)
-        if (safeRange.isEmpty()) return
-        prefetchSenses(senses.slice(safeRange).take(PREFETCH_LIMIT))
+        prefetcher.prefetchVisibleRange(senses, range)
     }
 }
 
@@ -855,18 +846,12 @@ fun FavoritesScreenContent(
             }
 
             is FavoritesUiState.Content -> {
-                LaunchedEffect(state.senses, scrollState) {
-                    snapshotFlow { scrollState.layoutInfo.visibleItemsInfo.map { it.index } }
-                        .distinctUntilChanged()
-                        .collectLatest { indices ->
-                            if (indices.isEmpty()) return@collectLatest
-                            val first = indices.minOrNull() ?: return@collectLatest
-                            val last = indices.maxOrNull() ?: return@collectLatest
-                            val lookahead = 5
-                            val end = minOf(last + lookahead, state.senses.lastIndex)
-                            onPrefetchVisible(state.senses, first..end)
-                        }
-                }
+                PrefetchVisibleRangeEffect(
+                    items = state.senses,
+                    scrollState = scrollState,
+                    headerItemCount = 0,
+                    onPrefetchVisible = onPrefetchVisible,
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

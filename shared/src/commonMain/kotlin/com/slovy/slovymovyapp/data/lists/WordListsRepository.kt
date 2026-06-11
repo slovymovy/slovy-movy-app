@@ -17,18 +17,19 @@ class WordListsRepository(private val db: AppDatabase) {
     suspend fun getLists(language: Language): List<WordList> = withContext(Dispatchers.IO) {
         val queries = db.wordListsQueries
         queries.transactionWithResult {
-            val ids = queries.selectListIdsByLang(language.code).executeAsList()
-            if (ids.isEmpty()) return@transactionWithResult emptyList()
+            val rows = queries.selectListIdsByLang(language.code).executeAsList()
+            if (rows.isEmpty()) return@transactionWithResult emptyList()
             val texts = queries.selectTextsByLang(language.code).executeAsList().groupBy { it.list_id }
             val labels = queries.selectLabelsByLang(language.code).executeAsList().groupBy { it.list_id }
             val senses = queries.selectSensesByLang(language.code).executeAsList().groupBy { it.list_id }
-            ids.map { id ->
+            rows.map { row ->
                 WordList(
-                    id = id,
-                    title = texts[id].orEmpty().mapNotNull { row -> row.title?.let { row.locale to it } }.toMap(),
-                    subtitle = texts[id].orEmpty().mapNotNull { row -> row.subtitle?.let { row.locale to it } }.toMap(),
-                    labels = labels[id].orEmpty().groupBy({ it.locale }, { it.label }),
-                    senseIds = senses[id].orEmpty().map { it.sense_id },
+                    id = row.list_id,
+                    title = texts[row.list_id].orEmpty().mapNotNull { r -> r.title?.let { r.locale to it } }.toMap(),
+                    subtitle = texts[row.list_id].orEmpty().mapNotNull { r -> r.subtitle?.let { r.locale to it } }.toMap(),
+                    labels = labels[row.list_id].orEmpty().groupBy({ it.locale }, { it.label }),
+                    senseIds = senses[row.list_id].orEmpty().map { it.sense_id },
+                    iconSvg = row.icon_svg,
                 )
             }
         }
@@ -37,7 +38,7 @@ class WordListsRepository(private val db: AppDatabase) {
     suspend fun getList(language: Language, listId: String): WordList? = withContext(Dispatchers.IO) {
         val queries = db.wordListsQueries
         queries.transactionWithResult {
-            queries.selectListId(language.code, listId).executeAsOneOrNull()
+            val listRow = queries.selectListId(language.code, listId).executeAsOneOrNull()
                 ?: return@transactionWithResult null
             val texts = queries.selectTextsByList(language.code, listId).executeAsList()
             WordList(
@@ -47,6 +48,7 @@ class WordListsRepository(private val db: AppDatabase) {
                 labels = queries.selectLabelsByList(language.code, listId).executeAsList()
                     .groupBy({ it.locale }, { it.label }),
                 senseIds = queries.selectSensesByList(language.code, listId).executeAsList(),
+                iconSvg = listRow.icon_svg,
             )
         }
     }
@@ -66,7 +68,7 @@ class WordListsRepository(private val db: AppDatabase) {
                 queries.deleteLabelsByLang(language.code)
                 queries.deleteSensesByLang(language.code)
                 lists.forEachIndexed { listIndex, list ->
-                    queries.insertList(language.code, list.id, listIndex.toLong())
+                    queries.insertList(language.code, list.id, listIndex.toLong(), list.iconSvg)
                     val locales = list.title.keys + list.subtitle.keys
                     locales.forEach { locale ->
                         queries.insertText(
@@ -89,4 +91,22 @@ class WordListsRepository(private val db: AppDatabase) {
                 queries.upsertMeta(language.code, version, updatedAt)
             }
         }
+
+    /**
+     * Drops every stored list bundle and per-language version (all languages), so the next
+     * sync refetches from the server. Returns the number of lists removed. Developer
+     * tooling only — regular cache invalidation goes through [replaceLists].
+     */
+    suspend fun clearAll(): Long = withContext(Dispatchers.IO) {
+        val queries = db.wordListsQueries
+        queries.transactionWithResult {
+            val count = queries.countAllLists().executeAsOne()
+            queries.deleteAllLists()
+            queries.deleteAllTexts()
+            queries.deleteAllLabels()
+            queries.deleteAllSenses()
+            queries.deleteAllMeta()
+            count
+        }
+    }
 }

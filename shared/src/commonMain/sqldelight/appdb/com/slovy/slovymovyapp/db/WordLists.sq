@@ -7,6 +7,7 @@ CREATE TABLE word_list (
   lang_code TEXT NOT NULL,
   list_id TEXT NOT NULL,
   position INTEGER NOT NULL,
+  icon_svg TEXT,
   PRIMARY KEY (lang_code, list_id)
 );
 
@@ -59,6 +60,27 @@ upsertMeta:
 INSERT OR REPLACE INTO word_list_meta(lang_code, version, updated_at)
 VALUES (?, ?, ?);
 
+-- Cache reset queries (run inside one transaction by WordListsRepository.clearAll;
+-- dropping word_list_meta too makes the next sync refetch every language).
+
+countAllLists:
+SELECT COUNT(*) FROM word_list;
+
+deleteAllLists:
+DELETE FROM word_list;
+
+deleteAllTexts:
+DELETE FROM word_list_text;
+
+deleteAllLabels:
+DELETE FROM word_list_label;
+
+deleteAllSenses:
+DELETE FROM word_list_sense;
+
+deleteAllMeta:
+DELETE FROM word_list_meta;
+
 -- Replace queries (run inside one transaction by WordListsRepository).
 
 deleteListsByLang:
@@ -74,8 +96,8 @@ deleteSensesByLang:
 DELETE FROM word_list_sense WHERE lang_code = ?;
 
 insertList:
-INSERT INTO word_list(lang_code, list_id, position)
-VALUES (?, ?, ?);
+INSERT INTO word_list(lang_code, list_id, position, icon_svg)
+VALUES (?, ?, ?, ?);
 
 insertText:
 INSERT INTO word_list_text(lang_code, list_id, locale, title, subtitle)
@@ -92,7 +114,7 @@ VALUES (?, ?, ?, ?);
 -- Read queries.
 
 selectListIdsByLang:
-SELECT list_id FROM word_list
+SELECT list_id, icon_svg FROM word_list
 WHERE lang_code = ?
 ORDER BY position ASC;
 
@@ -111,7 +133,7 @@ WHERE lang_code = ?
 ORDER BY position ASC;
 
 selectListId:
-SELECT list_id FROM word_list
+SELECT list_id, icon_svg FROM word_list
 WHERE lang_code = ? AND list_id = ?;
 
 selectTextsByList:

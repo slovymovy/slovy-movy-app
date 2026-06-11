@@ -22,6 +22,7 @@ open class WordListsRepositoryTest : BaseTest() {
         subtitle = mapOf("en" to "This is where your journey begins"),
         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1")),
         senseIds = listOf("sense-3", "sense-1", "sense-2"),
+        iconSvg = null,
     )
 
     private val travelList = WordList(
@@ -30,6 +31,7 @@ open class WordListsRepositoryTest : BaseTest() {
         subtitle = emptyMap(),
         labels = emptyMap(),
         senseIds = listOf("sense-9"),
+        iconSvg = null,
     )
 
     private fun openApp(): AppHandle {
@@ -104,6 +106,22 @@ open class WordListsRepositoryTest : BaseTest() {
             repo.replaceLists(Language.DUTCH, "v2", emptyList())
             assertEquals(emptyList(), repo.getLists(Language.DUTCH))
             assertEquals(listOf(travelList), repo.getLists(Language.POLISH), "other languages must stay untouched")
+        }
+    }
+
+    @Test
+    fun clearAll_dropsListsAndVersionsForEveryLanguage() = runBlocking {
+        withRepository { repo ->
+            repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
+            repo.replaceLists(Language.POLISH, "p7", listOf(travelList))
+
+            val removed = repo.clearAll()
+
+            assertEquals(2L, removed, "clearAll must report the number of removed lists")
+            assertNull(repo.getVersion(Language.DUTCH), "version must be dropped so the next sync refetches")
+            assertNull(repo.getVersion(Language.POLISH))
+            assertEquals(emptyList(), repo.getLists(Language.DUTCH))
+            assertEquals(emptyList(), repo.getLists(Language.POLISH))
         }
     }
 

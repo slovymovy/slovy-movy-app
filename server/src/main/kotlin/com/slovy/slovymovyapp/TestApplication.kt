@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp
 
 import com.slovy.slovymovyapp.server.lists.LanguageListsResponse
 import com.slovy.slovymovyapp.server.lists.ListsVersionResponse
+import com.slovy.slovymovyapp.server.lists.LocalDirectoryListsLoader
 import io.ktor.http.*
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.*
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.isRegularFile
 
 private const val TEST_DB_DIR_ENV = "TEST_DB_DIR"
+private const val TEST_LISTS_DIR_ENV = "TEST_LISTS_DIR"
 
 fun isTestMode(): Boolean =
     System.getenv("IS_TEST")?.equals("true", ignoreCase = true) == true
@@ -24,6 +26,23 @@ private fun testDbDir(): Path? {
     val dir = System.getenv(TEST_DB_DIR_ENV)?.takeIf { it.isNotBlank() } ?: ".test-db-files"
     val path = Paths.get(dir)
     return if (Files.exists(path) && Files.isDirectory(path)) path else null
+}
+
+private fun testListsDir(): Path? {
+    val dir = System.getenv(TEST_LISTS_DIR_ENV)?.takeIf { it.isNotBlank() } ?: ".test-lists-files"
+    val path = Paths.get(dir)
+    return if (Files.exists(path) && Files.isDirectory(path)) path else null
+}
+
+/**
+ * Lists committed under the test lists directory (env `TEST_LISTS_DIR`, default
+ * `.test-lists-files/{lang}/`), in the same `{id}.json` + `{id}.svg` layout as the
+ * GitHub `lists/{lang}/` folder. Loaded per request so file edits show up live.
+ */
+private fun localListsBundle(lang: String): LanguageListsResponse? {
+    val dir = testListsDir() ?: return null
+    val bundle = LocalDirectoryListsLoader(dir).load(lang) ?: return null
+    return LanguageListsResponse(version = bundle.version, lists = bundle.lists)
 }
 
 private fun isSafeFileName(name: String): Boolean {
@@ -41,6 +60,8 @@ private data class TestDbFileEntry(
  * In-memory replacement for the GitHub-backed lists data. Tests populate it via
  * `PUT /test/lists/{lang}` and the test-mode `/lists/{lang}` endpoints serve from it,
  * so client/server lists tests stay hermetic (no GitHub token or network needed).
+ * Languages that are not staged fall back to the committed test lists directory
+ * (see [localListsBundle]).
  */
 private object TestLanguageListsStore {
     private val bundles = ConcurrentHashMap<String, LanguageListsResponse>()
@@ -93,7 +114,7 @@ fun Routing.testListsEndpoints() {
             call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
             return@get
         }
-        val bundle = TestLanguageListsStore.get(lang)
+        val bundle = TestLanguageListsStore.get(lang) ?: localListsBundle(lang)
         if (bundle == null) {
             call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
             return@get
@@ -110,7 +131,7 @@ fun Routing.testListsEndpoints() {
             call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
             return@get
         }
-        val bundle = TestLanguageListsStore.get(lang)
+        val bundle = TestLanguageListsStore.get(lang) ?: localListsBundle(lang)
         if (bundle == null) {
             call.respond(HttpStatusCode.NotFound, "Lists for language '$lang' not found")
             return@get

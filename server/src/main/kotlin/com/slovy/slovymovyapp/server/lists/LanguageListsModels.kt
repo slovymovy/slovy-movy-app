@@ -15,18 +15,17 @@ internal data class RawListFile(
     val labels: Map<String, List<String>> = emptyMap(),
     val icon: String? = null,
     val senseIds: List<String> = emptyList(),
-)
-
-@Serializable
-data class IconPayload(
-    val mimeType: String,
-    val data: String,
+    // Curator-controlled feed position; lists are shown by ascending [order]. Absent
+    // (null) sorts to the end, with id as the alphabetical tiebreaker.
+    val order: Int? = null,
 )
 
 /**
  * Wire shape. [title], [subtitle], and [labels] carry every available UI locale;
  * resolution is left to the client (it picks the active UI locale with an "en"
  * fallback) so the server cache and version SHA stay locale-independent.
+ * [iconSvg] is the icon's SVG text — icons are SVG-only by design, so no mime
+ * type or binary encoding is involved.
  */
 @Serializable
 data class ListContent(
@@ -34,8 +33,11 @@ data class ListContent(
     val title: Map<String, String>,
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>>,
-    val icon: IconPayload?,
+    val iconSvg: String?,
     val senseIds: List<String>,
+    // Curator-controlled feed position; clients render by ascending [order] with absent
+    // (null) sorted to the end. The server also emits lists already in this order.
+    val order: Int? = null,
 )
 
 data class LanguageListsBundle(

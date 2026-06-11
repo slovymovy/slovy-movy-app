@@ -42,7 +42,9 @@ class ListsServiceServerTest : BaseTest() {
         val title: Map<String, String>,
         val subtitle: Map<String, String>,
         val labels: Map<String, List<String>>,
+        val iconSvg: String? = null,
         val senseIds: List<String>,
+        val order: Int? = null,
     )
 
     @Serializable
@@ -67,6 +69,7 @@ class ListsServiceServerTest : BaseTest() {
         title = mapOf("en" to "Basic words", "nl" to "Basiswoorden"),
         subtitle = mapOf("en" to "Start here"),
         labels = mapOf("en" to listOf("A1", "Basic")),
+        iconSvg = """<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg>""",
         senseIds = listOf("sense-2", "sense-1"),
     )
 
@@ -76,6 +79,7 @@ class ListsServiceServerTest : BaseTest() {
         subtitle = subtitle,
         labels = labels,
         senseIds = senseIds,
+        iconSvg = iconSvg,
     )
 
     private suspend fun putServerLists(language: Language, bundle: TestListsBundle) {
@@ -190,6 +194,75 @@ class ListsServiceServerTest : BaseTest() {
             }
         } finally {
             deleteServerLists(language)
+        }
+    }
+
+    @Test
+    fun sync_ordersListsByOrderField_withAbsentLast() = runBlocking {
+        val language = Language.POLISH
+        try {
+            // Staged out of feed order: the client must sort by ascending `order`, with the
+            // unordered list (`order = null`) falling to the end and id as the tiebreaker.
+            val second = TestListContent(
+                id = "z_second",
+                title = mapOf("en" to "Second"),
+                subtitle = mapOf("en" to ""),
+                labels = emptyMap(),
+                senseIds = listOf("sense-2"),
+                order = 2,
+            )
+            val first = TestListContent(
+                id = "a_first",
+                title = mapOf("en" to "First"),
+                subtitle = mapOf("en" to ""),
+                labels = emptyMap(),
+                senseIds = listOf("sense-1"),
+                order = 1,
+            )
+            val unordered = TestListContent(
+                id = "m_unordered",
+                title = mapOf("en" to "Unordered"),
+                subtitle = mapOf("en" to ""),
+                labels = emptyMap(),
+                senseIds = listOf("sense-3"),
+                order = null,
+            )
+            putServerLists(
+                language,
+                TestListsBundle(version = "v1", lists = listOf(unordered, second, first)),
+            )
+            withService(serverUrl()) { service, _ ->
+                assertTrue(service.sync(language), "first sync must store new content")
+                assertEquals(
+                    listOf(first.id, second.id, unordered.id),
+                    service.getLists(language).map { it.id },
+                )
+            }
+        } finally {
+            deleteServerLists(language)
+        }
+    }
+
+    @Test
+    fun sync_servesCommittedListsFromDisk() = runBlocking {
+        // No staged bundle for nl: the test server falls back to the committed
+        // `.test-lists-files/nl/` directory (TEST_LISTS_DIR), pairing `{id}.svg`
+        // icons by file name like the production GitHub loader does.
+        val language = Language.DUTCH
+        deleteServerLists(language)
+        withService(serverUrl()) { service, repository ->
+            assertTrue(service.sync(language), "sync must store the committed nl lists")
+            val version = repository.getVersion(language)
+            assertTrue(!version.isNullOrBlank(), "directory-backed bundle must carry a content-hash version")
+            val lists = service.getLists(language)
+            assertTrue(lists.isNotEmpty(), "committed nl lists must be served from disk")
+            for (list in lists) {
+                assertTrue(list.senseIds.isNotEmpty(), "list '${list.id}' must carry sense ids")
+            }
+            assertTrue(
+                lists.any { it.iconSvg != null },
+                "committed nl lists include svg icons; at least one must survive the round trip",
+            )
         }
     }
 

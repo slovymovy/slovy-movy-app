@@ -11,4 +11,5 @@ data class WordList(
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>>,
     val senseIds: List<String>,
+    val iconSvg: String?,
 )

@@ -11,6 +11,7 @@ androidx-lifecycle = "2.10.0"
 androidx-lifecycle-android = "2.10.0"
 androidx-testExt = "1.3.0"
 androidx-testRunner = "1.7.0"
+coil = "3.5.0"
 composeMultiplatform = "1.11.1"
 composeMaterialIconsExtended = "1.7.3"
 emoji2 = "1.6.0"
@@ -19,7 +20,7 @@ googleAuthLibrary = "1.48.0"
 googleCloudLoggingLogback = "0.141.0-alpha"
 googleCloudCore = "2.71.0"
 googleCloudTasks = "2.93.0"
-googleGenai = "1.57.0"
+googleGenai = "1.58.0"
 janino = "3.1.12"
 jtokkit = "1.1.0"
 junit = "4.13.2"
@@ -43,6 +44,8 @@ desugarJdkLibs = "2.1.5"
 
 [libraries]
 androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 github-api = { module = "org.kohsuke:github-api", version.ref = "githubApi" }
 google-auth-library = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "googleAuthLibrary" }
 google-cloud-logging-logback = { module = "com.google.cloud:google-cloud-logging-logback", version.ref = "googleCloudLoggingLogback" }

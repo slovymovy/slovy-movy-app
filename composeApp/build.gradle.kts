@@ -101,6 +101,8 @@ kotlin {
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.sqldelight.runtime)
             implementation(libs.ktor.client.core)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.svg)
             api(projects.shared)
         }
         iosMain.dependencies {

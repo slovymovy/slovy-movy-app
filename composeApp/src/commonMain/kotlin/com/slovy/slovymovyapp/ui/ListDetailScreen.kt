@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -46,6 +50,7 @@ import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.word.ChapterRule
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
@@ -67,14 +72,14 @@ data class ListWordItem(
     val definition: String? = null,
     val learnerLevel: LearnerLevel? = null,
     val frequency: SenseFrequency? = null,
-    val sense: LanguageCardResponseSense? = null,
+    override val sense: LanguageCardResponseSense? = null,
     val relatedWords: Map<String, RelatedWord> = emptyMap(),
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
-    val loading: Boolean = false,
-    val error: UiText? = null,
+    override val loading: Boolean = false,
+    override val error: UiText? = null,
     val isFavorited: Boolean = false,
-)
+) : PrefetchableSenseItem
 
 data class ListDetailUiState(
     val items: List<ListWordItem> = emptyList(),
@@ -97,6 +102,7 @@ class ListDetailViewModel(
         private set
     val scrollState = LazyListState()
     private var loadJob: Job? = null
+    private val prefetcher = SensePrefetcher(viewModelScope, ::loadSense)
 
     init {
         load()
@@ -127,12 +133,18 @@ class ListDetailViewModel(
             val favoritedIds = allFavorites.map { it.senseId }.toSet()
             val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
             val items = senses.map { sense ->
+                // Seed from cache so already-loaded senses render their translation
+                // immediately, mirroring FavoritesViewModel.buildSenseItem.
+                val cached = repository.getCachedSense(sense.senseId)
                 ListWordItem(
                     senseId = sense.senseId,
                     lemma = sense.lemma,
                     definition = sense.definition,
                     learnerLevel = sense.learnerLevel,
                     frequency = sense.frequency,
+                    sense = cached?.sense,
+                    relatedWords = cached?.relatedWords ?: emptyMap(),
+                    pos = cached?.pos,
                     isFavorited = sense.senseId in favoritedIds,
                 )
             }
@@ -141,7 +153,14 @@ class ListDetailViewModel(
                 isLoading = false,
                 favoriteLemmas = favoriteLemmas,
             )
+            // Prefetch the first screenful so translations show without expanding,
+            // like the favorites list. The rest is prefetched on scroll.
+            prefetcher.prefetchHead(items)
         }
+    }
+
+    fun prefetchVisibleRange(items: List<ListWordItem>, range: IntRange) {
+        prefetcher.prefetchVisibleRange(items, range)
     }
 
     private fun updateItem(senseId: String, transform: (ListWordItem) -> ListWordItem) {
@@ -245,6 +264,7 @@ fun ListDetailScreen(
             onBack = onBack,
             onSenseToggle = viewModel::toggleSense,
             onFavoriteToggle = viewModel::toggleFavorite,
+            onPrefetchVisible = viewModel::prefetchVisibleRange,
             onNavigateToWordDetail = { lemma, senseId ->
                 onNavigateToWordDetail(viewModel.language, lemma, senseId)
             },
@@ -293,19 +313,38 @@ private fun ListDetailErrorScreen(onBack: () -> Unit, onRetry: () -> Unit) {
 @Composable
 private fun ListDetailScaffold(
     onBack: () -> Unit,
+    title: String = "",
+    titleAlpha: Float = 0f,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
-            )
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = (-0.3).sp,
+                                fontFamily = MaterialTheme.serifFontFamily,
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.graphicsLayer { alpha = titleAlpha },
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+                )
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = titleAlpha * 0.6f),
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.surface,
         content = content,
@@ -321,18 +360,34 @@ fun ListDetailContent(
     onBack: () -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
+    onPrefetchVisible: (List<ListWordItem>, IntRange) -> Unit = { _, _ -> },
     onNavigateToWordDetail: (lemma: String, senseId: String?) -> Unit = { _, _ -> },
 ) {
     val isDark = LocalIsDarkTheme.current
+
+    // Prefetch full senses (with translations) for the visible range as the user
+    // scrolls. Index 0 is the header item.
+    PrefetchVisibleRangeEffect(
+        items = state.items,
+        scrollState = scrollState,
+        headerItemCount = 1,
+        onPrefetchVisible = onPrefetchVisible,
+    )
     val localeCode = androidx.compose.ui.text.intl.Locale.current.language
     val title = list.title[localeCode] ?: list.title["en"] ?: list.id
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
-    // Show the count of words actually available locally once they are loaded; sense ids
-    // missing from the downloaded dictionary are dropped by getListSenses.
-    val wordCount = if (state.isLoading) list.senseIds.size else state.items.size
+    val wordCount = list.senseIds.size
     val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
+    val showTitleInBar by remember(scrollState) {
+        derivedStateOf { scrollState.firstVisibleItemIndex > 0 }
+    }
+    val titleAlpha by animateFloatAsState(
+        targetValue = if (showTitleInBar) 1f else 0f,
+        animationSpec = tween(durationMillis = 150),
+        label = "titleAlpha",
+    )
 
-    ListDetailScaffold(onBack = onBack) { innerPadding ->
+    ListDetailScaffold(onBack = onBack, title = title, titleAlpha = titleAlpha) { innerPadding ->
         LazyColumn(
             state = scrollState,
             contentPadding = PaddingValues(
@@ -353,6 +408,7 @@ fun ListDetailContent(
                     wordCount = wordCount,
                     bgColor = bgColor,
                     fgColor = fgColor,
+                    iconSvg = list.iconSvg,
                     isDark = isDark,
                 )
             }
@@ -410,9 +466,6 @@ private fun ListWordSenseCard(
             pos = item.pos,
             loading = item.loading,
             error = item.error?.resolve(),
-            collapsedDefinition = item.definition,
-            collapsedLearnerLevel = item.learnerLevel,
-            collapsedFrequency = item.frequency,
         ),
         state = SenseUiState(
             senseId = item.senseId,
@@ -439,6 +492,7 @@ private fun ListDetailHeader(
     wordCount: Int,
     bgColor: Color,
     fgColor: Color,
+    iconSvg: String?,
     isDark: Boolean,
 ) {
     val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
@@ -448,58 +502,65 @@ private fun ListDetailHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp, bottom = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        // Emblem — same vibrant color as the feed card, with matching shadow
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .shadow(
-                    elevation = shadowElevation,
-                    shape = RoundedCornerShape(16.dp),
-                    ambientColor = shadowColor,
-                    spotColor = shadowColor,
-                )
-                .background(bgColor),
-            contentAlignment = Alignment.Center,
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            WordListEmblem(fgColor = fgColor, modifier = Modifier.size(48.dp).alpha(0.82f))
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .shadow(
+                        elevation = shadowElevation,
+                        shape = RoundedCornerShape(16.dp),
+                        ambientColor = shadowColor,
+                        spotColor = shadowColor,
+                    )
+                    .background(bgColor),
+                contentAlignment = Alignment.Center,
+            ) {
+                WordListIcon(
+                    iconSvg = iconSvg,
+                    fgColor = fgColor,
+                    modifier = Modifier.size(48.dp).alpha(0.82f),
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 24.sp,
+                        lineHeight = 28.sp,
+                        letterSpacing = (-0.3).sp,
+                    ),
+                )
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 13.5.sp,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        lineHeight = (13.5f * 1.38f).sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+                Text(
+                    text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+            }
         }
 
-        Spacer(Modifier.height(6.dp))
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontFamily = MaterialTheme.serifFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 24.sp,
-                letterSpacing = (-0.3).sp,
-            ),
-        )
-        if (subtitle.isNotEmpty()) {
-            Text(
-                text = subtitle,
-                fontSize = 13.5.sp,
-                fontStyle = FontStyle.Italic,
-                fontFamily = MaterialTheme.serifFontFamily,
-                lineHeight = (13.5f * 1.38f).sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-            text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-            modifier = Modifier.padding(top = 2.dp),
-        )
-
-        Spacer(Modifier.height(12.dp))
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        )
+        Spacer(Modifier.height(4.dp))
+        ChapterRule()
     }
 }
 
@@ -531,6 +592,7 @@ private fun previewWordList() = WordList(
     subtitle = mapOf("en" to "This is where your journey begins"),
     labels = mapOf("en" to listOf("A1", "Basic")),
     senseIds = List(3) { it.toString() },
+    iconSvg = null,
 )
 
 @Preview
