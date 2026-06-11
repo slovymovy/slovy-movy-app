@@ -287,6 +287,8 @@
     <string name="settings_developer_options_subtitle">Tijdmachine, tabellen, debugstatistieken</string>
     <string name="developer_non_debug_warning">Niet-debugbuild: destructieve ontwikkelaarstools zijn riskant en het volledig wissen van leerkaarten is uitgeschakeld.</string>
     <string name="developer_non_debug_warning_icon">Waarschuwing</string>
+    <string name="developer_completion_gallery_title">Studiesessie-eindstaten</string>
+    <string name="developer_completion_gallery_description">Open nepbeloningen zonder leerdata te wijzigen of op echte reeksen te wachten.</string>
     <string name="developer_time_machine_title">Tijdmachine</string>
     <string name="developer_time_machine_description">Verplaats alle leer-tijdstempels naar achteren om verstreken tijd te simuleren.</string>
     <string name="developer_intake_title">Intake</string>
@@ -631,6 +633,37 @@
         <item quantity="other">%1$d kaarten afgerond.</item>
     </plurals>
     <string name="study_complete_supporting">Zo blijven woorden hangen.</string>
+    <string name="study_complete_shift_title">Waar je woorden naartoe gingen</string>
+    <plurals name="study_complete_micro_cards_reviewed">
+        <item quantity="one">%1$d kaart</item>
+        <item quantity="few">%1$d kaarten</item>
+        <item quantity="many">%1$d kaarten</item>
+        <item quantity="other">%1$d kaarten</item>
+    </plurals>
+    <plurals name="study_complete_micro_minutes">
+        <item quantity="one">%1$d min</item>
+        <item quantity="few">%1$d min</item>
+        <item quantity="many">%1$d min</item>
+        <item quantity="other">%1$d min</item>
+    </plurals>
+    <plurals name="study_complete_micro_streak">
+        <item quantity="one">%1$d dag streak</item>
+        <item quantity="few">%1$d dagen streak</item>
+        <item quantity="many">%1$d dagen streak</item>
+        <item quantity="other">%1$d dagen streak</item>
+    </plurals>
+    <string name="study_complete_milestone_title_7">Een volle week!</string>
+    <string name="study_complete_milestone_title_14">Twee weken achter elkaar!</string>
+    <string name="study_complete_milestone_title_30">Een hele maand!</string>
+    <string name="study_complete_milestone_title_50">Vijftig dagen!</string>
+    <string name="study_complete_milestone_title_100">Honderd dagen!</string>
+    <string name="study_complete_milestone_title_generic">%1$d dagen op rij!</string>
+    <string name="study_complete_milestone_subtitle_7">Zeven dagen op rij. Goed op weg.</string>
+    <string name="study_complete_milestone_subtitle_14">Al veertien dagen onafgebroken. Je hebt het ritme te pakken.</string>
+    <string name="study_complete_milestone_subtitle_30">Dertig opeenvolgende dagen. Dit is een ijzersterke gewoonte.</string>
+    <string name="study_complete_milestone_subtitle_50">Vijftig dagen zonder pauze. Pure toewijding en discipline.</string>
+    <string name="study_complete_milestone_subtitle_100">Honderd dagen onafgebroken. Een ongelooflijke mijlpaal.</string>
+    <string name="study_complete_milestone_subtitle_generic">%1$d dagen zonder te missen. Houd deze streak vast.</string>
     <string name="study_action_done_for_now">Klaar voor nu</string>
     <string name="study_progress_count">%1$d van %2$d</string>
     <string name="study_tap_to_flip">Tik om te draaien</string>

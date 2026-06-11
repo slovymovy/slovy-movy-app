@@ -27,6 +27,25 @@ class StatsService(
 ) {
 
     @OptIn(ExperimentalTime::class)
+    fun rewardSnapshot(
+        langCode: String,
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
+        today: LocalDate = clock.now().toLocalDateTime(timeZone).date,
+    ): StatsRewardSnapshot {
+        val practicedDays = practicedDays(langCode = langCode, timeZone = timeZone)
+        return StatsRewardSnapshot(
+            streakDays = computeStreak(today = today, practicedDays = practicedDays),
+            pipeline = pipelineSnapshot(langCode),
+        )
+    }
+
+    fun pipelineSnapshot(langCode: String): List<StatsPipelineStage> =
+        computePipeline(
+            cardRows = learning.selectCardSchedulingByLang(langCode).executeAsList(),
+            queuedCount = learning.countPendingFavoritesByLang(langCode).executeAsOne().toInt(),
+        )
+
+    @OptIn(ExperimentalTime::class)
     fun statsScreenData(
         langCode: String,
         today: LocalDate,
@@ -63,12 +82,7 @@ class StatsService(
             ).executeAsOne(),
         )
 
-        val practicedDays = learning
-            .selectReviewTimestampsSince(langCode, since = 0L)
-            .executeAsList()
-            .asSequence()
-            .map { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
-            .toSet()
+        val practicedDays = practicedDays(langCode = langCode, timeZone = timeZone)
         val streakDays = computeStreak(today = today, practicedDays = practicedDays)
         val activeDaysTotal = practicedDays.size
 
@@ -127,6 +141,16 @@ class StatsService(
         }
         return streak
     }
+
+    private fun practicedDays(
+        langCode: String,
+        timeZone: TimeZone,
+    ): Set<LocalDate> = learning
+        .selectReviewTimestampsSince(langCode, since = 0L)
+        .executeAsList()
+        .asSequence()
+        .map { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
+        .toSet()
 
     private fun computePipeline(
         cardRows: List<SelectCardSchedulingByLang>,

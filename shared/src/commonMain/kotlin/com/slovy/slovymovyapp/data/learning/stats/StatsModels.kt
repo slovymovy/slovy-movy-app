@@ -31,6 +31,11 @@ data class StatsPipelineStage(
     val count: Int,
 )
 
+data class StatsRewardSnapshot(
+    val streakDays: Int,
+    val pipeline: List<StatsPipelineStage>,
+)
+
 data class StatsYearMonth(
     val year: Int,
     val monthZeroBased: Int,

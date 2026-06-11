@@ -286,6 +286,8 @@
     <string name="settings_developer_options_subtitle">Maszyna czasu, tabele, statystyki debugowania</string>
     <string name="developer_non_debug_warning">Kompilacja niedebugowa: destrukcyjne narzędzia programisty są ryzykowne, a pełne usuwanie kart nauki jest wyłączone.</string>
     <string name="developer_non_debug_warning_icon">Ostrzeżenie</string>
+    <string name="developer_completion_gallery_title">Stany zakończenia nauki</string>
+    <string name="developer_completion_gallery_description">Otwieraj fikcyjne ekrany nagrody bez zmiany danych nauki i czekania na prawdziwe serie.</string>
     <string name="developer_time_machine_title">Maszyna czasu</string>
     <string name="developer_time_machine_description">Przesuń wszystkie znaczniki czasu nauki wstecz, aby zasymulować upływ czasu.</string>
     <string name="developer_intake_title">Aktywacja</string>
@@ -632,6 +634,37 @@
         <item quantity="other">Przerobiono %1$d karty.</item>
     </plurals>
     <string name="study_complete_supporting">Właśnie tak utrwalasz słownictwo.</string>
+    <string name="study_complete_shift_title">Dokąd przesunęły się słowa</string>
+    <plurals name="study_complete_micro_cards_reviewed">
+        <item quantity="one">%1$d karta</item>
+        <item quantity="few">%1$d karty</item>
+        <item quantity="many">%1$d kart</item>
+        <item quantity="other">%1$d karty</item>
+    </plurals>
+    <plurals name="study_complete_micro_minutes">
+        <item quantity="one">%1$d min</item>
+        <item quantity="few">%1$d min</item>
+        <item quantity="many">%1$d min</item>
+        <item quantity="other">%1$d min</item>
+    </plurals>
+    <plurals name="study_complete_micro_streak">
+        <item quantity="one">%1$d dzień z rzędu</item>
+        <item quantity="few">%1$d dni z rzędu</item>
+        <item quantity="many">%1$d dni z rzędu</item>
+        <item quantity="other">%1$d dni z rzędu</item>
+    </plurals>
+    <string name="study_complete_milestone_title_7">Cały tydzień!</string>
+    <string name="study_complete_milestone_title_14">Dwa tygodnie bez przerwy!</string>
+    <string name="study_complete_milestone_title_30">Cały miesiąc!</string>
+    <string name="study_complete_milestone_title_50">Pięćdziesiąt dni!</string>
+    <string name="study_complete_milestone_title_100">Sto dni!</string>
+    <string name="study_complete_milestone_title_generic">%1$d dni z rzędu!</string>
+    <string name="study_complete_milestone_subtitle_7">Siedem dni z rzędu. Świetny początek.</string>
+    <string name="study_complete_milestone_subtitle_14">Czternaście dni z rzędu. Nawyk wchodzi w krew.</string>
+    <string name="study_complete_milestone_subtitle_30">Trzydzieści dni z rzędu. To już prawdziwa regularność.</string>
+    <string name="study_complete_milestone_subtitle_50">Pięćdziesiąt dni bez żadnej przerwy. Wyjątkowa dyscyplina.</string>
+    <string name="study_complete_milestone_subtitle_100">Sto dni bez przerwy. Niesamowite osiągnięcie.</string>
+    <string name="study_complete_milestone_subtitle_generic">%1$d dni bez przerwy. Utrzymaj tę serię.</string>
     <string name="study_action_done_for_now">Na dziś wystarczy</string>
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Dotknij, aby odwrócić</string>

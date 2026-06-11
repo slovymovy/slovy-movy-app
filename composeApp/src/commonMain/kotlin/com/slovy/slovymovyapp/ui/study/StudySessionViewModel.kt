@@ -23,6 +23,7 @@ import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
+import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.logging.AppLogger
@@ -31,10 +32,13 @@ import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -69,6 +73,9 @@ class StudySessionViewModel(
     private var reviewedCount: Int = 0
     private var skippedCount: Int = 0
     private var sessionTotal: Int = 0
+    private var sessionStartPipeline: List<StatsPipelineStage> = emptyList()
+    private var sessionPrepared: Boolean = false
+    private var isStarting: Boolean = false
     private var availableVoices: List<Text2SpeechVoice> = emptyList()
     private var currentVoiceIndex: Int = 0
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
@@ -372,7 +379,11 @@ class StudySessionViewModel(
     fun retry() {
         val failedCard = currentCard
         if (failedCard == null) {
-            loadNextCard()
+            if (sessionPrepared) {
+                loadNextCard()
+            } else {
+                start()
+            }
             return
         }
         viewModelScope.launch {
@@ -497,28 +508,38 @@ class StudySessionViewModel(
     }
 
     private fun start() {
+        if (isStarting) return
+        isStarting = true
         state = StudySessionUiState.Loading()
+        sessionPrepared = false
+        sessionStartPipeline = emptyList()
         viewModelScope.launch {
-            PerformanceMonitoring.startTrace("study_session_start").useWithResult {
-                putAttribute("lang", langCode)
-                try {
-                    val intakeResult = intakeService.runIntake(langCode)
-                    putMetric("cards_created", intakeResult.cardsCreated.toLong())
-                    putMetric("activated_favorites", intakeResult.activated.size.toLong())
-                    putMetric("skip_reasons", intakeResult.skipped.size.toLong())
-                    sessionTotal = statsService.dueNow(langCode, excludedCardFamiliesForSession())
-                    putMetric("due_now", sessionTotal.toLong())
-                    loadNextCard()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (error: Throwable) {
-                    markResult("failed")
-                    state = StudySessionUiState.Error(
-                        message = error.message?.let(UiText::Plain)
-                            ?: UiText.Resource(Res.string.study_error_prepare_failed),
-                        canRetry = true,
-                    )
+            try {
+                PerformanceMonitoring.startTrace("study_session_start").useWithResult {
+                    putAttribute("lang", langCode)
+                    try {
+                        val intakeResult = intakeService.runIntake(langCode)
+                        putMetric("cards_created", intakeResult.cardsCreated.toLong())
+                        putMetric("activated_favorites", intakeResult.activated.size.toLong())
+                        putMetric("skip_reasons", intakeResult.skipped.size.toLong())
+                        sessionStartPipeline = pipelineSnapshot()
+                        sessionTotal = statsService.dueNow(langCode, excludedCardFamiliesForSession())
+                        sessionPrepared = true
+                        putMetric("due_now", sessionTotal.toLong())
+                        loadNextCard()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (error: Throwable) {
+                        markResult("failed")
+                        state = StudySessionUiState.Error(
+                            message = error.message?.let(UiText::Plain)
+                                ?: UiText.Resource(Res.string.study_error_prepare_failed),
+                            canRetry = true,
+                        )
+                    }
                 }
+            } finally {
+                isStarting = false
             }
         }
     }
@@ -550,10 +571,7 @@ class StudySessionViewModel(
                                     state = if (completedCount == 0) {
                                         StudySessionUiState.Empty
                                     } else {
-                                        StudySessionUiState.Complete(
-                                            completedCount = completedCount,
-                                            message = randomCompletionMessage(language),
-                                        )
+                                        StudySessionUiState.Complete(buildCompleteState(completedCount))
                                     }
                                 }
 
@@ -650,6 +668,43 @@ class StudySessionViewModel(
             sessionStartedAt = sessionStartedAt,
             excludedFamilies = excludedCardFamiliesForSession(),
         )
+
+    private suspend fun buildCompleteState(completedCount: Int): StudySessionCompleteUiState {
+        val snapshot = try {
+            rewardSnapshot()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to build study reward snapshot for $langCode", e)
+            null
+        }
+        val streakDays = snapshot?.streakDays ?: 0
+        return StudySessionCompleteUiState(
+            cardsReviewed = completedCount,
+            minutes = (clock.now() - sessionStartedAt).inWholeMinutes.toInt().coerceAtLeast(1),
+            streakDays = streakDays,
+            message = randomCompletionMessage(language),
+            hero = if (snapshot == null || reviewedCount == 0) {
+                StudySessionCompleteHero.None
+            } else {
+                resolveStudySessionCompleteHero(
+                    streakDays = streakDays,
+                    pipelineBefore = sessionStartPipeline,
+                    pipelineAfter = snapshot.pipeline,
+                )
+            },
+        )
+    }
+
+    private suspend fun pipelineSnapshot(): List<StatsPipelineStage> =
+        withContext(Dispatchers.IO) {
+            statsService.pipelineSnapshot(langCode)
+        }
+
+    private suspend fun rewardSnapshot() =
+        withContext(Dispatchers.IO) {
+            statsService.rewardSnapshot(langCode)
+        }
 
     private fun excludedCardFamiliesForSession(): Set<CardFamily> =
         if (postponeListeningCardsForSession) {
