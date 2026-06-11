@@ -10,18 +10,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class RemoteIconPayload(
-    val mimeType: String,
-    val data: String,
-)
-
-@Serializable
 data class RemoteList(
     val id: String,
     val title: Map<String, String>,
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>> = emptyMap(),
-    val icon: RemoteIconPayload? = null,
+    // SVG text; icons are SVG-only by design (the server pairs only `{id}.svg` files).
+    val iconSvg: String? = null,
     val senseIds: List<String>,
     // Curator-controlled feed position; the feed is sorted by ascending [order] with
     // absent (null) sorted to the end. See ListsService.sync.

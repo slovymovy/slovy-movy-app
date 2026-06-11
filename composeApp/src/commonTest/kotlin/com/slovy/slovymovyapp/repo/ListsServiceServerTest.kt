@@ -42,6 +42,7 @@ class ListsServiceServerTest : BaseTest() {
         val title: Map<String, String>,
         val subtitle: Map<String, String>,
         val labels: Map<String, List<String>>,
+        val iconSvg: String? = null,
         val senseIds: List<String>,
         val order: Int? = null,
     )
@@ -68,6 +69,7 @@ class ListsServiceServerTest : BaseTest() {
         title = mapOf("en" to "Basic words", "nl" to "Basiswoorden"),
         subtitle = mapOf("en" to "Start here"),
         labels = mapOf("en" to listOf("A1", "Basic")),
+        iconSvg = """<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg>""",
         senseIds = listOf("sense-2", "sense-1"),
     )
 
@@ -77,7 +79,7 @@ class ListsServiceServerTest : BaseTest() {
         subtitle = subtitle,
         labels = labels,
         senseIds = senseIds,
-        iconSvg = null,
+        iconSvg = iconSvg,
     )
 
     private suspend fun putServerLists(language: Language, bundle: TestListsBundle) {

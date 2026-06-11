@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
-import java.util.Base64
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 import kotlin.io.path.readBytes
@@ -14,11 +13,11 @@ private val log = LoggerFactory.getLogger("LocalDirectoryListsLoader")
 
 /**
  * Loads curated word lists from a local directory laid out exactly like the GitHub
- * `lists/{lang}/` folder: `{id}.json` plus optional `{id}.{svg|png|webp}` icons. The
- * test-mode server uses it to serve the committed `.test-lists-files/` content,
- * mirroring how `TEST_DB_DIR` backs the `/test/db` endpoints. The bundle version is a
- * content hash over the folder, so file edits invalidate client caches the same way a
- * new tree SHA does in production.
+ * `lists/{lang}/` folder: `{id}.json` plus optional `{id}.svg` icons. The test-mode
+ * server uses it to serve the committed `.test-lists-files/` content, mirroring how
+ * `TEST_DB_DIR` backs the `/test/db` endpoints. The bundle version is a content hash
+ * over the served files — list JSON and SVG icons alike — so an icon-only edit
+ * invalidates client caches the same way a new tree SHA does in production.
  */
 class LocalDirectoryListsLoader(private val rootDir: Path) {
 
@@ -32,21 +31,16 @@ class LocalDirectoryListsLoader(private val rootDir: Path) {
             .sortedBy { it.name }
         val listFiles = files.filter { it.name.endsWith(".json", ignoreCase = true) }
         if (listFiles.isEmpty()) return null
-        val iconFiles = files.filter { ListsFolderDecoder.iconMimeType(it.name) != null }
+        val iconFiles = files.filter { ListsFolderDecoder.isIconFile(it.name) }
         val unknown = files - listFiles.toSet() - iconFiles.toSet()
         if (unknown.isNotEmpty()) {
             log.warn("Ignoring {} unsupported entries in {}: {}", unknown.size, dir, unknown.map { it.name })
         }
 
-        val iconsByName = iconFiles.associate { iconFile ->
-            iconFile.name to IconPayload(
-                mimeType = ListsFolderDecoder.iconMimeType(iconFile.name)!!,
-                data = Base64.getEncoder().encodeToString(iconFile.readBytes()),
-            )
-        }
+        val iconsByName = iconFiles.associate { iconFile -> iconFile.name to iconFile.readText() }
 
         val digest = MessageDigest.getInstance("SHA-256")
-        files.forEach { digest.update(it.readBytes()) }
+        (listFiles + iconFiles).sortedBy { it.name }.forEach { digest.update(it.readBytes()) }
         val version = digest.digest().joinToString("") { "%02x".format(it) }.take(16)
 
         val lists = listFiles

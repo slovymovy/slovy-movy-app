@@ -5,8 +5,6 @@ import com.slovy.slovymovyapp.data.remote.ListsClient
 import com.slovy.slovymovyapp.data.remote.RemoteList
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -56,16 +54,13 @@ class ListsService(
         }
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
     private fun RemoteList.toWordList() = WordList(
         id = id,
         title = title,
         subtitle = subtitle,
         labels = labels,
         senseIds = senseIds,
-        iconSvg = icon?.takeIf { it.mimeType == "image/svg+xml" }?.let { payload ->
-            try { Base64.decode(payload.data).decodeToString() } catch (e: Exception) { null }
-        },
+        iconSvg = iconSvg,
     )
 
     private companion object {
