@@ -19,15 +19,17 @@ class LanguageCardEnhancerTest : BaseLLMTest() {
             assertNotNull(request, "Expected request to be built from db_extract resources")
 
             val model = pickFastModel(provider)
-            val response = LanguageCardEnhancer().enhance(
-                request = request,
-                provider = provider,
-                temperature = 0f,
-                reasoningBudget = 1,
-                seed = 42,
-                model = model,
-                maxOutputTokens = 2048
-            )
+            val response = skipIfOutOfQuota {
+                LanguageCardEnhancer().enhance(
+                    request = request,
+                    provider = provider,
+                    temperature = 0f,
+                    reasoningBudget = 1,
+                    seed = 42,
+                    model = model,
+                    maxOutputTokens = 2048
+                )
+            } ?: continue
 
             assertTrue(response.entries.isNotEmpty(), "Provider $providerType should return entries")
             val firstSense = response.entries.first().senses.first()

@@ -18,15 +18,17 @@ class TranslationEnhancerTest : BaseLLMTest() {
             assertNotNull(languageCardRequest, "Expected language card request from db_extract resources")
 
             val languageCardModel = pickFastModel(provider)
-            val languageCard = LanguageCardEnhancer().enhance(
-                request = languageCardRequest,
-                provider = provider,
-                temperature = 0f,
-                reasoningBudget = 1,
-                seed = 42,
-                model = languageCardModel,
-                maxOutputTokens = 2048
-            )
+            val languageCard = skipIfOutOfQuota {
+                LanguageCardEnhancer().enhance(
+                    request = languageCardRequest,
+                    provider = provider,
+                    temperature = 0f,
+                    reasoningBudget = 1,
+                    seed = 42,
+                    model = languageCardModel,
+                    maxOutputTokens = 2048
+                )
+            } ?: continue
 
             val translationRequest = DbExtractEnhancerUtils.createTranslationRequest(
                 word = "celebration",
@@ -36,17 +38,19 @@ class TranslationEnhancerTest : BaseLLMTest() {
             )
 
             val translationModel = pickFastModel(provider)
-            val translationResponse = TranslationEnhancer().enhanceWithTranslations(
-                request = translationRequest,
-                provider = provider,
-                targetLanguageName = DbExtractEnhancerUtils.targetLanguageName("ru"),
-                systemPrompt = EnhancerPrompts.TRANSLATION_SYSTEM_PROMPT,
-                temperature = 0f,
-                reasoningBudget = 1,
-                model = translationModel,
-                seed = 42,
-                maxOutputTokens = 2048
-            )
+            val translationResponse = skipIfOutOfQuota {
+                TranslationEnhancer().enhanceWithTranslations(
+                    request = translationRequest,
+                    provider = provider,
+                    targetLanguageName = DbExtractEnhancerUtils.targetLanguageName("ru"),
+                    systemPrompt = EnhancerPrompts.TRANSLATION_SYSTEM_PROMPT,
+                    temperature = 0f,
+                    reasoningBudget = 1,
+                    model = translationModel,
+                    seed = 42,
+                    maxOutputTokens = 2048
+                )
+            } ?: continue
 
             assertTrue(translationResponse.senseTranslations.isNotEmpty(), "Should contain sense translations")
             assertTrue(translationResponse.exampleTranslations.isNotEmpty(), "Should contain example translations")
