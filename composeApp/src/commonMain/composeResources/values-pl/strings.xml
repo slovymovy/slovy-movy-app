@@ -58,6 +58,9 @@
     <string name="stats_library_section">Moje słownictwo</string>
     <string name="list_detail_load_error">Nie udało się wczytać listy. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="list_detail_empty">Słowa z tej listy nie są dostępne w pobranym słowniku.</string>
+    <string name="list_detail_in_my_words_count">%1$d w Moich słowach</string>
+    <string name="list_detail_add_all">Dodaj wszystkie do Moich słów</string>
+    <string name="list_detail_remove_all">Usuń wszystkie z Moich słów</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d słowo</item>
         <item quantity="few">%1$d słowa</item>

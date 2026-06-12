@@ -58,6 +58,9 @@
     <string name="stats_library_section">Мой словарь</string>
     <string name="list_detail_load_error">Не удалось загрузить список. Проверьте подключение и попробуйте снова.</string>
     <string name="list_detail_empty">Слова из этого списка недоступны в скачанном словаре.</string>
+    <string name="list_detail_in_my_words_count">%1$d в «Моих словах»</string>
+    <string name="list_detail_add_all">Добавить все в «Мои слова»</string>
+    <string name="list_detail_remove_all">Удалить все из «Моих слов»</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d слово</item>
         <item quantity="few">%1$d слова</item>

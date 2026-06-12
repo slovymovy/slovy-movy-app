@@ -46,6 +46,11 @@ data class CardFamilyDebugCount(
     val cardCount: Long,
 )
 
+data class NewFavorite(
+    val senseId: String,
+    val lemma: String,
+)
+
 class FavoritesRepository(private val db: AppDatabase) {
 
     private val distinctLemmasByLangCache = mutableMapOf<Language, Set<String>>()
@@ -75,6 +80,49 @@ class FavoritesRepository(private val db: AppDatabase) {
                 createdAt = createdAt,
             )
         }
+
+    /** Adds every favorite from [items] that is not stored yet, in a single transaction. */
+    @OptIn(ExperimentalTime::class)
+    suspend fun addAll(language: Language, items: List<NewFavorite>) = withContext(Dispatchers.IO) {
+        if (items.isEmpty()) return@withContext
+        val now = Clock.System.now().toEpochMilliseconds()
+        db.favoritesQueries.transaction {
+            items.forEach { item ->
+                insertFavoriteIfMissing(
+                    senseId = item.senseId,
+                    language = language,
+                    lemma = item.lemma,
+                    createdAt = now,
+                    activationTimestamp = now,
+                )
+            }
+        }
+        invalidateDistinctLemmaCache(language)
+    }
+
+    /** Removes every favorite from [senseIds] in a single transaction, suspending its learning cards. */
+    suspend fun removeAll(senseIds: List<String>, language: Language) = withContext(Dispatchers.IO) {
+        if (senseIds.isEmpty()) return@withContext
+        db.favoritesQueries.transaction {
+            senseIds.forEach { senseId ->
+                val existing = db.favoritesQueries.selectFavoriteWithActivation(
+                    sense_id = senseId,
+                    lang_code = language.code,
+                ).executeAsOneOrNull()
+                if (existing != null) {
+                    db.favoritesQueries.suspendCardsByFavorite(
+                        sense_id = Uuid.parse(senseId),
+                        lang_code = language.code,
+                    )
+                    db.favoritesQueries.deleteFavorite(
+                        sense_id = senseId,
+                        lang_code = language.code,
+                    )
+                }
+            }
+        }
+        invalidateDistinctLemmaCache(language)
+    }
 
     @OptIn(ExperimentalTime::class)
     suspend fun restoreForUndo(snapshot: RemovedFavoriteSnapshot) = withContext(Dispatchers.IO) {
@@ -331,33 +379,50 @@ class FavoritesRepository(private val db: AppDatabase) {
         lemma: String,
         createdAt: Long,
     ) {
-        val senseUuid = Uuid.parse(senseId)
         val restoredAt = Clock.System.now().toEpochMilliseconds()
         db.favoritesQueries.transaction {
-            val existing = db.favoritesQueries.selectFavoriteWithActivation(
-                sense_id = senseId,
-                lang_code = language.code,
-            ).executeAsOneOrNull()
-            if (existing != null) return@transaction
-            val hasLearningCards = db.favoritesQueries.countCardsByFavorite(
-                sense_id = senseUuid,
-                lang_code = language.code,
-            ).executeAsOne() > 0
-            db.favoritesQueries.insertFavorite(
-                sense_id = senseId,
-                lang_code = language.code,
+            insertFavoriteIfMissing(
+                senseId = senseId,
+                language = language,
                 lemma = lemma,
-                created_at = createdAt,
-                activated_at = if (hasLearningCards) restoredAt else null,
+                createdAt = createdAt,
+                activationTimestamp = restoredAt,
             )
-            if (hasLearningCards) {
-                db.favoritesQueries.unsuspendCardsByFavorite(
-                    sense_id = senseUuid,
-                    lang_code = language.code,
-                )
-            }
         }
         invalidateDistinctLemmaCache(language)
+    }
+
+    /** Per-item insert logic shared by [addFavorite] and [addAll]; must run inside a transaction. */
+    private fun insertFavoriteIfMissing(
+        senseId: String,
+        language: Language,
+        lemma: String,
+        createdAt: Long,
+        activationTimestamp: Long,
+    ) {
+        val senseUuid = Uuid.parse(senseId)
+        val existing = db.favoritesQueries.selectFavoriteWithActivation(
+            sense_id = senseId,
+            lang_code = language.code,
+        ).executeAsOneOrNull()
+        if (existing != null) return
+        val hasLearningCards = db.favoritesQueries.countCardsByFavorite(
+            sense_id = senseUuid,
+            lang_code = language.code,
+        ).executeAsOne() > 0
+        db.favoritesQueries.insertFavorite(
+            sense_id = senseId,
+            lang_code = language.code,
+            lemma = lemma,
+            created_at = createdAt,
+            activated_at = if (hasLearningCards) activationTimestamp else null,
+        )
+        if (hasLearningCards) {
+            db.favoritesQueries.unsuspendCardsByFavorite(
+                sense_id = senseUuid,
+                lang_code = language.code,
+            )
+        }
     }
 
     private suspend fun invalidateDistinctLemmaCache(language: Language) {

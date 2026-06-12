@@ -4,6 +4,7 @@ import app.cash.sqldelight.db.SqlDriver
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.favorites.NewFavorite
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardState
@@ -134,6 +135,59 @@ open class FavoritesRepositoryTest : BaseTest() {
 
             // Should only have one entry
             assertEquals(1, all.size)
+        }
+    }
+
+    @Test
+    fun addAll_adds_only_missing_favorites() = runBlocking {
+        withRepository { repo ->
+            repo.deleteAll()
+
+            repo.add(sense1, Language.ENGLISH, "hello", 1000L)
+
+            repo.addAll(
+                Language.ENGLISH,
+                listOf(
+                    NewFavorite(senseId = sense1, lemma = "hello"),
+                    NewFavorite(senseId = sense2, lemma = "world"),
+                    NewFavorite(senseId = sense3, lemma = "again"),
+                ),
+            )
+
+            assertEquals(3, repo.getAll().size)
+            val existing = assertNotNull(repo.getOne(sense1, Language.ENGLISH))
+            assertEquals(1000L, existing.createdAt, "pre-existing favorite should keep its createdAt")
+            assertTrue(repo.exists(sense2, Language.ENGLISH))
+            assertTrue(repo.exists(sense3, Language.ENGLISH))
+            assertEquals(
+                setOf("hello", "world", "again"),
+                repo.getFavoriteLemmas(Language.ENGLISH),
+                "lemma cache should be invalidated by addAll",
+            )
+        }
+    }
+
+    @Test
+    fun removeAll_removes_only_given_senses() = runBlocking {
+        withRepository { repo ->
+            repo.deleteAll()
+
+            repo.add(sense1, Language.ENGLISH, "hello")
+            repo.add(sense2, Language.ENGLISH, "world")
+            repo.add(sense3, Language.ENGLISH, "again")
+            repo.add(sense4, Language.RUSSIAN, "privet")
+
+            repo.removeAll(listOf(sense2, sense3, nonexistent), Language.ENGLISH)
+
+            assertTrue(repo.exists(sense1, Language.ENGLISH), "favorite outside the bulk removal should stay")
+            assertFalse(repo.exists(sense2, Language.ENGLISH))
+            assertFalse(repo.exists(sense3, Language.ENGLISH))
+            assertTrue(repo.exists(sense4, Language.RUSSIAN), "favorite in another language should stay")
+            assertEquals(
+                setOf("hello"),
+                repo.getFavoriteLemmas(Language.ENGLISH),
+                "lemma cache should be invalidated by removeAll",
+            )
         }
     }
 
