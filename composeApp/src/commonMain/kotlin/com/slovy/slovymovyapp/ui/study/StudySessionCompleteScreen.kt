@@ -19,9 +19,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +45,31 @@ import slovymovyapp.composeapp.generated.resources.*
 
 @Composable
 internal fun StudySessionCompleteContent(
+    reward: StudySessionCompleteUiState,
+    scrollState: ScrollState,
+    onClose: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+    animate: Boolean = true,
+    respectReduceMotion: Boolean = true,
+) {
+    val reduceMotion = rememberReduceMotion()
+    val entrance = RewardEntrance(
+        animate = animate && !LocalInspectionMode.current && !(respectReduceMotion && reduceMotion),
+    )
+    CompositionLocalProvider(LocalRewardEntrance provides entrance) {
+        StudySessionCompleteScaffold(
+            reward = reward,
+            scrollState = scrollState,
+            onClose = onClose,
+            snackbarHostState = snackbarHostState,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun StudySessionCompleteScaffold(
     reward: StudySessionCompleteUiState,
     scrollState: ScrollState,
     onClose: () -> Unit,
@@ -83,6 +110,7 @@ internal fun StudySessionCompleteContent(
                         imageVector = with(SlovyIcons) { completeIllustration(reward.hero) },
                         contentDescription = null,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.OTTER)
                             .size(width = 148.dp, height = 168.dp),
                     )
                     Spacer(Modifier.height(AppSpacing.lg))
@@ -94,6 +122,7 @@ internal fun StudySessionCompleteContent(
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.HEADLINE)
                             .fillMaxWidth()
                             .padding(horizontal = AppSpacing.xl),
                     )
@@ -101,12 +130,14 @@ internal fun StudySessionCompleteContent(
                     CompletionSubtext(
                         reward = reward,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.STATS)
                             .fillMaxWidth()
                             .padding(horizontal = AppSpacing.xl),
                     )
                     CompletionHero(
                         hero = reward.hero,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.HERO_TILE)
                             .padding(top = AppSpacing.xxl)
                             .widthIn(max = 332.dp),
                     )
@@ -115,6 +146,7 @@ internal fun StudySessionCompleteContent(
             Button(
                 onClick = onClose,
                 modifier = Modifier
+                    .rewardEntrance(RewardElement.ACTION_BAR)
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = MaterialTheme.shapes.extraLarge,
@@ -215,6 +247,7 @@ private fun StudySessionCompleteMilestonePreview(
             scrollState = ScrollState(0),
             onClose = {},
             snackbarHostState = SnackbarHostState(),
+            animate = false,
         )
     }
 }
@@ -244,6 +277,7 @@ private fun StudySessionCompletePipelineShiftPreview(
             scrollState = ScrollState(0),
             onClose = {},
             snackbarHostState = SnackbarHostState(),
+            animate = false,
         )
     }
 }

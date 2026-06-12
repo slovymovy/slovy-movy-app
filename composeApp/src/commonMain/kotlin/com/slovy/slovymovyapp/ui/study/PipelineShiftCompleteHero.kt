@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.ui.study
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,10 +71,11 @@ internal fun PipelineShiftCompleteHero(
                 modifier = Modifier.fillMaxWidth(),
             )
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                stages.forEach { stage ->
+                stages.forEachIndexed { index, stage ->
                     PipelineShiftRow(
                         stage = stage,
                         maxValue = maxValue,
+                        index = index,
                     )
                 }
             }
@@ -81,9 +87,37 @@ internal fun PipelineShiftCompleteHero(
 private fun PipelineShiftRow(
     stage: PipelineShiftStageUiState,
     maxValue: Int,
+    index: Int,
 ) {
     val beforePct = stage.before.toFloat() / maxValue.toFloat()
     val afterPct = stage.after.toFloat() / maxValue.toFloat()
+
+    // Solid fill slides beforePct -> afterPct (§4f / §8e); ghost stays pinned at beforePct.
+    val animate = LocalRewardEntrance.current.animate
+    val solidFraction = remember(beforePct, afterPct) {
+        Animatable(if (animate) beforePct else afterPct)
+    }
+    LaunchedEffect(animate, beforePct, afterPct) {
+        if (animate) {
+            solidFraction.snapTo(beforePct)
+            solidFraction.animateTo(
+                targetValue = afterPct,
+                animationSpec = tween(
+                    durationMillis = ShiftBarDurationMillis,
+                    delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis,
+                    easing = ShiftBarEase,
+                ),
+            )
+        } else {
+            solidFraction.snapTo(afterPct)
+        }
+    }
+
+    val deltaCount by rememberCountUp(
+        target = stage.delta,
+        delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis + ShiftDeltaExtraDelayMillis,
+        durationMillis = ShiftDeltaDurationMillis,
+    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -124,14 +158,14 @@ private fun PipelineShiftRow(
             )
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(afterPct)
+                    .fillMaxWidth(solidFraction.value)
                     .height(10.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(stageColor(stage.id)),
             )
         }
         Text(
-            text = formatDelta(stage.delta),
+            text = formatDelta(stage.delta, deltaCount),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -169,8 +203,9 @@ private fun stageColor(stage: StatsPipelineStageId): Color = when (stage) {
     StatsPipelineStageId.LEARNED -> Color(0xFF7CB078)
 }
 
-private fun formatDelta(delta: Int): String = when {
-    delta > 0 -> "+$delta"
-    delta < 0 -> "\u2212${-delta}"
-    else -> "\u2014"
+// Signed delta with the true minus glyph; the magnitude tracks the count-up while the sign holds.
+private fun formatDelta(delta: Int, current: Int): String = when {
+    delta == 0 -> "\u2014"
+    delta > 0 -> "+${current.coerceAtLeast(0)}"
+    else -> "\u2212${(-current).coerceAtLeast(0)}"
 }
