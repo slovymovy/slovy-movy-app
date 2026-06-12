@@ -58,6 +58,9 @@
     <string name="stats_library_section">Mijn woordenschat</string>
     <string name="list_detail_load_error">Kan deze lijst niet laden. Controleer je verbinding en probeer het opnieuw.</string>
     <string name="list_detail_empty">Geen woorden uit deze lijst beschikbaar in het gedownloade woordenboek.</string>
+    <string name="list_detail_in_my_words_count">%1$d in Mijn woorden</string>
+    <string name="list_detail_add_all">Alles toevoegen aan Mijn woorden</string>
+    <string name="list_detail_remove_all">Alles verwijderen uit Mijn woorden</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d woord</item>
         <item quantity="few">%1$d woorden</item>
