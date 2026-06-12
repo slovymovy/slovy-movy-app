@@ -23,7 +23,7 @@
     <string name="search_section_explore">Explore</string>
     <string name="search_pull_to_refresh_hint">Pull down for new words</string>
     <string name="search_section_recently_saved">Recently saved</string>
-    <string name="search_section_lists_for_you">Lists for you</string>
+    <string name="search_section_lists_for_you">Ready to Learn</string>
     <string name="search_empty_start_typing">Start typing to search</string>
     <string name="search_no_dictionary_title">No dictionary downloaded</string>
     <string name="search_no_dictionary_description">Download a dictionary to start searching for words</string>

@@ -23,7 +23,7 @@
     <string name="search_section_explore">Узнайте новое</string>
     <string name="search_pull_to_refresh_hint">Потяните, чтобы обновить</string>
     <string name="search_section_recently_saved">Недавно сохраненные</string>
-    <string name="search_section_lists_for_you">Списки для вас</string>
+    <string name="search_section_lists_for_you">Учите прямо сейчас</string>
     <string name="search_empty_start_typing">Введите слово для поиска</string>
     <string name="search_no_dictionary_title">Словарь не скачан</string>
     <string name="search_no_dictionary_description">Скачайте словарь, чтобы начать поиск слов</string>
