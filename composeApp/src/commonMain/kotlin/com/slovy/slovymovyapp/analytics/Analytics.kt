@@ -41,7 +41,10 @@ enum class AnalyticsEvent {
     TTS_PLAY_FAILED,
     SETTING_CHANGED,
     REVIEW_APP_CLICK,
-    LANGUAGE_REQUEST_OPEN
+    LANGUAGE_REQUEST_OPEN,
+    LIST_CARD_CLICK,
+    LIST_ADD_ALL,
+    LIST_REMOVE_ALL
 }
 
 expect object Analytics {
