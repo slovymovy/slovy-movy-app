@@ -97,6 +97,9 @@ data class SearchUiState(
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList(),
     val curatedLists: List<WordList> = emptyList(),
+    // Gates the empty-state body so it renders once fully populated instead of flashing
+    // the favorites/"start typing" fallback before curated lists finish loading.
+    val isEmptyStateLoading: Boolean = false,
     val listSuggestionDialogVisible: Boolean = false,
     val listSuggestionComment: String = "",
     val listSuggestionEmail: String = "",
@@ -127,7 +130,8 @@ class SearchViewModel(
                 results = emptyList(),
                 showNoResults = false,
                 availableLanguages = installed,
-                selectedLanguage = installed.firstOrNull()
+                selectedLanguage = installed.firstOrNull(),
+                isEmptyStateLoading = installed.isNotEmpty()
             )
         }
     )
@@ -201,7 +205,11 @@ class SearchViewModel(
                 // This bypasses setSelectedLanguage (the preference must not be re-saved),
                 // so drop anything the screen-open refresh loaded for the pre-restore
                 // language and reload lists for the restored one.
-                state = state.copy(selectedLanguage = savedLang, curatedLists = emptyList())
+                state = state.copy(
+                    selectedLanguage = savedLang,
+                    curatedLists = emptyList(),
+                    isEmptyStateLoading = true
+                )
                 queryFlow.value = queryFlow.value.copy(language = savedLang)
                 refreshLists()
             }
@@ -253,13 +261,24 @@ class SearchViewModel(
             // Render suggestions for this language first, then lists below them.
             suggestionsLoadedForLanguage.first { it == language }
             if (state.selectedLanguage == language) {
-                state = state.copy(curatedLists = cached)
+                // Lift the loading gate as soon as we have cached lists so the empty
+                // state renders once, fully populated. With an empty cache (first launch)
+                // keep waiting through the server sync so the favorites/"start typing"
+                // fallback does not flash before lists arrive.
+                state = if (cached.isNotEmpty()) {
+                    state.copy(curatedLists = cached, isEmptyStateLoading = false)
+                } else {
+                    state.copy(curatedLists = cached)
+                }
             }
             if (listsService.sync(language)) {
                 val updated = listsService.getLists(language)
                 if (state.selectedLanguage == language) {
                     state = state.copy(curatedLists = updated)
                 }
+            }
+            if (state.selectedLanguage == language) {
+                state = state.copy(isEmptyStateLoading = false)
             }
         }
     }
@@ -362,7 +381,19 @@ class SearchViewModel(
         }
         val languageChanged = currentLanguage != target
         // Do not call setSelectedLanguage — that would overwrite the saved preference.
-        state = state.copy(availableLanguages = installed, selectedLanguage = target)
+        // On a language switch, drop the previous language's lists and re-gate so the
+        // empty state shows a spinner (not stale wrong-language lists) until the caller's
+        // refreshLists() repopulates. Safe because the only caller follows with refreshLists().
+        state = if (languageChanged) {
+            state.copy(
+                availableLanguages = installed,
+                selectedLanguage = target,
+                curatedLists = emptyList(),
+                isEmptyStateLoading = target != null
+            )
+        } else {
+            state.copy(availableLanguages = installed, selectedLanguage = target)
+        }
         queryFlow.value = queryFlow.value.copy(language = target)
         if (languageChanged) {
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
@@ -396,7 +427,9 @@ class SearchViewModel(
         }
         // Load suggestions and lists for new language
         if (langChanged) {
-            state = state.copy(curatedLists = emptyList())
+            // No per-language lists in "All languages" mode, so don't gate on loading there
+            // (refreshLists/loadSuggestions early-return for a null language).
+            state = state.copy(curatedLists = emptyList(), isEmptyStateLoading = language != null)
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
             refreshLists()
         }
@@ -642,6 +675,7 @@ fun SearchScreenContent(
                                     wordSuggestions = state.wordSuggestions,
                                     favoriteLemmas = state.favoriteLemmas,
                                     curatedLists = state.curatedLists,
+                                    isLoading = state.isEmptyStateLoading,
                                     onWordClick = onSuggestionSelected,
                                     onListClick = onListClick,
                                     onSuggestListClick = onSuggestListClick
@@ -769,10 +803,20 @@ private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
     curatedLists: List<WordList>,
+    isLoading: Boolean,
     onWordClick: (String) -> Unit,
     onListClick: (WordList) -> Unit,
     onSuggestListClick: () -> Unit
 ) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     val isDark = LocalIsDarkTheme.current
     Column(
         modifier = Modifier
