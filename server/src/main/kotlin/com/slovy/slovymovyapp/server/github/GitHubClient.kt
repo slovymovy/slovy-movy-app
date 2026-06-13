@@ -34,6 +34,9 @@ object GitHubClient {
     private const val FEEDBACK_LABEL = "feedback"
     private const val FEEDBACK_LABEL_COLOR = "0E8A16"
     private const val FEEDBACK_LABEL_DESCRIPTION = "Feedback reported from application users"
+    private const val LIST_SUGGESTION_LABEL = "list-suggestion"
+    private const val LIST_SUGGESTION_LABEL_COLOR = "1D76DB"
+    private const val LIST_SUGGESTION_LABEL_DESCRIPTION = "Word list ideas suggested from application users"
 
     private const val GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
     private const val FEEDBACK_DISCUSSION_CATEGORY = "Feedback"
@@ -392,6 +395,34 @@ object GitHubClient {
     }
 
     /**
+     * Creates a word-list suggestion issue in the words repository, tagged with the language,
+     * and applies the "list-suggestion" label.
+     */
+    fun createListSuggestionIssue(
+        lang: String,
+        comment: String,
+        email: String? = null
+    ): CreatedIssue {
+        val repository = client().getRepository("$REPO_OWNER/$REPO_NAME")
+        ensureListSuggestionLabelExists(repository)
+        val title = buildListSuggestionIssueTitle(lang = lang)
+        val body = buildListSuggestionIssueBody(
+            lang = lang,
+            comment = comment,
+            email = email
+        )
+        val issue = repository.createIssue(title)
+            .body(body)
+            .label(LIST_SUGGESTION_LABEL)
+            .create()
+        return CreatedIssue(
+            number = issue.number,
+            title = issue.title,
+            htmlUrl = issue.htmlUrl.toString()
+        )
+    }
+
+    /**
      * Closes an issue in the words repository.
      */
     fun closeIssue(issueNumber: Int) {
@@ -430,6 +461,29 @@ object GitHubClient {
         }
     }
 
+    internal fun buildListSuggestionIssueTitle(lang: String): String {
+        return "List suggestion: [$lang]"
+    }
+
+    internal fun buildListSuggestionIssueBody(
+        lang: String,
+        comment: String,
+        email: String? = null
+    ): String {
+        return buildString {
+            appendLine("Word list suggestion submitted from application.")
+            appendLine()
+            appendLine("- Language: `$lang`")
+            if (!email.isNullOrBlank()) {
+                val obfuscated = email.trim().replace("@", " [$lang] ")
+                appendLine("- Email: `$obfuscated`")
+            }
+            appendLine()
+            appendLine("Comment:")
+            appendLine(comment.trim())
+        }
+    }
+
     private fun normalizeTranslationCodes(translationCodes: List<String>): List<String> {
         return translationCodes
             .map { it.trim() }
@@ -445,6 +499,18 @@ object GitHubClient {
                 FEEDBACK_LABEL,
                 FEEDBACK_LABEL_COLOR,
                 FEEDBACK_LABEL_DESCRIPTION
+            )
+        }
+    }
+
+    private fun ensureListSuggestionLabelExists(repository: GHRepository) {
+        try {
+            repository.getLabel(LIST_SUGGESTION_LABEL)
+        } catch (_: GHFileNotFoundException) {
+            repository.createLabel(
+                LIST_SUGGESTION_LABEL,
+                LIST_SUGGESTION_LABEL_COLOR,
+                LIST_SUGGESTION_LABEL_DESCRIPTION
             )
         }
     }

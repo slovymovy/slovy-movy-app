@@ -773,7 +773,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        SearchViewModel(dictionaryRepository, settingsRepository, listsService)
+                        SearchViewModel(dictionaryRepository, settingsRepository, listsService, dictionaryClient)
                     }
 
                     LaunchedEffect(pendingSearchQuery) {

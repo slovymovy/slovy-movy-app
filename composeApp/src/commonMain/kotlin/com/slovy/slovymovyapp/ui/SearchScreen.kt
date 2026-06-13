@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -55,7 +56,9 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.serialization.json.JsonPrimitive
@@ -70,6 +73,7 @@ import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -92,13 +96,20 @@ data class SearchUiState(
     val isSuggestionsRefreshing: Boolean = false,
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList(),
-    val curatedLists: List<WordList> = emptyList()
+    val curatedLists: List<WordList> = emptyList(),
+    val listSuggestionDialogVisible: Boolean = false,
+    val listSuggestionComment: String = "",
+    val listSuggestionEmail: String = "",
+    val listSuggestionSubmitting: Boolean = false,
+    val listSuggestionError: String? = null,
+    val listSuggestionIssueUrl: String? = null
 )
 
 class SearchViewModel(
     private val repository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
     private val listsService: ListsService,
+    private val dictionaryClient: DictionaryClient,
 ) : ViewModel() {
 
     data class Search(
@@ -249,6 +260,67 @@ class SearchViewModel(
                 if (state.selectedLanguage == language) {
                     state = state.copy(curatedLists = updated)
                 }
+            }
+        }
+    }
+
+    fun openListSuggestionDialog() {
+        state = state.copy(
+            listSuggestionDialogVisible = true,
+            listSuggestionComment = "",
+            listSuggestionEmail = "",
+            listSuggestionSubmitting = false,
+            listSuggestionError = null,
+            listSuggestionIssueUrl = null
+        )
+    }
+
+    fun dismissListSuggestionDialog() {
+        if (state.listSuggestionSubmitting) return
+        state = state.copy(
+            listSuggestionDialogVisible = false,
+            listSuggestionComment = "",
+            listSuggestionEmail = "",
+            listSuggestionError = null,
+            listSuggestionIssueUrl = null
+        )
+    }
+
+    fun updateListSuggestionComment(comment: String) {
+        state = state.copy(listSuggestionComment = comment, listSuggestionError = null)
+    }
+
+    fun updateListSuggestionEmail(email: String) {
+        state = state.copy(listSuggestionEmail = email)
+    }
+
+    fun submitListSuggestion() {
+        if (state.listSuggestionSubmitting) return
+        val language = state.selectedLanguage ?: return
+
+        val comment = state.listSuggestionComment.trim()
+        if (comment.isBlank()) return
+
+        state = state.copy(listSuggestionSubmitting = true, listSuggestionError = null)
+        viewModelScope.launch {
+            try {
+                val response = dictionaryClient.sendListSuggestion(
+                    language = language,
+                    comment = comment,
+                    email = state.listSuggestionEmail.trim().takeIf { it.isNotBlank() }
+                )
+                state = state.copy(
+                    listSuggestionSubmitting = false,
+                    listSuggestionError = null,
+                    listSuggestionIssueUrl = response.issueUrl
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = state.copy(
+                    listSuggestionSubmitting = false,
+                    listSuggestionError = NetworkErrorClassifier.userMessage(e)
+                )
             }
         }
     }
@@ -407,6 +479,11 @@ fun SearchScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         onListClick = onListClick,
+        onSuggestListClick = { viewModel.openListSuggestionDialog() },
+        onListSuggestionCommentChange = { viewModel.updateListSuggestionComment(it) },
+        onListSuggestionEmailChange = { viewModel.updateListSuggestionEmail(it) },
+        onDismissListSuggestion = { viewModel.dismissListSuggestionDialog() },
+        onSubmitListSuggestion = { viewModel.submitListSuggestion() },
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
@@ -426,6 +503,11 @@ fun SearchScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
     onListClick: (WordList) -> Unit = {},
+    onSuggestListClick: () -> Unit = {},
+    onListSuggestionCommentChange: (String) -> Unit = {},
+    onListSuggestionEmailChange: (String) -> Unit = {},
+    onDismissListSuggestion: () -> Unit = {},
+    onSubmitListSuggestion: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -561,7 +643,8 @@ fun SearchScreenContent(
                                     favoriteLemmas = state.favoriteLemmas,
                                     curatedLists = state.curatedLists,
                                     onWordClick = onSuggestionSelected,
-                                    onListClick = onListClick
+                                    onListClick = onListClick,
+                                    onSuggestListClick = onSuggestListClick
                                 )
                             }
                         }
@@ -590,6 +673,25 @@ fun SearchScreenContent(
                 }
             }
         }
+
+    if (state.listSuggestionDialogVisible) {
+        FeedbackDialog(
+            title = stringResource(Res.string.search_suggest_list_dialog_title),
+            commentPlaceholder = stringResource(Res.string.search_suggest_list_placeholder),
+            commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
+            successCopy = null,
+            allowDismissWhileSending = false,
+            comment = state.listSuggestionComment,
+            email = state.listSuggestionEmail,
+            isSending = state.listSuggestionSubmitting,
+            error = state.listSuggestionError,
+            resultUrl = state.listSuggestionIssueUrl,
+            onCommentChange = onListSuggestionCommentChange,
+            onEmailChange = onListSuggestionEmailChange,
+            onDismiss = onDismissListSuggestion,
+            onSend = onSubmitListSuggestion
+        )
+    }
 }
 
 @Composable
@@ -668,7 +770,8 @@ private fun EmptySearchState(
     favoriteLemmas: List<String>,
     curatedLists: List<WordList>,
     onWordClick: (String) -> Unit,
-    onListClick: (WordList) -> Unit
+    onListClick: (WordList) -> Unit,
+    onSuggestListClick: () -> Unit
 ) {
     val isDark = LocalIsDarkTheme.current
     Column(
@@ -745,6 +848,26 @@ private fun EmptySearchState(
                     featured = index == 0,
                     isDark = isDark,
                     onClick = { onListClick(list) }
+                )
+            }
+            TextButton(
+                onClick = onSuggestListClick,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 4.dp),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Flag,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(Res.string.search_suggest_list_button),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         } else if (favoriteLemmas.isNotEmpty()) {
