@@ -48,12 +48,14 @@ import com.slovy.slovymovyapp.data.favorites.NewFavorite
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
+import com.slovy.slovymovyapp.data.remote.DictionaryClientException
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.LearnerLevel
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
+import com.slovy.slovymovyapp.data.remote.WordFetchManager
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
@@ -65,6 +67,7 @@ import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -112,6 +115,7 @@ class ListDetailViewModel(
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
     private val listsService: ListsService,
+    private val wordFetchManager: WordFetchManager,
     private val onFavoriteChanged: (added: Boolean) -> Unit,
 ) : ViewModel() {
     var list by mutableStateOf<WordList?>(null)
@@ -214,14 +218,32 @@ class ListDetailViewModel(
 
     private suspend fun loadMissingSenses(lemma: String, senseIds: Set<String>) {
         try {
-            val results = repository.getSenses(language, lemma, senseIds)
+            val translationTargets = repository.defaultTranslationTargets(language)
+            // The sense is missing from the local SQLite, so a plain getSenses() read would just
+            // return a missing reason. Stream the word from the server first (WordFetchManager
+            // ingests the processed content into the local DBs); only then can getSenses resolve
+            // it. Mirrors FavoriteLemmaRecovery.fetchLemma.
+            val terminal = wordFetchManager.getWord(
+                language = language,
+                lemma = lemma,
+                translationTargets = translationTargets,
+                pushToRepo = false,
+            ).first { !it.isWordLoading && !it.isTranslationLoading }
+            val fetchError = terminal.error
+            if (fetchError is DictionaryClientException.CancelledException) {
+                throw CancellationException(fetchError.message)
+            }
+            val results = repository.getSenses(language, lemma, senseIds, translationTargets)
             senseIds.forEach { senseId ->
                 val result = results[senseId]
                 val senseWithPos = result?.sense
-                val error = if (senseWithPos == null) {
-                    result?.missingReason?.toFavoriteSenseLoadError(language)
+                val error = when {
+                    senseWithPos != null -> null
+                    result?.missingReason != null -> result.missingReason.toFavoriteSenseLoadError(language)
+                    fetchError != null -> fetchError.message?.let(UiText::Plain)
                         ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
-                } else null
+                    else -> UiText.Resource(Res.string.favorites_error_meaning_not_found)
+                }
                 updateItem(senseId) {
                     it.copy(
                         sense = senseWithPos?.sense,

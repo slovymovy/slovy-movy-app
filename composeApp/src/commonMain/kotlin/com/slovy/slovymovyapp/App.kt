@@ -844,6 +844,7 @@ fun App(
                             repository = dictionaryRepository,
                             favoritesRepository = favoritesRepository,
                             listsService = listsService,
+                            wordFetchManager = wordFetchManager,
                             onFavoriteChanged = { _ ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
                                 appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
