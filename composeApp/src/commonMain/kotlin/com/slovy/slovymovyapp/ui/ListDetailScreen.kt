@@ -163,30 +163,38 @@ class ListDetailViewModel(
             // Build an item for every list sense in server order. Senses present in the
             // local dictionary render immediately; senses missing from it become loading
             // placeholders carrying the bundle lemma so they can be fetched + favorited.
-            val items = resolvedList.senses.map { listSense ->
+            // A sense missing locally with a blank lemma (legacy senseIds-only bundle or a
+            // pre-lemma cached row) is skipped: it can be neither fetched nor turned into a
+            // usable favorite (all fetch/recovery/intake paths are keyed by lemma), so it must
+            // not reach "Add all". This matches the pre-lemma behavior of dropping such senses.
+            val items = resolvedList.senses.mapNotNull { listSense ->
                 val sense = resolved[listSense.senseId]
-                if (sense != null) {
-                    // Seed from cache so already-loaded senses render their translation
-                    // immediately, mirroring FavoritesViewModel.buildSenseItem.
-                    val cached = repository.getCachedSense(sense.senseId)
-                    ListWordItem(
-                        senseId = sense.senseId,
-                        lemma = sense.lemma,
-                        definition = sense.definition,
-                        learnerLevel = sense.learnerLevel,
-                        frequency = sense.frequency,
-                        sense = cached?.sense,
-                        relatedWords = cached?.relatedWords ?: emptyMap(),
-                        pos = cached?.pos,
-                        isFavorited = sense.senseId in favoritedIds,
-                    )
-                } else {
-                    ListWordItem(
+                when {
+                    sense != null -> {
+                        // Seed from cache so already-loaded senses render their translation
+                        // immediately, mirroring FavoritesViewModel.buildSenseItem.
+                        val cached = repository.getCachedSense(sense.senseId)
+                        ListWordItem(
+                            senseId = sense.senseId,
+                            lemma = sense.lemma,
+                            definition = sense.definition,
+                            learnerLevel = sense.learnerLevel,
+                            frequency = sense.frequency,
+                            sense = cached?.sense,
+                            relatedWords = cached?.relatedWords ?: emptyMap(),
+                            pos = cached?.pos,
+                            isFavorited = sense.senseId in favoritedIds,
+                        )
+                    }
+
+                    listSense.lemma.isNotBlank() -> ListWordItem(
                         senseId = listSense.senseId,
                         lemma = listSense.lemma,
                         isFavorited = listSense.senseId in favoritedIds,
                         loading = true,
                     )
+
+                    else -> null
                 }
             }
             state = ListDetailUiState(
@@ -199,7 +207,8 @@ class ListDetailViewModel(
             prefetcher.prefetchHead(items)
             // Fetch the senses missing from the local dictionary from the server in the
             // background; resolved items are already on screen, so this never blocks the UI.
-            val missing = resolvedList.senses.filter { it.senseId !in resolved }
+            // Only senses with a usable lemma are fetchable.
+            val missing = resolvedList.senses.filter { it.senseId !in resolved && it.lemma.isNotBlank() }
             if (missing.isNotEmpty()) fetchMissingSenses(missing)
         }
     }
