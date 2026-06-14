@@ -1,7 +1,7 @@
 package com.slovy.slovymovyapp.data.remote
 
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
-class FavoriteRecoveryControllerTest : BaseTest() {
+class LemmaRecoveryControllerTest : BaseTest() {
     private val senseId = "00000000-0000-0000-0000-000000000001"
 
     @Test
@@ -25,9 +25,9 @@ class FavoriteRecoveryControllerTest : BaseTest() {
         val releaseFetch = CompletableDeferred<Unit>()
         var recoveryRuns = 0
         val keepAlive = CountingKeepAliveFactory()
-        val controller = FavoriteRecoveryController(
+        val controller = LemmaRecoveryController(
             recovery = recovery(
-                onFavoritesLoaded = { recoveryRuns++ },
+                onItemsLoaded = { recoveryRuns++ },
                 onFetch = {
                     started.complete(Unit)
                     releaseFetch.await()
@@ -52,8 +52,8 @@ class FavoriteRecoveryControllerTest : BaseTest() {
     fun ensureStarted_starts_new_job_after_previous_completes() = runBlocking {
         var recoveryRuns = 0
         val keepAlive = CountingKeepAliveFactory()
-        val controller = FavoriteRecoveryController(
-            recovery = recovery(onFavoritesLoaded = { recoveryRuns++ }),
+        val controller = LemmaRecoveryController(
+            recovery = recovery(onItemsLoaded = { recoveryRuns++ }),
             acquireKeepAlive = keepAlive::acquire,
         )
 
@@ -73,7 +73,7 @@ class FavoriteRecoveryControllerTest : BaseTest() {
         val started = CompletableDeferred<Unit>()
         val releaseFetch = CompletableDeferred<Unit>()
         val keepAlive = CountingKeepAliveFactory()
-        val controller = FavoriteRecoveryController(
+        val controller = LemmaRecoveryController(
             recovery = recovery(
                 onFetch = {
                     started.complete(Unit)
@@ -106,7 +106,7 @@ class FavoriteRecoveryControllerTest : BaseTest() {
         val started = CompletableDeferred<Unit>()
         val releaseFetch = CompletableDeferred<Unit>()
         val keepAlive = CountingKeepAliveFactory()
-        val controller = FavoriteRecoveryController(
+        val controller = LemmaRecoveryController(
             recovery = recovery(
                 onFetch = {
                     started.complete(Unit)
@@ -127,17 +127,17 @@ class FavoriteRecoveryControllerTest : BaseTest() {
     }
 
     private fun recovery(
-        onFavoritesLoaded: () -> Unit = {},
+        onItemsLoaded: () -> Unit = {},
         onFetch: suspend () -> Unit = {},
-    ): FavoriteLemmaRecovery {
-        return FavoriteLemmaRecovery(
-            favoritesProvider = {
-                onFavoritesLoaded()
-                listOf(Favorite(senseId, Language.ENGLISH, "test"))
+    ): LemmaRecovery {
+        return LemmaRecovery(
+            itemsProvider = {
+                onItemsLoaded()
+                listOf(RecoverableSense(Language.ENGLISH, "test", senseId))
             },
             hasDownloadedDictionary = { language -> language == Language.ENGLISH },
             downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
-            downloadedFavoritesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
+            downloadedSensesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
             translationTargetsProvider = { listOf(Language.RUSSIAN) },
             fetchLemma = { _, _, _ -> onFetch() },
         )

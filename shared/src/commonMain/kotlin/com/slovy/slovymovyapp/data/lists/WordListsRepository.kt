@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.lists
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -31,6 +32,18 @@ class WordListsRepository(private val db: AppDatabase) {
                     senses = senses[row.list_id].orEmpty().map { WordListSense(it.sense_id, it.lemma) },
                     iconSvg = row.icon_svg,
                 )
+            }
+        }
+    }
+
+    /**
+     * Every stored list sense across all languages as [RecoverableSense]s, for lemma recovery.
+     * Rows with an unrecognized language code are skipped.
+     */
+    suspend fun getAllSenses(): List<RecoverableSense> = withContext(Dispatchers.IO) {
+        db.wordListsQueries.selectAllSenses().executeAsList().mapNotNull { row ->
+            Language.fromCodeOrNull(row.lang_code)?.let { language ->
+                RecoverableSense(language = language, lemma = row.lemma, senseId = row.sense_id)
             }
         }
     }

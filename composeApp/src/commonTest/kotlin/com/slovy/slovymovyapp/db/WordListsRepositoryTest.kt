@@ -6,6 +6,7 @@ import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
 import com.slovy.slovymovyapp.data.lists.WordListsRepository
+import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
@@ -91,6 +92,26 @@ open class WordListsRepositoryTest : BaseTest() {
             assertEquals("v2", repo.getVersion(Language.DUTCH))
             assertEquals(listOf(updatedBasic), repo.getLists(Language.DUTCH))
             assertNull(repo.getList(Language.DUTCH, travelList.id), "lists absent from the new bundle must be removed")
+        }
+    }
+
+    @Test
+    fun getAllSenses_returns_every_stored_sense_with_lemma_across_languages() = runBlocking {
+        withRepository { repo ->
+            repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
+            repo.replaceLists(Language.POLISH, "p7", listOf(travelList))
+
+            val all = repo.getAllSenses().toSet()
+            assertEquals(
+                setOf(
+                    RecoverableSense(Language.DUTCH, "sense-3-lemma", "sense-3"),
+                    RecoverableSense(Language.DUTCH, "sense-1-lemma", "sense-1"),
+                    RecoverableSense(Language.DUTCH, "sense-2-lemma", "sense-2"),
+                    RecoverableSense(Language.POLISH, "sense-9-lemma", "sense-9"),
+                ),
+                all,
+                "getAllSenses must carry (language, lemma, senseId) for every stored list sense",
+            )
         }
     }
 

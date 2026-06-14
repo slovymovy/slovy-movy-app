@@ -137,6 +137,11 @@ SELECT list_id, sense_id, lemma FROM word_list_sense
 WHERE lang_code = ?
 ORDER BY position ASC;
 
+-- Every stored list sense across all languages, for lemma recovery. Distinct keeps a
+-- lemma/sense that appears in several lists from being processed more than once.
+selectAllSenses:
+SELECT DISTINCT lang_code, sense_id, lemma FROM word_list_sense;
+
 selectListId:
 SELECT list_id, icon_svg FROM word_list
 WHERE lang_code = ? AND list_id = ?;

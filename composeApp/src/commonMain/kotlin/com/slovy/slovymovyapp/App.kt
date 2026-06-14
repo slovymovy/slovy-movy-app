@@ -39,6 +39,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordListsRepository
+import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.theme.AppTheme
@@ -311,14 +312,31 @@ fun App(
     val wordFetchManager = remember(dictionaryClient) {
         WordFetchManager(dictionaryClient)
     }
-    val favoriteLemmaRecovery = remember(favoritesRepository, dataManager, dictionaryRepository, wordFetchManager) {
-        FavoriteLemmaRecovery(favoritesRepository, dataManager, dictionaryRepository, wordFetchManager)
+    val lemmaRecovery = remember(
+        favoritesRepository,
+        wordListsRepository,
+        dataManager,
+        dictionaryRepository,
+        wordFetchManager,
+    ) {
+        LemmaRecovery(
+            itemsProvider = {
+                // Recover favorites and curated word-list senses in one combined pass;
+                // recover() dedups by (language, lemma).
+                favoritesRepository.getAll()
+                    .map { RecoverableSense(it.language, it.lemma, it.senseId) } +
+                    wordListsRepository.getAllSenses()
+            },
+            dataDbManager = dataManager,
+            dictionaryRepository = dictionaryRepository,
+            wordFetchManager = wordFetchManager,
+        )
     }
-    val favoriteRecoveryController = remember(favoriteLemmaRecovery, platform) {
-        FavoriteRecoveryController(favoriteLemmaRecovery, platform)
+    val lemmaRecoveryController = remember(lemmaRecovery, platform) {
+        LemmaRecoveryController(lemmaRecovery, platform)
     }
-    DisposableEffect(favoriteRecoveryController) {
-        onDispose { favoriteRecoveryController.close() }
+    DisposableEffect(lemmaRecoveryController) {
+        onDispose { lemmaRecoveryController.close() }
     }
     val fsrsConfig = remember { FsrsDefaults.config() }
     val fsrsScheduler = remember(fsrsConfig) {
@@ -421,7 +439,7 @@ fun App(
                     favoritesReviewCoordinator.invalidateAllIntakeCache()
                     dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
-                        favoriteRecoveryController.ensureStarted()
+                        lemmaRecoveryController.ensureStarted()
                     }
                     favoritesViewModel.dropCachedFavoriteDetails()
                 },
@@ -678,10 +696,10 @@ fun App(
                                     onWordListsSync(true)
                                     listsService.sync(dictLang)
                                     onWordListsSync(false)
-                                    val recoveryJob = favoriteRecoveryController.ensureStarted()
+                                    val recoveryJob = lemmaRecoveryController.ensureStarted()
                                     coroutineScope {
                                         val observerJob = launch {
-                                            favoriteRecoveryController.progress.collect { progress ->
+                                            lemmaRecoveryController.progress.collect { progress ->
                                                 if (progress != null) {
                                                     onRecoveryProgress(progress)
                                                 }

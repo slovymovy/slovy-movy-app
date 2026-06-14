@@ -206,7 +206,7 @@ class ListDetailViewModel(
 
     private suspend fun fetchMissingSenses(missing: List<WordListSense>) {
         // Group by lemma so a multi-sense word is one server fetch; cap parallelism to
-        // keep download/CPU pressure low (mirrors FavoriteLemmaRecovery).
+        // keep download/CPU pressure low (mirrors LemmaRecovery).
         val byLemma = missing.groupBy({ it.lemma }, { it.senseId })
         val semaphore = Semaphore(MAX_PARALLEL_SENSE_FETCHES)
         coroutineScope {
@@ -222,7 +222,7 @@ class ListDetailViewModel(
             // The sense is missing from the local SQLite, so a plain getSenses() read would just
             // return a missing reason. Stream the word from the server first (WordFetchManager
             // ingests the processed content into the local DBs); only then can getSenses resolve
-            // it. Mirrors FavoriteLemmaRecovery.fetchLemma.
+            // it. Mirrors LemmaRecovery.fetchLemma.
             val terminal = wordFetchManager.getWord(
                 language = language,
                 lemma = lemma,

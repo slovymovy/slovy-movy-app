@@ -13,13 +13,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class FavoriteRecoveryController private constructor(
-    private val recovery: FavoriteLemmaRecovery,
+class LemmaRecoveryController private constructor(
+    private val recovery: LemmaRecovery,
     private val acquireKeepAlive: () -> ProcessKeepAlive,
     private val scope: CoroutineScope,
 ) {
     constructor(
-        recovery: FavoriteLemmaRecovery,
+        recovery: LemmaRecovery,
         platform: PlatformDbSupport,
     ) : this(
         recovery = recovery,
@@ -28,7 +28,7 @@ class FavoriteRecoveryController private constructor(
     )
 
     internal constructor(
-        recovery: FavoriteLemmaRecovery,
+        recovery: LemmaRecovery,
         acquireKeepAlive: () -> ProcessKeepAlive,
     ) : this(
         recovery = recovery,
@@ -40,18 +40,18 @@ class FavoriteRecoveryController private constructor(
     private var currentJob: Job? = null
     private var isClosed = false
 
-    private val _progress = MutableStateFlow<FavoriteRecoveryProgress?>(null)
-    val progress: StateFlow<FavoriteRecoveryProgress?> = _progress.asStateFlow()
+    private val _progress = MutableStateFlow<LemmaRecoveryProgress?>(null)
+    val progress: StateFlow<LemmaRecoveryProgress?> = _progress.asStateFlow()
 
     /** Starts a recovery run if none is in flight; otherwise returns the existing Job. */
     suspend fun ensureStarted(): Job = mutex.withLock {
-        if (isClosed) throw CancellationException("Favorite recovery controller is closed")
+        if (isClosed) throw CancellationException("Lemma recovery controller is closed")
         currentJob?.takeIf { it.isActive }?.let { return@withLock it }
         val job = scope.launch {
             var handle: ProcessKeepAlive? = null
             try {
                 handle = acquireKeepAlive()
-                recovery.recoverAllInstalledFavorites { progress ->
+                recovery.recoverAllInstalled { progress ->
                     _progress.value = progress
                 }
             } finally {
