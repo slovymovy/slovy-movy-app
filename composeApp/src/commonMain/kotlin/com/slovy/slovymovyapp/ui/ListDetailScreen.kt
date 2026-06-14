@@ -40,6 +40,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.favorites.NewFavorite
@@ -257,6 +259,10 @@ class ListDetailViewModel(
         if (state.isLoading || state.bulkActionInProgress) return
         val toAdd = state.items.filter { !it.isFavorited }
         if (toAdd.isEmpty()) return
+        Analytics.logEvent(
+            AnalyticsEvent.LIST_ADD_ALL,
+            mapOf("lang" to language.code, "list_id" to listId)
+        )
         state = state.copy(bulkActionInProgress = true)
         viewModelScope.launch {
             favoritesRepository.addAll(language, toAdd.map { NewFavorite(senseId = it.senseId, lemma = it.lemma) })
@@ -276,6 +282,10 @@ class ListDetailViewModel(
             favorited
         }
         if (targets.isEmpty()) return
+        Analytics.logEvent(
+            AnalyticsEvent.LIST_REMOVE_ALL,
+            mapOf("lang" to language.code, "list_id" to listId)
+        )
         state = state.copy(bulkActionInProgress = true)
         viewModelScope.launch {
             favoritesRepository.removeAll(targets.map { it.senseId }, language)

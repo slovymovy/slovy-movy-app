@@ -294,6 +294,54 @@ class GitHubClientTest {
     }
 
     @Test
+    fun buildListSuggestionIssueTitle_includesLanguage() {
+        val title = GitHubClient.buildListSuggestionIssueTitle("en")
+        assertEquals("List suggestion: [en]", title)
+    }
+
+    @Test
+    fun buildListSuggestionIssueBody_withEmail() {
+        val body = GitHubClient.buildListSuggestionIssueBody(
+            lang = "en",
+            comment = "A list of cooking verbs",
+            email = "user@example.com"
+        )
+        assertTrue(body.contains("Word list suggestion submitted from application."), "Body should contain header")
+        assertTrue(body.contains("- Language: `en`"), "Body should contain language line")
+        assertTrue(body.contains("A list of cooking verbs"), "Body should contain comment")
+        assertTrue(body.contains("[en]"), "Email should be obfuscated with [en]")
+        assertFalse(body.contains("@example"), "Email @ should be replaced")
+    }
+
+    @Test
+    fun buildListSuggestionIssueBody_withoutEmail() {
+        val body = GitHubClient.buildListSuggestionIssueBody(
+            lang = "ru",
+            comment = "Travel phrases",
+            email = null
+        )
+        assertTrue(body.contains("- Language: `ru`"), "Body should contain language line")
+        assertTrue(body.contains("Travel phrases"), "Body should contain comment")
+        assertFalse(body.contains("Email"), "Body should not contain Email line")
+    }
+
+    @Test
+    @Ignore("prevent repo pollution")
+    fun createListSuggestionIssue_createsAndReturns() {
+        if (!GitHubClient.isAvailable()) return
+
+        val issue = GitHubClient.createListSuggestionIssue(
+            lang = "en",
+            comment = "Integration test list suggestion - please ignore",
+            email = null
+        )
+
+        assertTrue(issue.number > 0, "Issue number should be positive")
+        assertTrue(issue.title.contains("[en]"), "Title should contain language")
+        assertTrue(issue.htmlUrl.contains("github.com"), "URL should be a GitHub URL")
+    }
+
+    @Test
     fun fileOperations_throwsForNonExistentFileOnBranch() {
         val testBranch = "test-${UUID.randomUUID()}"
 

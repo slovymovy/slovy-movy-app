@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -55,7 +56,9 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.serialization.json.JsonPrimitive
@@ -70,6 +73,7 @@ import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -92,13 +96,23 @@ data class SearchUiState(
     val isSuggestionsRefreshing: Boolean = false,
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList(),
-    val curatedLists: List<WordList> = emptyList()
+    val curatedLists: List<WordList> = emptyList(),
+    // Gates the empty-state body so it renders once fully populated instead of flashing
+    // the favorites/"start typing" fallback before curated lists finish loading.
+    val isEmptyStateLoading: Boolean = false,
+    val listSuggestionDialogVisible: Boolean = false,
+    val listSuggestionComment: String = "",
+    val listSuggestionEmail: String = "",
+    val listSuggestionSubmitting: Boolean = false,
+    val listSuggestionError: String? = null,
+    val listSuggestionIssueUrl: String? = null
 )
 
 class SearchViewModel(
     private val repository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
     private val listsService: ListsService,
+    private val dictionaryClient: DictionaryClient,
 ) : ViewModel() {
 
     data class Search(
@@ -116,7 +130,8 @@ class SearchViewModel(
                 results = emptyList(),
                 showNoResults = false,
                 availableLanguages = installed,
-                selectedLanguage = installed.firstOrNull()
+                selectedLanguage = installed.firstOrNull(),
+                isEmptyStateLoading = installed.isNotEmpty()
             )
         }
     )
@@ -190,7 +205,11 @@ class SearchViewModel(
                 // This bypasses setSelectedLanguage (the preference must not be re-saved),
                 // so drop anything the screen-open refresh loaded for the pre-restore
                 // language and reload lists for the restored one.
-                state = state.copy(selectedLanguage = savedLang, curatedLists = emptyList())
+                state = state.copy(
+                    selectedLanguage = savedLang,
+                    curatedLists = emptyList(),
+                    isEmptyStateLoading = true
+                )
                 queryFlow.value = queryFlow.value.copy(language = savedLang)
                 refreshLists()
             }
@@ -242,13 +261,85 @@ class SearchViewModel(
             // Render suggestions for this language first, then lists below them.
             suggestionsLoadedForLanguage.first { it == language }
             if (state.selectedLanguage == language) {
-                state = state.copy(curatedLists = cached)
+                // Lift the loading gate as soon as we have cached lists so the empty
+                // state renders once, fully populated. With an empty cache (first launch)
+                // keep waiting through the server sync so the favorites/"start typing"
+                // fallback does not flash before lists arrive.
+                state = if (cached.isNotEmpty()) {
+                    state.copy(curatedLists = cached, isEmptyStateLoading = false)
+                } else {
+                    state.copy(curatedLists = cached)
+                }
             }
             if (listsService.sync(language)) {
                 val updated = listsService.getLists(language)
                 if (state.selectedLanguage == language) {
                     state = state.copy(curatedLists = updated)
                 }
+            }
+            if (state.selectedLanguage == language) {
+                state = state.copy(isEmptyStateLoading = false)
+            }
+        }
+    }
+
+    fun openListSuggestionDialog() {
+        state = state.copy(
+            listSuggestionDialogVisible = true,
+            listSuggestionComment = "",
+            listSuggestionEmail = "",
+            listSuggestionSubmitting = false,
+            listSuggestionError = null,
+            listSuggestionIssueUrl = null
+        )
+    }
+
+    fun dismissListSuggestionDialog() {
+        if (state.listSuggestionSubmitting) return
+        state = state.copy(
+            listSuggestionDialogVisible = false,
+            listSuggestionComment = "",
+            listSuggestionEmail = "",
+            listSuggestionError = null,
+            listSuggestionIssueUrl = null
+        )
+    }
+
+    fun updateListSuggestionComment(comment: String) {
+        state = state.copy(listSuggestionComment = comment, listSuggestionError = null)
+    }
+
+    fun updateListSuggestionEmail(email: String) {
+        state = state.copy(listSuggestionEmail = email)
+    }
+
+    fun submitListSuggestion() {
+        if (state.listSuggestionSubmitting) return
+        val language = state.selectedLanguage ?: return
+
+        val comment = state.listSuggestionComment.trim()
+        if (comment.isBlank()) return
+
+        state = state.copy(listSuggestionSubmitting = true, listSuggestionError = null)
+        viewModelScope.launch {
+            try {
+                val response = dictionaryClient.sendListSuggestion(
+                    language = language,
+                    comment = comment,
+                    email = state.listSuggestionEmail.trim().takeIf { it.isNotBlank() }
+                )
+                state = state.copy(
+                    listSuggestionSubmitting = false,
+                    listSuggestionError = null,
+                    listSuggestionIssueUrl = response.issueUrl
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = state.copy(
+                    listSuggestionSubmitting = false,
+                    listSuggestionError = NetworkErrorClassifier.userMessage(e)
+                )
             }
         }
     }
@@ -290,7 +381,19 @@ class SearchViewModel(
         }
         val languageChanged = currentLanguage != target
         // Do not call setSelectedLanguage — that would overwrite the saved preference.
-        state = state.copy(availableLanguages = installed, selectedLanguage = target)
+        // On a language switch, drop the previous language's lists and re-gate so the
+        // empty state shows a spinner (not stale wrong-language lists) until the caller's
+        // refreshLists() repopulates. Safe because the only caller follows with refreshLists().
+        state = if (languageChanged) {
+            state.copy(
+                availableLanguages = installed,
+                selectedLanguage = target,
+                curatedLists = emptyList(),
+                isEmptyStateLoading = target != null
+            )
+        } else {
+            state.copy(availableLanguages = installed, selectedLanguage = target)
+        }
         queryFlow.value = queryFlow.value.copy(language = target)
         if (languageChanged) {
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
@@ -324,7 +427,9 @@ class SearchViewModel(
         }
         // Load suggestions and lists for new language
         if (langChanged) {
-            state = state.copy(curatedLists = emptyList())
+            // No per-language lists in "All languages" mode, so don't gate on loading there
+            // (refreshLists/loadSuggestions early-return for a null language).
+            state = state.copy(curatedLists = emptyList(), isEmptyStateLoading = language != null)
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
             refreshLists()
         }
@@ -407,6 +512,11 @@ fun SearchScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         onListClick = onListClick,
+        onSuggestListClick = { viewModel.openListSuggestionDialog() },
+        onListSuggestionCommentChange = { viewModel.updateListSuggestionComment(it) },
+        onListSuggestionEmailChange = { viewModel.updateListSuggestionEmail(it) },
+        onDismissListSuggestion = { viewModel.dismissListSuggestionDialog() },
+        onSubmitListSuggestion = { viewModel.submitListSuggestion() },
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
@@ -426,6 +536,11 @@ fun SearchScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
     onListClick: (WordList) -> Unit = {},
+    onSuggestListClick: () -> Unit = {},
+    onListSuggestionCommentChange: (String) -> Unit = {},
+    onListSuggestionEmailChange: (String) -> Unit = {},
+    onDismissListSuggestion: () -> Unit = {},
+    onSubmitListSuggestion: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -560,8 +675,10 @@ fun SearchScreenContent(
                                     wordSuggestions = state.wordSuggestions,
                                     favoriteLemmas = state.favoriteLemmas,
                                     curatedLists = state.curatedLists,
+                                    isLoading = state.isEmptyStateLoading,
                                     onWordClick = onSuggestionSelected,
-                                    onListClick = onListClick
+                                    onListClick = onListClick,
+                                    onSuggestListClick = onSuggestListClick
                                 )
                             }
                         }
@@ -590,6 +707,25 @@ fun SearchScreenContent(
                 }
             }
         }
+
+    if (state.listSuggestionDialogVisible) {
+        FeedbackDialog(
+            title = stringResource(Res.string.search_suggest_list_dialog_title),
+            commentPlaceholder = stringResource(Res.string.search_suggest_list_placeholder),
+            commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
+            successCopy = null,
+            allowDismissWhileSending = false,
+            comment = state.listSuggestionComment,
+            email = state.listSuggestionEmail,
+            isSending = state.listSuggestionSubmitting,
+            error = state.listSuggestionError,
+            resultUrl = state.listSuggestionIssueUrl,
+            onCommentChange = onListSuggestionCommentChange,
+            onEmailChange = onListSuggestionEmailChange,
+            onDismiss = onDismissListSuggestion,
+            onSend = onSubmitListSuggestion
+        )
+    }
 }
 
 @Composable
@@ -667,9 +803,20 @@ private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
     curatedLists: List<WordList>,
+    isLoading: Boolean,
     onWordClick: (String) -> Unit,
-    onListClick: (WordList) -> Unit
+    onListClick: (WordList) -> Unit,
+    onSuggestListClick: () -> Unit
 ) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     val isDark = LocalIsDarkTheme.current
     Column(
         modifier = Modifier
@@ -745,6 +892,26 @@ private fun EmptySearchState(
                     featured = index == 0,
                     isDark = isDark,
                     onClick = { onListClick(list) }
+                )
+            }
+            TextButton(
+                onClick = onSuggestListClick,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 4.dp),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Flag,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(Res.string.search_suggest_list_button),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         } else if (favoriteLemmas.isNotEmpty()) {

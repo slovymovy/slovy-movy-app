@@ -61,6 +61,19 @@ private data class FeedbackIssueResponse(
 )
 
 @Serializable
+private data class ListSuggestionRequest(
+    val comment: String,
+    val email: String? = null
+)
+
+@Serializable
+private data class ListSuggestionResponse(
+    val issueNumber: Int,
+    val issueTitle: String,
+    val issueUrl: String
+)
+
+@Serializable
 private data class GeneralFeedbackRequest(
     val comment: String,
     val email: String? = null
@@ -313,6 +326,61 @@ fun Application.module() {
                     e
                 )
                 call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback discussion")
+            }
+        }
+
+        post("/list-suggestion/{lang}") {
+            val lang = call.parameters["lang"]?.trim()
+
+            if (lang.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
+                return@post
+            }
+
+            if (!GitHubClient.isAvailable()) {
+                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+                return@post
+            }
+
+            val json = Json { ignoreUnknownKeys = true }
+            val suggestionRequest = try {
+                json.decodeFromString(
+                    ListSuggestionRequest.serializer(),
+                    call.receiveText()
+                )
+            } catch (_: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid request body")
+                return@post
+            }
+
+            val comment = suggestionRequest.comment.trim()
+            if (comment.isBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing comment")
+                return@post
+            }
+
+            try {
+                val createdIssue = GitHubClient.createListSuggestionIssue(
+                    lang = lang,
+                    comment = comment,
+                    email = suggestionRequest.email
+                )
+                val response = ListSuggestionResponse(
+                    issueNumber = createdIssue.number,
+                    issueTitle = createdIssue.title,
+                    issueUrl = createdIssue.htmlUrl
+                )
+                call.respondText(
+                    text = json.encodeToString(ListSuggestionResponse.serializer(), response),
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.Created
+                )
+            } catch (e: Exception) {
+                call.application.environment.log.error(
+                    "Failed to create list suggestion issue for $lang: ${e.message}",
+                    e
+                )
+                call.respond(HttpStatusCode.InternalServerError, "Failed to create list suggestion issue")
             }
         }
 

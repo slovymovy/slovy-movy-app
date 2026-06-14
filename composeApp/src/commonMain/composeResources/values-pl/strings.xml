@@ -25,6 +25,9 @@
     <string name="search_section_recently_saved">Ostatnio zapisane</string>
     <string name="search_section_lists_for_you">Gotowe do nauki</string>
     <string name="search_empty_start_typing">Zacznij pisać, aby wyszukać</string>
+    <string name="search_suggest_list_button">Zaproponuj listę</string>
+    <string name="search_suggest_list_dialog_title">Zaproponuj listę</string>
+    <string name="search_suggest_list_placeholder">Opisz tutaj listę słów, którą chcesz zobaczyć...</string>
     <string name="search_no_dictionary_title">Brak pobranego słownika</string>
     <string name="search_no_dictionary_description">Pobierz słownik, aby zacząć szukać słów</string>
     <string name="search_go_to_settings">Przejdź do ustawień</string>

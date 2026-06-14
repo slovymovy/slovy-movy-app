@@ -773,7 +773,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        SearchViewModel(dictionaryRepository, settingsRepository, listsService)
+                        SearchViewModel(dictionaryRepository, settingsRepository, listsService, dictionaryClient)
                     }
 
                     LaunchedEffect(pendingSearchQuery) {
@@ -821,6 +821,10 @@ fun App(
                         onListClick = { list ->
                             val lang = viewModel.state.selectedLanguage
                             if (lang != null) {
+                                logEvent(
+                                    AnalyticsEvent.LIST_CARD_CLICK,
+                                    mapOf("lang" to lang.code, "list_id" to list.id)
+                                )
                                 navController.navigate(AppDestination.ListDetail(lang.code, list.id))
                             }
                         },

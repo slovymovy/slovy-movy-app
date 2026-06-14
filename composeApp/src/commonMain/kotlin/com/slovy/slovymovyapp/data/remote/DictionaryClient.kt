@@ -586,6 +586,48 @@ class DictionaryClient(
         }
     }
 
+    suspend fun sendListSuggestion(
+        language: Language,
+        comment: String,
+        email: String? = null
+    ): FeedbackResponse {
+        val url = "$serverBaseUrl/list-suggestion/${language.code}"
+
+        try {
+            val response = httpClient.post(url) {
+                contentType(ContentType.Application.Json)
+                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
+                setBody(
+                    json.encodeToString(
+                        FeedbackRequest.serializer(),
+                        FeedbackRequest(comment.trim(), trimmedEmail)
+                    )
+                )
+            }
+
+            if (!response.status.isSuccess()) {
+                val body = response.bodyAsText()
+                throw DictionaryClientException.ServerException(response.status.value, body)
+            }
+
+            val body = response.bodyAsText()
+            return json.decodeFromString(FeedbackResponse.serializer(), body)
+        } catch (e: CancellationException) {
+            AppLogger.warn(TAG, "sendListSuggestion cancelled for ${language.code}", e)
+            throw e
+        } catch (e: Exception) {
+            if (e is DictionaryClientException) {
+                AppLogger.error(TAG, "sendListSuggestion failed for ${language.code}", e)
+                throw e
+            }
+            AppLogger.error(TAG, "sendListSuggestion failed for ${language.code}", e)
+            throw DictionaryClientException.NetworkException(
+                NetworkErrorClassifier.userMessage(e),
+                e
+            )
+        }
+    }
+
     suspend fun sendGeneralFeedback(
         comment: String,
         email: String? = null
