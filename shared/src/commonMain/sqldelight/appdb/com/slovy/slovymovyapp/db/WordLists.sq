@@ -37,6 +37,11 @@ CREATE TABLE word_list_sense (
   list_id TEXT NOT NULL,
   position INTEGER NOT NULL,
   sense_id TEXT NOT NULL,
+  -- Lemma the sense belongs to; carried so the client can fetch a word that is missing
+  -- from the locally downloaded dictionary (all word fetch paths are keyed by lemma).
+  -- DEFAULT '' matches migration 8.sqm (SQLite requires a default to add a NOT NULL column);
+  -- every insert supplies the lemma, so the default is never actually used.
+  lemma TEXT NOT NULL DEFAULT '',
   PRIMARY KEY (lang_code, list_id, position)
 );
 
@@ -108,8 +113,8 @@ INSERT INTO word_list_label(lang_code, list_id, locale, position, label)
 VALUES (?, ?, ?, ?, ?);
 
 insertSense:
-INSERT INTO word_list_sense(lang_code, list_id, position, sense_id)
-VALUES (?, ?, ?, ?);
+INSERT INTO word_list_sense(lang_code, list_id, position, sense_id, lemma)
+VALUES (?, ?, ?, ?, ?);
 
 -- Read queries.
 
@@ -128,7 +133,7 @@ WHERE lang_code = ?
 ORDER BY position ASC;
 
 selectSensesByLang:
-SELECT list_id, sense_id FROM word_list_sense
+SELECT list_id, sense_id, lemma FROM word_list_sense
 WHERE lang_code = ?
 ORDER BY position ASC;
 
@@ -146,6 +151,6 @@ WHERE lang_code = ? AND list_id = ?
 ORDER BY position ASC;
 
 selectSensesByList:
-SELECT sense_id FROM word_list_sense
+SELECT sense_id, lemma FROM word_list_sense
 WHERE lang_code = ? AND list_id = ?
 ORDER BY position ASC;

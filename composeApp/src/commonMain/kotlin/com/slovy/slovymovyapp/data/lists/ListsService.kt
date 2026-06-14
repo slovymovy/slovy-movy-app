@@ -66,7 +66,7 @@ class ListsService(
         title = title,
         subtitle = subtitle,
         labels = labels,
-        senseIds = senseIds,
+        senses = senses.map { WordListSense(it.senseId, it.lemma) },
         iconSvg = iconSvg,
     )
 

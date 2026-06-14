@@ -1,0 +1,4 @@
+-- Carry the lemma per curated list sense so the client can fetch words missing from the
+-- locally downloaded dictionary (all word fetch paths are keyed by lemma). Existing rows are
+-- replaced on the next version-mismatch list sync, so the empty default is never user-visible.
+ALTER TABLE word_list_sense ADD COLUMN lemma TEXT NOT NULL DEFAULT '';

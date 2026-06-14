@@ -36,6 +36,17 @@ internal object ListsFolderDecoder {
         iconsByName: Map<String, String>,
     ): ListContent {
         val raw = json.decodeFromString(RawListFile.serializer(), text)
+        // Prefer the new {senseId, lemma} shape; fall back to the legacy sense-ids-only shape
+        // for files not yet re-exported. Legacy senses get an empty lemma, so clients cannot
+        // fetch them when they are missing from the local dictionary until the file is updated.
+        val senses = if (raw.senses.isNotEmpty()) {
+            raw.senses
+        } else {
+            if (raw.senseIds.isNotEmpty()) {
+                log.warn("List '{}' in {} uses the legacy senseIds shape; re-export with lemmas", id, folder)
+            }
+            raw.senseIds.map { ListSenseEntry(senseId = it, lemma = "") }
+        }
         val iconSvg = iconsByName["$id.svg"] ?: raw.icon?.let { iconsByName[it] }
         if (raw.icon != null && iconSvg == null) {
             log.warn("List '{}' in {} references icon '{}' but no matching file was found", id, folder, raw.icon)
@@ -52,7 +63,7 @@ internal object ListsFolderDecoder {
             subtitle = raw.subtitle,
             labels = raw.labels,
             iconSvg = iconSvg,
-            senseIds = raw.senseIds,
+            senses = senses,
             order = raw.order,
         )
     }

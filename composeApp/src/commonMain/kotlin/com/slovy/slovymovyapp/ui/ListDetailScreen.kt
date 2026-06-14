@@ -47,6 +47,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.favorites.NewFavorite
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
+import com.slovy.slovymovyapp.data.lists.WordListSense
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.LearnerLevel
@@ -63,7 +64,10 @@ import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
@@ -147,25 +151,39 @@ class ListDetailViewModel(
                 return@launch
             }
             list = resolvedList
-            val senses = repository.getListSenses(language, resolvedList.senseIds)
+            val resolved = repository.getListSenses(language, resolvedList.senseIds)
+                .associateBy { it.senseId }
             val allFavorites = favoritesRepository.getAll().filter { it.language == language }
             val favoritedIds = allFavorites.map { it.senseId }.toSet()
             val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
-            val items = senses.map { sense ->
-                // Seed from cache so already-loaded senses render their translation
-                // immediately, mirroring FavoritesViewModel.buildSenseItem.
-                val cached = repository.getCachedSense(sense.senseId)
-                ListWordItem(
-                    senseId = sense.senseId,
-                    lemma = sense.lemma,
-                    definition = sense.definition,
-                    learnerLevel = sense.learnerLevel,
-                    frequency = sense.frequency,
-                    sense = cached?.sense,
-                    relatedWords = cached?.relatedWords ?: emptyMap(),
-                    pos = cached?.pos,
-                    isFavorited = sense.senseId in favoritedIds,
-                )
+            // Build an item for every list sense in server order. Senses present in the
+            // local dictionary render immediately; senses missing from it become loading
+            // placeholders carrying the bundle lemma so they can be fetched + favorited.
+            val items = resolvedList.senses.map { listSense ->
+                val sense = resolved[listSense.senseId]
+                if (sense != null) {
+                    // Seed from cache so already-loaded senses render their translation
+                    // immediately, mirroring FavoritesViewModel.buildSenseItem.
+                    val cached = repository.getCachedSense(sense.senseId)
+                    ListWordItem(
+                        senseId = sense.senseId,
+                        lemma = sense.lemma,
+                        definition = sense.definition,
+                        learnerLevel = sense.learnerLevel,
+                        frequency = sense.frequency,
+                        sense = cached?.sense,
+                        relatedWords = cached?.relatedWords ?: emptyMap(),
+                        pos = cached?.pos,
+                        isFavorited = sense.senseId in favoritedIds,
+                    )
+                } else {
+                    ListWordItem(
+                        senseId = listSense.senseId,
+                        lemma = listSense.lemma,
+                        isFavorited = listSense.senseId in favoritedIds,
+                        loading = true,
+                    )
+                }
             }
             state = ListDetailUiState(
                 items = items,
@@ -175,6 +193,57 @@ class ListDetailViewModel(
             // Prefetch the first screenful so translations show without expanding,
             // like the favorites list. The rest is prefetched on scroll.
             prefetcher.prefetchHead(items)
+            // Fetch the senses missing from the local dictionary from the server in the
+            // background; resolved items are already on screen, so this never blocks the UI.
+            val missing = resolvedList.senses.filter { it.senseId !in resolved }
+            if (missing.isNotEmpty()) fetchMissingSenses(missing)
+        }
+    }
+
+    private suspend fun fetchMissingSenses(missing: List<WordListSense>) {
+        // Group by lemma so a multi-sense word is one server fetch; cap parallelism to
+        // keep download/CPU pressure low (mirrors FavoriteLemmaRecovery).
+        val byLemma = missing.groupBy({ it.lemma }, { it.senseId })
+        val semaphore = Semaphore(MAX_PARALLEL_SENSE_FETCHES)
+        coroutineScope {
+            byLemma.forEach { (lemma, senseIds) ->
+                launch { semaphore.withPermit { loadMissingSenses(lemma, senseIds.toSet()) } }
+            }
+        }
+    }
+
+    private suspend fun loadMissingSenses(lemma: String, senseIds: Set<String>) {
+        try {
+            val results = repository.getSenses(language, lemma, senseIds)
+            senseIds.forEach { senseId ->
+                val result = results[senseId]
+                val senseWithPos = result?.sense
+                val error = if (senseWithPos == null) {
+                    result?.missingReason?.toFavoriteSenseLoadError(language)
+                        ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
+                } else null
+                updateItem(senseId) {
+                    it.copy(
+                        sense = senseWithPos?.sense,
+                        relatedWords = senseWithPos?.relatedWords ?: it.relatedWords,
+                        pos = senseWithPos?.pos,
+                        loading = false,
+                        error = error,
+                    )
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            senseIds.forEach { senseId ->
+                updateItem(senseId) {
+                    it.copy(
+                        loading = false,
+                        error = e.message?.let(UiText::Plain)
+                            ?: UiText.Resource(Res.string.favorites_error_meaning_not_found),
+                    )
+                }
+            }
         }
     }
 
@@ -304,6 +373,10 @@ class ListDetailViewModel(
             items = state.items.map { it.copy(isFavorited = it.senseId in favoritedIds) },
             favoriteLemmas = favoriteLemmas,
         )
+    }
+
+    private companion object {
+        const val MAX_PARALLEL_SENSE_FETCHES = 4
     }
 }
 
@@ -719,7 +792,7 @@ private fun previewWordList() = WordList(
     title = mapOf("en" to "500 first Dutch words"),
     subtitle = mapOf("en" to "This is where your journey begins"),
     labels = mapOf("en" to listOf("A1", "Basic")),
-    senseIds = List(3) { it.toString() },
+    senses = List(3) { WordListSense(senseId = it.toString(), lemma = "woord$it") },
     iconSvg = null,
 )
 
