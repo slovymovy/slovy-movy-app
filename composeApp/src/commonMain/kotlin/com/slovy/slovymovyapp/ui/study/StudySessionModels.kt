@@ -118,9 +118,11 @@ data class StudyCardBackUiState(
     val isLemmaHeadline: Boolean = false,
     val secondary: String? = null,
     val definition: String? = null,
+    val definitionTranslation: String? = null,
     val examples: List<StudyExampleUiState> = emptyList(),
     val synonyms: List<StudySynonymUiState> = emptyList(),
     val cloze: StudyClozeTextUiState? = null,
+    val clozeTranslation: StudyClozeTextUiState? = null,
     val audioText: String? = headline,
 )
 

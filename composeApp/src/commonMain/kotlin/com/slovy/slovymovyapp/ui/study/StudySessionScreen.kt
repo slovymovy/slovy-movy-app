@@ -1511,13 +1511,17 @@ private fun StudyCardBackContent(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
         back.cloze?.let { cloze ->
-            StudyClozeText(
-                cloze = cloze,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
-            )
-            Spacer(Modifier.height(AppSpacing.xs))
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                StudyClozeText(
+                    cloze = cloze,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                )
+                back.clozeTranslation?.let { translation ->
+                    StudyClozeTranslationText(cloze = translation)
+                }
+            }
         }
 
         val headlineIsLemma = back.isLemmaHeadline
@@ -1564,13 +1568,22 @@ private fun StudyCardBackContent(
         }
 
         back.definition?.let { definition ->
-            StudyTaggedText(
-                text = definition,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                StudyTaggedText(
+                    text = definition,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                back.definitionTranslation?.let { translation ->
+                    StudyTaggedText(
+                        text = translation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
 
         back.examples.forEach { example ->
@@ -1884,6 +1897,35 @@ internal fun StudyClozeTextUiState.toDisplayText(): StudyClozeDisplayText {
     return StudyClozeDisplayText(
         text = output.toString(),
         answerRanges = outputRanges,
+    )
+}
+
+@Composable
+private fun StudyClozeTranslationText(
+    cloze: StudyClozeTextUiState,
+    modifier: Modifier = Modifier,
+) {
+    val highlightColor = MaterialTheme.colorScheme.primary
+    val displayText = remember(cloze) { cloze.toDisplayText() }
+    val text = buildAnnotatedString {
+        var cursor = 0
+        displayText.answerRanges.forEach { range ->
+            append(displayText.text.substring(cursor, range.first))
+            pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.Medium))
+            append(displayText.text.substring(range.first, range.last + 1))
+            pop()
+            cursor = range.last + 1
+        }
+        append(displayText.text.substring(cursor))
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            fontStyle = FontStyle.Italic,
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
     )
 }
 
@@ -2319,13 +2361,14 @@ private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
 private fun productionCard() = StudyCardUiState.Production(
     id = "production",
     chipLabel = UiText.Plain("EN -> NL"),
-    promptLabel = UiText.Resource(Res.string.study_prompt_translate_to, listOf("Dutch")),
+    promptLabel = UiText.Resource(Res.string.study_prompt_translate_to, listOf("Nederlands")),
     promptText = "cosy, sociable",
     firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
-        definition = "a uniquely Dutch flavour of warm conviviality",
+        definition = "een typisch Nederlandse vorm van warme gezelligheid",
+        definitionTranslation = "a uniquely Dutch flavour of warm conviviality",
         examples = listOf(
             StudyExampleUiState(
                 text = "Bij Marja is het altijd <w>gezellig</w>.",
@@ -2351,10 +2394,16 @@ private fun clozeCard() = StudyCardUiState.Cloze(
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
-        definition = "a feeling of warmth and conviviality from being together",
+        definition = "een gevoel van warmte en gezelligheid van het samenzijn",
+        definitionTranslation = "a feeling of warmth and conviviality from being together",
         cloze = StudyClozeTextUiState(
             text = "Het was zo gezellig bij jullie thuis.",
             answerRanges = listOf(11..18),
+            filled = true,
+        ),
+        clozeTranslation = StudyClozeTextUiState(
+            text = "It was so lovely at your place.",
+            answerRanges = listOf(10..15),
             filled = true,
         ),
         synonyms = listOf(
@@ -2380,7 +2429,8 @@ private fun translationClozeCard() = StudyCardUiState.Cloze(
         headline = "gezellig",
         isLemmaHeadline = true,
         secondary = "cosy, sociable",
-        definition = "a feeling of warmth and conviviality from being together",
+        definition = "een gevoel van warmte en gezelligheid van het samenzijn",
+        definitionTranslation = "a feeling of warmth and conviviality from being together",
         examples = listOf(
             StudyExampleUiState(
                 text = "Het was zo gezellig bij jullie thuis.",

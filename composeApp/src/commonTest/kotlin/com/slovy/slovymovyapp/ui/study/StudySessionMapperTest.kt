@@ -41,6 +41,7 @@ class StudySessionMapperTest {
         assertEquals(StudyRecognitionMode.BILINGUAL, mapped.mode)
         assertEquals("cosy, sociable", mapped.back.headline)
         assertEquals("a feeling of warmth", mapped.back.definition)
+        assertEquals("een gevoel van warmte", mapped.back.definitionTranslation)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
     }
@@ -115,7 +116,7 @@ class StudySessionMapperTest {
         mapped.senses.forEach { senseUi ->
             assertEquals("gezellig", senseUi.back.headline)
         }
-        assertEquals("a feeling of warmth", mapped.senses.first().back.definition)
+        assertEquals("een gevoel van warmte", mapped.senses.first().back.definition)
         assertEquals("convivial gathering", mapped.senses.last().back.definition)
     }
 
@@ -130,7 +131,8 @@ class StudySessionMapperTest {
         assertEquals("gezellig", mapped.promptAudioText)
         assertEquals("gezellig", mapped.back.headline)
         assertEquals("cosy, sociable", mapped.back.secondary)
-        assertEquals("a feeling of warmth", mapped.back.definition)
+        assertEquals("een gevoel van warmte", mapped.back.definition)
+        assertEquals("a feeling of warmth", mapped.back.definitionTranslation)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
     }
@@ -182,7 +184,7 @@ class StudySessionMapperTest {
         val activeSenseBack = mapped.senses.single { it.id == studiedSenseId }.back
         assertEquals("gezellig", activeSenseBack.headline)
         assertEquals("cosy, sociable", activeSenseBack.secondary)
-        assertEquals("a feeling of warmth", activeSenseBack.definition)
+        assertEquals("een gevoel van warmte", activeSenseBack.definition)
         val otherBack = mapped.senses.single { it.id == otherSenseId }.back
         assertEquals("gezellig", otherBack.headline)
         assertEquals("sociable evening", otherBack.secondary)
@@ -238,6 +240,11 @@ class StudySessionMapperTest {
         assertNull(mapped.translationHint)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
+        assertEquals("een gevoel van warmte", mapped.back.definition)
+        assertEquals("a feeling of warmth", mapped.back.definitionTranslation)
+        val clozeTranslation = assertNotNull(mapped.back.clozeTranslation)
+        assertEquals("It was so cosy.", clozeTranslation.text)
+        assertEquals(true, clozeTranslation.filled)
     }
 
     @Test
@@ -385,7 +392,7 @@ class StudySessionMapperTest {
                     senses = listOf(
                         LanguageCardResponseSense(
                             senseId = PrimarySenseId,
-                            senseDefinition = "a feeling of warmth",
+                            senseDefinition = "een gevoel van warmte",
                             learnerLevel = LearnerLevel.A2,
                             frequency = SenseFrequency.HIGH,
                             semanticGroupId = "warmth",

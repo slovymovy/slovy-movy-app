@@ -78,6 +78,7 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                 back = StudyCardBackUiState(
                     headline = answer,
                     definition = definition,
+                    definitionTranslation = sense.senseDefinition.takeIf { it.isNotBlank() },
                     examples = sense.studyExamples(target),
                     synonyms = sense.toStudySynonyms(favoriteLemmas),
                     audioText = null,
@@ -125,7 +126,7 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                 chipLabel = UiText.Plain("${target.studyCode()} -> ${sourceLanguage.studyCode()}"),
                 promptLabel = UiText.Resource(
                     Res.string.study_prompt_translate_to,
-                    listOf(sourceLanguage.englishName),
+                    listOf(sourceLanguage.selfName),
                 ),
                 promptText = cue,
                 firstLetterHint = lemma.firstLetterHint(),
@@ -143,11 +144,15 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
         CardKind.CLOZE_SOURCE -> {
             val target = targetLanguage ?: return null
             val cloze = example?.toClozeText() ?: return null
+            val clozeTranslation = sense.examples[example.exampleIndex.toInt()]
+                .targetLangTranslations[target]
+                ?.let { toTranslationHintCloze(it)?.copy(filled = true) }
             val activeBack = sourceClozeBack(
                 lemma = lemma,
                 sense = sense,
                 targetLanguage = target,
                 cloze = cloze.copy(filled = true),
+                clozeTranslation = clozeTranslation,
                 favoriteLemmas = favoriteLemmas,
             )
             val senses = studiedSenses.toSourceSenseUiStates(
@@ -266,6 +271,7 @@ private fun sourceBack(
         isLemmaHeadline = true,
         secondary = targetLanguage?.let { sense.translationWords(it) },
         definition = sense.senseDefinition,
+        definitionTranslation = targetLanguage?.let { sense.translationDef(it) },
         cloze = cloze,
         audioText = lemma,
         examples = sense.studyExamples(targetLanguage),
@@ -278,6 +284,7 @@ private fun sourceClozeBack(
     targetLanguage: Language?,
     favoriteLemmas: Set<String>,
     cloze: StudyClozeTextUiState? = null,
+    clozeTranslation: StudyClozeTextUiState? = null,
     examples: List<StudyExampleUiState> = emptyList(),
 ): StudyCardBackUiState =
     StudyCardBackUiState(
@@ -285,9 +292,11 @@ private fun sourceClozeBack(
         isLemmaHeadline = true,
         secondary = targetLanguage?.let { sense.translationWords(it) },
         definition = sense.senseDefinition,
+        definitionTranslation = targetLanguage?.let { sense.translationDef(it) },
         examples = examples,
         synonyms = sense.toStudySynonyms(favoriteLemmas),
         cloze = cloze,
+        clozeTranslation = clozeTranslation,
         audioText = lemma,
     )
 
@@ -321,6 +330,7 @@ private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
             back = StudyCardBackUiState(
                 headline = answer,
                 definition = definition,
+                definitionTranslation = sense.senseDefinition.takeIf { it.isNotBlank() },
                 examples = sense.studyExamples(targetLanguage),
                 synonyms = sense.toStudySynonyms(favoriteLemmas),
                 audioText = null,
