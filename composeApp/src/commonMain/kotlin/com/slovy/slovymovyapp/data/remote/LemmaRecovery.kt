@@ -27,6 +27,8 @@ class LemmaRecovery internal constructor(
     suspend (Language, Map<String, Set<String>>, List<Language>) -> Set<String>,
     private val translationTargetsProvider: suspend (Language) -> List<Language>,
     private val fetchLemma: suspend (Language, String, List<Language>) -> Unit,
+    private val resolveSenses:
+    suspend (Language, String, Set<String>) -> Map<String, DictionaryRepository.SenseLookupResult>,
 ) {
     constructor(
         itemsProvider: suspend () -> List<RecoverableSense>,
@@ -58,6 +60,14 @@ class LemmaRecovery internal constructor(
                 }
                 throw err
             }
+        },
+        resolveSenses = { language, lemma, senseIds ->
+            dictionaryRepository.getSenses(
+                language = language,
+                lemma = lemma,
+                senseIds = senseIds,
+                translationTargets = dictionaryRepository.defaultTranslationTargets(language),
+            )
         },
     )
 
@@ -179,6 +189,62 @@ class LemmaRecovery internal constructor(
         }
     }
 
+    /**
+     * Fetches and resolves a specific set of [senses] — e.g. a curated list's senses that are
+     * missing from the downloaded dictionary — invoking [onResolved] for each as soon as it is
+     * ready. Groups by (language, lemma) so a multi-sense word is a single fetch, caps parallelism,
+     * and reuses the shared fetch path (server stream + ingest, retry/backoff, cancellation).
+     * Unlike [recoverAllInstalled] there is no "already present" gating: every requested sense is
+     * fetched and resolved. Senses with a blank lemma are skipped (they cannot be fetched). Per-lemma
+     * failures are reported through [onResolved] rather than thrown, so one broken word never aborts
+     * the rest; only cancellation propagates.
+     */
+    suspend fun recoverSenses(
+        senses: List<RecoverableSense>,
+        onResolved: (RecoveredSenseResult) -> Unit,
+    ): Unit = coroutineScope {
+        val groups = senses
+            .filter { it.lemma.isNotBlank() }
+            .groupBy { LemmaGroupKey(it.language, it.lemma.trim().lowercase()) }
+        val semaphore = Semaphore(MAX_PARALLEL_RECOVERY_GROUPS)
+        groups.values.map { groupItems ->
+            async {
+                semaphore.withPermit {
+                    val language = groupItems.first().language
+                    val lemma = groupItems.first().lemma.trim()
+                    val senseIds = groupItems.map { it.senseId }.toSet()
+                    try {
+                        fetchLemmaIntoLocalDb(language, lemma)
+                        val results = resolveSenses(language, lemma, senseIds)
+                        senseIds.forEach { senseId ->
+                            onResolved(RecoveredSenseResult(senseId, results[senseId], error = null))
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to recover senses for '$lemma' (${language.code})", e)
+                        senseIds.forEach { senseId ->
+                            onResolved(RecoveredSenseResult(senseId, result = null, error = e))
+                        }
+                    }
+                }
+            }
+        }.awaitAll()
+    }
+
+    /**
+     * Fetches [lemma] (with translations) into the local DBs through the shared recovery fetch
+     * path — same [WordFetchManager] streaming, retry/backoff and cancellation handling used by the
+     * background recovery — skipping the "is it already present" gating. Throws on a non-retryable
+     * failure or cancellation.
+     */
+    private suspend fun fetchLemmaIntoLocalDb(language: Language, lemma: String) {
+        val translationTargets = translationTargetsProvider(language)
+            .filter { it != language }
+            .distinctBy { it.code }
+        fetchLemmaWithRetry(language, lemma, translationTargets)
+    }
+
     private suspend fun recoverLemmaGroup(language: Language, items: List<RecoverableSense>) {
         if (items.isEmpty()) return
 
@@ -267,6 +333,18 @@ data class LemmaRecoveryProgress(
     val completed: Int,
     val total: Int,
     val failed: Int,
+)
+
+/**
+ * Outcome of recovering a single sense via [LemmaRecovery.recoverSenses]: either a dictionary
+ * [result] (which itself may carry a missing reason when the word was fetched but the sense was
+ * not found) or, when the whole lemma fetch failed, the [error] that caused it. Exactly one of
+ * the two is non-null.
+ */
+data class RecoveredSenseResult(
+    val senseId: String,
+    val result: DictionaryRepository.SenseLookupResult?,
+    val error: Throwable?,
 )
 
 private data class LemmaGroupKey(

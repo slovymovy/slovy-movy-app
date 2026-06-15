@@ -43,7 +43,7 @@ class ListsService(
             repository.replaceLists(
                 language = language,
                 version = response.version,
-                lists = ordered.map { it.toWordList() },
+                lists = ordered.map { it.toWordList(language) },
             )
             true
         } catch (e: CancellationException) {
@@ -61,12 +61,12 @@ class ListsService(
      */
     suspend fun clearCache(): Long = syncMutex.withLock { repository.clearAll() }
 
-    private fun RemoteList.toWordList() = WordList(
+    private fun RemoteList.toWordList(language: Language) = WordList(
         id = id,
         title = title,
         subtitle = subtitle,
         labels = labels,
-        senses = senses.map { WordListSense(it.senseId, it.lemma) },
+        senses = senses.map { WordListSense(it.senseId, it.lemma, language) },
         iconSvg = iconSvg,
     )
 

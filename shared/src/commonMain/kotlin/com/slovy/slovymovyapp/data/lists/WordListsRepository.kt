@@ -1,7 +1,6 @@
 package com.slovy.slovymovyapp.data.lists
 
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -29,7 +28,7 @@ class WordListsRepository(private val db: AppDatabase) {
                     title = texts[row.list_id].orEmpty().mapNotNull { r -> r.title?.let { r.locale to it } }.toMap(),
                     subtitle = texts[row.list_id].orEmpty().mapNotNull { r -> r.subtitle?.let { r.locale to it } }.toMap(),
                     labels = labels[row.list_id].orEmpty().groupBy({ it.locale }, { it.label }),
-                    senses = senses[row.list_id].orEmpty().map { WordListSense(it.sense_id, it.lemma) },
+                    senses = senses[row.list_id].orEmpty().map { WordListSense(it.sense_id, it.lemma, language) },
                     iconSvg = row.icon_svg,
                 )
             }
@@ -37,13 +36,13 @@ class WordListsRepository(private val db: AppDatabase) {
     }
 
     /**
-     * Every stored list sense across all languages as [RecoverableSense]s, for lemma recovery.
-     * Rows with an unrecognized language code are skipped.
+     * Every stored list sense across all languages, for lemma recovery. Rows with an unrecognized
+     * language code are skipped.
      */
-    suspend fun getAllSenses(): List<RecoverableSense> = withContext(Dispatchers.IO) {
+    suspend fun getAllSenses(): List<WordListSense> = withContext(Dispatchers.IO) {
         db.wordListsQueries.selectAllSenses().executeAsList().mapNotNull { row ->
             Language.fromCodeOrNull(row.lang_code)?.let { language ->
-                RecoverableSense(language = language, lemma = row.lemma, senseId = row.sense_id)
+                WordListSense(senseId = row.sense_id, lemma = row.lemma, language = language)
             }
         }
     }
@@ -61,7 +60,7 @@ class WordListsRepository(private val db: AppDatabase) {
                 labels = queries.selectLabelsByList(language.code, listId).executeAsList()
                     .groupBy({ it.locale }, { it.label }),
                 senses = queries.selectSensesByList(language.code, listId).executeAsList()
-                    .map { WordListSense(it.sense_id, it.lemma) },
+                    .map { WordListSense(it.sense_id, it.lemma, language) },
                 iconSvg = listRow.icon_svg,
             )
         }

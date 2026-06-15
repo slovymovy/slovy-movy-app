@@ -1,10 +1,18 @@
 package com.slovy.slovymovyapp.data.lists
 
-/** A curated sense paired with the lemma it belongs to. */
+import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.recovery.RecoverableSense
+
+/**
+ * A curated sense paired with the lemma it belongs to. Implements [RecoverableSense] so a sense
+ * missing from the local dictionary can be fed straight to lemma recovery; [language] matches the
+ * owning list's language.
+ */
 data class WordListSense(
-    val senseId: String,
-    val lemma: String,
-)
+    override val senseId: String,
+    override val lemma: String,
+    override val language: Language,
+) : RecoverableSense
 
 /**
  * A curated word list as stored in the app DB. [title], [subtitle], and [labels] are

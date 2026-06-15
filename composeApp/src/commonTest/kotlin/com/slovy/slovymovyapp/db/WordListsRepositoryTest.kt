@@ -6,7 +6,6 @@ import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
 import com.slovy.slovymovyapp.data.lists.WordListsRepository
-import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import kotlinx.coroutines.runBlocking
@@ -18,14 +17,17 @@ import kotlin.uuid.Uuid
 
 open class WordListsRepositoryTest : BaseTest() {
 
-    private fun senses(vararg ids: String) = ids.map { WordListSense(senseId = it, lemma = "$it-lemma") }
+    // A WordListSense carries the language of the list it belongs to, so fixtures are built per
+    // language to round-trip correctly against the language they are stored under.
+    private fun senses(language: Language, vararg ids: String) =
+        ids.map { WordListSense(senseId = it, lemma = "$it-lemma", language = language) }
 
     private val basicList = WordList(
         id = "nl_a1_basic",
         title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
         subtitle = mapOf("en" to "This is where your journey begins"),
         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1")),
-        senses = senses("sense-3", "sense-1", "sense-2"),
+        senses = senses(Language.DUTCH, "sense-3", "sense-1", "sense-2"),
         iconSvg = null,
     )
 
@@ -34,9 +36,12 @@ open class WordListsRepositoryTest : BaseTest() {
         title = mapOf("en" to "Travel words"),
         subtitle = emptyMap(),
         labels = emptyMap(),
-        senses = senses("sense-9"),
+        senses = senses(Language.DUTCH, "sense-9"),
         iconSvg = null,
     )
+
+    // Same travel list authored under Polish, for cross-language isolation tests.
+    private val travelListPl = travelList.copy(senses = senses(Language.POLISH, "sense-9"))
 
     private fun openApp(): AppHandle {
         val platform = testPlatformDbSupport()
@@ -85,7 +90,7 @@ open class WordListsRepositoryTest : BaseTest() {
 
             val updatedBasic = basicList.copy(
                 title = basicList.title + ("ru" to "500 первых слов"),
-                senses = senses("sense-1"),
+                senses = senses(Language.DUTCH, "sense-1"),
             )
             repo.replaceLists(Language.DUTCH, "v2", listOf(updatedBasic))
 
@@ -99,15 +104,15 @@ open class WordListsRepositoryTest : BaseTest() {
     fun getAllSenses_returns_every_stored_sense_with_lemma_across_languages() = runBlocking {
         withRepository { repo ->
             repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
-            repo.replaceLists(Language.POLISH, "p7", listOf(travelList))
+            repo.replaceLists(Language.POLISH, "p7", listOf(travelListPl))
 
             val all = repo.getAllSenses().toSet()
             assertEquals(
                 setOf(
-                    RecoverableSense(Language.DUTCH, "sense-3-lemma", "sense-3"),
-                    RecoverableSense(Language.DUTCH, "sense-1-lemma", "sense-1"),
-                    RecoverableSense(Language.DUTCH, "sense-2-lemma", "sense-2"),
-                    RecoverableSense(Language.POLISH, "sense-9-lemma", "sense-9"),
+                    WordListSense("sense-3", "sense-3-lemma", Language.DUTCH),
+                    WordListSense("sense-1", "sense-1-lemma", Language.DUTCH),
+                    WordListSense("sense-2", "sense-2-lemma", Language.DUTCH),
+                    WordListSense("sense-9", "sense-9-lemma", Language.POLISH),
                 ),
                 all,
                 "getAllSenses must carry (language, lemma, senseId) for every stored list sense",
@@ -119,17 +124,17 @@ open class WordListsRepositoryTest : BaseTest() {
     fun languages_are_isolated() = runBlocking {
         withRepository { repo ->
             repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
-            repo.replaceLists(Language.POLISH, "p7", listOf(travelList))
+            repo.replaceLists(Language.POLISH, "p7", listOf(travelListPl))
 
             assertEquals(listOf(basicList), repo.getLists(Language.DUTCH))
-            assertEquals(listOf(travelList), repo.getLists(Language.POLISH))
+            assertEquals(listOf(travelListPl), repo.getLists(Language.POLISH))
             assertEquals("v1", repo.getVersion(Language.DUTCH))
             assertEquals("p7", repo.getVersion(Language.POLISH))
             assertNull(repo.getList(Language.POLISH, basicList.id))
 
             repo.replaceLists(Language.DUTCH, "v2", emptyList())
             assertEquals(emptyList(), repo.getLists(Language.DUTCH))
-            assertEquals(listOf(travelList), repo.getLists(Language.POLISH), "other languages must stay untouched")
+            assertEquals(listOf(travelListPl), repo.getLists(Language.POLISH), "other languages must stay untouched")
         }
     }
 
@@ -153,7 +158,9 @@ open class WordListsRepositoryTest : BaseTest() {
     fun sense_order_is_preserved() = runBlocking {
         withRepository { repo ->
             val manySenses = basicList.copy(
-                senses = (0 until 500).map { WordListSense(senseId = "sense-$it", lemma = "lemma-$it") },
+                senses = (0 until 500).map {
+                    WordListSense(senseId = "sense-$it", lemma = "lemma-$it", language = Language.DUTCH)
+                },
             )
             repo.replaceLists(Language.DUTCH, "v1", listOf(manySenses))
 
@@ -167,7 +174,7 @@ open class WordListsRepositoryTest : BaseTest() {
         withRepository { repo ->
             repo.replaceLists(Language.DUTCH, "v1", listOf(basicList))
 
-            val duplicated = travelList.copy(senses = senses("sense-9", "sense-9"))
+            val duplicated = travelList.copy(senses = senses(Language.DUTCH, "sense-9", "sense-9"))
             assertFailsWith<Exception>("a duplicate sense id within a list must violate the unique index") {
                 repo.replaceLists(Language.DUTCH, "v2", listOf(basicList, duplicated))
             }

@@ -321,11 +321,10 @@ fun App(
     ) {
         LemmaRecovery(
             itemsProvider = {
-                // Recover favorites and curated word-list senses in one combined pass;
-                // recover() dedups by (language, lemma).
-                favoritesRepository.getAll()
-                    .map { RecoverableSense(it.language, it.lemma, it.senseId) } +
-                    wordListsRepository.getAllSenses()
+                // Recover favorites and curated word-list senses in one combined pass; both
+                // implement RecoverableSense, and recover() dedups by (language, lemma).
+                val favorites: List<RecoverableSense> = favoritesRepository.getAll()
+                favorites + wordListsRepository.getAllSenses()
             },
             dataDbManager = dataManager,
             dictionaryRepository = dictionaryRepository,
@@ -862,7 +861,7 @@ fun App(
                             repository = dictionaryRepository,
                             favoritesRepository = favoritesRepository,
                             listsService = listsService,
-                            wordFetchManager = wordFetchManager,
+                            lemmaRecovery = lemmaRecovery,
                             onFavoriteChanged = { _ ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
                                 appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }

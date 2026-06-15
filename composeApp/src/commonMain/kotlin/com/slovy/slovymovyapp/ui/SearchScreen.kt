@@ -1326,7 +1326,7 @@ private fun SearchScreenPreviewWithLists(
                         title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
                         subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),
                         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1", "Basis")),
-                        senses = List(500) { WordListSense(senseId = it.toString(), lemma = "woord$it") },
+                        senses = List(500) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
                         iconSvg = null,
                     ),
                     WordList(
@@ -1334,7 +1334,7 @@ private fun SearchScreenPreviewWithLists(
                         title = mapOf("en" to "At the doctor's", "nl" to "Bij de huisarts"),
                         subtitle = mapOf("en" to "Words for your next appointment", "nl" to "Woorden voor je afspraak"),
                         labels = mapOf("en" to listOf("A2")),
-                        senses = List(64) { WordListSense(senseId = it.toString(), lemma = "woord$it") },
+                        senses = List(64) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
                         iconSvg = null,
                     ),
                     WordList(
@@ -1342,7 +1342,7 @@ private fun SearchScreenPreviewWithLists(
                         title = mapOf("en" to "Digital life", "nl" to "Digitaal leven"),
                         subtitle = mapOf("en" to "Phones, apps and the web", "nl" to "Telefoons, apps en het web"),
                         labels = emptyMap(),
-                        senses = List(120) { WordListSense(senseId = it.toString(), lemma = "woord$it") },
+                        senses = List(120) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
                         iconSvg = null,
                     )
                 )

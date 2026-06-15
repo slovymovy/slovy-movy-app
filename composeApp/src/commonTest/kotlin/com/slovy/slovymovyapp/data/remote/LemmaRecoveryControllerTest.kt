@@ -133,15 +133,22 @@ class LemmaRecoveryControllerTest : BaseTest() {
         return LemmaRecovery(
             itemsProvider = {
                 onItemsLoaded()
-                listOf(RecoverableSense(Language.ENGLISH, "test", senseId))
+                listOf(TestRecoverableSense(Language.ENGLISH, "test", senseId))
             },
             hasDownloadedDictionary = { language -> language == Language.ENGLISH },
             downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
             downloadedSensesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
             translationTargetsProvider = { listOf(Language.RUSSIAN) },
             fetchLemma = { _, _, _ -> onFetch() },
+            resolveSenses = { _, _, _ -> emptyMap() },
         )
     }
+
+    private data class TestRecoverableSense(
+        override val language: Language,
+        override val lemma: String,
+        override val senseId: String,
+    ) : RecoverableSense
 
     private class CountingKeepAliveFactory {
         var acquired = 0

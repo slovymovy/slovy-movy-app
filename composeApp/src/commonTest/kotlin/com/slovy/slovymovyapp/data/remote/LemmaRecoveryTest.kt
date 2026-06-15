@@ -24,8 +24,8 @@ class LemmaRecoveryTest : BaseTest() {
         val lemmaChecks = mutableListOf<LemmaCheck>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "test", sense1),
-                RecoverableSense(Language.ENGLISH, "test", sense2),
+                TestRecoverableSense(Language.ENGLISH, "test", sense1),
+                TestRecoverableSense(Language.ENGLISH, "test", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("test"),
@@ -53,9 +53,9 @@ class LemmaRecoveryTest : BaseTest() {
         // so the shared lemma is fetched once.
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "shared", sense1),
-                RecoverableSense(Language.ENGLISH, "shared", sense2),
-                RecoverableSense(Language.ENGLISH, "listonly", sense2),
+                TestRecoverableSense(Language.ENGLISH, "shared", sense1),
+                TestRecoverableSense(Language.ENGLISH, "shared", sense2),
+                TestRecoverableSense(Language.ENGLISH, "listonly", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("shared", "listonly"),
@@ -79,8 +79,8 @@ class LemmaRecoveryTest : BaseTest() {
         val fetches = mutableListOf<FetchCall>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "test", sense1),
-                RecoverableSense(Language.ENGLISH, "test", sense2),
+                TestRecoverableSense(Language.ENGLISH, "test", sense1),
+                TestRecoverableSense(Language.ENGLISH, "test", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = emptySet(),
@@ -97,7 +97,7 @@ class LemmaRecoveryTest : BaseTest() {
         val fetches = mutableListOf<FetchCall>()
         val translationChecks = mutableListOf<TranslationCheck>()
         val recovery = recovery(
-            items = listOf(RecoverableSense(Language.ENGLISH, "test", sense1)),
+            items = listOf(TestRecoverableSense(Language.ENGLISH, "test", sense1)),
             installedDictionaries = emptySet(),
             lemmasNeedingRecovery = emptySet(),
             fetches = fetches,
@@ -119,8 +119,8 @@ class LemmaRecoveryTest : BaseTest() {
         val lemmaChecks = mutableListOf<LemmaCheck>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                RecoverableSense(Language.ENGLISH, "beta", sense2),
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("alpha", "beta"),
@@ -146,8 +146,8 @@ class LemmaRecoveryTest : BaseTest() {
         val fetches = mutableListOf<FetchCall>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                RecoverableSense(Language.ENGLISH, "beta", sense2),
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("alpha"),
@@ -167,7 +167,7 @@ class LemmaRecoveryTest : BaseTest() {
         val fetches = mutableListOf<FetchCall>()
         val translationChecks = mutableListOf<TranslationCheck>()
         val recovery = recovery(
-            items = listOf(RecoverableSense(Language.ENGLISH, "test", sense1)),
+            items = listOf(TestRecoverableSense(Language.ENGLISH, "test", sense1)),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = emptySet(),
             translationsMissingFor = setOf("test"),
@@ -199,8 +199,8 @@ class LemmaRecoveryTest : BaseTest() {
         val translationChecks = mutableListOf<TranslationCheck>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                RecoverableSense(Language.ENGLISH, "beta", sense2),
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("alpha"),
@@ -231,8 +231,8 @@ class LemmaRecoveryTest : BaseTest() {
         val fetches = mutableListOf<FetchCall>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                RecoverableSense(Language.ENGLISH, "beta", sense2),
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("alpha"),
@@ -255,8 +255,8 @@ class LemmaRecoveryTest : BaseTest() {
         val progressEvents = mutableListOf<LemmaRecoveryProgress>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                RecoverableSense(Language.ENGLISH, "beta", sense2),
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("alpha", "beta"),
@@ -281,8 +281,8 @@ class LemmaRecoveryTest : BaseTest() {
         val progressEvents = mutableListOf<LemmaRecoveryProgress>()
         val recovery = recovery(
             items = listOf(
-                RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                RecoverableSense(Language.ENGLISH, "beta", sense2),
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
             ),
             installedDictionaries = setOf(Language.ENGLISH),
             lemmasNeedingRecovery = setOf("alpha", "beta"),
@@ -310,8 +310,8 @@ class LemmaRecoveryTest : BaseTest() {
         val recovery = LemmaRecovery(
             itemsProvider = {
                 listOf(
-                    RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                    RecoverableSense(Language.ENGLISH, "beta", sense2),
+                    TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                    TestRecoverableSense(Language.ENGLISH, "beta", sense2),
                 )
             },
             hasDownloadedDictionary = { language -> language == Language.ENGLISH },
@@ -331,6 +331,7 @@ class LemmaRecoveryTest : BaseTest() {
                     }
                 }
             },
+            resolveSenses = { _, _, _ -> emptyMap() },
         )
 
         val recoveryJob = launch {
@@ -361,7 +362,7 @@ class LemmaRecoveryTest : BaseTest() {
         var attempts = 0
         val fetches = mutableListOf<FetchCall>()
         val recovery = LemmaRecovery(
-            itemsProvider = { listOf(RecoverableSense(Language.ENGLISH, "test", sense1)) },
+            itemsProvider = { listOf(TestRecoverableSense(Language.ENGLISH, "test", sense1)) },
             hasDownloadedDictionary = { language -> language == Language.ENGLISH },
             downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
             downloadedSensesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
@@ -371,6 +372,7 @@ class LemmaRecoveryTest : BaseTest() {
                 if (attempts == 1) throw RuntimeException("HTTP 500")
                 fetches += FetchCall(language, lemma, translationTargets)
             },
+            resolveSenses = { _, _, _ -> emptyMap() },
         )
 
         recovery.recoverAllInstalled()
@@ -390,8 +392,8 @@ class LemmaRecoveryTest : BaseTest() {
         val recovery = LemmaRecovery(
             itemsProvider = {
                 listOf(
-                    RecoverableSense(Language.ENGLISH, "alpha", sense1),
-                    RecoverableSense(Language.ENGLISH, "beta", sense2),
+                    TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                    TestRecoverableSense(Language.ENGLISH, "beta", sense2),
                 )
             },
             hasDownloadedDictionary = { language -> language == Language.ENGLISH },
@@ -409,11 +411,72 @@ class LemmaRecoveryTest : BaseTest() {
                 }
                 activeFetches -= lemma
             },
+            resolveSenses = { _, _, _ -> emptyMap() },
         )
 
         recovery.recoverAllInstalled()
 
         assertEquals(2, maxActiveFetches)
+    }
+
+    @Test
+    fun recoverSenses_fetches_once_per_lemma_and_reports_each_sense() = runBlocking {
+        val fetches = mutableListOf<FetchCall>()
+        val resolveCalls = mutableListOf<Pair<String, Set<String>>>()
+        val recovery = LemmaRecovery(
+            itemsProvider = { emptyList() },
+            hasDownloadedDictionary = { true },
+            downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
+            downloadedSensesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
+            translationTargetsProvider = { listOf(Language.RUSSIAN) },
+            fetchLemma = { language, lemma, targets -> fetches += FetchCall(language, lemma, targets) },
+            resolveSenses = { _, lemma, senseIds ->
+                resolveCalls += lemma to senseIds
+                senseIds.associateWith {
+                    DictionaryRepository.SenseLookupResult(
+                        missingReason = DictionaryRepository.FavoriteSenseMissingReason.MEANING_NOT_FOUND,
+                    )
+                }
+            },
+        )
+
+        val resolved = mutableListOf<RecoveredSenseResult>()
+        recovery.recoverSenses(
+            listOf(
+                TestRecoverableSense(Language.ENGLISH, "test", sense1),
+                TestRecoverableSense(Language.ENGLISH, "test", sense2),
+            ),
+        ) { resolved += it }
+
+        // The shared lemma is fetched and resolved once; both senses come back through the callback.
+        assertEquals(listOf(FetchCall(Language.ENGLISH, "test", listOf(Language.RUSSIAN))), fetches)
+        assertEquals(listOf("test" to setOf(sense1, sense2)), resolveCalls)
+        assertEquals(setOf(sense1, sense2), resolved.map { it.senseId }.toSet())
+        assertTrue(resolved.all { it.error == null && it.result != null })
+    }
+
+    @Test
+    fun recoverSenses_reports_error_for_each_sense_when_lemma_fetch_fails() = runBlocking {
+        val recovery = LemmaRecovery(
+            itemsProvider = { emptyList() },
+            hasDownloadedDictionary = { true },
+            downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
+            downloadedSensesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
+            translationTargetsProvider = { listOf(Language.RUSSIAN) },
+            fetchLemma = { _, _, _ -> throw RuntimeException("boom") },
+            resolveSenses = { _, _, _ -> emptyMap() },
+        )
+
+        val resolved = mutableListOf<RecoveredSenseResult>()
+        recovery.recoverSenses(
+            listOf(TestRecoverableSense(Language.ENGLISH, "test", sense1)),
+        ) { resolved += it }
+
+        assertEquals(1, resolved.size)
+        val single = resolved.single()
+        assertNotNull(single.error, "a failed lemma fetch must surface as an error per sense")
+        assertEquals(sense1, single.senseId)
+        assertEquals(null, single.result)
     }
 
     private fun recovery(
@@ -444,8 +507,15 @@ class LemmaRecoveryTest : BaseTest() {
                 if (lemma == failLemma) throw RuntimeException("Fetch failed")
                 fetches += FetchCall(language, lemma, translationTargets)
             },
+            resolveSenses = { _, _, _ -> emptyMap() },
         )
     }
+
+    private data class TestRecoverableSense(
+        override val language: Language,
+        override val lemma: String,
+        override val senseId: String,
+    ) : RecoverableSense
 
     private data class FetchCall(
         val language: Language,

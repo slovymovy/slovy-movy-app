@@ -82,12 +82,12 @@ class ListsServiceServerTest : BaseTest() {
         senses = testSenses("sense-2", "sense-1"),
     )
 
-    private fun TestListContent.toWordList() = WordList(
+    private fun TestListContent.toWordList(language: Language) = WordList(
         id = id,
         title = title,
         subtitle = subtitle,
         labels = labels,
-        senses = senses.map { WordListSense(it.senseId, it.lemma) },
+        senses = senses.map { WordListSense(it.senseId, it.lemma, language) },
         iconSvg = iconSvg,
     )
 
@@ -140,8 +140,8 @@ class ListsServiceServerTest : BaseTest() {
                 assertTrue(service.sync(language), "first sync must store new content")
 
                 assertEquals("v1", repository.getVersion(language))
-                assertEquals(listOf(basicContent.toWordList()), service.getLists(language))
-                assertEquals(basicContent.toWordList(), service.getList(language, basicContent.id))
+                assertEquals(listOf(basicContent.toWordList(language)), service.getLists(language))
+                assertEquals(basicContent.toWordList(language), service.getList(language, basicContent.id))
             }
         } finally {
             deleteServerLists(language)
@@ -163,7 +163,7 @@ class ListsServiceServerTest : BaseTest() {
 
                 assertFalse(service.sync(language), "sync must report no update for an unchanged version")
                 assertEquals(
-                    listOf(basicContent.toWordList()),
+                    listOf(basicContent.toWordList(language)),
                     repository.getLists(language),
                     "stored lists must not change when the version is unchanged",
                 )
@@ -197,7 +197,7 @@ class ListsServiceServerTest : BaseTest() {
                 assertTrue(service.sync(language), "sync must store content for a new version")
                 assertEquals("v2", repository.getVersion(language))
                 assertEquals(
-                    listOf(updatedContent.toWordList(), newContent.toWordList()),
+                    listOf(updatedContent.toWordList(language), newContent.toWordList(language)),
                     service.getLists(language),
                 )
             }
@@ -290,17 +290,17 @@ class ListsServiceServerTest : BaseTest() {
     fun sync_keepsStoredLists_whenServerUnreachable() = runBlocking {
         val language = Language.FRENCH
         withService(deadServerUrl()) { service, repository ->
-            repository.replaceLists(language, "v1", listOf(basicContent.toWordList()))
+            repository.replaceLists(language, "v1", listOf(basicContent.toWordList(language)))
 
             assertFalse(service.sync(language), "sync must report no update when the server is unreachable")
             assertEquals("v1", repository.getVersion(language))
             assertEquals(
-                listOf(basicContent.toWordList()),
+                listOf(basicContent.toWordList(language)),
                 service.getLists(language),
                 "stored lists must survive a failed sync",
             )
             assertEquals(
-                basicContent.toWordList(),
+                basicContent.toWordList(language),
                 service.getList(language, basicContent.id),
                 "list detail reads must not require the network",
             )
