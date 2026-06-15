@@ -39,9 +39,7 @@ CREATE TABLE word_list_sense (
   sense_id TEXT NOT NULL,
   -- Lemma the sense belongs to; carried so the client can fetch a word that is missing
   -- from the locally downloaded dictionary (all word fetch paths are keyed by lemma).
-  -- DEFAULT '' matches migration 8.sqm (SQLite requires a default to add a NOT NULL column);
-  -- every insert supplies the lemma, so the default is never actually used.
-  lemma TEXT NOT NULL DEFAULT '',
+  lemma TEXT NOT NULL,
   PRIMARY KEY (lang_code, list_id, position)
 );
 
