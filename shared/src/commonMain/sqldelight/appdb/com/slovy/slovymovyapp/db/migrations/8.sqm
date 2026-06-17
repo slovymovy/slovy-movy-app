@@ -1,0 +1,24 @@
+-- Carry the lemma per curated list sense so the client can fetch words missing from the
+-- locally downloaded dictionary (all word fetch paths are keyed by lemma). word_list_sense is
+-- a regenerable cache, so rebuild it to add lemma as a plain NOT NULL column (SQLite cannot
+-- ALTER ... ADD a NOT NULL column without a DEFAULT). Existing rows copy in an empty lemma and
+-- are replaced on the next version-mismatch list sync; blank-lemma senses are skipped until then.
+CREATE TABLE word_list_sense_new (
+  lang_code TEXT NOT NULL,
+  list_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  sense_id TEXT NOT NULL,
+  lemma TEXT NOT NULL,
+  PRIMARY KEY (lang_code, list_id, position)
+);
+
+INSERT INTO word_list_sense_new(lang_code, list_id, position, sense_id, lemma)
+SELECT lang_code, list_id, position, sense_id, '' FROM word_list_sense;
+
+DROP INDEX idx_word_list_sense_unique;
+
+DROP TABLE word_list_sense;
+
+ALTER TABLE word_list_sense_new RENAME TO word_list_sense;
+
+CREATE UNIQUE INDEX idx_word_list_sense_unique ON word_list_sense(lang_code, list_id, sense_id);

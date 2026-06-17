@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
+import com.slovy.slovymovyapp.data.lists.WordListSense
 import com.slovy.slovymovyapp.data.lists.WordListsRepository
 import com.slovy.slovymovyapp.data.remote.ListsClient
 import com.slovy.slovymovyapp.db.AppDatabase
@@ -37,15 +38,23 @@ import kotlin.uuid.Uuid
 class ListsServiceServerTest : BaseTest() {
 
     @Serializable
+    private data class TestListSense(
+        val senseId: String,
+        val lemma: String,
+    )
+
+    @Serializable
     private data class TestListContent(
         val id: String,
         val title: Map<String, String>,
         val subtitle: Map<String, String>,
         val labels: Map<String, List<String>>,
         val iconSvg: String? = null,
-        val senseIds: List<String>,
+        val senses: List<TestListSense>,
         val order: Int? = null,
     )
+
+    private fun testSenses(vararg ids: String) = ids.map { TestListSense(senseId = it, lemma = "$it-lemma") }
 
     @Serializable
     private data class TestListsBundle(
@@ -70,15 +79,15 @@ class ListsServiceServerTest : BaseTest() {
         subtitle = mapOf("en" to "Start here"),
         labels = mapOf("en" to listOf("A1", "Basic")),
         iconSvg = """<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg>""",
-        senseIds = listOf("sense-2", "sense-1"),
+        senses = testSenses("sense-2", "sense-1"),
     )
 
-    private fun TestListContent.toWordList() = WordList(
+    private fun TestListContent.toWordList(language: Language) = WordList(
         id = id,
         title = title,
         subtitle = subtitle,
         labels = labels,
-        senseIds = senseIds,
+        senses = senses.map { WordListSense(it.senseId, it.lemma, language) },
         iconSvg = iconSvg,
     )
 
@@ -131,8 +140,8 @@ class ListsServiceServerTest : BaseTest() {
                 assertTrue(service.sync(language), "first sync must store new content")
 
                 assertEquals("v1", repository.getVersion(language))
-                assertEquals(listOf(basicContent.toWordList()), service.getLists(language))
-                assertEquals(basicContent.toWordList(), service.getList(language, basicContent.id))
+                assertEquals(listOf(basicContent.toWordList(language)), service.getLists(language))
+                assertEquals(basicContent.toWordList(language), service.getList(language, basicContent.id))
             }
         } finally {
             deleteServerLists(language)
@@ -149,12 +158,12 @@ class ListsServiceServerTest : BaseTest() {
 
                 // Same version, different content: the version gate must skip the refetch,
                 // so the stored rows stay as they were.
-                val changedContent = basicContent.copy(senseIds = listOf("sense-99"))
+                val changedContent = basicContent.copy(senses = testSenses("sense-99"))
                 putServerLists(language, TestListsBundle(version = "v1", lists = listOf(changedContent)))
 
                 assertFalse(service.sync(language), "sync must report no update for an unchanged version")
                 assertEquals(
-                    listOf(basicContent.toWordList()),
+                    listOf(basicContent.toWordList(language)),
                     repository.getLists(language),
                     "stored lists must not change when the version is unchanged",
                 )
@@ -174,21 +183,21 @@ class ListsServiceServerTest : BaseTest() {
 
                 val updatedContent = basicContent.copy(
                     title = basicContent.title + ("ru" to "Базовые слова"),
-                    senseIds = listOf("sense-7"),
+                    senses = testSenses("sense-7"),
                 )
                 val newContent = TestListContent(
                     id = "a2_next",
                     title = mapOf("en" to "Next steps"),
                     subtitle = mapOf("en" to "Keep going"),
                     labels = emptyMap(),
-                    senseIds = listOf("sense-8"),
+                    senses = testSenses("sense-8"),
                 )
                 putServerLists(language, TestListsBundle(version = "v2", lists = listOf(updatedContent, newContent)))
 
                 assertTrue(service.sync(language), "sync must store content for a new version")
                 assertEquals("v2", repository.getVersion(language))
                 assertEquals(
-                    listOf(updatedContent.toWordList(), newContent.toWordList()),
+                    listOf(updatedContent.toWordList(language), newContent.toWordList(language)),
                     service.getLists(language),
                 )
             }
@@ -208,7 +217,7 @@ class ListsServiceServerTest : BaseTest() {
                 title = mapOf("en" to "Second"),
                 subtitle = mapOf("en" to ""),
                 labels = emptyMap(),
-                senseIds = listOf("sense-2"),
+                senses = testSenses("sense-2"),
                 order = 2,
             )
             val first = TestListContent(
@@ -216,7 +225,7 @@ class ListsServiceServerTest : BaseTest() {
                 title = mapOf("en" to "First"),
                 subtitle = mapOf("en" to ""),
                 labels = emptyMap(),
-                senseIds = listOf("sense-1"),
+                senses = testSenses("sense-1"),
                 order = 1,
             )
             val unordered = TestListContent(
@@ -224,7 +233,7 @@ class ListsServiceServerTest : BaseTest() {
                 title = mapOf("en" to "Unordered"),
                 subtitle = mapOf("en" to ""),
                 labels = emptyMap(),
-                senseIds = listOf("sense-3"),
+                senses = testSenses("sense-3"),
                 order = null,
             )
             putServerLists(
@@ -281,17 +290,17 @@ class ListsServiceServerTest : BaseTest() {
     fun sync_keepsStoredLists_whenServerUnreachable() = runBlocking {
         val language = Language.FRENCH
         withService(deadServerUrl()) { service, repository ->
-            repository.replaceLists(language, "v1", listOf(basicContent.toWordList()))
+            repository.replaceLists(language, "v1", listOf(basicContent.toWordList(language)))
 
             assertFalse(service.sync(language), "sync must report no update when the server is unreachable")
             assertEquals("v1", repository.getVersion(language))
             assertEquals(
-                listOf(basicContent.toWordList()),
+                listOf(basicContent.toWordList(language)),
                 service.getLists(language),
                 "stored lists must survive a failed sync",
             )
             assertEquals(
-                basicContent.toWordList(),
+                basicContent.toWordList(language),
                 service.getList(language, basicContent.id),
                 "list detail reads must not require the network",
             )

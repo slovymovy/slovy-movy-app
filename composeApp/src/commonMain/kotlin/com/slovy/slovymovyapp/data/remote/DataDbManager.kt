@@ -382,17 +382,17 @@ class DataDbManager(
     }
 
     /**
-     * Returns the subset of normalized lemmas (keys of [senseIdsByNormalizedLemma]) whose favorited
+     * Returns the subset of normalized lemmas (keys of [senseIdsByNormalizedLemma]) whose
      * sense_ids are missing translations in any of [translationTargets].
      *
      * A lemma is reported as needing recovery if any target language either:
      *  - has no translation database file on disk (so no senses can possibly have translations), or
-     *  - has a translation database that does not contain a row for at least one favorited sense_id.
+     *  - has a translation database that does not contain a row for at least one sense_id.
      *
      * Sense_ids that fail to parse as a [Uuid] are treated as missing — they cannot match any stored
      * row, so the safest action is to refetch.
      */
-    suspend fun downloadedFavoritesNeedingTranslationRecovery(
+    suspend fun downloadedSensesNeedingTranslationRecovery(
         language: Language,
         senseIdsByNormalizedLemma: Map<String, Set<String>>,
         translationTargets: List<Language>,

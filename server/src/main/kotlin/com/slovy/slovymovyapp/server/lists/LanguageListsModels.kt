@@ -3,6 +3,17 @@ package com.slovy.slovymovyapp.server.lists
 import kotlinx.serialization.Serializable
 
 /**
+ * One curated sense and the lemma it belongs to. The lemma travels with the sense so
+ * clients can fetch a word missing from the locally downloaded dictionary (all word
+ * fetch paths are keyed by lemma, not sense id).
+ */
+@Serializable
+data class ListSenseEntry(
+    val senseId: String,
+    val lemma: String,
+)
+
+/**
  * On-disk shape. [title], [subtitle], and [labels] are keyed by UI locale code
  * (e.g. "en", "ru") so the same list renders in the user's interface language,
  * independently of the studied language in the folder path. The client resolves
@@ -14,6 +25,11 @@ internal data class RawListFile(
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>> = emptyMap(),
     val icon: String? = null,
+    // New authoring shape: each sense carries its lemma. [ListsFolderDecoder] normalizes to
+    // this on the wire.
+    val senses: List<ListSenseEntry> = emptyList(),
+    // Legacy authoring shape: sense ids only. Accepted for not-yet-re-exported list files;
+    // such senses get an empty lemma (clients can't fetch them until the file is re-authored).
     val senseIds: List<String> = emptyList(),
     // Curator-controlled feed position; lists are shown by ascending [order]. Absent
     // (null) sorts to the end, with id as the alphabetical tiebreaker.
@@ -34,7 +50,7 @@ data class ListContent(
     val subtitle: Map<String, String>,
     val labels: Map<String, List<String>>,
     val iconSvg: String?,
-    val senseIds: List<String>,
+    val senses: List<ListSenseEntry>,
     // Curator-controlled feed position; clients render by ascending [order] with absent
     // (null) sorted to the end. The server also emits lists already in this order.
     val order: Int? = null,

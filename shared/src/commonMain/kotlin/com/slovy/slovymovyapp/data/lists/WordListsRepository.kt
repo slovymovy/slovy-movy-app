@@ -28,9 +28,21 @@ class WordListsRepository(private val db: AppDatabase) {
                     title = texts[row.list_id].orEmpty().mapNotNull { r -> r.title?.let { r.locale to it } }.toMap(),
                     subtitle = texts[row.list_id].orEmpty().mapNotNull { r -> r.subtitle?.let { r.locale to it } }.toMap(),
                     labels = labels[row.list_id].orEmpty().groupBy({ it.locale }, { it.label }),
-                    senseIds = senses[row.list_id].orEmpty().map { it.sense_id },
+                    senses = senses[row.list_id].orEmpty().map { WordListSense(it.sense_id, it.lemma, language) },
                     iconSvg = row.icon_svg,
                 )
+            }
+        }
+    }
+
+    /**
+     * Every stored list sense across all languages, for lemma recovery. Rows with an unrecognized
+     * language code are skipped.
+     */
+    suspend fun getAllSenses(): List<WordListSense> = withContext(Dispatchers.IO) {
+        db.wordListsQueries.selectAllSenses().executeAsList().mapNotNull { row ->
+            Language.fromCodeOrNull(row.lang_code)?.let { language ->
+                WordListSense(senseId = row.sense_id, lemma = row.lemma, language = language)
             }
         }
     }
@@ -47,7 +59,8 @@ class WordListsRepository(private val db: AppDatabase) {
                 subtitle = texts.mapNotNull { row -> row.subtitle?.let { row.locale to it } }.toMap(),
                 labels = queries.selectLabelsByList(language.code, listId).executeAsList()
                     .groupBy({ it.locale }, { it.label }),
-                senseIds = queries.selectSensesByList(language.code, listId).executeAsList(),
+                senses = queries.selectSensesByList(language.code, listId).executeAsList()
+                    .map { WordListSense(it.sense_id, it.lemma, language) },
                 iconSvg = listRow.icon_svg,
             )
         }
@@ -84,8 +97,14 @@ class WordListsRepository(private val db: AppDatabase) {
                             queries.insertLabel(language.code, list.id, locale, labelIndex.toLong(), label)
                         }
                     }
-                    list.senseIds.forEachIndexed { senseIndex, senseId ->
-                        queries.insertSense(language.code, list.id, senseIndex.toLong(), senseId)
+                    list.senses.forEachIndexed { senseIndex, sense ->
+                        queries.insertSense(
+                            language.code,
+                            list.id,
+                            senseIndex.toLong(),
+                            sense.senseId,
+                            sense.lemma,
+                        )
                     }
                 }
                 queries.upsertMeta(language.code, version, updatedAt)

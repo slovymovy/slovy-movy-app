@@ -10,6 +10,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
+data class RemoteListSense(
+    val senseId: String,
+    val lemma: String,
+)
+
+@Serializable
 data class RemoteList(
     val id: String,
     val title: Map<String, String>,
@@ -17,7 +23,9 @@ data class RemoteList(
     val labels: Map<String, List<String>> = emptyMap(),
     // SVG text; icons are SVG-only by design (the server pairs only `{id}.svg` files).
     val iconSvg: String? = null,
-    val senseIds: List<String>,
+    // The lemma travels with each sense so missing words can be fetched (fetch paths are
+    // keyed by lemma). Order is preserved as the server's feed order.
+    val senses: List<RemoteListSense>,
     // Curator-controlled feed position; the feed is sorted by ascending [order] with
     // absent (null) sorted to the end. See ListsService.sync.
     val order: Int? = null,
