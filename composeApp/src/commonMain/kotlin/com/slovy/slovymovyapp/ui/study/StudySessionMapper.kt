@@ -207,12 +207,6 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
             ).map { senseUi ->
                 if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
             }
-            // Prefer the answer word from the source example; fall back to the lemma when the
-            // source example is untagged (CLOZE_TRANSLATION only requires a tagged translation),
-            // so the front always has a usable first-letter hint.
-            val recallWord = toTranslationHintCloze(sourceExample.text)?.firstAnswerText()
-                ?.takeIf { it.isNotBlank() }
-                ?: lemma
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(
@@ -220,7 +214,8 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                     listOf(sourceLanguage.studyCode()),
                 ),
                 prompt = cloze.copy(filled = true),
-                firstLetterHint = recallWord.firstLetterHint(),
+                // The recalled answer is the word itself, so hint from the lemma.
+                firstLetterHint = lemma.firstLetterHint(),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,

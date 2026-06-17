@@ -271,7 +271,7 @@ class StudySessionMapperTest {
     }
 
     @Test
-    fun translationClozeCardExposesFirstLetterHintFromSourceWord() {
+    fun translationClozeCardExposesFirstLetterHintFromLemma() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
             example = ExamplePair(
@@ -279,6 +279,8 @@ class StudySessionMapperTest {
                 text = "It was so cosy.",
                 clozeRanges = listOf(10..13),
             ),
+            // Inflected form in the source example differs from the lemma; the hint uses the lemma.
+            primaryExampleText = "Het was zo <w>gezelliger</w>.",
         )
 
         val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
@@ -286,28 +288,7 @@ class StudySessionMapperTest {
         assertNull(mapped.translationHint)
         val hint = assertNotNull(mapped.firstLetterHint)
         assertEquals('g', hint.letter)
-        assertEquals(8, hint.letterCount)
-        assertEquals(7, hint.dotCount)
-    }
-
-    @Test
-    fun translationClozeCardFallsBackToLemmaHintWhenSourceUntagged() {
-        val sessionCard = sessionCard(
-            variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
-            example = ExamplePair(
-                exampleIndex = 0,
-                text = "It was so cosy.",
-                clozeRanges = listOf(10..13),
-            ),
-            // Source example without a tagged word: the hint must fall back to the lemma.
-            primaryExampleText = "Het was zo gezellig.",
-        )
-
-        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
-
-        assertNull(mapped.translationHint)
-        val hint = assertNotNull(mapped.firstLetterHint)
-        assertEquals('g', hint.letter)
+        // "gezellig" (lemma, 8) rather than "gezelliger" (inflected form, 10).
         assertEquals(8, hint.letterCount)
         assertEquals(7, hint.dotCount)
     }
