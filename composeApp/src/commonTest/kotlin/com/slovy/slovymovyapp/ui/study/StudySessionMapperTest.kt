@@ -233,7 +233,7 @@ class StudySessionMapperTest {
 
         assertEquals("Het was zo gezellig.", mapped.prompt.text)
         assertEquals(listOf(11..18), mapped.prompt.answerRanges)
-        // Fixture translation is untagged, so the hint falls back to the first-letter hint.
+        // Fixture translation is untagged, so the hint falls back to the lemma's first-letter hint.
         assertNull(mapped.translationHint)
         val hint = assertNotNull(mapped.firstLetterHint)
         assertEquals('g', hint.letter)
@@ -308,11 +308,11 @@ class StudySessionMapperTest {
 
         assertEquals("Vergeet niet om je paspoort mee te nemen.", mapped.prompt.text)
         assertEquals(listOf(28..30, 35..39), mapped.prompt.answerRanges)
-        // Untagged fixture translation falls back to the first-letter hint of the first answer.
+        // Untagged fixture translation falls back to the lemma's first-letter hint.
         val hint = assertNotNull(mapped.firstLetterHint)
-        assertEquals('m', hint.letter)
-        assertEquals(3, hint.letterCount)
-        assertEquals(2, hint.dotCount)
+        assertEquals('g', hint.letter)
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
         assertNotNull(mapped.back.cloze)
         assertEquals(listOf(28..30, 35..39), mapped.back.cloze.answerRanges)
     }

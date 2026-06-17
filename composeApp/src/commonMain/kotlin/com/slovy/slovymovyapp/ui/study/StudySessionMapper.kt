@@ -173,7 +173,7 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                 prompt = cloze,
                 translationHint = highlightedTranslation,
                 firstLetterHint = if (highlightedTranslation == null) {
-                    cloze.firstAnswerText().firstLetterHint()
+                    lemma.firstLetterHint()
                 } else {
                     null
                 },
@@ -403,13 +403,6 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
 private fun toTranslationHintCloze(text: String): StudyClozeTextUiState? {
     val parsed = parseClozeFromTaggedText(text) ?: return null
     return StudyClozeTextUiState(text = parsed.plainText, answerRanges = parsed.answerRanges)
-}
-
-private fun StudyClozeTextUiState.firstAnswerText(): String {
-    val range = answerRanges.firstOrNull() ?: return ""
-    val start = range.first.coerceIn(0, text.length)
-    val endExclusive = (range.last + 1).coerceIn(start, text.length)
-    return text.substring(start, endExclusive)
 }
 
 internal fun String.firstLetterHint(): FirstLetterHint? {
