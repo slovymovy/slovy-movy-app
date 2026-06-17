@@ -233,11 +233,12 @@ class StudySessionMapperTest {
 
         assertEquals("Het was zo gezellig.", mapped.prompt.text)
         assertEquals(listOf(11..18), mapped.prompt.answerRanges)
+        // Fixture translation is untagged, so the hint falls back to the first-letter hint.
+        assertNull(mapped.translationHint)
         val hint = assertNotNull(mapped.firstLetterHint)
         assertEquals('g', hint.letter)
         assertEquals(8, hint.letterCount)
         assertEquals(7, hint.dotCount)
-        assertNull(mapped.translationHint)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
         assertEquals("een gevoel van warmte", mapped.back.definition)
@@ -248,7 +249,29 @@ class StudySessionMapperTest {
     }
 
     @Test
-    fun translationClozeCardExposesSourceExampleAsClozeHint() {
+    fun sourceClozeCardHighlightsTranslationHintWhenTranslationTagged() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = Language.ENGLISH.code),
+            example = ExamplePair(
+                exampleIndex = 0,
+                text = "Het was zo gezellig.",
+                clozeRanges = listOf(11..18),
+            ),
+            primaryExampleTranslation = "It was so <w>cosy</w>.",
+        )
+
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // Tagged translation: highlight the answer word in the translation hint, no first-letter hint.
+        assertNull(mapped.firstLetterHint)
+        val hint = assertNotNull(mapped.translationHint)
+        assertEquals("It was so cosy.", hint.text)
+        assertEquals(listOf(10..13), hint.answerRanges)
+        assertEquals(true, hint.filled)
+    }
+
+    @Test
+    fun translationClozeCardExposesFirstLetterHintFromSourceWord() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
             example = ExamplePair(
@@ -260,9 +283,33 @@ class StudySessionMapperTest {
 
         val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
 
-        val hint = assertNotNull(mapped.translationHint)
-        assertEquals("Het was zo gezellig.", hint.text)
-        assertEquals(listOf(11..18), hint.answerRanges)
+        assertNull(mapped.translationHint)
+        val hint = assertNotNull(mapped.firstLetterHint)
+        assertEquals('g', hint.letter)
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
+    }
+
+    @Test
+    fun translationClozeCardFallsBackToLemmaHintWhenSourceUntagged() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
+            example = ExamplePair(
+                exampleIndex = 0,
+                text = "It was so cosy.",
+                clozeRanges = listOf(10..13),
+            ),
+            // Source example without a tagged word: the hint must fall back to the lemma.
+            primaryExampleText = "Het was zo gezellig.",
+        )
+
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
+
+        assertNull(mapped.translationHint)
+        val hint = assertNotNull(mapped.firstLetterHint)
+        assertEquals('g', hint.letter)
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
     }
 
     @Test
@@ -280,6 +327,7 @@ class StudySessionMapperTest {
 
         assertEquals("Vergeet niet om je paspoort mee te nemen.", mapped.prompt.text)
         assertEquals(listOf(28..30, 35..39), mapped.prompt.answerRanges)
+        // Untagged fixture translation falls back to the first-letter hint of the first answer.
         val hint = assertNotNull(mapped.firstLetterHint)
         assertEquals('m', hint.letter)
         assertEquals(3, hint.letterCount)
@@ -348,6 +396,8 @@ class StudySessionMapperTest {
         studiedSenseIds: Set<String> = emptySet(),
         extraSenses: List<LanguageCardResponseSense> = emptyList(),
         synonyms: List<String> = emptyList(),
+        primaryExampleText: String = "Het was zo <w>gezellig</w>.",
+        primaryExampleTranslation: String = "It was so cosy.",
     ): SessionCard {
         return SessionCard(
             card = Card(
@@ -371,7 +421,9 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(extraSenses, synonyms)),
+            wordResult = WordResult(
+                card = languageCard(extraSenses, synonyms, primaryExampleText, primaryExampleTranslation),
+            ),
             senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
@@ -381,6 +433,8 @@ class StudySessionMapperTest {
     private fun languageCard(
         extraSenses: List<LanguageCardResponseSense>,
         synonyms: List<String>,
+        primaryExampleText: String,
+        primaryExampleTranslation: String,
     ): LanguageCard =
         LanguageCard(
             lemma = "gezellig",
@@ -398,8 +452,8 @@ class StudySessionMapperTest {
                             semanticGroupId = "warmth",
                             examples = listOf(
                                 LanguageCardExample(
-                                    text = "Het was zo <w>gezellig</w>.",
-                                    targetLangTranslations = mapOf(Language.ENGLISH to "It was so cosy."),
+                                    text = primaryExampleText,
+                                    targetLangTranslations = mapOf(Language.ENGLISH to primaryExampleTranslation),
                                 ),
                             ),
                             targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),
