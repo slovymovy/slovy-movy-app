@@ -162,11 +162,21 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
             ).map { senseUi ->
                 if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
             }
+            // Prefer the translation hint only when it actually highlights the answer word
+            // (the example translation is tagged). CLOZE_SOURCE can be eligible without a
+            // tagged/present example translation, so fall back to the first-letter hint to
+            // guarantee a usable hint.
+            val highlightedTranslation = clozeTranslation?.takeIf { it.answerRanges.isNotEmpty() }
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
                 prompt = cloze,
-                firstLetterHint = cloze.firstAnswerText().firstLetterHint(),
+                translationHint = highlightedTranslation,
+                firstLetterHint = if (highlightedTranslation == null) {
+                    cloze.firstAnswerText().firstLetterHint()
+                } else {
+                    null
+                },
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -197,6 +207,7 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
             ).map { senseUi ->
                 if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
             }
+            val recallWord = toTranslationHintCloze(sourceExample.text)?.firstAnswerText()
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(
@@ -204,7 +215,7 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                     listOf(sourceLanguage.studyCode()),
                 ),
                 prompt = cloze.copy(filled = true),
-                translationHint = toTranslationHintCloze(sourceExample.text),
+                firstLetterHint = recallWord?.firstLetterHint(),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,

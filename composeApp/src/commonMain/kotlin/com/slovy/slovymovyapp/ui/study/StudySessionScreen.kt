@@ -1921,7 +1921,7 @@ private fun StudyClozeTranslationText(
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium.copy(
-            fontStyle = FontStyle.Italic,
+            fontStyle = FontStyle.Normal,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f,
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2050,7 +2050,6 @@ private fun HintRevealPill(
     val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
     val dashWidth = 6.dp
     val dashGap = 4.dp
-    val description = contentDescription
     Box(
         modifier = modifier
             .height(48.dp)
@@ -2074,9 +2073,9 @@ private fun HintRevealPill(
             }
             .clip(CircleShape)
             .semantics(mergeDescendants = true) {
-                this.contentDescription = description
+                this.contentDescription = contentDescription
             }
-            .clickable(role = Role.Button, onClickLabel = description) { onReveal() }
+            .clickable(role = Role.Button, onClickLabel = contentDescription) { onReveal() }
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -2390,7 +2389,11 @@ private fun clozeCard() = StudyCardUiState.Cloze(
         text = "Het was zo gezellig bij jullie thuis.",
         answerRanges = listOf(11..18),
     ),
-    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
+    translationHint = StudyClozeTextUiState(
+        text = "It was so lovely at your place.",
+        answerRanges = listOf(10..15),
+        filled = true,
+    ),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
@@ -2421,10 +2424,7 @@ private fun translationClozeCard() = StudyCardUiState.Cloze(
         answerRanges = listOf(10..15),
         filled = true,
     ),
-    translationHint = StudyClozeTextUiState(
-        text = "Het was zo gezellig bij jullie thuis.",
-        answerRanges = listOf(11..18),
-    ),
+    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         isLemmaHeadline = true,
@@ -2684,7 +2684,7 @@ private fun StudySessionClozeFrontHintRevealedPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(
-                clozeCard().copy(firstLetterHintRevealed = true),
+                clozeCard().copy(translationHintRevealed = true),
                 StudyCardSide.FRONT,
                 current = 6,
             ),
@@ -2730,7 +2730,7 @@ private fun StudySessionTranslationClozeFrontHintRevealedPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(
-                translationClozeCard().copy(translationHintRevealed = true),
+                translationClozeCard().copy(firstLetterHintRevealed = true),
                 StudyCardSide.FRONT,
                 current = 6,
             ),
