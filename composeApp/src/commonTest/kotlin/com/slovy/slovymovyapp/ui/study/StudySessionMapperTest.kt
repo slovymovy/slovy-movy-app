@@ -291,6 +291,28 @@ class StudySessionMapperTest {
     }
 
     @Test
+    fun translationClozeCardFallsBackToLemmaHintWhenSourceUntagged() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
+            example = ExamplePair(
+                exampleIndex = 0,
+                text = "It was so cosy.",
+                clozeRanges = listOf(10..13),
+            ),
+            // Source example without a tagged word: the hint must fall back to the lemma.
+            primaryExampleText = "Het was zo gezellig.",
+        )
+
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
+
+        assertNull(mapped.translationHint)
+        val hint = assertNotNull(mapped.firstLetterHint)
+        assertEquals('g', hint.letter)
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
+    }
+
+    @Test
     fun mapsSourceClozeCardWithMultipleTaggedRanges() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = Language.ENGLISH.code),
@@ -374,6 +396,7 @@ class StudySessionMapperTest {
         studiedSenseIds: Set<String> = emptySet(),
         extraSenses: List<LanguageCardResponseSense> = emptyList(),
         synonyms: List<String> = emptyList(),
+        primaryExampleText: String = "Het was zo <w>gezellig</w>.",
         primaryExampleTranslation: String = "It was so cosy.",
     ): SessionCard {
         return SessionCard(
@@ -398,7 +421,9 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(extraSenses, synonyms, primaryExampleTranslation)),
+            wordResult = WordResult(
+                card = languageCard(extraSenses, synonyms, primaryExampleText, primaryExampleTranslation),
+            ),
             senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
@@ -408,6 +433,7 @@ class StudySessionMapperTest {
     private fun languageCard(
         extraSenses: List<LanguageCardResponseSense>,
         synonyms: List<String>,
+        primaryExampleText: String,
         primaryExampleTranslation: String,
     ): LanguageCard =
         LanguageCard(
@@ -426,7 +452,7 @@ class StudySessionMapperTest {
                             semanticGroupId = "warmth",
                             examples = listOf(
                                 LanguageCardExample(
-                                    text = "Het was zo <w>gezellig</w>.",
+                                    text = primaryExampleText,
                                     targetLangTranslations = mapOf(Language.ENGLISH to primaryExampleTranslation),
                                 ),
                             ),
