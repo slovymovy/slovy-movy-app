@@ -7,7 +7,7 @@
     <string name="nav_stats">Статистика</string>
     <string name="nav_settings">Настройки</string>
 
-    <string name="welcome_tagline">Приложение, чтобы не просто искать слова, а учить их. Бесплатно.</string>
+    <string name="welcome_tagline">Запоминайте слова, которые обычно забываете уже к завтрашнему дню.</string>
     <string name="welcome_selling_point_translations_title">Ищите любые слова</string>
     <string name="welcome_selling_point_translations_description">Примеры, формы, фразы и синонимы — всё в одном месте.</string>
     <string name="welcome_selling_point_collection_title">Свой список слов</string>
