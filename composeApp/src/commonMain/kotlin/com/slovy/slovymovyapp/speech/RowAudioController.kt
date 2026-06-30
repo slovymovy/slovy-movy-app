@@ -37,7 +37,10 @@ class RowAudioController(
     var voiceSetupLanguage by mutableStateOf<Language?>(null)
         private set
 
-    private val voicesByLanguage = mutableMapOf<Language, List<Text2SpeechVoice>>()
+    // Platform language lookup is stable, so it's cached. The enabled-voice filter is NOT cached:
+    // this controller is as long-lived as the (remembered) view model, so voices are re-resolved on
+    // every play to pick up enable/disable changes made in Settings.
+    private val targetLanguageByLanguage = mutableMapOf<Language, Text2SpeechLanguage>()
     private val voiceIndexByLanguage = mutableMapOf<Language, Int>()
     private var pendingPlay: PendingPlay? = null
     private var listenerAttached = false
@@ -174,16 +177,13 @@ class RowAudioController(
     }
 
     private suspend fun loadVoices(language: Language): List<Text2SpeechVoice> {
-        voicesByLanguage[language]?.let { return it }
         return try {
-            val languages = ttsManager.getAvailableLanguages()
-            val target = languages.firstOrNull { it.language == language }
-            val voices = if (target != null) {
-                voiceFilterHelper.loadEnabledVoices(ttsManager, target)
-            } else {
-                emptyList()
-            }
-            voicesByLanguage[language] = voices
+            val target = targetLanguageByLanguage[language]
+                ?: ttsManager.getAvailableLanguages().firstOrNull { it.language == language }
+                    ?.also { targetLanguageByLanguage[language] = it }
+                ?: return emptyList()
+            // Re-resolve enabled voices each play so Settings changes are reflected immediately.
+            val voices = voiceFilterHelper.loadEnabledVoices(ttsManager, target)
             if (voices.isNotEmpty() && voiceIndexByLanguage[language] == null) {
                 voiceIndexByLanguage[language] = voices.indices.random()
             }
