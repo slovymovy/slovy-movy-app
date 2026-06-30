@@ -57,6 +57,9 @@ import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.speech.RowAudioController
+import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.ChapterRule
@@ -111,6 +114,8 @@ class ListDetailViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val listsService: ListsService,
     private val lemmaRecovery: LemmaRecovery,
+    ttsManager: TextToSpeechManager,
+    voiceFilterHelper: VoiceFilterHelper,
     private val onFavoriteChanged: (added: Boolean) -> Unit,
 ) : ViewModel() {
     var list by mutableStateOf<WordList?>(null)
@@ -120,6 +125,23 @@ class ListDetailViewModel(
     val scrollState = LazyListState()
     private var loadJob: Job? = null
     private val prefetcher = SensePrefetcher(viewModelScope, ::loadSense)
+
+    val rowAudio = RowAudioController(
+        ttsManager = ttsManager,
+        voiceFilterHelper = voiceFilterHelper,
+        scope = viewModelScope,
+        analyticsSource = "list_detail",
+    )
+
+    fun toggleAudio(senseId: String) {
+        val item = findItem(senseId) ?: return
+        rowAudio.toggle(senseId, item.lemma, language)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        rowAudio.dispose()
+    }
 
     // SenseIds added by "Add all" in this session; "Remove all" only removes these so
     // favorites that existed before the bulk add survive. When empty (e.g. the screen
@@ -390,6 +412,13 @@ fun ListDetailScreen(
             onNavigateToWordDetail = { lemma, senseId ->
                 onNavigateToWordDetail(viewModel.language, lemma, senseId)
             },
+            playingSenseId = viewModel.rowAudio.playingSenseId,
+            preparingSenseId = viewModel.rowAudio.preparingSenseId,
+            onToggleAudio = viewModel::toggleAudio,
+            voiceSetupLanguage = viewModel.rowAudio.voiceSetupLanguage,
+            onOpenVoiceSettings = viewModel.rowAudio::openVoiceSettings,
+            onDismissVoiceSetup = viewModel.rowAudio::dismissVoiceSetup,
+            onLaterVoiceSetup = viewModel.rowAudio::dismissVoiceSetupAndPlay,
         )
 
         viewModel.state.isLoading -> ListDetailLoadingScreen(onBack = onBack)
@@ -486,6 +515,13 @@ fun ListDetailContent(
     onRemoveAll: () -> Unit = {},
     onPrefetchVisible: (List<ListWordItem>, IntRange) -> Unit = { _, _ -> },
     onNavigateToWordDetail: (lemma: String, senseId: String?) -> Unit = { _, _ -> },
+    playingSenseId: String? = null,
+    preparingSenseId: String? = null,
+    onToggleAudio: (String) -> Unit = {},
+    voiceSetupLanguage: Language? = null,
+    onOpenVoiceSettings: () -> Unit = {},
+    onDismissVoiceSetup: () -> Unit = {},
+    onLaterVoiceSetup: () -> Unit = {},
 ) {
     val isDark = LocalIsDarkTheme.current
 
@@ -571,10 +607,22 @@ fun ListDetailContent(
                         onFavoriteToggle = { onFavoriteToggle(item.senseId) },
                         onViewFullDetails = { onNavigateToWordDetail(item.lemma, item.senseId) },
                         onWordClick = { word -> onNavigateToWordDetail(word, null) },
+                        onToggleAudio = { onToggleAudio(item.senseId) },
+                        audioPlaying = playingSenseId == item.senseId,
+                        audioPreparing = preparingSenseId == item.senseId,
                     )
                 }
             }
         }
+    }
+
+    voiceSetupLanguage?.let { language ->
+        VoiceSetupBottomSheet(
+            language = language,
+            onOpenSettings = onOpenVoiceSettings,
+            onDismiss = onDismissVoiceSetup,
+            onLater = onLaterVoiceSetup,
+        )
     }
 }
 
@@ -586,6 +634,9 @@ private fun ListWordSenseCard(
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit,
+    onToggleAudio: () -> Unit,
+    audioPlaying: Boolean,
+    audioPreparing: Boolean,
 ) {
     SenseCard(
         data = SenseCardData(
@@ -612,6 +663,9 @@ private fun ListWordSenseCard(
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas,
+        onToggleAudio = onToggleAudio,
+        audioPlaying = audioPlaying,
+        audioPreparing = audioPreparing,
     )
 }
 

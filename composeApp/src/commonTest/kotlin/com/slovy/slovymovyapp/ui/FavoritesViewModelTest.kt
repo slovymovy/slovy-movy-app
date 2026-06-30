@@ -6,6 +6,9 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
+import com.slovy.slovymovyapp.test.TestContext
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
@@ -72,7 +75,14 @@ open class FavoritesViewModelTest : BaseTest() {
         settingsRepo: SettingsRepository = SettingsRepository(testAppDatabaseHolder().database),
         clock: Clock = testClock,
     ): FavoritesViewModel {
-        val vm = FavoritesViewModel(favRepo, dictRepo, settingsRepo, clock)
+        val vm = FavoritesViewModel(
+            favRepo,
+            dictRepo,
+            settingsRepo,
+            TextToSpeechManager(TestContext.androidContext()),
+            VoiceFilterHelper(settingsRepo),
+            clock,
+        )
         viewModelStore.put("test", vm)
         return vm
     }

@@ -64,6 +64,9 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.speech.RowAudioController
+import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.icons.NoFavsImage
@@ -171,6 +174,8 @@ class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
+    ttsManager: TextToSpeechManager,
+    voiceFilterHelper: VoiceFilterHelper,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -180,6 +185,24 @@ class FavoritesViewModel(
     val scrollState = LazyListState()
     val emptyStateScrollState = ScrollState(0)
     val snackbarHostState = SnackbarHostState()
+
+    val rowAudio = RowAudioController(
+        ttsManager = ttsManager,
+        voiceFilterHelper = voiceFilterHelper,
+        scope = viewModelScope,
+        analyticsSource = "favorites",
+    )
+
+    fun toggleAudio(senseId: String) {
+        val content = state as? FavoritesUiState.Content ?: return
+        val item = content.senses.firstOrNull { it.senseId == senseId } ?: return
+        rowAudio.toggle(senseId, item.lemma, item.targetLang)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        rowAudio.dispose()
+    }
 
     private var pendingScrollToTop: Boolean = false
     private var savedFavoritesLanguage: Language? = null
@@ -780,6 +803,13 @@ fun FavoritesScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onStartStudy = onStartStudy,
         onContinueStudyingNow = onContinueStudyingNow,
+        playingSenseId = viewModel.rowAudio.playingSenseId,
+        preparingSenseId = viewModel.rowAudio.preparingSenseId,
+        onToggleAudio = viewModel::toggleAudio,
+        voiceSetupLanguage = viewModel.rowAudio.voiceSetupLanguage,
+        onOpenVoiceSettings = viewModel.rowAudio::openVoiceSettings,
+        onDismissVoiceSetup = viewModel.rowAudio::dismissVoiceSetup,
+        onLaterVoiceSetup = viewModel.rowAudio::dismissVoiceSetupAndPlay,
     )
 }
 
@@ -803,6 +833,13 @@ fun FavoritesScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
+    playingSenseId: String? = null,
+    preparingSenseId: String? = null,
+    onToggleAudio: (String) -> Unit = {},
+    voiceSetupLanguage: Language? = null,
+    onOpenVoiceSettings: () -> Unit = {},
+    onDismissVoiceSetup: () -> Unit = {},
+    onLaterVoiceSetup: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val resolvedEmptyStateScrollState = emptyStateScrollState ?: remember { ScrollState(0) }
@@ -1077,7 +1114,10 @@ fun FavoritesScreenContent(
                                                     Analytics.logEvent(AnalyticsEvent.FAVORITES_WORD_SHOW)
                                                     onNavigateToWordDetail(item.targetLang, word, null)
                                                 },
-                                                favoriteLemmas = state.favoriteLemmas
+                                                favoriteLemmas = state.favoriteLemmas,
+                                                onToggleAudio = { onToggleAudio(item.senseId) },
+                                                audioPlaying = playingSenseId == item.senseId,
+                                                audioPreparing = preparingSenseId == item.senseId,
                                             )
                                         }
                                     }
@@ -1088,6 +1128,15 @@ fun FavoritesScreenContent(
                 }
             }
         }
+    }
+
+    voiceSetupLanguage?.let { language ->
+        VoiceSetupBottomSheet(
+            language = language,
+            onOpenSettings = onOpenVoiceSettings,
+            onDismiss = onDismissVoiceSetup,
+            onLater = onLaterVoiceSetup,
+        )
     }
 }
 
@@ -1219,7 +1268,10 @@ private fun FavoriteSenseCard(
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit = {},
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmas: Set<String> = emptySet(),
+    onToggleAudio: () -> Unit = {},
+    audioPlaying: Boolean = false,
+    audioPreparing: Boolean = false,
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -1247,7 +1299,10 @@ private fun FavoriteSenseCard(
         onViewFullDetails = onViewFullDetails,
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
-        favoriteLemmas = favoriteLemmas
+        favoriteLemmas = favoriteLemmas,
+        onToggleAudio = onToggleAudio,
+        audioPlaying = audioPlaying,
+        audioPreparing = audioPreparing,
     )
 }
 
