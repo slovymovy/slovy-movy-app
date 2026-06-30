@@ -393,6 +393,7 @@ fun ListDetailScreen(
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(lifecycle) {
+        viewModel.rowAudio.ensureAvailabilityLoaded()
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.reloadFavorites()
         }
@@ -412,6 +413,7 @@ fun ListDetailScreen(
             onNavigateToWordDetail = { lemma, senseId ->
                 onNavigateToWordDetail(viewModel.language, lemma, senseId)
             },
+            audioAvailable = viewModel.rowAudio.isLanguagePlayable(viewModel.language),
             playingSenseId = viewModel.rowAudio.playingSenseId,
             preparingSenseId = viewModel.rowAudio.preparingSenseId,
             onToggleAudio = viewModel::toggleAudio,
@@ -515,6 +517,7 @@ fun ListDetailContent(
     onRemoveAll: () -> Unit = {},
     onPrefetchVisible: (List<ListWordItem>, IntRange) -> Unit = { _, _ -> },
     onNavigateToWordDetail: (lemma: String, senseId: String?) -> Unit = { _, _ -> },
+    audioAvailable: Boolean = true,
     playingSenseId: String? = null,
     preparingSenseId: String? = null,
     onToggleAudio: (String) -> Unit = {},
@@ -607,7 +610,9 @@ fun ListDetailContent(
                         onFavoriteToggle = { onFavoriteToggle(item.senseId) },
                         onViewFullDetails = { onNavigateToWordDetail(item.lemma, item.senseId) },
                         onWordClick = { word -> onNavigateToWordDetail(word, null) },
-                        onToggleAudio = { onToggleAudio(item.senseId) },
+                        // Hide the speaker when the language can't be spoken (e.g. Desktop) so the
+                        // row never shows a dead control.
+                        onToggleAudio = if (audioAvailable) ({ onToggleAudio(item.senseId) }) else null,
                         audioPlaying = playingSenseId == item.senseId,
                         audioPreparing = preparingSenseId == item.senseId,
                     )
@@ -634,7 +639,7 @@ private fun ListWordSenseCard(
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit,
-    onToggleAudio: () -> Unit,
+    onToggleAudio: (() -> Unit)?,
     audioPlaying: Boolean,
     audioPreparing: Boolean,
 ) {

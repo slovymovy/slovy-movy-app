@@ -37,6 +37,11 @@ class RowAudioController(
     var voiceSetupLanguage by mutableStateOf<Language?>(null)
         private set
 
+    // Languages the TTS engine can speak. Null until [ensureAvailabilityLoaded] resolves it; empty
+    // means no playable language (e.g. Desktop). Drives whether a row shows the speaker at all.
+    private var availableLanguages by mutableStateOf<Set<Language>?>(null)
+    private var availabilityLoadStarted = false
+
     // Platform language lookup is stable, so it's cached. The enabled-voice filter is NOT cached:
     // this controller is as long-lived as the (remembered) view model, so voices are re-resolved on
     // every play to pick up enable/disable changes made in Settings.
@@ -56,6 +61,37 @@ class RowAudioController(
     private var pendingSpeakSenseId: String? = null
 
     private data class PendingPlay(val senseId: String, val lemma: String, val language: Language)
+
+    /**
+     * Loads the set of speakable languages once. Call when a host screen becomes visible (not at
+     * controller construction) so the shared TTS engine isn't initialised at app start for the
+     * app-lifetime Favorites controller.
+     */
+    fun ensureAvailabilityLoaded() {
+        if (availabilityLoadStarted) return
+        availabilityLoadStarted = true
+        scope.launch {
+            availableLanguages = try {
+                ttsManager.getAvailableLanguages()
+                    .filter { it.isAvailable }
+                    .map { it.language }
+                    .toSet()
+            } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to load TTS language availability", e)
+                emptySet()
+            }
+        }
+    }
+
+    /**
+     * Whether [language] can be spoken. Returns true while availability is still unknown so the
+     * speaker shows optimistically; once resolved, unplayable languages (incl. all of Desktop) hide
+     * it. Read during composition so the row recomposes when availability resolves.
+     */
+    fun isLanguagePlayable(language: Language): Boolean {
+        val known = availableLanguages ?: return true
+        return language in known
+    }
 
     /** Play [lemma] for [senseId], or stop if that row is already preparing/playing. */
     fun toggle(senseId: String, lemma: String, language: Language) {

@@ -750,6 +750,7 @@ fun FavoritesScreen(
     val undoLabel = stringResource(Res.string.favorites_removed_undo)
 
     LifecycleResumeEffect(viewModel) {
+        viewModel.rowAudio.ensureAvailabilityLoaded()
         viewModel.loadFavorites()
         onRefreshReviewState()
         onPauseOrDispose { }
@@ -803,6 +804,7 @@ fun FavoritesScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onStartStudy = onStartStudy,
         onContinueStudyingNow = onContinueStudyingNow,
+        isAudioAvailable = viewModel.rowAudio::isLanguagePlayable,
         playingSenseId = viewModel.rowAudio.playingSenseId,
         preparingSenseId = viewModel.rowAudio.preparingSenseId,
         onToggleAudio = viewModel::toggleAudio,
@@ -833,6 +835,7 @@ fun FavoritesScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
+    isAudioAvailable: (Language) -> Boolean = { true },
     playingSenseId: String? = null,
     preparingSenseId: String? = null,
     onToggleAudio: (String) -> Unit = {},
@@ -1115,7 +1118,13 @@ fun FavoritesScreenContent(
                                                     onNavigateToWordDetail(item.targetLang, word, null)
                                                 },
                                                 favoriteLemmas = state.favoriteLemmas,
-                                                onToggleAudio = { onToggleAudio(item.senseId) },
+                                                // Hide the speaker when the row's language can't be
+                                                // spoken (e.g. Desktop) — no dead control.
+                                                onToggleAudio = if (isAudioAvailable(item.targetLang)) {
+                                                    { onToggleAudio(item.senseId) }
+                                                } else {
+                                                    null
+                                                },
                                                 audioPlaying = playingSenseId == item.senseId,
                                                 audioPreparing = preparingSenseId == item.senseId,
                                             )
@@ -1269,7 +1278,7 @@ private fun FavoriteSenseCard(
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet(),
-    onToggleAudio: () -> Unit = {},
+    onToggleAudio: (() -> Unit)? = null,
     audioPlaying: Boolean = false,
     audioPreparing: Boolean = false,
 ) {
