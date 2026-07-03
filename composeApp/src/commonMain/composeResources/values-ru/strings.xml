@@ -743,4 +743,21 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d ч %2$d мин</string>
     <string name="favorites_study_done_next_review_a11y">Следующее повторение через %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Чтение</string>
+    <string name="reader_title_with_lang">Слова · %1$s</string>
+    <string name="reader_error_analyzing">Не удалось разобрать текст</string>
+    <string name="reader_paste_from_clipboard">Вставить текст из буфера обмена</string>
+    <string name="reader_analyzing">Анализ текста</string>
+    <string name="reader_tap_to_paste">Нажмите, чтобы вставить текст</string>
+    <string name="reader_paste_blurb">Скопируйте несколько слов и вставьте их сюда. Вы сможете посмотреть каждое слово и сохранить значения, которые хотите запомнить.</string>
+    <string name="reader_clipboard_empty">Буфер обмена пуст. Скопируйте текст и вставьте его сюда.</string>
+    <string name="reader_look_up">Посмотреть</string>
+    <string name="reader_frequency_legend">Обозначения частотности</string>
+    <string name="reader_frequency">Частотность</string>
+    <string name="reader_a11y_saved">Сохранено, %1$s</string>
+    <string name="search_add_words">Добавить слова</string>
+    <string name="search_add_words_row">Скопируйте и вставьте текст</string>
+    <string name="search_add_words_cd">Вставьте текст</string>
 </resources>

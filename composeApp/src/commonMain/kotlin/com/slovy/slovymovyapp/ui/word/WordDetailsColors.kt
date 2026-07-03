@@ -294,6 +294,33 @@ internal val DownloadVector: ImageVector = ImageVector.Builder(
     )
 }.build()
 
+// Clipboard glyph — line style matching the app's icon vocabulary. Stroke is black so
+// Icon() tint applies correctly; do not render via Image().
+internal val ClipboardVector: ImageVector = ImageVector.Builder(
+    name = "Clipboard",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f
+).apply {
+    addPath(
+        pathData = parsePathNodes("M9.2 3 H14.8 A1.2 1.2 0 0 1 16 4.2 V5.8 A1.2 1.2 0 0 1 14.8 7 H9.2 A1.2 1.2 0 0 1 8 5.8 V4.2 A1.2 1.2 0 0 1 9.2 3 Z"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 1.7f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+    addPath(
+        pathData = parsePathNodes("M9 5 H7 a2 2 0 0 0 -2 2 v12 a2 2 0 0 0 2 2 h10 a2 2 0 0 0 2 -2 V7 a2 2 0 0 0 -2 -2 h-2"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 1.7f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+}.build()
+
 internal val ExpandMoreVector: ImageVector = ImageVector.Builder(
     name = "ExpandableChevronDown",
     defaultWidth = 24.dp,

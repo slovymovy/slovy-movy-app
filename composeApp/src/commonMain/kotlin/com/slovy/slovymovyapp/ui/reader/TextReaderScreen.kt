@@ -1,57 +1,103 @@
 package com.slovy.slovymovyapp.ui.reader
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.LearnerLevel
+import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
-import com.slovy.slovymovyapp.ui.theme.AppSpacing
-import com.slovy.slovymovyapp.ui.word.colorsForLevel
+import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.word.ClipboardVector
+import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
+import com.slovy.slovymovyapp.ui.word.colorsForFrequency
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.stringResource
+import slovymovyapp.composeapp.generated.resources.*
 import kotlin.uuid.Uuid
 
 private val TOKEN_REGEX = Regex("[\\p{L}\\p{M}\\-']+|\\s+|[^\\p{L}\\p{M}\\-'\\s]+")
-private val PillShape = RoundedCornerShape(6.dp)
-private val HeartColor = Color(0xFFC46060)
+
+// Corpus-frequency bands used to colour the passage. Derived from each lemma's Zipf
+// frequency (~1 rare … ~7 extremely common). Thresholds are deliberately simple and
+// meant to be tuned against real passages.
+private const val HIGH_ZIPF_THRESHOLD = 4.3
+private const val MID_ZIPF_THRESHOLD = 3.3
+
+enum class FreqBand { HIGH, MID, LOW }
+
+private fun bandForZipf(zipf: Double?): FreqBand? = when {
+    zipf == null -> null
+    zipf >= HIGH_ZIPF_THRESHOLD -> FreqBand.HIGH
+    zipf >= MID_ZIPF_THRESHOLD -> FreqBand.MID
+    else -> FreqBand.LOW
+}
+
+// Band labels reuse the app-wide frequency strings (sense_frequency_*).
+@Composable
+private fun bandLabel(band: FreqBand): String = stringResource(
+    when (band) {
+        FreqBand.HIGH -> Res.string.sense_frequency_high
+        FreqBand.MID -> Res.string.sense_frequency_middle
+        FreqBand.LOW -> Res.string.sense_frequency_low
+    }
+)
+
+// Reuse the app-wide frequency chip palette (matches the design's --freq-* tokens).
+// Returns (background, foreground); the passage uses the background as a soft word wash and
+// the foreground for the legend swatches.
+@Composable
+private fun colorsForBand(band: FreqBand): Pair<Color, Color> = colorsForFrequency(
+    when (band) {
+        FreqBand.HIGH -> SenseFrequency.HIGH
+        FreqBand.MID -> SenseFrequency.MIDDLE
+        FreqBand.LOW -> SenseFrequency.LOW
+    }
+)
 
 data class TextToken(
     val text: String,
     val lemma: String? = null,
     val lemmaId: Uuid? = null,
-    val level: LearnerLevel? = null,
+    val band: FreqBand? = null,
     val isWord: Boolean
 )
 
@@ -59,7 +105,7 @@ data class TextReaderUiState(
     val tokens: List<TextToken> = emptyList(),
     val favoriteLemmas: Set<String> = emptySet(),
     val isAnalyzing: Boolean = false,
-    val error: String? = null
+    val isError: Boolean = false
 ) {
     val hasResults: Boolean get() = tokens.isNotEmpty()
 }
@@ -77,7 +123,7 @@ class TextReaderViewModel(
     fun analyzeText(text: String) {
         if (text.isBlank()) return
         viewModelScope.launch {
-            state = state.copy(isAnalyzing = true, error = null)
+            state = state.copy(isAnalyzing = true, isError = false)
             try {
                 val tokens = withContext(Dispatchers.Default) { tokenize(text) }
                 val uniqueForms = tokens.filter { it.isWord }.map { stripAccents(it.text) }.distinct()
@@ -89,7 +135,7 @@ class TextReaderViewModel(
                         token.copy(
                             lemma = result?.lemma,
                             lemmaId = result?.lemmaId,
-                            level = result?.level
+                            band = bandForZipf(result?.zipf)
                         )
                     }
                 }
@@ -98,7 +144,7 @@ class TextReaderViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                state = state.copy(isAnalyzing = false, error = e.message ?: "Error analyzing text")
+                state = state.copy(isAnalyzing = false, isError = true)
             }
         }
     }
@@ -165,15 +211,25 @@ fun TextReaderScreen(
     onWordClick: (language: Language, lemma: String) -> Unit,
     onBack: () -> Unit
 ) {
+    val clipboard = LocalClipboardManager.current
+    // Whether the clipboard holds text — checked here in the stateful layer (not in the
+    // stateless content) and refreshed on resume. We only read the clipboard's *content*
+    // when the user actually taps to paste, never eagerly.
+    var clipboardHasText by remember { mutableStateOf(runCatching { clipboard.hasText() }.getOrDefault(true)) }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshFavorites()
+        clipboardHasText = runCatching { clipboard.hasText() }.getOrDefault(true)
         onPauseOrDispose {}
     }
     TextReaderContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         language = viewModel.language,
-        onAnalyze = { viewModel.analyzeText(it) },
+        clipboardHasText = clipboardHasText,
+        onPaste = {
+            val text = clipboard.getText()?.text.orEmpty()
+            if (text.isNotBlank()) viewModel.analyzeText(text) else clipboardHasText = false
+        },
         onWordClick = onWordClick,
         onBack = onBack
     )
@@ -185,26 +241,38 @@ fun TextReaderContent(
     state: TextReaderUiState,
     scrollState: ScrollState = rememberScrollState(),
     language: Language = Language.DUTCH,
-    onAnalyze: (String) -> Unit = {},
+    clipboardHasText: Boolean = true,
+    onPaste: () -> Unit = {},
     onWordClick: (language: Language, lemma: String) -> Unit = { _, _ -> },
     onBack: () -> Unit = {}
 ) {
+    val title = if (state.hasResults) {
+        stringResource(Res.string.reader_title_with_lang, language.code.uppercase())
+    } else {
+        stringResource(Res.string.reader_title)
+    }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = {
                     Text(
-                        "Text reader · ${language.selfName}",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+                        title,
+                        style = TextStyle(
+                            fontFamily = MaterialTheme.serifFontFamily,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.1.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(Res.string.common_back)
                         )
                     }
                 }
@@ -222,8 +290,9 @@ fun TextReaderContent(
         } else {
             InputView(
                 isAnalyzing = state.isAnalyzing,
-                error = state.error,
-                onAnalyze = onAnalyze,
+                isError = state.isError,
+                clipboardHasText = clipboardHasText,
+                onPaste = onPaste,
                 modifier = Modifier.padding(innerPadding)
             )
         }
@@ -233,72 +302,108 @@ fun TextReaderContent(
 @Composable
 private fun InputView(
     isAnalyzing: Boolean,
-    error: String?,
-    onAnalyze: (String) -> Unit,
+    isError: Boolean,
+    clipboardHasText: Boolean,
+    onPaste: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val clipboardManager = LocalClipboardManager.current
-    var clipboardEmpty by remember { mutableStateOf(false) }
+    val canPaste = !isAnalyzing && clipboardHasText
+    val contentAlpha = if (clipboardHasText || isAnalyzing) 1f else 0.45f
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        val dashColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-            modifier = Modifier.padding(horizontal = AppSpacing.xxl)
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .drawBehind {
+                    val stroke = Stroke(
+                        width = 1.5.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(9.dp.toPx(), 7.dp.toPx()))
+                    )
+                    drawRoundRect(
+                        color = dashColor,
+                        cornerRadius = CornerRadius(24.dp.toPx()),
+                        style = stroke
+                    )
+                }
+                .clickable(
+                    enabled = canPaste,
+                    onClickLabel = stringResource(Res.string.reader_paste_from_clipboard),
+                    role = Role.Button
+                ) { onPaste() }
+                .padding(horizontal = 22.dp, vertical = 24.dp)
+                .semantics(mergeDescendants = true) {}
         ) {
-            Text(
-                text = "Copy any text to your clipboard and paste it here with the button below",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "Each word is looked up individually — phrases and multi-word expressions are not recognized",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-
             if (isAnalyzing) {
+                val analyzingLabel = stringResource(Res.string.reader_analyzing)
                 CircularProgressIndicator(
-                    modifier = Modifier.semantics { contentDescription = "Analyzing text" }
+                    modifier = Modifier.semantics { contentDescription = analyzingLabel }
                 )
             } else {
-                FilledTonalButton(
-                    onClick = {
-                        val text = clipboardManager.getText()?.text.orEmpty()
-                        if (text.isBlank()) {
-                            clipboardEmpty = true
-                        } else {
-                            clipboardEmpty = false
-                            onAnalyze(text)
-                        }
-                    }
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .alpha(contentAlpha)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Paste")
+                    Icon(
+                        imageVector = ClipboardVector,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(30.dp)
+                    )
                 }
-            }
-
-            if (clipboardEmpty) {
                 Text(
-                    text = "Clipboard is empty. Copy something awesome and paste here",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                    text = stringResource(Res.string.reader_tap_to_paste),
+                    style = TextStyle(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = (-0.2).sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.alpha(contentAlpha)
+                )
+                Text(
+                    text = if (clipboardHasText) {
+                        stringResource(Res.string.reader_paste_blurb)
+                    } else {
+                        stringResource(Res.string.reader_clipboard_empty)
+                    },
+                    style = TextStyle(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontSize = 14.5.sp,
+                        fontStyle = FontStyle.Italic,
+                        lineHeight = 22.5.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(max = 250.dp)
                 )
             }
+        }
 
-            if (error != null) {
-                Text(
-                    text = error,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
-                )
-            }
+        if (isError) {
+            Text(
+                text = stringResource(Res.string.reader_error_analyzing),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -312,27 +417,30 @@ private fun ResultView(
     onWordClick: (language: Language, lemma: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Full (bg, text) color pairs per level — used as solid pill backgrounds
-    val levelColors: Map<LearnerLevel, Pair<Color, Color>> = mapOf(
-        LearnerLevel.A1 to colorsForLevel(LearnerLevel.A1),
-        LearnerLevel.A2 to colorsForLevel(LearnerLevel.A2),
-        LearnerLevel.B1 to colorsForLevel(LearnerLevel.B1),
-        LearnerLevel.B2 to colorsForLevel(LearnerLevel.B2),
-        LearnerLevel.C1 to colorsForLevel(LearnerLevel.C1),
-        LearnerLevel.C2 to colorsForLevel(LearnerLevel.C2),
+    val passageStyle = TextStyle(
+        fontFamily = MaterialTheme.serifFontFamily,
+        fontSize = 18.5.sp,
+        lineHeight = 35.5.sp,
+        letterSpacing = 0.1.sp,
+        color = MaterialTheme.colorScheme.onSurface
     )
-    // Neutral pill for words not in the DB or without a CEFR level yet
-    val neutralBg = MaterialTheme.colorScheme.surfaceContainerHigh
-    val neutralText = MaterialTheme.colorScheme.onSurfaceVariant
+
+    // Resolved once and shared by every word rather than per-word inside HighlightedWord.
+    val lookUpLabel = stringResource(Res.string.reader_look_up)
 
     Column(modifier = modifier.fillMaxSize()) {
+        FrequencyLegend()
+
+        // Note: FlowRow composes every token eagerly (it is not lazy), so a very large paste
+        // builds the whole passage up front. Fine for normal paragraphs; revisit if we ever
+        // need to support book-length input.
         FlowRow(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(scrollState)
-                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
+                .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             val groups = remember(state.tokens) { groupTokensForRendering(state.tokens) }
             groups.forEach { group ->
@@ -344,132 +452,118 @@ private fun ResultView(
                             Spacer(modifier = Modifier.fillMaxWidth())
                         }
                     } else {
-                        Text(
-                            text = single.text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
+                        Text(text = single.text, style = passageStyle)
                     }
                 } else if (group.none { it.isWord }) {
-                    // Pure punctuation/number group — render directly as FlowRow items (no Row wrapper)
-                    group.forEach { token ->
-                        Text(
-                            text = token.text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
-                    }
+                    // Pure punctuation/number group
+                    group.forEach { token -> Text(text = token.text, style = passageStyle) }
                 } else {
                     // Word + adjacent punctuation group — wrap in Row so FlowRow never splits them
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         group.forEach { token ->
-                            if (!token.isWord) {
-                                Text(
-                                    text = token.text,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = 2.dp)
-                                )
-                            } else if (token.lemma == null) {
-                                // Word not found in dictionary — plain text, no pill
-                                Text(
-                                    text = token.text,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = 2.dp)
-                                )
+                            if (!token.isWord || token.lemma == null) {
+                                // Inert punctuation, or a word not found in the dictionary — plain text.
+                                Text(text = token.text, style = passageStyle)
                             } else {
-                                val (bgColor, textColor) = levelColors[token.level] ?: (neutralBg to neutralText)
-                                val lemmaCapture = token.lemma
-                                val isFavorite = state.favoriteLemmas.contains(lemmaCapture.lowercase())
-                                val semanticDescription = buildString {
-                                    if (isFavorite) append("Saved, ")
-                                    append(token.text)
-                                    token.level?.let { append(", ${it.name} level") }
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .semantics { contentDescription = semanticDescription }
-                                        .clip(PillShape)
-                                        .background(bgColor)
-                                        .clickable(
-                                            onClickLabel = "Look up",
-                                            role = Role.Button
-                                        ) { onWordClick(language, lemmaCapture) }
-                                        .padding(horizontal = 4.dp, vertical = 2.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        if (isFavorite) {
-                                            Text(
-                                                text = "\u2665",
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = HeartColor,
-                                                modifier = Modifier.clearAndSetSemantics {}
-                                            )
-                                        }
-                                        Text(
-                                            text = token.text,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = textColor
-                                        )
-                                    }
-                                }
+                                HighlightedWord(
+                                    token = token,
+                                    style = passageStyle,
+                                    isFavorite = state.favoriteLemmas.contains(token.lemma.lowercase()),
+                                    lookUpLabel = lookUpLabel,
+                                    onClick = { onWordClick(language, token.lemma) }
+                                )
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
 
-        Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)
-                    .semantics(mergeDescendants = false) {
-                        contentDescription = "Level legend"
-                    },
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LearnerLevel.entries.forEach { level ->
-                    val (bg, fg) = levelColors[level] ?: return@forEach
-                    Surface(
-                        color = bg,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        modifier = Modifier.clearAndSetSemantics {}
-                    ) {
-                        Text(
-                            text = level.name,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = fg,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-                Surface(
-                    color = neutralBg,
-                    shape = MaterialTheme.shapes.extraSmall,
-                    modifier = Modifier.clearAndSetSemantics {}
+/** A single tappable content word: soft frequency-band background wash + optional saved heart. */
+@Composable
+private fun HighlightedWord(
+    token: TextToken,
+    style: TextStyle,
+    isFavorite: Boolean,
+    lookUpLabel: String,
+    onClick: () -> Unit
+) {
+    val bandBackground = token.band?.let { colorsForBand(it).first }
+    val savedWord = if (isFavorite) stringResource(Res.string.reader_a11y_saved, token.text) else token.text
+    val bandLabelText = token.band?.let { bandLabel(it) }
+    val semanticDescription = listOfNotNull(savedWord, bandLabelText).joinToString(", ")
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier
+            .semantics { contentDescription = semanticDescription }
+            .clip(RoundedCornerShape(4.dp))
+            .then(if (bandBackground != null) Modifier.background(bandBackground) else Modifier)
+            .clickable(onClickLabel = lookUpLabel, role = Role.Button) { onClick() }
+            .padding(horizontal = 4.dp, vertical = 1.dp)
+    ) {
+        if (isFavorite) {
+            Text(
+                text = "♥",
+                fontSize = 11.sp,
+                color = FavoriteAccentColor,
+                modifier = Modifier.clearAndSetSemantics {}
+            )
+        }
+        Text(text = token.text, style = style)
+    }
+}
+
+/** Slim static row decoding the passage's frequency colours. */
+@Composable
+private fun FrequencyLegend() {
+    val legendLabel = stringResource(Res.string.reader_frequency_legend)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 11.dp)
+            .semantics { contentDescription = legendLabel },
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(Res.string.reader_frequency).uppercase(),
+            style = TextStyle(
+                fontSize = 10.5.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier.clearAndSetSemantics {}
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clearAndSetSemantics {}
+        ) {
+            FreqBand.entries.forEach { band ->
+                val (_, fg) = colorsForBand(band)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "\u2665",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = HeartColor
+                    Box(
+                        modifier = Modifier
+                            .size(9.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(fg)
+                    )
+                    Text(
+                        text = bandLabel(band),
+                        style = TextStyle(
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.2.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = "Saved",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = neutralText
-                        )
-                    }
+                    )
                 }
             }
         }
@@ -513,28 +607,28 @@ private fun TextReaderResultPreview(
         TextReaderContent(
             state = TextReaderUiState(
                 tokens = listOf(
-                    TextToken("De", lemma = "de", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"), level = LearnerLevel.A1, isWord = true),
+                    TextToken("Gisteren", lemma = "gisteren", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000001"), band = FreqBand.HIGH, isWord = true),
                     TextToken(" ", isWord = false),
-                    TextToken("kinderen", lemma = "kind", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"), level = LearnerLevel.A1, isWord = true),
+                    TextToken("bleef", lemma = "blijven", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000002"), band = FreqBand.HIGH, isWord = true),
+                    TextToken(" ik laat op om te ", isWord = false),
+                    TextToken("lezen", lemma = "lezen", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"), band = FreqBand.HIGH, isWord = true),
+                    TextToken(". De ", isWord = false),
+                    TextToken("stad", lemma = "stad", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"), band = FreqBand.HIGH, isWord = true),
+                    TextToken(" was ", isWord = false),
+                    TextToken("stil", lemma = "stil", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000005"), band = FreqBand.MID, isWord = true),
+                    TextToken(", en door het ", isWord = false),
+                    TextToken("raam", lemma = "raam", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000006"), band = FreqBand.MID, isWord = true),
+                    TextToken(" zag ik de eerste ", isWord = false),
+                    TextToken("merkwaardige", lemma = "merkwaardig", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000007"), band = FreqBand.LOW, isWord = true),
                     TextToken(" ", isWord = false),
-                    TextToken("liepen", lemma = "lopen", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000003"), level = LearnerLevel.A2, isWord = true),
-                    TextToken(" ", isWord = false),
-                    TextToken("door", lemma = "door", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000004"), level = LearnerLevel.A1, isWord = true),
-                    TextToken(" ", isWord = false),
-                    TextToken("het", lemma = "het", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000005"), level = LearnerLevel.A1, isWord = true),
-                    TextToken(" ", isWord = false),
-                    TextToken("park", lemma = "park", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000006"), level = LearnerLevel.B1, isWord = true),
-                    TextToken(".", isWord = false),
-                    TextToken("\n\n", isWord = false),
+                    TextToken("gezelligheid", lemma = "gezelligheid", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000008"), band = FreqBand.LOW, isWord = true),
+                    TextToken(". Sommige ", isWord = false),
                     TextToken("onbekend", isWord = true),
                     TextToken(" ", isWord = false),
-                    TextToken("beleggen", lemma = "beleggen", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000009"), level = null, isWord = true),
-                    TextToken(" ", isWord = false),
-                    TextToken("woorden", lemma = "woord", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000007"), level = LearnerLevel.C1, isWord = true),
-                    TextToken(" ", isWord = false),
-                    TextToken("complexe", lemma = "complex", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000008"), level = LearnerLevel.C2, isWord = true),
+                    TextToken("herinneringen", lemma = "herinnering", lemmaId = Uuid.parse("00000000-0000-0000-0000-000000000009"), band = FreqBand.MID, isWord = true),
+                    TextToken(".", isWord = false),
                 ),
-                favoriteLemmas = setOf("lopen")
+                favoriteLemmas = setOf("blijven", "gezelligheid", "herinnering")
             ),
             language = Language.DUTCH
         )

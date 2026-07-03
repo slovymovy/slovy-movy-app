@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -30,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -46,6 +49,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
+import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -878,6 +882,10 @@ private fun EmptySearchState(
             }
         }
 
+        // "Add words" entry into the Read (paste-to-highlight) flow — its own feed
+        // section, sitting below Explore and above the curated lists.
+        ReadSection(onClick = onNavigateToTextReader)
+
         if (curatedLists.isNotEmpty()) {
             Text(
                 text = stringResource(Res.string.search_section_lists_for_you).uppercase(),
@@ -960,11 +968,77 @@ private fun EmptySearchState(
             )
         }
 
-        FilledTonalButton(onClick = onNavigateToTextReader) {
-            Text("Add your text")
-        }
-
         Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+/**
+ * "ADD WORDS" feed section — the entry into the Read (paste-to-highlight) flow.
+ * A hairline-outlined, primary-tinted pill with a clipboard glyph echoing the paste
+ * drop-zone it opens.
+ */
+@Composable
+private fun ReadSection(onClick: () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    val background = MaterialTheme.colorScheme.background
+    Column(modifier = Modifier.padding(bottom = 4.dp)) {
+        Text(
+            text = stringResource(Res.string.search_add_words).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.6.sp,
+                fontSize = 10.5.sp,
+            ),
+            color = primary,
+            modifier = Modifier.padding(top = 8.dp, bottom = 10.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(lerp(background, primary, 0.12f), lerp(background, primary, 0.06f))
+                    )
+                )
+                .border(1.dp, primary.copy(alpha = 0.22f), RoundedCornerShape(16.dp))
+                .clickable(onClickLabel = stringResource(Res.string.search_add_words_cd), role = Role.Button) { onClick() }
+                .padding(start = 12.dp, end = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(13.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(primary.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ClipboardVector,
+                    contentDescription = null,
+                    tint = primary,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+            Text(
+                text = stringResource(Res.string.search_add_words_row),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    letterSpacing = 0.1.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = primary.copy(alpha = 0.75f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 

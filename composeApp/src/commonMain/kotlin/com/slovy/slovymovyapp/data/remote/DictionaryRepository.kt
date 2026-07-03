@@ -1407,7 +1407,7 @@ class DictionaryRepository(
     data class TokenResult(
         val lemma: String,
         val lemmaId: Uuid,
-        val level: LearnerLevel?
+        val zipf: Double?
     )
 
     /**
@@ -1442,14 +1442,10 @@ class DictionaryRepository(
                         .executeAsList()
                         .forEach { row ->
                             if (!dbPass1.containsKey(row.form_normalized)) {
-                                val level = row.min_level?.let { rawValue ->
-                                    com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
-                                        .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
-                                }
                                 dbPass1[row.form_normalized] = TokenResult(
                                     lemma = row.lemma,
                                     lemmaId = row.lemma_id,
-                                    level = level
+                                    zipf = row.zipf
                                 )
                             }
                         }
@@ -1465,14 +1461,10 @@ class DictionaryRepository(
                         .executeAsList()
                         .forEach { row ->
                             if (!directResults.containsKey(row.lemma_normalized)) {
-                                val level = row.min_level?.let { rawValue ->
-                                    com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
-                                        .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
-                                }
                                 directResults[row.lemma_normalized] = TokenResult(
                                     lemma = row.lemma,
                                     lemmaId = row.lemma_id,
-                                    level = level
+                                    zipf = row.zipf
                                 )
                             }
                         }
