@@ -1428,56 +1428,57 @@ class DictionaryRepository(
     ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
         if (forms.isEmpty()) return@withContext emptyMap()
 
-        val databases = openDictionaryDatabases(language)
         val result = mutableMapOf<String, TokenResult>()
 
-        for (db in databases) {
-            val q = db.dictionaryQueries
+        withDictionaryDatabases(language) { databases ->
+            for (db in databases) {
+                val q = db.dictionaryQueries
 
-            // Pass 1: form-based lookup (handles inflected forms like "liepen" → "lopen").
-            // Collect per-DB first so that local DB results can override RO DB results.
-            val dbPass1 = mutableMapOf<String, TokenResult>()
-            forms.chunked(999).forEach { chunk ->
-                q.selectTokenDataByForms(language.code, chunk)
-                    .executeAsList()
-                    .forEach { row ->
-                        if (!dbPass1.containsKey(row.form_normalized)) {
-                            val level = row.min_level?.let { rawValue ->
-                                com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
-                                    .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
+                // Pass 1: form-based lookup (handles inflected forms like "liepen" → "lopen").
+                // Collect per-DB first so that local DB results can override RO DB results.
+                val dbPass1 = mutableMapOf<String, TokenResult>()
+                forms.chunked(999).forEach { chunk ->
+                    q.selectTokenDataByForms(language.code, chunk)
+                        .executeAsList()
+                        .forEach { row ->
+                            if (!dbPass1.containsKey(row.form_normalized)) {
+                                val level = row.min_level?.let { rawValue ->
+                                    com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
+                                        .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
+                                }
+                                dbPass1[row.form_normalized] = TokenResult(
+                                    lemma = row.lemma,
+                                    lemmaId = row.lemma_id,
+                                    level = level
+                                )
                             }
-                            dbPass1[row.form_normalized] = TokenResult(
-                                lemma = row.lemma,
-                                lemmaId = row.lemma_id,
-                                level = level
-                            )
                         }
-                    }
-            }
-            result.putAll(dbPass1)
+                }
+                result.putAll(dbPass1)
 
-            // Pass 2: direct lemma lookup — overrides pass-1 when the token itself is a lemma.
-            // Function words (e.g. "wat") may not have form-table entries and would otherwise
-            // resolve to a wrong high-frequency word that shares the same inflected form.
-            val directResults = mutableMapOf<String, TokenResult>()
-            forms.chunked(999).forEach { chunk ->
-                q.selectTokenDataByLemmas(language.code, chunk)
-                    .executeAsList()
-                    .forEach { row ->
-                        if (!directResults.containsKey(row.lemma_normalized)) {
-                            val level = row.min_level?.let { rawValue ->
-                                com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
-                                    .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
+                // Pass 2: direct lemma lookup — overrides pass-1 when the token itself is a lemma.
+                // Function words (e.g. "wat") may not have form-table entries and would otherwise
+                // resolve to a wrong high-frequency word that shares the same inflected form.
+                val directResults = mutableMapOf<String, TokenResult>()
+                forms.chunked(999).forEach { chunk ->
+                    q.selectTokenDataByLemmas(language.code, chunk)
+                        .executeAsList()
+                        .forEach { row ->
+                            if (!directResults.containsKey(row.lemma_normalized)) {
+                                val level = row.min_level?.let { rawValue ->
+                                    com.slovy.slovymovyapp.data.dictionary.LearnerLevel.from(rawValue)
+                                        .let { dbLevel -> LearnerLevel.valueOf(dbLevel.name) }
+                                }
+                                directResults[row.lemma_normalized] = TokenResult(
+                                    lemma = row.lemma,
+                                    lemmaId = row.lemma_id,
+                                    level = level
+                                )
                             }
-                            directResults[row.lemma_normalized] = TokenResult(
-                                lemma = row.lemma,
-                                lemmaId = row.lemma_id,
-                                level = level
-                            )
                         }
-                    }
+                }
+                result.putAll(directResults)
             }
-            result.putAll(directResults)
         }
 
         result
@@ -1527,5 +1528,5 @@ class DictionaryRepository(
     }
 
     suspend fun getFavoriteLemmasByLang(language: Language): Set<String> =
-        favoritesRepository.getDistinctLemmasByLang(language).mapTo(mutableSetOf()) { it.lowercase() }
+        favoritesRepository.getFavoriteLemmas(language).mapTo(mutableSetOf()) { it.lowercase() }
 }
