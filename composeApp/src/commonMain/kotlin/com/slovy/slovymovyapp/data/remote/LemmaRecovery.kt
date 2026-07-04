@@ -30,6 +30,10 @@ class LemmaRecovery internal constructor(
     private val resolveSenses:
     suspend (Language, String, Set<String>) -> Map<String, DictionaryRepository.SenseLookupResult>,
 ) {
+    // Shared across recoverAllInstalled and every recoverSenses call, so concurrent recovery
+    // passes (e.g. a post-download pass plus per-row list repairs) never exceed the cap in total.
+    private val groupSemaphore = Semaphore(MAX_PARALLEL_RECOVERY_GROUPS)
+
     constructor(
         itemsProvider: suspend () -> List<RecoverableSense>,
         dataDbManager: DataDbManager,
@@ -127,11 +131,9 @@ class LemmaRecovery internal constructor(
             onProgress(LemmaRecoveryProgress(activeLemmas.values.firstOrNull(), completed, total, failed))
         }
 
-        val semaphore = Semaphore(MAX_PARALLEL_RECOVERY_GROUPS)
-
         groupsToRecover.map { (key, groupItems) ->
             async {
-                semaphore.withPermit {
+                groupSemaphore.withPermit {
                     var failedGroup = false
                     val lemma = groupItems.first().lemma.trim()
                     try {
@@ -206,10 +208,9 @@ class LemmaRecovery internal constructor(
         val groups = senses
             .filter { it.lemma.isNotBlank() }
             .groupBy { LemmaGroupKey(it.language, it.lemma.trim().lowercase()) }
-        val semaphore = Semaphore(MAX_PARALLEL_RECOVERY_GROUPS)
         groups.values.map { groupItems ->
             async {
-                semaphore.withPermit {
+                groupSemaphore.withPermit {
                     val language = groupItems.first().language
                     val lemma = groupItems.first().lemma.trim()
                     val senseIds = groupItems.map { it.senseId }.toSet()

@@ -126,6 +126,24 @@ class ListDetailViewModel(
     // was opened with everything already favorited), "Remove all" removes all items.
     private var sessionBulkAddedSenseIds: Set<String> = emptySet()
 
+    // Default translation targets resolved at load(); used to detect senses that resolved
+    // locally but lack a requested translation language (gap in the downloaded translation DB).
+    private var translationTargets: List<Language> = emptyList()
+
+    // SenseIds already handed to translation repair this session, so a fetch that yields no
+    // translations (or fails) is not retried on every prefetch/expand of the same row.
+    // Parallelism is capped inside LemmaRecovery, shared across all recovery callers.
+    private val translationRecoveryAttempted = mutableSetOf<String>()
+
+    // Lemmas whose repair completed without filling the gap (fetch failed or the server has no
+    // translations for them): further senses of the same lemma skip the pointless refetch.
+    // Successful repairs need no lemma-level dedup — concurrent same-lemma fetches are shared
+    // by WordFetchManager, and once ingested the next repair resolves locally without a server
+    // round trip.
+    private val translationRepairFailedLemmas = mutableSetOf<String>()
+
+    private fun lemmaRepairKey(lemma: String) = lemma.trim().lowercase()
+
     init {
         load()
     }
@@ -150,6 +168,9 @@ class ListDetailViewModel(
                 return@launch
             }
             list = resolvedList
+            translationTargets = repository.defaultTranslationTargets(language)
+                .filter { it != language }
+                .distinctBy { it.code }
             val resolved = repository.getListSenses(language, resolvedList.senseIds)
                 .associateBy { it.senseId }
             val allFavorites = favoritesRepository.getAll().filter { it.language == language }
@@ -204,32 +225,75 @@ class ListDetailViewModel(
             // background; resolved items are already on screen, so this never blocks the UI.
             // Only senses with a usable lemma are fetchable.
             val missing = resolvedList.senses.filter { it.senseId !in resolved && it.lemma.isNotBlank() }
-            if (missing.isNotEmpty()) fetchMissingSenses(missing)
+            // Senses seeded from the cache may lack a translation language (an earlier repair
+            // failed or never ran); hand them to the same recovery pass so reopening the screen
+            // retries the fetch.
+            val translationGaps = items.mapNotNull { item ->
+                val sense = item.sense ?: return@mapNotNull null
+                if (senseMissingTranslations(sense) &&
+                    lemmaRepairKey(item.lemma) !in translationRepairFailedLemmas &&
+                    translationRecoveryAttempted.add(item.senseId)
+                ) {
+                    WordListSense(senseId = item.senseId, lemma = item.lemma, language = language)
+                } else null
+            }
+            if (missing.isNotEmpty() || translationGaps.isNotEmpty()) {
+                fetchMissingSenses(missing, translationGaps)
+            }
         }
     }
 
-    private suspend fun fetchMissingSenses(missing: List<WordListSense>) {
+    // True when the sense resolved locally but the downloaded/local translation DBs have no data
+    // for one of the requested target languages — the case the server fetch can repair.
+    private fun senseMissingTranslations(sense: LanguageCardResponseSense): Boolean =
+        translationTargets.any { it !in sense.translations && it !in sense.targetLangDefinitions }
+
+    private suspend fun fetchMissingSenses(
+        missing: List<WordListSense>,
+        translationGaps: List<WordListSense>,
+    ) {
         // Hand the missing senses to LemmaRecovery, which fetches (server stream + ingest, with
         // retry/backoff, parallelism cap and cancellation) and resolves each one, calling back as
         // results arrive. WordListSense is itself a RecoverableSense, so no mapping is needed; the
         // screen only maps each outcome to its per-item UI state.
-        lemmaRecovery.recoverSenses(missing) { recovered ->
+        val gapLemmaKeysBySenseId = translationGaps.associate { it.senseId to lemmaRepairKey(it.lemma) }
+        lemmaRecovery.recoverSenses(missing + translationGaps) { recovered ->
             val lookup = recovered.result
             val senseWithPos = lookup?.sense
-            val error = when {
-                senseWithPos != null -> null
-                lookup?.missingReason != null -> lookup.missingReason.toFavoriteSenseLoadError(language)
-                else -> recovered.error?.message?.let(UiText::Plain)
-                    ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
-            }
-            updateItem(recovered.senseId) {
-                it.copy(
-                    sense = senseWithPos?.sense,
-                    relatedWords = senseWithPos?.relatedWords ?: it.relatedWords,
-                    pos = senseWithPos?.pos,
-                    loading = false,
-                    error = error,
-                )
+            val gapLemmaKey = gapLemmaKeysBySenseId[recovered.senseId]
+            if (gapLemmaKey != null) {
+                // Translation repair: the row already renders a locally resolved sense, so a
+                // failed or still-translation-less fetch keeps the current content instead of
+                // surfacing an error. A repair that didn't fill the gap marks the lemma so
+                // other senses of the same word don't refetch what the server cannot provide.
+                if (senseWithPos == null || senseMissingTranslations(senseWithPos.sense)) {
+                    translationRepairFailedLemmas += gapLemmaKey
+                }
+                if (senseWithPos != null) {
+                    updateItem(recovered.senseId) {
+                        it.copy(
+                            sense = senseWithPos.sense,
+                            relatedWords = senseWithPos.relatedWords.ifEmpty { it.relatedWords },
+                            pos = senseWithPos.pos,
+                        )
+                    }
+                }
+            } else {
+                val error = when {
+                    senseWithPos != null -> null
+                    lookup?.missingReason != null -> lookup.missingReason.toFavoriteSenseLoadError(language)
+                    else -> recovered.error?.message?.let(UiText::Plain)
+                        ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
+                }
+                updateItem(recovered.senseId) {
+                    it.copy(
+                        sense = senseWithPos?.sense,
+                        relatedWords = senseWithPos?.relatedWords ?: it.relatedWords,
+                        pos = senseWithPos?.pos,
+                        loading = false,
+                        error = error,
+                    )
+                }
             }
         }
     }
@@ -272,6 +336,21 @@ class ListDetailViewModel(
                     pos = senseWithPos?.pos,
                     loading = false,
                     error = error,
+                )
+            }
+            // The row is already rendering the local sense; if a requested translation language
+            // is absent from the local DBs, fetch it from the server (same path the word-detail
+            // screen uses) and swap the row content in when it arrives.
+            if (senseWithPos != null &&
+                senseMissingTranslations(senseWithPos.sense) &&
+                lemmaRepairKey(item.lemma) !in translationRepairFailedLemmas &&
+                translationRecoveryAttempted.add(item.senseId)
+            ) {
+                fetchMissingSenses(
+                    missing = emptyList(),
+                    translationGaps = listOf(
+                        WordListSense(senseId = item.senseId, lemma = item.lemma, language = language)
+                    ),
                 )
             }
         } catch (e: CancellationException) {
