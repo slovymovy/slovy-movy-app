@@ -749,6 +749,7 @@
     <string name="reader_title">Lezen</string>
     <string name="reader_title_with_lang">Woorden · %1$s</string>
     <string name="reader_error_analyzing">De tekst kon niet worden geanalyseerd</string>
+    <string name="reader_text_too_long">Die tekst is wat lang — probeer maximaal %1$d woorden.</string>
     <string name="reader_paste_from_clipboard">Tekst vanaf het klembord plakken</string>
     <string name="reader_analyzing">Tekst analyseren</string>
     <string name="reader_tap_to_paste">Tik om tekst te plakken</string>

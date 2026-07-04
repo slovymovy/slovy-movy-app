@@ -748,6 +748,7 @@
     <string name="reader_title">Read</string>
     <string name="reader_title_with_lang">Words · %1$s</string>
     <string name="reader_error_analyzing">Couldn't analyze the text</string>
+    <string name="reader_text_too_long">That text is a bit long — try up to %1$d words.</string>
     <string name="reader_paste_from_clipboard">Paste text from clipboard</string>
     <string name="reader_analyzing">Analyzing text</string>
     <string name="reader_tap_to_paste">Tap to paste text</string>

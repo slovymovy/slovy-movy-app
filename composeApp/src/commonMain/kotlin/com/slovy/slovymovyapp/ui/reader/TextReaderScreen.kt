@@ -62,6 +62,10 @@ private val TOKEN_REGEX = Regex("[\\p{L}\\p{M}\\-']+|\\s+|[^\\p{L}\\p{M}\\-'\\s]
 private const val HIGH_ZIPF_THRESHOLD = 4.3
 private const val MID_ZIPF_THRESHOLD = 3.3
 
+// The passage is rendered eagerly (FlowRow is not lazy), so cap the word count to keep
+// composition responsive and avoid ANRs on very large pastes.
+private const val MAX_WORDS = 2000
+
 enum class FreqBand { HIGH, MID, LOW }
 
 private fun bandForZipf(zipf: Double?): FreqBand? = when {
@@ -105,7 +109,8 @@ data class TextReaderUiState(
     val tokens: List<TextToken> = emptyList(),
     val favoriteLemmas: Set<String> = emptySet(),
     val isAnalyzing: Boolean = false,
-    val isError: Boolean = false
+    val isError: Boolean = false,
+    val isTooLong: Boolean = false
 ) {
     val hasResults: Boolean get() = tokens.isNotEmpty()
 }
@@ -123,9 +128,13 @@ class TextReaderViewModel(
     fun analyzeText(text: String) {
         if (text.isBlank()) return
         viewModelScope.launch {
-            state = state.copy(isAnalyzing = true, isError = false)
+            state = state.copy(isAnalyzing = true, isError = false, isTooLong = false)
             try {
                 val tokens = withContext(Dispatchers.Default) { tokenize(text) }
+                if (tokens.count { it.isWord } > MAX_WORDS) {
+                    state = state.copy(isAnalyzing = false, isTooLong = true)
+                    return@launch
+                }
                 val uniqueForms = tokens.filter { it.isWord }.map { stripAccents(it.text) }.distinct()
                 val results = repository.lookupTokensBatch(uniqueForms, language)
                 val resolvedTokens = tokens.map { token ->
@@ -291,6 +300,7 @@ fun TextReaderContent(
             InputView(
                 isAnalyzing = state.isAnalyzing,
                 isError = state.isError,
+                isTooLong = state.isTooLong,
                 clipboardHasText = clipboardHasText,
                 onPaste = onPaste,
                 modifier = Modifier.padding(innerPadding)
@@ -303,6 +313,7 @@ fun TextReaderContent(
 private fun InputView(
     isAnalyzing: Boolean,
     isError: Boolean,
+    isTooLong: Boolean,
     clipboardHasText: Boolean,
     onPaste: () -> Unit,
     modifier: Modifier = Modifier
@@ -394,6 +405,16 @@ private fun InputView(
                     modifier = Modifier.widthIn(max = 250.dp)
                 )
             }
+        }
+
+        if (isTooLong) {
+            Text(
+                text = stringResource(Res.string.reader_text_too_long, MAX_WORDS),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         if (isError) {

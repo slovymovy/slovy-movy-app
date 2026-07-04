@@ -1428,6 +1428,9 @@ class DictionaryRepository(
     ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
         if (forms.isEmpty()) return@withContext emptyMap()
 
+        // Each query binds the IN-list plus one language.code parameter, so cap the chunk at
+        // 998 to stay under SQLite's 999-variable limit on older SQLite (Android API 24-25, iOS).
+        val chunkSize = 998
         val result = mutableMapOf<String, TokenResult>()
 
         withDictionaryDatabases(language) { databases ->
@@ -1437,7 +1440,7 @@ class DictionaryRepository(
                 // Pass 1: form-based lookup (handles inflected forms like "liepen" → "lopen").
                 // Collect per-DB first so that local DB results can override RO DB results.
                 val dbPass1 = mutableMapOf<String, TokenResult>()
-                forms.chunked(999).forEach { chunk ->
+                forms.chunked(chunkSize).forEach { chunk ->
                     q.selectTokenDataByForms(language.code, chunk)
                         .executeAsList()
                         .forEach { row ->
@@ -1456,7 +1459,7 @@ class DictionaryRepository(
                 // Function words (e.g. "wat") may not have form-table entries and would otherwise
                 // resolve to a wrong high-frequency word that shares the same inflected form.
                 val directResults = mutableMapOf<String, TokenResult>()
-                forms.chunked(999).forEach { chunk ->
+                forms.chunked(chunkSize).forEach { chunk ->
                     q.selectTokenDataByLemmas(language.code, chunk)
                         .executeAsList()
                         .forEach { row ->

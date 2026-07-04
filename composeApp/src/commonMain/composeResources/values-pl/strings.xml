@@ -750,6 +750,7 @@
     <string name="reader_title">Czytaj</string>
     <string name="reader_title_with_lang">Słowa · %1$s</string>
     <string name="reader_error_analyzing">Nie udało się przeanalizować tekstu</string>
+    <string name="reader_text_too_long">Ten tekst jest trochę za długi — spróbuj maksymalnie %1$d słów.</string>
     <string name="reader_paste_from_clipboard">Wklej tekst ze schowka</string>
     <string name="reader_analyzing">Analizowanie tekstu</string>
     <string name="reader_tap_to_paste">Dotknij, aby wkleić tekst</string>
