@@ -63,22 +63,29 @@ class SessionService(
                     val sessionCard = loadUntilTerminal(card) {
                         loadingEmissions += 1
                     }
-                    if (sessionCard != null) {
-                        val loadState = sessionCard.loadState()
-                        markResult(loadState.name.lowercase())
-                        putAttribute("family", sessionCard.card.family.name.lowercase())
-                        putAttribute("variant", sessionCard.variant.kind.name.lowercase())
-                        logSelectedCard(
-                            sessionCard = sessionCard,
-                            priorityScore = priorityScore,
-                            candidateRank = attemptedCandidates,
-                            candidateCount = candidates.size,
-                            loadState = loadState,
-                            nowMs = now,
-                        )
-                        emit(sessionCard)
-                        return@flow
+                    if (sessionCard == null) {
+                        // No playable variant (e.g. the configured translation languages carry no
+                        // data for this sense) or the favorite is gone. Bury the card for the
+                        // standard failed-card cooldown instead of leaving it due and silently
+                        // re-scanned forever; a later attempt may find data (settings changed,
+                        // fetch succeeded online).
+                        setCardAvailableAfter(card)
+                        continue
                     }
+                    val loadState = sessionCard.loadState()
+                    markResult(loadState.name.lowercase())
+                    putAttribute("family", sessionCard.card.family.name.lowercase())
+                    putAttribute("variant", sessionCard.variant.kind.name.lowercase())
+                    logSelectedCard(
+                        sessionCard = sessionCard,
+                        priorityScore = priorityScore,
+                        candidateRank = attemptedCandidates,
+                        candidateCount = candidates.size,
+                        loadState = loadState,
+                        nowMs = now,
+                    )
+                    emit(sessionCard)
+                    return@flow
                 }
                 AppLogger.debug(TAG, null) {
                     "Card selection empty lang=$langCode candidates=${candidates.size} " +
@@ -247,7 +254,7 @@ class SessionService(
         }
     }
 
-    private suspend fun loadSessionCard(card: Card): Flow<SessionCard?>? {
+    private suspend fun loadSessionCard(card: Card): Flow<Pair<WordResult, SessionCard?>>? {
         val favorite =
             learning.selectFavoriteWithActivation(card.senseId.toString(), card.langCode).executeAsOneOrNull()
                 ?: return null
@@ -262,7 +269,7 @@ class SessionService(
             lemma = favorite.lemma,
             translationTargets = targets,
         ).map { result ->
-            result.toSessionCard(card)
+            result to result.toSessionCard(card, targets)
         }
     }
 
@@ -272,17 +279,26 @@ class SessionService(
     ): SessionCard? {
         val sessionCardFlow = loadSessionCard(card) ?: return null
         return sessionCardFlow
-            .onEach { sessionCard ->
+            .onEach { (_, sessionCard) ->
                 if (sessionCard?.isFetchLoading() == true) {
                     onLoadingEmission()
                     emit(sessionCard)
                 }
             }
-            .first { it == null || !it.isFetchLoading() }
+            .first { (result, sessionCard) ->
+                // A null session card is only terminal once the fetch itself has finished: an
+                // interim emission may still lack the translations that make a variant playable,
+                // and burying on it would punish a card whose data was seconds away.
+                if (sessionCard == null) !result.isFetchLoading() else !sessionCard.isFetchLoading()
+            }
+            .second
     }
 
+    private fun WordResult.isFetchLoading(): Boolean =
+        isWordLoading || isTranslationLoading
+
     private fun SessionCard.isFetchLoading(): Boolean =
-        wordResult.isWordLoading || wordResult.isTranslationLoading
+        wordResult.isFetchLoading()
 
     @OptIn(ExperimentalTime::class)
     private fun setCardAvailableAfter(card: Card) {
@@ -577,28 +593,32 @@ class SessionService(
         val windowWidth: Long,
     )
 
-    private fun sortedVariants(card: Card, sense: LanguageCardResponseSense?): List<CardVariant> {
+    private fun sortedVariants(
+        card: Card,
+        sense: LanguageCardResponseSense?,
+        translationTargets: List<Language>,
+    ): List<CardVariant> {
         sense ?: return emptyList()
         val lastReview = learning.selectLastReviewVariantByCard(card.id).executeAsOneOrNull()
         val lastVariant = lastReview?.let { CardVariant(it.variant_kind, it.variant_target_lang) }
         return selectVariantsForReview(
             family = card.family,
             sense = sense,
-            translationTargets = translationTargetsFor(sense),
+            translationTargets = translationTargets,
             cardStability = card.scheduling.stability.toDuration(DurationUnit.DAYS),
             lastVariant = lastVariant,
         )
     }
 
-    private fun WordResult.toSessionCard(card: Card): SessionCard? {
+    private fun WordResult.toSessionCard(card: Card, translationTargets: List<Language>): SessionCard? {
         val senseId = card.senseId.toString()
         val sense = this.card?.findSense(senseId)
         val studiedSenseIds = learning.selectActiveSenseIdsByLemma(
             lang_code = card.langCode,
             lemma_id = card.lemmaId,
         ).executeAsList().mapTo(HashSet()) { it.toString() }
-        val sessionCards = sortedVariants(card, sense).map { variant ->
-            toSessionCard(card, variant, senseId, sense, studiedSenseIds)
+        val sessionCards = sortedVariants(card, sense, translationTargets).map { variant ->
+            toSessionCard(card, variant, senseId, sense, studiedSenseIds, translationTargets)
         }
 
         return sessionCards.firstOrNull { it.loadState() == SessionCardLoadState.READY }
@@ -612,6 +632,7 @@ class SessionService(
         senseId: String,
         sense: LanguageCardResponseSense?,
         studiedSenseIds: Set<String>,
+        translationTargets: List<Language>,
     ): SessionCard {
         val example = if (variant.kind.isCloze && sense != null) {
             val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
@@ -631,6 +652,7 @@ class SessionService(
             senseId = senseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
+            translationTargets = translationTargets,
         )
     }
 
@@ -671,7 +693,7 @@ class SessionService(
             }
             return
         }
-        val variants = buildTaskVariants(unlockFamily, sense, translationTargetsFor(sense))
+        val variants = buildTaskVariants(unlockFamily, sense, card.translationTargets)
         if (variants.isEmpty()) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
@@ -796,12 +818,6 @@ class SessionService(
         }
         return current
     }
-
-    private fun translationTargetsFor(sense: LanguageCardResponseSense): List<Language> =
-        sense.targetLangDefinitions.keys
-            .plus(sense.translations.keys)
-            .plus(sense.examples.flatMap { it.targetLangTranslations.keys })
-            .distinctBy { it.code }
 
     private fun Rating.buriesSiblings(): Boolean =
         this != Rating.AGAIN

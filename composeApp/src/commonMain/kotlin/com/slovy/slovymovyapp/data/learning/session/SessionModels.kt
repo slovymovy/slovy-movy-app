@@ -14,6 +14,7 @@ data class SessionCard(
     val senseId: String,
     val example: ExamplePair?,
     val studiedSenseIds: Set<String> = emptySet(),
+    val translationTargets: List<Language> = emptyList(),
 ) {
     fun loadState(): SessionCardLoadState {
         if (wordResult.isWordLoading) return SessionCardLoadState.LOADING
@@ -23,10 +24,7 @@ data class SessionCard(
         if (!variant.kind.requiresTranslation) return SessionCardLoadState.READY
 
         val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull) ?: return SessionCardLoadState.ERROR
-        return if (
-            sense.targetLangDefinitions[targetLanguage] != null ||
-            sense.translations[targetLanguage].orEmpty().isNotEmpty()
-        ) {
+        return if (sense.satisfiesTranslationData(variant.kind, targetLanguage)) {
             SessionCardLoadState.READY
         } else {
             SessionCardLoadState.ERROR
@@ -49,10 +47,7 @@ data class SessionCard(
         if (variant.kind.requiresTranslation) {
             val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
                 ?: return SessionCardLoadError(SessionCardLoadErrorReason.TARGET_LANGUAGE_MISSING)
-            if (
-                sense.targetLangDefinitions[targetLanguage] == null &&
-                sense.translations[targetLanguage].orEmpty().isEmpty()
-            ) {
+            if (!sense.satisfiesTranslationData(variant.kind, targetLanguage)) {
                 return SessionCardLoadError(SessionCardLoadErrorReason.TRANSLATION_MISSING)
             }
         }

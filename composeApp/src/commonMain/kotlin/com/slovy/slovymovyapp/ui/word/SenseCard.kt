@@ -27,8 +27,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.takeOrElse
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
+import com.slovy.slovymovyapp.ui.components.appendWithMutedCenteredBullets
+import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
@@ -437,11 +441,13 @@ private fun ExampleText(
     val annotated = buildAnnotatedString {
         appendTextWithW(this, text, highlight, highlight, emptySet())
     }
+    val bulletColor = style.color.takeOrElse { LocalContentColor.current }
 
     Text(
         text = annotated,
         style = style,
-        modifier = modifier
+        modifier = modifier,
+        inlineContent = remember(bulletColor) { centeredBulletInlineContent(bulletColor) },
     )
 }
 
@@ -498,10 +504,15 @@ internal fun TranslationHeader(
     val multiLang = sense.translations.keys.size > 1
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
     val style = MaterialTheme.typography.titleMedium
+    val bulletColor = LocalContentColor.current
+    val bulletInlineContent = remember(bulletColor, clarificationColor) {
+        centeredBulletInlineContent(color = bulletColor, mutedColor = clarificationColor)
+    }
     sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
         Text(
             text = buildClarificationRow(langTranslations, ambiguous, multiLang, clarificationColor),
-            style = style
+            style = style,
+            inlineContent = bulletInlineContent,
         )
     }
 }
@@ -512,7 +523,7 @@ internal fun buildClarificationRow(
     multiLang: Boolean,
     clarificationColor: Color = Color.Unspecified
 ) = buildAnnotatedString {
-    if (multiLang) append("$bullet ")
+    if (multiLang) appendWithCenteredBullets(this, "$bullet ")
     langTranslations.orderedByIdx().forEachIndexed { index, translation ->
         if (index > 0) append(", ")
         val word = translation.targetLangWord
@@ -520,21 +531,42 @@ internal fun buildClarificationRow(
         val clarification = translation.targetLangSenseClarification
         if (word in ambiguous && clarification != null) {
             withStyle(SpanStyle(color = clarificationColor)) {
-                append(" $bullet $clarification")
+                // The span only colors text; the drawn dot must be routed to the muted inline
+                // content so it matches the clarification color.
+                appendWithMutedCenteredBullets(this, " $bullet $clarification")
             }
         }
     }
 }
 
 internal fun LanguageCardResponseSense.translationsHeader(): String? {
-    if (translations.isEmpty()) {
+    val lines = translationLines(allowedLanguages = null)
+    return joinLanguageLines(lines, bulleted = lines.size > 1)
+}
+
+// One cleaned line per language that actually has content: words are blank-filtered and
+// de-duplicated, languages ordered stably by enum order. allowedLanguages == null keeps every
+// language present in the data.
+internal fun LanguageCardResponseSense.translationLines(allowedLanguages: Set<Language>?): List<String> =
+    translations.entries
+        .filter { allowedLanguages == null || it.key in allowedLanguages }
+        .sortedBy { it.key }
+        .mapNotNull { entry ->
+            entry.value.orderedByIdx()
+                .map { translation -> translation.targetLangWord }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .joinToString(separator = ", ")
+                .takeIf { it.isNotBlank() }
+        }
+
+// The single renderer of the bullet-per-language block layout shared by the word-details header
+// and the study card backs. Callers decide `bulleted` so all blocks on one surface can agree.
+internal fun joinLanguageLines(lines: List<String>, bulleted: Boolean): String? {
+    if (lines.isEmpty()) {
         return null
     }
-    val prefix = if (translations.keys.size > 1) "$bullet " else ""
-    return translations.entries.sortedBy { it.key }.joinToString(separator = "\n") {
-        prefix + it.value.orderedByIdx().map { translation -> translation.targetLangWord }
-            .joinToString(separator = ", ")
-    }
+    return lines.joinToString(separator = "\n") { line -> if (bulleted) "$bullet $line" else line }
 }
 
 private fun List<LanguageCardTranslation>.orderedByIdx(): List<LanguageCardTranslation> =
