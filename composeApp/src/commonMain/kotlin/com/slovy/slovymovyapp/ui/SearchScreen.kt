@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
@@ -31,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalFocusManager
@@ -974,13 +972,15 @@ private fun EmptySearchState(
 
 /**
  * "ADD WORDS" feed section — the entry into the Read (paste-to-highlight) flow.
- * A hairline-outlined, primary-tinted pill with a clipboard glyph echoing the paste
- * drop-zone it opens.
+ * A flat utility row matching the list cards' surface + hairline border; the copper accent
+ * is confined to the eyebrow and the small clipboard tile so it reads as utility, not a CTA.
  */
 @Composable
 private fun ReadSection(onClick: () -> Unit) {
     val primary = MaterialTheme.colorScheme.primary
-    val background = MaterialTheme.colorScheme.background
+    val shape = RoundedCornerShape(16.dp)
+    // Warm but flat: a 16% primary wash over the container, no border, no shadow/glow.
+    val rowFill = lerp(MaterialTheme.colorScheme.surfaceContainer, primary, 0.16f)
     Column(modifier = Modifier.padding(bottom = 4.dp)) {
         Text(
             text = stringResource(Res.string.search_add_words).uppercase(),
@@ -996,13 +996,8 @@ private fun ReadSection(onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(lerp(background, primary, 0.12f), lerp(background, primary, 0.06f))
-                    )
-                )
-                .border(1.dp, primary.copy(alpha = 0.22f), RoundedCornerShape(16.dp))
+                .clip(shape)
+                .background(rowFill)
                 .clickable(onClickLabel = stringResource(Res.string.search_add_words_cd), role = Role.Button) { onClick() }
                 .padding(start = 12.dp, end = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(13.dp),
@@ -1031,12 +1026,6 @@ private fun ReadSection(onClick: () -> Unit) {
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = primary.copy(alpha = 0.75f),
-                modifier = Modifier.size(18.dp)
             )
         }
     }
