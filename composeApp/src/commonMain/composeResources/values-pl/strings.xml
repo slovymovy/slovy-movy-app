@@ -7,7 +7,7 @@
     <string name="nav_stats">Statystyki</string>
     <string name="nav_settings">Ustawienia</string>
 
-    <string name="welcome_tagline">Aplikacja, by nie tylko sprawdzać słowa, ale faktycznie się ich uczyć. Za darmo.</string>
+    <string name="welcome_tagline">Zapamiętaj słowa, które zwykle zapominasz do jutra.</string>
     <string name="welcome_selling_point_translations_title">Wyszukuj dowolne słowa</string>
     <string name="welcome_selling_point_translations_description">Przykłady, odmiany, zwroty i synonimy — wszystko w jednym miejscu.</string>
     <string name="welcome_selling_point_collection_title">Twoja własna lista słówek</string>
