@@ -162,11 +162,21 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
             ).map { senseUi ->
                 if (senseUi.id == sense.senseId) senseUi.copy(back = activeBack) else senseUi
             }
+            // Prefer the translation hint only when it actually highlights the answer word
+            // (the example translation is tagged). CLOZE_SOURCE can be eligible without a
+            // tagged/present example translation, so fall back to the first-letter hint to
+            // guarantee a usable hint.
+            val highlightedTranslation = clozeTranslation?.takeIf { it.answerRanges.isNotEmpty() }
             StudyCardUiState.Cloze(
                 id = card.id.toString(),
                 chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
                 prompt = cloze,
-                firstLetterHint = cloze.firstAnswerText().firstLetterHint(),
+                translationHint = highlightedTranslation,
+                firstLetterHint = if (highlightedTranslation == null) {
+                    lemma.firstLetterHint()
+                } else {
+                    null
+                },
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -204,7 +214,8 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                     listOf(sourceLanguage.studyCode()),
                 ),
                 prompt = cloze.copy(filled = true),
-                translationHint = toTranslationHintCloze(sourceExample.text),
+                // The recalled answer is the word itself, so hint from the lemma.
+                firstLetterHint = lemma.firstLetterHint(),
                 senses = senses,
                 activeSenseId = sense.senseId,
                 back = activeBack,
@@ -392,13 +403,6 @@ private fun ExamplePair.toClozeText(): StudyClozeTextUiState? {
 private fun toTranslationHintCloze(text: String): StudyClozeTextUiState? {
     val parsed = parseClozeFromTaggedText(text) ?: return null
     return StudyClozeTextUiState(text = parsed.plainText, answerRanges = parsed.answerRanges)
-}
-
-private fun StudyClozeTextUiState.firstAnswerText(): String {
-    val range = answerRanges.firstOrNull() ?: return ""
-    val start = range.first.coerceIn(0, text.length)
-    val endExclusive = (range.last + 1).coerceIn(start, text.length)
-    return text.substring(start, endExclusive)
 }
 
 internal fun String.firstLetterHint(): FirstLetterHint? {

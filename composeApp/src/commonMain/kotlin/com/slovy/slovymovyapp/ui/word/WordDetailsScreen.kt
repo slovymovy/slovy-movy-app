@@ -8,7 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -1262,23 +1262,38 @@ private fun WordDetailContent(
 
 @Composable
 private fun LemmaHeadlineText(lemma: String, modifier: Modifier = Modifier) {
-    Text(
-        text = lemma,
-        style = MaterialTheme.typography.displaySmall.copy(
-            fontWeight = FontWeight.Medium,
-            lineHeight = 44.sp,
-            letterSpacing = (-0.3).sp
-        ),
-        color = MaterialTheme.colorScheme.onSurface,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        autoSize = TextAutoSize.StepBased(
-            minFontSize = 22.sp,
-            maxFontSize = 42.sp,
-            stepSize = 1.sp,
-        ),
-        modifier = modifier,
+    val baseStyle = MaterialTheme.typography.displaySmall.copy(
+        fontWeight = FontWeight.Medium,
+        letterSpacing = (-0.3).sp,
     )
+    val textMeasurer = rememberTextMeasurer()
+    // autoSize on Text is unreliable on iOS, so measure-and-fit manually: shrink the
+    // font from maxFontSize down until the lemma fits the available width on one line.
+    BoxWithConstraints(modifier = modifier) {
+        val maxWidthPx = with(LocalDensity.current) { maxWidth.toPx() }
+        val maxFontSize = 42f
+        val minFontSize = 15f
+        val fontSize = remember(lemma, maxWidthPx, textMeasurer, baseStyle) {
+            var size = maxFontSize
+            while (size > minFontSize) {
+                val width = textMeasurer.measure(
+                    text = lemma,
+                    style = baseStyle.copy(fontSize = size.sp),
+                    maxLines = 1,
+                ).size.width
+                if (width <= maxWidthPx) break
+                size -= 1f
+            }
+            size
+        }
+        Text(
+            text = lemma,
+            style = baseStyle.copy(fontSize = fontSize.sp, lineHeight = (fontSize + 2f).sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 @Composable

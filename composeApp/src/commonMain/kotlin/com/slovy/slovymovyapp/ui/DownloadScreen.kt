@@ -53,7 +53,7 @@ class DownloadViewModel(
     private val downloadKey: String,
     private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
     private val finalize: suspend (
-        onRecoveryProgress: (FavoriteRecoveryProgress) -> Unit,
+        onRecoveryProgress: (LemmaRecoveryProgress) -> Unit,
         onWordListsSync: (Boolean) -> Unit,
     ) -> Unit = { _, _ -> },
     private val onSuccess: suspend () -> Unit,
@@ -231,7 +231,7 @@ class DownloadViewModel(
         }
     }
 
-    fun updateRecoveryProgress(progress: FavoriteRecoveryProgress) {
+    fun updateRecoveryProgress(progress: LemmaRecoveryProgress) {
         // Late controller emissions can arrive after finalization has moved to a terminal state.
         val current = state
         if (current is DownloadUiState.Finalizing) {
@@ -660,7 +660,7 @@ sealed interface DownloadUiState {
     data object Idle : DownloadUiState
     data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
     data class Finalizing(
-        val recovery: FavoriteRecoveryProgress? = null,
+        val recovery: LemmaRecoveryProgress? = null,
         val updatingWordLists: Boolean = false,
     ) : DownloadUiState
     data class Failed(val error: Throwable) : DownloadUiState
@@ -724,7 +724,7 @@ private fun DownloadScreenPreviewFinalizing(
     ThemedPreview(darkTheme = isDark) {
         DownloadScreenContent(
             state = DownloadUiState.Finalizing(
-                FavoriteRecoveryProgress(currentLemma = "test", completed = 1, total = 3, failed = 0)
+                LemmaRecoveryProgress(currentLemma = "test", completed = 1, total = 3, failed = 0)
             )
         )
     }
