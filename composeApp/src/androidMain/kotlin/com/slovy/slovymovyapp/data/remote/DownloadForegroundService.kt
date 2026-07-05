@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.Build
+import com.slovy.slovymovyapp.R
 
 class DownloadForegroundService : Service() {
     override fun onBind(intent: Intent?) = null
@@ -18,14 +19,14 @@ class DownloadForegroundService : Service() {
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
             Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle("Downloading dictionary")
+                .setContentTitle(getString(R.string.notification_download_title))
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setOngoing(true)
                 .build()
         } else {
             @Suppress("DEPRECATION")
             Notification.Builder(this)
-                .setContentTitle("Downloading dictionary")
+                .setContentTitle(getString(R.string.notification_download_title))
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_LOW)
@@ -44,7 +45,11 @@ class DownloadForegroundService : Service() {
     }
 
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(CHANNEL_ID, "Downloads", NotificationManager.IMPORTANCE_LOW)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            getString(R.string.notification_download_channel),
+            NotificationManager.IMPORTANCE_LOW
+        )
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
