@@ -37,6 +37,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
@@ -45,7 +46,6 @@ import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import com.slovy.slovymovyapp.ui.word.colorsForFrequency
-import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,27 +53,6 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.uuid.Uuid
-
-private val TOKEN_REGEX = Regex("[\\p{L}\\p{M}\\-']+|\\s+|[^\\p{L}\\p{M}\\-'\\s]+")
-
-// Corpus-frequency bands used to colour the passage. Derived from each lemma's Zipf
-// frequency (~1 rare … ~7 extremely common). Thresholds are deliberately simple and
-// meant to be tuned against real passages.
-private const val HIGH_ZIPF_THRESHOLD = 4.3
-private const val MID_ZIPF_THRESHOLD = 3.3
-
-// The passage is rendered eagerly (FlowRow is not lazy), so cap the word count to keep
-// composition responsive and avoid ANRs on very large pastes.
-private const val MAX_WORDS = 2000
-
-enum class FreqBand { HIGH, MID, LOW }
-
-private fun bandForZipf(zipf: Double?): FreqBand? = when {
-    zipf == null -> null
-    zipf >= HIGH_ZIPF_THRESHOLD -> FreqBand.HIGH
-    zipf >= MID_ZIPF_THRESHOLD -> FreqBand.MID
-    else -> FreqBand.LOW
-}
 
 // Band labels reuse the app-wide frequency strings (sense_frequency_*).
 @Composable
@@ -97,14 +76,6 @@ private fun colorsForBand(band: FreqBand): Pair<Color, Color> = colorsForFrequen
     }
 )
 
-data class TextToken(
-    val text: String,
-    val lemma: String? = null,
-    val lemmaId: Uuid? = null,
-    val band: FreqBand? = null,
-    val isWord: Boolean
-)
-
 data class TextReaderUiState(
     val tokens: List<TextToken> = emptyList(),
     val favoriteLemmas: Set<String> = emptySet(),
@@ -117,6 +88,7 @@ data class TextReaderUiState(
 
 class TextReaderViewModel(
     private val repository: DictionaryRepository,
+    private val favoritesRepository: FavoritesRepository,
     val language: Language
 ) : ViewModel() {
 
@@ -129,26 +101,31 @@ class TextReaderViewModel(
         if (text.isBlank()) return
         viewModelScope.launch {
             state = state.copy(isAnalyzing = true, isError = false, isTooLong = false)
+            // Length pre-check: rejects oversized pastes before tokenization does any work.
+            if (text.length > MAX_CHARS) {
+                state = state.copy(isAnalyzing = false, isTooLong = true)
+                return@launch
+            }
             try {
                 val tokens = withContext(Dispatchers.Default) { tokenize(text) }
                 if (tokens.count { it.isWord } > MAX_WORDS) {
                     state = state.copy(isAnalyzing = false, isTooLong = true)
                     return@launch
                 }
-                val uniqueForms = tokens.filter { it.isWord }.map { stripAccents(it.text) }.distinct()
-                val results = repository.lookupTokensBatch(uniqueForms, language)
+                val words = tokens.filter { it.isWord }.map { normalizeApostrophes(it.text) }.distinct()
+                val results = repository.lookupTokens(words, language)
                 val resolvedTokens = tokens.map { token ->
                     if (!token.isWord) token
                     else {
-                        val result = results[stripAccents(token.text)]
+                        val result = results[normalizeApostrophes(token.text)]
                         token.copy(
                             lemma = result?.lemma,
                             lemmaId = result?.lemmaId,
-                            band = bandForZipf(result?.zipf)
+                            band = result?.let { bandForZipf(it.zipf) }
                         )
                     }
                 }
-                val favoriteLemmas = repository.getFavoriteLemmasByLang(language)
+                val favoriteLemmas = favoritesRepository.getFavoriteLemmas(language)
                 state = state.copy(tokens = resolvedTokens, favoriteLemmas = favoriteLemmas, isAnalyzing = false)
             } catch (e: CancellationException) {
                 throw e
@@ -161,56 +138,10 @@ class TextReaderViewModel(
     fun refreshFavorites() {
         if (state.tokens.isEmpty()) return
         viewModelScope.launch {
-            val favoriteLemmas = repository.getFavoriteLemmasByLang(language)
+            val favoriteLemmas = favoritesRepository.getFavoriteLemmas(language)
             state = state.copy(favoriteLemmas = favoriteLemmas)
         }
     }
-}
-
-private fun tokenize(text: String): List<TextToken> {
-    val result = mutableListOf<TextToken>()
-    for (match in TOKEN_REGEX.findAll(text)) {
-        val value = match.value
-        if (!value.any { it.isLetter() }) {
-            result.add(TextToken(text = value, isWord = false))
-            continue
-        }
-        // Strip leading/trailing hyphens and apostrophes so that bullet-style
-        // "-word" and quoted "'rijk'" are looked up without the surrounding symbol.
-        // Mid-word occurrences (you're, arm-rijk) are preserved unchanged.
-        val trimmedStart = value.trimStart('-', '\'')
-        val leading = value.length - trimmedStart.length
-        val core = trimmedStart.trimEnd('-', '\'')
-        val trailing = trimmedStart.length - core.length
-        if (leading > 0) result.add(TextToken(text = value.take(leading), isWord = false))
-        result.add(TextToken(text = core, isWord = core.any { it.isLetter() }))
-        if (trailing > 0) result.add(TextToken(text = trimmedStart.takeLast(trailing), isWord = false))
-    }
-    return result
-}
-
-// Groups tokens so that each word stays with its immediately surrounding punctuation,
-// but groups never span more than one word. This prevents long runs of non-whitespace
-// tokens (e.g. URLs) from forming a single oversized FlowRow item.
-private fun groupTokensForRendering(tokens: List<TextToken>): List<List<TextToken>> {
-    val result = mutableListOf<List<TextToken>>()
-    val current = mutableListOf<TextToken>()
-    for (token in tokens) {
-        when {
-            !token.isWord && token.text.all { it.isWhitespace() } -> {
-                if (current.isNotEmpty()) { result.add(current.toList()); current.clear() }
-                result.add(listOf(token))
-            }
-            token.isWord && current.any { it.isWord } -> {
-                // Second word in the same run — flush and start a new group
-                result.add(current.toList()); current.clear()
-                current.add(token)
-            }
-            else -> current.add(token)
-        }
-    }
-    if (current.isNotEmpty()) result.add(current.toList())
-    return result
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -489,7 +420,7 @@ private fun ResultView(
                                 HighlightedWord(
                                     token = token,
                                     style = passageStyle,
-                                    isFavorite = state.favoriteLemmas.contains(token.lemma.lowercase()),
+                                    isFavorite = FavoritesRepository.normalizeLemma(token.lemma) in state.favoriteLemmas,
                                     lookUpLabel = lookUpLabel,
                                     onClick = { onWordClick(language, token.lemma) }
                                 )

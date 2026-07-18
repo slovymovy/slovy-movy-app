@@ -1171,7 +1171,7 @@ fun App(
                         return@composable
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
-                        TextReaderViewModel(dictionaryRepository, language)
+                        TextReaderViewModel(dictionaryRepository, favoritesRepository, language)
                     }
                     TextReaderScreen(
                         viewModel = viewModel,
