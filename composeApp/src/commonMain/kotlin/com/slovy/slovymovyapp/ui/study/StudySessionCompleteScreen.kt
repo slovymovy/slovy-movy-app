@@ -20,8 +20,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontStyle
@@ -144,10 +148,20 @@ private fun StudySessionCompleteScaffold(
                     )
                 }
             }
+            // The button is fully transparent until its entrance starts, but a
+            // graphicsLayer alpha keeps hit target and semantics alive. Gate interaction and
+            // semantics on the entrance having begun so an early tap in the bottom-bar area can't
+            // dismiss the screen and assistive tech can't focus an invisible action.
+            val actionBarProgress = rememberElementProgress(RewardElement.ACTION_BAR)
+            val actionBarVisible by remember(actionBarProgress) {
+                derivedStateOf { actionBarProgress.value > 0f }
+            }
             Button(
                 onClick = onClose,
+                enabled = actionBarVisible,
                 modifier = Modifier
-                    .rewardEntrance(RewardElement.ACTION_BAR)
+                    .rewardEntrance(RewardElement.ACTION_BAR, actionBarProgress)
+                    .then(if (actionBarVisible) Modifier else Modifier.clearAndSetSemantics {})
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = MaterialTheme.shapes.extraLarge,

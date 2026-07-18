@@ -153,7 +153,7 @@ internal fun rememberRewardEntranceFloat(
 
 /** Eased 0..1 entrance progress for [element], started once when this enters composition. */
 @Composable
-private fun rememberElementProgress(element: RewardElement): State<Float> =
+internal fun rememberElementProgress(element: RewardElement): State<Float> =
     rememberRewardEntranceFloat(
         hiddenValue = 0f,
         playedValue = 1f,
@@ -167,8 +167,16 @@ private fun rememberElementProgress(element: RewardElement): State<Float> =
 @Composable
 internal fun Modifier.rewardEntrance(element: RewardElement): Modifier {
     val progress = rememberElementProgress(element)
-    return graphicsLayer { element.applyKeyframe(this, progress.value) }
+    return rewardEntrance(element, progress)
 }
+
+/**
+ * [rewardEntrance] variant for call sites that also observe [progress] themselves (e.g. to gate
+ * interaction on an element that starts invisible), so the element is not registered twice on the
+ * entrance transition.
+ */
+internal fun Modifier.rewardEntrance(element: RewardElement, progress: State<Float>): Modifier =
+    graphicsLayer { element.applyKeyframe(this, progress.value) }
 
 /**
  * Ticks an integer 0 -> [target] (§8e). Renders [target] instantly when not animating. Negative
