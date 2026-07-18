@@ -605,6 +605,7 @@ fun DeveloperScreenContent(
             scrollState = rememberScrollState(),
             onClose = { selectedCompletionPreview = null },
             snackbarHostState = remember { SnackbarHostState() },
+            respectReduceMotion = false,
         )
         return
     }

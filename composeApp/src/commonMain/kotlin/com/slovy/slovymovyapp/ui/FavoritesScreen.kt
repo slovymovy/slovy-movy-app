@@ -64,6 +64,12 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioActions
+import com.slovy.slovymovyapp.speech.RowAudioController
+import com.slovy.slovymovyapp.speech.RowAudioUiState
+import com.slovy.slovymovyapp.speech.SpeechPlayer
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.icons.NoFavsImage
@@ -171,6 +177,8 @@ class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
+    speechPlayer: SpeechPlayer,
+    voiceFilterHelper: VoiceFilterHelper,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -180,6 +188,31 @@ class FavoritesViewModel(
     val scrollState = LazyListState()
     val emptyStateScrollState = ScrollState(0)
     val snackbarHostState = SnackbarHostState()
+
+    val rowAudio = RowAudioController(
+        speechPlayer = speechPlayer,
+        voiceFilterHelper = voiceFilterHelper,
+        scope = viewModelScope,
+        analyticsSource = "favorites",
+    )
+
+    val rowAudioActions = RowAudioActions(
+        onToggle = ::toggleAudio,
+        onOpenVoiceSettings = rowAudio::openVoiceSettings,
+        onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
+        onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
+    )
+
+    fun toggleAudio(senseId: String) {
+        val content = state as? FavoritesUiState.Content ?: return
+        val item = content.senses.firstOrNull { it.senseId == senseId } ?: return
+        rowAudio.toggle(senseId, item.lemma, item.targetLang)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        rowAudio.dispose()
+    }
 
     private var pendingScrollToTop: Boolean = false
     private var savedFavoritesLanguage: Language? = null
@@ -727,6 +760,7 @@ fun FavoritesScreen(
     val undoLabel = stringResource(Res.string.favorites_removed_undo)
 
     LifecycleResumeEffect(viewModel) {
+        viewModel.rowAudio.refreshAvailability()
         viewModel.loadFavorites()
         onRefreshReviewState()
         onPauseOrDispose { }
@@ -780,6 +814,8 @@ fun FavoritesScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onStartStudy = onStartStudy,
         onContinueStudyingNow = onContinueStudyingNow,
+        rowAudio = viewModel.rowAudio.uiState,
+        rowAudioActions = viewModel.rowAudioActions,
     )
 }
 
@@ -803,6 +839,8 @@ fun FavoritesScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
+    rowAudio: RowAudioUiState = RowAudioUiState(),
+    rowAudioActions: RowAudioActions = RowAudioActions(),
 ) {
     val focusManager = LocalFocusManager.current
     val resolvedEmptyStateScrollState = emptyStateScrollState ?: remember { ScrollState(0) }
@@ -1077,7 +1115,12 @@ fun FavoritesScreenContent(
                                                     Analytics.logEvent(AnalyticsEvent.FAVORITES_WORD_SHOW)
                                                     onNavigateToWordDetail(item.targetLang, word, null)
                                                 },
-                                                favoriteLemmas = state.favoriteLemmas
+                                                favoriteLemmas = state.favoriteLemmas,
+                                                lemmaAudio = rowAudio.controlFor(
+                                                    senseId = item.senseId,
+                                                    language = item.targetLang,
+                                                    actions = rowAudioActions,
+                                                ),
                                             )
                                         }
                                     }
@@ -1089,6 +1132,8 @@ fun FavoritesScreenContent(
             }
         }
     }
+
+    RowAudioVoiceSetupHost(state = rowAudio, actions = rowAudioActions)
 }
 
 @Composable
@@ -1219,7 +1264,8 @@ private fun FavoriteSenseCard(
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit = {},
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmas: Set<String> = emptySet(),
+    lemmaAudio: LemmaAudioControl? = null,
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -1247,7 +1293,8 @@ private fun FavoriteSenseCard(
         onViewFullDetails = onViewFullDetails,
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
-        favoriteLemmas = favoriteLemmas
+        favoriteLemmas = favoriteLemmas,
+        lemmaAudio = lemmaAudio,
     )
 }
 
