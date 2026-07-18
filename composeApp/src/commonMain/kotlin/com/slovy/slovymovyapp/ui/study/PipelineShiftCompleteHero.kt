@@ -1,7 +1,5 @@
 package com.slovy.slovymovyapp.ui.study
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -19,18 +17,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
@@ -93,30 +93,20 @@ private fun PipelineShiftRow(
     val afterPct = stage.after.toFloat() / maxValue.toFloat()
 
     // Solid fill slides beforePct -> afterPct (§4f / §8e); ghost stays pinned at beforePct.
-    val animate = LocalRewardEntrance.current.animate
-    val solidFraction = remember(beforePct, afterPct) {
-        Animatable(if (animate) beforePct else afterPct)
-    }
-    LaunchedEffect(animate, beforePct, afterPct) {
-        if (animate) {
-            solidFraction.snapTo(beforePct)
-            solidFraction.animateTo(
-                targetValue = afterPct,
-                animationSpec = tween(
-                    durationMillis = ShiftBarDurationMillis,
-                    delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis,
-                    easing = ShiftBarEase,
-                ),
-            )
-        } else {
-            solidFraction.snapTo(afterPct)
-        }
-    }
+    val solidFraction by rememberRewardEntranceFloat(
+        hiddenValue = beforePct,
+        playedValue = afterPct,
+        delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis,
+        durationMillis = ShiftBarDurationMillis,
+        easing = ShiftBarEase,
+        label = "bar[$index]",
+    )
 
     val deltaCount by rememberCountUp(
         target = stage.delta,
         delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis + ShiftDeltaExtraDelayMillis,
         durationMillis = ShiftDeltaDurationMillis,
+        label = "delta[$index]",
     )
 
     Row(
@@ -158,7 +148,7 @@ private fun PipelineShiftRow(
             )
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(solidFraction.value)
+                    .fillMaxWidth(solidFraction)
                     .height(10.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(stageColor(stage.id)),
@@ -208,4 +198,25 @@ private fun formatDelta(delta: Int, current: Int): String = when {
     delta == 0 -> "\u2014"
     delta > 0 -> "+${current.coerceAtLeast(0)}"
     else -> "\u2212${(-current).coerceAtLeast(0)}"
+}
+
+// Run this preview in interactive mode and tap the hero to (re)play the bar/delta choreography.
+@Preview
+@Composable
+private fun PipelineShiftCompleteHeroEntrancePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        RewardEntrancePreviewPlayer {
+            PipelineShiftCompleteHero(
+                stages = listOf(
+                    PipelineShiftStageUiState(StatsPipelineStageId.NEW, before = 18, after = 12),
+                    PipelineShiftStageUiState(StatsPipelineStageId.FRESH, before = 22, after = 28),
+                    PipelineShiftStageUiState(StatsPipelineStageId.MIDDLE, before = 16, after = 20),
+                    PipelineShiftStageUiState(StatsPipelineStageId.STRONG, before = 11, after = 13),
+                    PipelineShiftStageUiState(StatsPipelineStageId.LEARNED, before = 5, after = 6),
+                ),
+            )
+        }
+    }
 }

@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,11 +27,14 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -69,6 +69,7 @@ internal fun MilestoneCompleteHero(
                 target = streakDays,
                 delayMillis = MedallionCountUpDelayMillis,
                 durationMillis = MedallionCountUpDurationMillis,
+                label = "medallionCount",
             )
             Box(
                 modifier = Modifier
@@ -163,26 +164,15 @@ private fun MilestoneConfetti(
     }
 
     // One-shot fall per piece (§8b rwFall), staggered by 55ms. Never loops; finished state = 1f.
-    val animate = LocalRewardEntrance.current.animate
-    val fall = remember(pieces) { pieces.map { Animatable(if (animate) 0f else 1f) } }
-    LaunchedEffect(animate) {
-        if (animate) {
-            fall.forEachIndexed { index, piece ->
-                launch {
-                    piece.snapTo(0f)
-                    piece.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(
-                            durationMillis = ConfettiDurationMillis,
-                            delayMillis = ConfettiBaseDelayMillis + index * ConfettiPieceStaggerMillis,
-                            easing = ConfettiEase,
-                        ),
-                    )
-                }
-            }
-        } else {
-            fall.forEach { it.snapTo(1f) }
-        }
+    val fall = pieces.mapIndexed { index, _ ->
+        rememberRewardEntranceFloat(
+            hiddenValue = 0f,
+            playedValue = 1f,
+            delayMillis = ConfettiBaseDelayMillis + index * ConfettiPieceStaggerMillis,
+            durationMillis = ConfettiDurationMillis,
+            easing = ConfettiEase,
+            label = "confetti[$index]",
+        )
     }
 
     Canvas(modifier = modifier) {
@@ -233,4 +223,17 @@ private data class ConfettiPiece(
 private enum class ConfettiShape {
     DOT,
     TICK,
+}
+
+// Run this preview in interactive mode and tap the hero to (re)play the entrance choreography.
+@Preview
+@Composable
+private fun MilestoneCompleteHeroEntrancePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        RewardEntrancePreviewPlayer {
+            MilestoneCompleteHero(streakDays = 7)
+        }
+    }
 }

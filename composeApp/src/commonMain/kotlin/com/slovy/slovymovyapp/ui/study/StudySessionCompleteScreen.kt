@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.rememberReduceMotion
 import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
 import com.slovy.slovymovyapp.ui.icons.OtterDaysStreakC
 import com.slovy.slovymovyapp.ui.icons.OtterPipelineStreakC
@@ -54,7 +55,7 @@ internal fun StudySessionCompleteContent(
     respectReduceMotion: Boolean = true,
 ) {
     val reduceMotion = rememberReduceMotion()
-    val entrance = RewardEntrance(
+    val entrance = rememberRewardEntrance(
         animate = animate && !LocalInspectionMode.current && !(respectReduceMotion && reduceMotion),
     )
     CompositionLocalProvider(LocalRewardEntrance provides entrance) {
