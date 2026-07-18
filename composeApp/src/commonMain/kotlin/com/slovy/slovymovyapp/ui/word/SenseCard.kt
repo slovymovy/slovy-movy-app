@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.SpanStyle
@@ -27,7 +28,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.takeOrElse
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
@@ -540,16 +540,15 @@ internal fun buildClarificationRow(
 }
 
 internal fun LanguageCardResponseSense.translationsHeader(): String? {
-    val lines = translationLines(allowedLanguages = null)
+    val lines = translationLines(translations.keys)
     return joinLanguageLines(lines, bulleted = lines.size > 1)
 }
 
-// One cleaned line per language that actually has content: words are blank-filtered and
-// de-duplicated, languages ordered stably by enum order. allowedLanguages == null keeps every
-// language present in the data.
-internal fun LanguageCardResponseSense.translationLines(allowedLanguages: Set<Language>?): List<String> =
+// One cleaned line per requested language that actually has content: words are blank-filtered
+// and de-duplicated, languages ordered stably by enum order.
+internal fun LanguageCardResponseSense.translationLines(languages: Set<Language>): List<String> =
     translations.entries
-        .filter { allowedLanguages == null || it.key in allowedLanguages }
+        .filter { it.key in languages }
         .sortedBy { it.key }
         .mapNotNull { entry ->
             entry.value.orderedByIdx()

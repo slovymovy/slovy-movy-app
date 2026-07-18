@@ -8,8 +8,7 @@ import com.slovy.slovymovyapp.data.learning.Rating
 import com.slovy.slovymovyapp.data.learning.session.ExamplePair
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
-import com.slovy.slovymovyapp.data.learning.session.hasTranslationDefinition
-import com.slovy.slovymovyapp.data.learning.session.hasTranslationWords
+import com.slovy.slovymovyapp.data.learning.session.satisfiesTranslationData
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.parseClozeFromTaggedText
 import com.slovy.slovymovyapp.i18n.UiText
@@ -302,16 +301,13 @@ private fun sourceBack(
     cloze: StudyClozeTextUiState? = null,
     clozeTranslation: StudyClozeTextUiState? = null,
 ): StudyCardBackUiState {
-    val backLanguages = backLanguages(targetLanguage, translationTargets)
-    val translationLines = sense.translationLines(backLanguages)
-    val definitionLines = sense.definitionLines(backLanguages)
-    val bulleted = bulletLanguageLines(translationLines, definitionLines)
+    val blocks = sense.languageBlocks(targetLanguage, translationTargets)
     return StudyCardBackUiState(
         headline = lemma,
         isLemmaHeadline = true,
-        translations = joinLanguageLines(translationLines, bulleted),
+        translations = blocks.translations,
         definition = sense.senseDefinition,
-        definitionTranslation = joinLanguageLines(definitionLines, bulleted),
+        definitionTranslation = blocks.definitions,
         examples = examples,
         synonyms = sense.toStudySynonyms(favoriteLemmas),
         cloze = cloze,
@@ -320,17 +316,35 @@ private fun sourceBack(
     )
 }
 
-// Monolingual variants keep a translation-free back; bilingual variants confirm the answer in
-// every configured translation language, all rendered equally.
-private fun backLanguages(
+// The translation-language sections of a card back, in the exact bullet-per-language format the
+// word-details screen uses. Monolingual variants (targetLanguage == null) keep a translation-free
+// back; bilingual variants confirm the answer in every configured translation language, all
+// rendered equally. If either section spans several languages, both carry bullets so one card
+// never mixes formats.
+private class LanguageBlocks(
+    val translations: String?,
+    val definitions: String?,
+    val isMultiLanguage: Boolean,
+)
+
+private fun LanguageCardResponseSense.languageBlocks(
     targetLanguage: Language?,
     translationTargets: List<Language>,
-): Set<Language> =
-    if (targetLanguage == null) {
+): LanguageBlocks {
+    val languages = if (targetLanguage == null) {
         emptySet()
     } else {
         (listOf(targetLanguage) + translationTargets).distinctBy { it.code }.toSet()
     }
+    val translationLines = translationLines(languages)
+    val definitionLines = definitionLines(languages)
+    val bulleted = translationLines.size > 1 || definitionLines.size > 1
+    return LanguageBlocks(
+        translations = joinLanguageLines(translationLines, bulleted),
+        definitions = joinLanguageLines(definitionLines, bulleted),
+        isMultiLanguage = translationLines.size > 1,
+    )
+}
 
 private fun LanguageCardResponseSense.definitionLines(languages: Set<Language>): List<String> =
     targetLangDefinitions.entries
@@ -338,21 +352,10 @@ private fun LanguageCardResponseSense.definitionLines(languages: Set<Language>):
         .sortedBy { it.key }
         .map { it.value }
 
-// Bullets mark a multi-language card: if either block shows more than one language, both blocks
-// carry bullets so one card never mixes formats.
-private fun bulletLanguageLines(
-    translationLines: List<String>,
-    definitionLines: List<String>,
-): Boolean = translationLines.size > 1 || definitionLines.size > 1
-
+// The TRANSLATION_TO_WORD prompt: the tested language's words through the same formatter as the
+// card backs, so cue and answer agree on filtering and word order.
 private fun LanguageCardResponseSense.translationCue(language: Language): String? =
-    translations[language]
-        .orEmpty()
-        .map { it.targetLangWord }
-        .filter { it.isNotBlank() }
-        .distinct()
-        .joinToString(", ")
-        .takeIf { it.isNotBlank() }
+    translationLines(setOf(language)).firstOrNull()
 
 private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
     targetLanguage: Language,
@@ -373,26 +376,21 @@ private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
 // The headline is the answer: translation words in every configured language, in the exact same
 // bullet-per-language block the word-details screen uses, so no language looks subordinate. The
 // definition follows the same rule — one line per configured language — with the source-language
-// definition below, as before. Returns null when the tested language cannot be rendered
-// (no translation words or no definition), mirroring satisfiesTranslationData for
-// WORD_TO_TRANSLATION.
+// definition below, as before. Returns null when the tested language cannot be rendered, judged
+// by the same satisfiesTranslationData gate that variant building and load-state checks use.
 private fun bilingualBack(
     sense: LanguageCardResponseSense,
     targetLanguage: Language,
     translationTargets: List<Language>,
     favoriteLemmas: Set<String>,
 ): StudyCardBackUiState? {
-    if (!sense.hasTranslationWords(targetLanguage)) return null
-    if (!sense.hasTranslationDefinition(targetLanguage)) return null
-    val backLanguages = backLanguages(targetLanguage, translationTargets)
-    val translationLines = sense.translationLines(backLanguages)
-    val definitionLines = sense.definitionLines(backLanguages)
-    val bulleted = bulletLanguageLines(translationLines, definitionLines)
-    val headline = joinLanguageLines(translationLines, bulleted) ?: return null
-    val definition = joinLanguageLines(definitionLines, bulleted) ?: return null
+    if (!sense.satisfiesTranslationData(CardKind.WORD_TO_TRANSLATION, targetLanguage)) return null
+    val blocks = sense.languageBlocks(targetLanguage, translationTargets)
+    val headline = blocks.translations ?: return null
+    val definition = blocks.definitions ?: return null
     return StudyCardBackUiState(
         headline = headline,
-        isMultiLanguageHeadline = translationLines.size > 1,
+        isMultiLanguageHeadline = blocks.isMultiLanguage,
         definition = definition,
         definitionTranslation = sense.senseDefinition.takeIf { it.isNotBlank() },
         examples = sense.studyExamples(targetLanguage),

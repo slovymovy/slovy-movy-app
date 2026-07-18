@@ -81,8 +81,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextLayoutResult
-import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
-import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -112,6 +110,8 @@ import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
+import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -2851,8 +2851,8 @@ private fun StudySessionCompletePreview(
 // Multi-language back previews: two configured translation languages (EN + RU) rendered as
 // equal bullet-per-language blocks, one preview per affected card kind.
 
-private const val previewMultiLangTranslations = "• cosy, sociable\n• уютный, душевный"
-private const val previewMultiLangDefinitions =
+private const val PreviewMultiLangTranslations = "• cosy, sociable\n• уютный, душевный"
+private const val PreviewMultiLangDefinitions =
     "• a feeling of warmth and conviviality from being together\n" +
         "• чувство тепла и уюта от совместного времяпрепровождения"
 
@@ -2860,9 +2860,9 @@ private fun multiLanguageRecognitionCard() = recognitionCard().let { card ->
     card.copy(
         id = "recognition-multi-language",
         back = card.back.copy(
-            headline = previewMultiLangTranslations,
+            headline = PreviewMultiLangTranslations,
             isMultiLanguageHeadline = true,
-            definition = previewMultiLangDefinitions,
+            definition = PreviewMultiLangDefinitions,
             definitionTranslation = "een gevoel van warmte en gezelligheid van het samenzijn",
         ),
     )
@@ -2872,8 +2872,8 @@ private fun multiLanguageProductionCard() = productionCard().let { card ->
     card.copy(
         id = "production-multi-language",
         back = card.back.copy(
-            translations = previewMultiLangTranslations,
-            definitionTranslation = previewMultiLangDefinitions,
+            translations = PreviewMultiLangTranslations,
+            definitionTranslation = PreviewMultiLangDefinitions,
         ),
     )
 }
@@ -2882,8 +2882,8 @@ private fun multiLanguageClozeCard() = clozeCard().let { card ->
     card.copy(
         id = "cloze-multi-language",
         back = card.back.copy(
-            translations = previewMultiLangTranslations,
-            definitionTranslation = previewMultiLangDefinitions,
+            translations = PreviewMultiLangTranslations,
+            definitionTranslation = PreviewMultiLangDefinitions,
         ),
     )
 }
@@ -2892,8 +2892,8 @@ private fun multiLanguageTranslationClozeCard() = translationClozeCard().let { c
     card.copy(
         id = "cloze-translation-multi-language",
         back = card.back.copy(
-            translations = previewMultiLangTranslations,
-            definitionTranslation = previewMultiLangDefinitions,
+            translations = PreviewMultiLangTranslations,
+            definitionTranslation = PreviewMultiLangDefinitions,
         ),
     )
 }
@@ -2902,9 +2902,9 @@ private fun multiLanguageListeningCard() = listeningCard().let { card ->
     card.copy(
         id = "listening-multi-language",
         back = card.back.copy(
-            translations = previewMultiLangTranslations,
+            translations = PreviewMultiLangTranslations,
             definition = "een gevoel van warmte en gezelligheid van het samenzijn",
-            definitionTranslation = previewMultiLangDefinitions,
+            definitionTranslation = PreviewMultiLangDefinitions,
         ),
     )
 }

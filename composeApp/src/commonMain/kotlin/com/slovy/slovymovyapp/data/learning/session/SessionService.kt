@@ -279,26 +279,21 @@ class SessionService(
     ): SessionCard? {
         val sessionCardFlow = loadSessionCard(card) ?: return null
         return sessionCardFlow
-            .onEach { (_, sessionCard) ->
-                if (sessionCard?.isFetchLoading() == true) {
+            .onEach { (result, sessionCard) ->
+                if (sessionCard != null && result.isFetchLoading()) {
                     onLoadingEmission()
                     emit(sessionCard)
                 }
             }
-            .first { (result, sessionCard) ->
-                // A null session card is only terminal once the fetch itself has finished: an
-                // interim emission may still lack the translations that make a variant playable,
-                // and burying on it would punish a card whose data was seconds away.
-                if (sessionCard == null) !result.isFetchLoading() else !sessionCard.isFetchLoading()
-            }
+            // Terminal means the fetch finished, whether or not a playable variant emerged: an
+            // interim emission may still lack the translations that make a variant playable,
+            // and burying on it would punish a card whose data was seconds away.
+            .first { (result, _) -> !result.isFetchLoading() }
             .second
     }
 
     private fun WordResult.isFetchLoading(): Boolean =
         isWordLoading || isTranslationLoading
-
-    private fun SessionCard.isFetchLoading(): Boolean =
-        wordResult.isFetchLoading()
 
     @OptIn(ExperimentalTime::class)
     private fun setCardAvailableAfter(card: Card) {

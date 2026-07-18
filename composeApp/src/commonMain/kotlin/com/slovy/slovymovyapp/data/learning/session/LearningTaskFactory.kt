@@ -58,11 +58,12 @@ fun buildTaskVariants(
 }
 
 // The data a variant needs before it is playable in a given target language. This is the single
-// source of truth shared by variant building (here) and fetch-result readiness
-// (SessionCard.loadState) so a card can never be selected in a shape its renderer rejects:
-// WORD_TO_TRANSLATION renders translation words as the answer headline and the target-language
-// definition as the body, TRANSLATION_TO_WORD cues from translation words, and the remaining
-// bilingual kinds only need some translation cue for the card back.
+// source of truth shared by variant building (here), fetch-result readiness (SessionCard.loadState),
+// and the bilingual back renderer (bilingualBack in StudySessionMapper) so a card can never be
+// selected in a shape its renderer rejects: WORD_TO_TRANSLATION renders translation words as the
+// answer headline and the target-language definition as the body, TRANSLATION_TO_WORD cues from
+// translation words, and the remaining bilingual kinds only need some translation cue for the
+// card back.
 internal fun LanguageCardResponseSense.satisfiesTranslationData(kind: CardKind, language: Language): Boolean =
     when (kind) {
         CardKind.WORD_TO_TRANSLATION -> hasTranslationWords(language) && hasTranslationDefinition(language)
@@ -70,10 +71,10 @@ internal fun LanguageCardResponseSense.satisfiesTranslationData(kind: CardKind, 
         else -> hasTranslationWords(language) || hasTranslationDefinition(language)
     }
 
-internal fun LanguageCardResponseSense.hasTranslationWords(language: Language): Boolean =
+private fun LanguageCardResponseSense.hasTranslationWords(language: Language): Boolean =
     translations[language].orEmpty().any { it.targetLangWord.isNotBlank() }
 
-internal fun LanguageCardResponseSense.hasTranslationDefinition(language: Language): Boolean =
+private fun LanguageCardResponseSense.hasTranslationDefinition(language: Language): Boolean =
     !targetLangDefinitions[language].isNullOrBlank()
 
 fun selectVariantsForReview(
