@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -74,21 +75,24 @@ class RowAudioController(
     // it started with and bails if a newer request superseded it, so a slow first-time load for row
     // A can't speak or clobber row B's state after the user re-taps.
     private var requestToken = 0L
-    private var availabilityLoadStarted = false
+    private var availabilityLoadJob: Job? = null
     private var listenerAttached = false
 
     /**
-     * Loads the set of speakable languages once. Call when a host screen becomes visible (not at
-     * controller construction) so the shared TTS engine isn't initialised at app start for the
-     * app-lifetime Favorites controller.
+     * Re-probes which languages are speakable. Call when a host screen becomes visible or resumes
+     * (not at controller construction, so the shared TTS engine isn't initialised at app start for
+     * the app-lifetime Favorites controller). Refreshing on every resume picks up voices the user
+     * installed or disabled while away in Settings; only one probe runs at a time. A language
+     * counts as playable only when the engine supports it AND at least one enabled voice remains,
+     * so rows never show a speaker that cannot produce sound.
      */
-    fun ensureAvailabilityLoaded() {
-        if (availabilityLoadStarted) return
-        availabilityLoadStarted = true
-        scope.launch {
+    fun refreshAvailability() {
+        if (availabilityLoadJob?.isActive == true) return
+        availabilityLoadJob = scope.launch {
             val languages = try {
                 speechPlayer.getAvailableLanguages()
                     .filter { it.isAvailable }
+                    .filter { voiceFilterHelper.hasPlayableVoice(speechPlayer, it) }
                     .map { it.language }
                     .toSet()
             } catch (e: CancellationException) {
@@ -152,9 +156,12 @@ class RowAudioController(
     }
 
     private fun startPlayback(request: PlayRequest, gateOnVoiceSetup: Boolean) {
-        // A new utterance replaces any in-flight one; no explicit stop (mirrors Word details and
-        // avoids the IDLE callback racing the LoadingVoices state we set below).
         val token = ++requestToken
+        // Silence any current utterance before the async voice path: if this request stalls (slow
+        // load, no voices, setup sheet) the previous row must not keep playing with no visible
+        // stop control. The engine's IDLE for the stopped utterance lands while we are in
+        // LoadingVoices, which the status listener ignores, so it cannot race the spinner.
+        speechPlayer.stop()
         playback = Playback.LoadingVoices(request)
         scope.launch {
             // Voices are re-resolved on every play to pick up Settings changes.

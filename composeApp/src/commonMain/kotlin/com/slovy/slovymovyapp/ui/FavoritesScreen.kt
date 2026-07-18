@@ -760,7 +760,7 @@ fun FavoritesScreen(
     val undoLabel = stringResource(Res.string.favorites_removed_undo)
 
     LifecycleResumeEffect(viewModel) {
-        viewModel.rowAudio.ensureAvailabilityLoaded()
+        viewModel.rowAudio.refreshAvailability()
         viewModel.loadFavorites()
         onRefreshReviewState()
         onPauseOrDispose { }

@@ -129,11 +129,33 @@ open class RowAudioControllerTest : BaseTest() {
         val fake = fakeWithEnglishVoices(voice("v1"))
         withController(fake) { controller ->
             driveToPlaying(controller, fake)
+            val stopsBefore = fake.stopCount
 
             controller.toggle(SENSE_A, LEMMA_A, Language.ENGLISH)
-            assertEquals(1, fake.stopCount, "Tapping the playing row should stop the engine")
+            assertEquals(stopsBefore + 1, fake.stopCount, "Tapping the playing row should stop the engine")
             assertNull(controller.uiState.playingSenseId, "Stop should clear the playing row")
             assertNull(controller.uiState.preparingSenseId, "Stop should clear the spinner")
+        }
+    }
+
+    @Test
+    fun switchingRowsSilencesCurrentAudioImmediately() = runBlocking {
+        val fake = fakeWithEnglishVoices(voice("v1"))
+        withController(fake) { controller ->
+            driveToPlaying(controller, fake)
+            val stopsBefore = fake.stopCount
+
+            // Hold row B's voice load open: row A's audio must already be silenced while B loads,
+            // because A's stop control is gone the moment B starts preparing.
+            val gate = CompletableDeferred<Unit>()
+            fake.voiceLoadGate = gate
+            controller.toggle(SENSE_B, LEMMA_B, Language.ENGLISH)
+            assertEquals(stopsBefore + 1, fake.stopCount, "Switching rows must stop the engine before loading voices")
+            assertEquals(SENSE_B, controller.uiState.preparingSenseId, "Row B should be preparing")
+            assertNull(controller.uiState.playingSenseId, "Row A should no longer show as playing")
+
+            gate.complete(Unit)
+            awaitUntil("row B's utterance handed to the engine") { fake.spokenTexts.contains(LEMMA_B) }
         }
     }
 
@@ -199,12 +221,13 @@ open class RowAudioControllerTest : BaseTest() {
         val fake = fakeWithEnglishVoices(voice("v1"))
         withController(fake) { controller ->
             driveToPlaying(controller, fake)
+            val stopsBefore = fake.stopCount
 
             // Another feature preempts the shared engine; its SPEAKING arrives with no IDLE for our
             // flushed utterance.
             fake.emitStatus(TTSStatus.SPEAKING)
             assertNull(controller.uiState.playingSenseId, "Preempted row must release its playing state")
-            assertEquals(0, fake.stopCount, "Releasing the row must not stop the other feature's audio")
+            assertEquals(stopsBefore, fake.stopCount, "Releasing the row must not stop the other feature's audio")
         }
     }
 
@@ -326,7 +349,9 @@ open class RowAudioControllerTest : BaseTest() {
             languages = listOf(
                 ttsLanguage(Language.ENGLISH),
                 ttsLanguage(Language.DUTCH, isAvailable = false),
+                ttsLanguage(Language.FRENCH), // Engine-available but without any voice.
             )
+            voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("v1")))
         }
         withController(fake) { controller ->
             assertTrue(
@@ -334,11 +359,50 @@ open class RowAudioControllerTest : BaseTest() {
                 "Before availability resolves every language shows the speaker optimistically"
             )
 
-            controller.ensureAvailabilityLoaded()
+            controller.refreshAvailability()
             awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
             assertTrue(controller.uiState.isPlayable(Language.ENGLISH), "Available language should be playable")
             assertFalse(controller.uiState.isPlayable(Language.DUTCH), "Unavailable language should hide the speaker")
+            assertFalse(controller.uiState.isPlayable(Language.FRENCH), "Voiceless language should hide the speaker")
             assertFalse(controller.uiState.isPlayable(Language.GERMAN), "Unknown language should hide the speaker")
+        }
+    }
+
+    @Test
+    fun availabilityRefreshPicksUpNewlyInstalledVoices() = runBlocking {
+        val fake = FakeSpeechPlayer().apply {
+            languages = listOf(ttsLanguage(Language.ENGLISH))
+        }
+        withController(fake) { controller ->
+            controller.refreshAvailability()
+            awaitUntil("first availability probe resolved") { controller.uiState.availableLanguages != null }
+            assertFalse(
+                controller.uiState.isPlayable(Language.ENGLISH),
+                "A language without voices must not be playable"
+            )
+
+            // The user installs a voice in system settings and comes back; the resume re-probe
+            // must pick it up without recreating the controller.
+            fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("v1")))
+            controller.refreshAvailability()
+            awaitUntil("re-probe picked up the installed voice") {
+                controller.uiState.isPlayable(Language.ENGLISH)
+            }
+        }
+    }
+
+    @Test
+    fun allVoicesDisabledHidesSpeaker() = runBlocking {
+        val fake = fakeWithEnglishVoices(voice("v1"))
+        // The user disabled every English voice in Settings.
+        VoiceFilterHelper(settingsRepository()).setEnabledVoices(ttsLanguage(Language.ENGLISH), emptySet())
+        withController(fake) { controller ->
+            controller.refreshAvailability()
+            awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
+            assertFalse(
+                controller.uiState.isPlayable(Language.ENGLISH),
+                "A language whose voices are all disabled must not show a speaker"
+            )
         }
     }
 
@@ -347,9 +411,10 @@ open class RowAudioControllerTest : BaseTest() {
         val fake = fakeWithEnglishVoices(voice("v1"))
         withController(fake) { controller ->
             driveToPlaying(controller, fake)
+            val stopsBefore = fake.stopCount
 
             controller.dispose()
-            assertEquals(1, fake.stopCount, "Dispose should stop the engine")
+            assertEquals(stopsBefore + 1, fake.stopCount, "Dispose should stop the engine")
             assertNull(controller.uiState.playingSenseId, "Dispose should clear playback state")
             assertFalse(fake.hasStatusListeners, "Dispose should detach the status listener")
 

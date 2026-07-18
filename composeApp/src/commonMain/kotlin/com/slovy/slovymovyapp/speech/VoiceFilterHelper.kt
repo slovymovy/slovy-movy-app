@@ -137,6 +137,17 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         return !isVoiceSetupShown(language)
     }
 
+    /**
+     * Whether [language] has at least one voice the user would actually hear: any installed voice
+     * when no enabled-voice selection is stored, otherwise at least one still-enabled voice.
+     * Unlike [loadEnabledVoices] this never seeds a default selection, so it is safe to probe
+     * every language.
+     */
+    suspend fun hasPlayableVoice(speechPlayer: SpeechPlayer, language: Text2SpeechLanguage): Boolean {
+        val allVoices = speechPlayer.getVoicesForLanguage(language)
+        return filterVoicesByEnabled(allVoices, language).isNotEmpty()
+    }
+
     private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {
         val eligibleVoices = voices.filter { it.enabledByDefault }
         val fallbackVoices = voices.filter { !it.networkConnectionRequired }

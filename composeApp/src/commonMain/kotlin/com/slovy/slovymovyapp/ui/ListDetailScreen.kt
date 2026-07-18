@@ -406,7 +406,7 @@ fun ListDetailScreen(
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             // Same on-visible trigger as My words: don't touch the TTS engine until the user can
             // see a speaker.
-            viewModel.rowAudio.ensureAvailabilityLoaded()
+            viewModel.rowAudio.refreshAvailability()
             viewModel.reloadFavorites()
         }
     }
