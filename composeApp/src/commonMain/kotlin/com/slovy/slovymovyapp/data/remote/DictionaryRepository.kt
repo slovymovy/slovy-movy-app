@@ -1409,6 +1409,80 @@ class DictionaryRepository(
         return allRelatedWords
     }
 
+    data class TokenResult(
+        val lemma: String,
+        val lemmaId: Uuid,
+        val zipf: Double
+    )
+
+    /**
+     * How a reader token matched a dictionary row, in ascending strength: an exact spelling
+     * beats an accent-insensitive one, and a lemma beats an inflected form at equal exactness.
+     * So Dutch "wat" stays on the lemma "wat" instead of a form of a higher-frequency word,
+     * and Polish "laska"/"łaska" each resolve to their own lemma.
+     */
+    private enum class TokenMatchRank { FORM_NORMALIZED, LEMMA_NORMALIZED, FORM_EXACT, LEMMA_EXACT }
+
+    private data class RankedTokenResult(val rank: TokenMatchRank, val result: TokenResult)
+
+    /**
+     * Batch-resolves reader tokens to lemmas for [language]. Returns a map keyed by the exact
+     * strings passed in [words] (missing keys mean the word is not in the dictionary).
+     *
+     * Each word takes its best [TokenMatchRank] candidate across the form and lemma tables,
+     * with corpus frequency as the tie-break within a database. Later databases (the writable
+     * local cache) override earlier ones only with an equally strong or stronger match, so a
+     * local form hit cannot displace an exact lemma from the downloaded DB.
+     */
+    suspend fun lookupTokens(
+        words: Collection<String>,
+        language: Language
+    ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
+        if (words.isEmpty()) return@withContext emptyMap()
+        val wordsByNormalized = words.distinct().groupBy { stripAccents(it) }
+
+        withDictionaryDatabases(language) { databases ->
+            val best = mutableMapOf<String, RankedTokenResult>()
+            for (db in databases) {
+                val q = db.dictionaryQueries
+                val dbBest = mutableMapOf<String, RankedTokenResult>()
+
+                fun offer(word: String, candidate: RankedTokenResult) {
+                    val current = dbBest[word]
+                    if (current == null || candidate.rank > current.rank ||
+                        (candidate.rank == current.rank && candidate.result.zipf > current.result.zipf)
+                    ) dbBest[word] = candidate
+                }
+
+                queryInChunks(wordsByNormalized.keys) { chunk ->
+                    q.selectTokenCandidatesByForms(language.code, chunk).executeAsList()
+                }.forEach { row ->
+                    val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
+                    wordsByNormalized[row.form_normalized]?.forEach { word ->
+                        val exact = row.form.equals(word, ignoreCase = true)
+                        offer(word, RankedTokenResult(if (exact) TokenMatchRank.FORM_EXACT else TokenMatchRank.FORM_NORMALIZED, result))
+                    }
+                }
+
+                queryInChunks(wordsByNormalized.keys) { chunk ->
+                    q.selectTokenCandidatesByLemmas(language.code, chunk).executeAsList()
+                }.forEach { row ->
+                    val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
+                    wordsByNormalized[row.lemma_normalized]?.forEach { word ->
+                        val exact = row.lemma.equals(word, ignoreCase = true)
+                        offer(word, RankedTokenResult(if (exact) TokenMatchRank.LEMMA_EXACT else TokenMatchRank.LEMMA_NORMALIZED, result))
+                    }
+                }
+
+                dbBest.forEach { (word, candidate) ->
+                    val current = best[word]
+                    if (current == null || candidate.rank >= current.rank) best[word] = candidate
+                }
+            }
+            best.mapValues { (_, ranked) -> ranked.result }
+        }
+    }
+
     private suspend fun finalizeSearchResults(
         out: List<SearchItem>,
         maxItems: Int

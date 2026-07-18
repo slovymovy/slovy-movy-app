@@ -743,4 +743,22 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d Std. %2$d Min.</string>
     <string name="favorites_study_done_next_review_a11y">Nächste Wiederholung in %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Lesen</string>
+    <string name="reader_title_with_lang">Wörter · %1$s</string>
+    <string name="reader_error_analyzing">Der Text konnte nicht analysiert werden</string>
+    <string name="reader_text_too_long">Der Text ist etwas lang — versuche es mit höchstens %1$d Wörtern.</string>
+    <string name="reader_paste_from_clipboard">Text aus der Zwischenablage einfügen</string>
+    <string name="reader_analyzing">Text wird analysiert</string>
+    <string name="reader_tap_to_paste">Tippe, um Text einzufügen</string>
+    <string name="reader_paste_blurb">Kopiere ein paar Wörter und füge sie hier ein. Du kannst jedes Wort nachschlagen und Bedeutungen speichern, die du dir merken möchtest.</string>
+    <string name="reader_clipboard_empty">Die Zwischenablage ist leer. Kopiere etwas Text und füge ihn hier ein.</string>
+    <string name="reader_look_up">Nachschlagen</string>
+    <string name="reader_frequency_legend">Häufigkeitslegende</string>
+    <string name="reader_frequency">Häufigkeit</string>
+    <string name="reader_a11y_saved">Gespeichert, %1$s</string>
+    <string name="search_add_words">Wörter hinzufügen</string>
+    <string name="search_add_words_row">Kopiere und füge deinen Text ein</string>
+    <string name="search_add_words_cd">Füge deinen Text ein</string>
 </resources>

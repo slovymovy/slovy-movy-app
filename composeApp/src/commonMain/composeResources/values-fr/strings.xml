@@ -743,4 +743,22 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Prochaine révision dans %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Lire</string>
+    <string name="reader_title_with_lang">Mots · %1$s</string>
+    <string name="reader_error_analyzing">Impossible d'analyser le texte</string>
+    <string name="reader_text_too_long">Ce texte est un peu long — essaie avec %1$d mots maximum.</string>
+    <string name="reader_paste_from_clipboard">Coller le texte du presse-papiers</string>
+    <string name="reader_analyzing">Analyse du texte</string>
+    <string name="reader_tap_to_paste">Touche pour coller du texte</string>
+    <string name="reader_paste_blurb">Copie quelques mots et colle-les ici. Tu pourras chercher chaque mot et enregistrer les sens que tu veux retenir.</string>
+    <string name="reader_clipboard_empty">Le presse-papiers est vide. Copie du texte et colle-le ici.</string>
+    <string name="reader_look_up">Chercher</string>
+    <string name="reader_frequency_legend">Légende de fréquence</string>
+    <string name="reader_frequency">Fréquence</string>
+    <string name="reader_a11y_saved">Enregistré, %1$s</string>
+    <string name="search_add_words">Ajouter des mots</string>
+    <string name="search_add_words_row">Copie et colle ton texte</string>
+    <string name="search_add_words_cd">Colle ton texte</string>
 </resources>
