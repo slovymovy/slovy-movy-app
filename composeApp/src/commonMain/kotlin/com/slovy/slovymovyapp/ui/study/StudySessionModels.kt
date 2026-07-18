@@ -113,10 +113,16 @@ enum class StudyRecognitionMode {
     MONOLINGUAL,
 }
 
+// `translations` and `definitionTranslation` are pre-formatted multi-language blocks in the same
+// bullet-per-language format the word-details screen uses (see translationsHeader in SenseCard);
+// every language renders identically.
 data class StudyCardBackUiState(
     val headline: String,
     val isLemmaHeadline: Boolean = false,
-    val secondary: String? = null,
+    // True when the headline is a bullet block covering several translation languages; the UI
+    // steps the headline typography down one size so the block doesn't overwhelm the card.
+    val isMultiLanguageHeadline: Boolean = false,
+    val translations: String? = null,
     val definition: String? = null,
     val definitionTranslation: String? = null,
     val examples: List<StudyExampleUiState> = emptyList(),

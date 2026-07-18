@@ -110,6 +110,8 @@ import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
+import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -1529,12 +1531,18 @@ private fun StudyCardBackContent(
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             verticalAlignment = Alignment.Top,
         ) {
+            val headlineTypography = if (back.isMultiLanguageHeadline) {
+                MaterialTheme.typography.headlineMedium
+            } else {
+                MaterialTheme.typography.headlineLarge
+            }
+            val emphasizeHeadline = headlineEmphasized && !back.isMultiLanguageHeadline
             StudyTaggedText(
                 text = back.headline,
-                style = MaterialTheme.typography.headlineLarge.copy(
+                style = headlineTypography.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
-                    fontSize = if (headlineEmphasized) 30.sp else MaterialTheme.typography.headlineLarge.fontSize,
-                    lineHeight = if (headlineEmphasized) 33.sp else MaterialTheme.typography.headlineLarge.lineHeight,
+                    fontSize = if (emphasizeHeadline) 30.sp else headlineTypography.fontSize,
+                    lineHeight = if (emphasizeHeadline) 33.sp else headlineTypography.lineHeight,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start,
@@ -1559,9 +1567,9 @@ private fun StudyCardBackContent(
             }
         }
 
-        back.secondary?.let { secondary ->
+        back.translations?.let { translations ->
             StudyTaggedText(
-                text = secondary,
+                text = translations,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -2001,22 +2009,25 @@ private fun StudyTaggedText(
     autoSize: TextAutoSize? = null,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
-    val annotated = buildAnnotatedString {
-        HtmlTagParser.parseTextSegments(text).forEach { segment ->
-            if (segment.isTagged) {
-                pushStyle(
-                    SpanStyle(
-                        color = highlightColor,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                )
-                append(HtmlTagParser.plainText(segment.text))
-                pop()
-            } else {
-                append(segment.text)
+    val annotated = remember(text, highlightColor) {
+        buildAnnotatedString {
+            HtmlTagParser.parseTextSegments(text).forEach { segment ->
+                if (segment.isTagged) {
+                    pushStyle(
+                        SpanStyle(
+                            color = highlightColor,
+                            fontWeight = FontWeight.SemiBold,
+                        ),
+                    )
+                    appendWithCenteredBullets(this, HtmlTagParser.plainText(segment.text))
+                    pop()
+                } else {
+                    appendWithCenteredBullets(this, segment.text)
+                }
             }
         }
     }
+    val inlineContent = remember(color) { centeredBulletInlineContent(color) }
     if (autoSize != null) {
         Text(
             text = annotated,
@@ -2026,6 +2037,7 @@ private fun StudyTaggedText(
             maxLines = maxLines,
             overflow = overflow,
             autoSize = autoSize,
+            inlineContent = inlineContent,
             modifier = modifier,
         )
     } else {
@@ -2036,6 +2048,7 @@ private fun StudyTaggedText(
             textAlign = textAlign,
             maxLines = maxLines,
             overflow = overflow,
+            inlineContent = inlineContent,
             modifier = modifier,
         )
     }
@@ -2365,7 +2378,7 @@ private fun productionCard() = StudyCardUiState.Production(
     firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
-        secondary = "cosy, sociable",
+        translations = "cosy, sociable",
         definition = "een typisch Nederlandse vorm van warme gezelligheid",
         definitionTranslation = "a uniquely Dutch flavour of warm conviviality",
         examples = listOf(
@@ -2396,7 +2409,7 @@ private fun clozeCard() = StudyCardUiState.Cloze(
     ),
     back = StudyCardBackUiState(
         headline = "gezellig",
-        secondary = "cosy, sociable",
+        translations = "cosy, sociable",
         definition = "een gevoel van warmte en gezelligheid van het samenzijn",
         definitionTranslation = "a feeling of warmth and conviviality from being together",
         cloze = StudyClozeTextUiState(
@@ -2428,7 +2441,7 @@ private fun translationClozeCard() = StudyCardUiState.Cloze(
     back = StudyCardBackUiState(
         headline = "gezellig",
         isLemmaHeadline = true,
-        secondary = "cosy, sociable",
+        translations = "cosy, sociable",
         definition = "een gevoel van warmte en gezelligheid van het samenzijn",
         definitionTranslation = "a feeling of warmth and conviviality from being together",
         examples = listOf(
@@ -2446,7 +2459,7 @@ private fun listeningCard() = StudyCardUiState.Listening(
     promptAudioText = "gezellig",
     back = StudyCardBackUiState(
         headline = "gezellig",
-        secondary = "cosy, sociable",
+        translations = "cosy, sociable",
         definition = "a feeling of warmth, comfort, and conviviality from being together with others",
         examples = listOf(
             StudyExampleUiState(
@@ -2470,7 +2483,7 @@ private fun multiSenseListeningCard() = StudyCardUiState.Listening(
             back = sense.back.copy(
                 headline = "zetten",
                 isLemmaHeadline = true,
-                secondary = sense.back.headline,
+                translations = sense.back.headline,
                 audioText = "zetten",
             ),
         )
@@ -2479,7 +2492,7 @@ private fun multiSenseListeningCard() = StudyCardUiState.Listening(
     back = StudyCardBackUiState(
         headline = "zetten",
         isLemmaHeadline = true,
-        secondary = "to put, place",
+        translations = "to put, place",
         definition = "place something somewhere with intent.",
         examples = listOf(
             StudyExampleUiState(
@@ -2829,6 +2842,137 @@ private fun StudySessionCompletePreview(
                     hero = StudySessionCompleteHero.None,
                 )
             ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+// Multi-language back previews: two configured translation languages (EN + RU) rendered as
+// equal bullet-per-language blocks, one preview per affected card kind.
+
+private const val PreviewMultiLangTranslations = "• cosy, sociable\n• уютный, душевный"
+private const val PreviewMultiLangDefinitions =
+    "• a feeling of warmth and conviviality from being together\n" +
+        "• чувство тепла и уюта от совместного времяпрепровождения"
+
+private fun multiLanguageRecognitionCard() = recognitionCard().let { card ->
+    card.copy(
+        id = "recognition-multi-language",
+        back = card.back.copy(
+            headline = PreviewMultiLangTranslations,
+            isMultiLanguageHeadline = true,
+            definition = PreviewMultiLangDefinitions,
+            definitionTranslation = "een gevoel van warmte en gezelligheid van het samenzijn",
+        ),
+    )
+}
+
+private fun multiLanguageProductionCard() = productionCard().let { card ->
+    card.copy(
+        id = "production-multi-language",
+        back = card.back.copy(
+            translations = PreviewMultiLangTranslations,
+            definitionTranslation = PreviewMultiLangDefinitions,
+        ),
+    )
+}
+
+private fun multiLanguageClozeCard() = clozeCard().let { card ->
+    card.copy(
+        id = "cloze-multi-language",
+        back = card.back.copy(
+            translations = PreviewMultiLangTranslations,
+            definitionTranslation = PreviewMultiLangDefinitions,
+        ),
+    )
+}
+
+private fun multiLanguageTranslationClozeCard() = translationClozeCard().let { card ->
+    card.copy(
+        id = "cloze-translation-multi-language",
+        back = card.back.copy(
+            translations = PreviewMultiLangTranslations,
+            definitionTranslation = PreviewMultiLangDefinitions,
+        ),
+    )
+}
+
+private fun multiLanguageListeningCard() = listeningCard().let { card ->
+    card.copy(
+        id = "listening-multi-language",
+        back = card.back.copy(
+            translations = PreviewMultiLangTranslations,
+            definition = "een gevoel van warmte en gezelligheid van het samenzijn",
+            definitionTranslation = PreviewMultiLangDefinitions,
+        ),
+    )
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiLanguageRecognitionBackPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiLanguageRecognitionCard(), StudyCardSide.BACK),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiLanguageProductionBackPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiLanguageProductionCard(), StudyCardSide.BACK, current = 5),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiLanguageClozeBackPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiLanguageClozeCard(), StudyCardSide.BACK, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiLanguageTranslationClozeBackPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiLanguageTranslationClozeCard(), StudyCardSide.BACK, current = 7),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionMultiLanguageListeningBackPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(multiLanguageListeningCard(), StudyCardSide.BACK, current = 8),
             onCancel = {},
             onEnd = {},
         )

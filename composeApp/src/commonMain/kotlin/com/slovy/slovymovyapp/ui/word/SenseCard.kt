@@ -5,11 +5,15 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,8 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,8 +35,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioPhase
+import com.slovy.slovymovyapp.ui.SpeakerVector
+import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
+import com.slovy.slovymovyapp.ui.components.appendWithMutedCenteredBullets
+import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
@@ -63,7 +78,10 @@ internal fun SenseCard(
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
     onViewFullDetails: (() -> Unit)? = null,
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmas: Set<String> = emptySet(),
+    // Inline lemma speaker (My words / list detail). When null no speaker is shown — Word details
+    // renders its own hero speaker, so it leaves this off.
+    lemmaAudio: LemmaAudioControl? = null,
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -111,12 +129,19 @@ internal fun SenseCard(
                         data.translationLoading -> LoadingPlaceholder(stringResource(Res.string.word_details_preparing_translation))
                     }
                     if (data.showLemma) {
-                        HighlightedText(
-                            text = data.lemma,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = MaterialTheme.serifFontFamily
+                        if (lemmaAudio != null) {
+                            LemmaWithSpeaker(
+                                lemma = data.lemma,
+                                control = lemmaAudio,
                             )
-                        )
+                        } else {
+                            HighlightedText(
+                                text = data.lemma,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = MaterialTheme.serifFontFamily
+                                )
+                            )
+                        }
                     }
                     if (sense != null) {
                         if (translationBasedHeader == null) {
@@ -334,6 +359,86 @@ internal fun SenseCard(
     }
 }
 
+/**
+ * Lemma with an inline speaker glyph that follows the last fragment on wrap (spec §3). The glyph is
+ * an inline placeholder so it stays bound to the word's text run and never detaches or truncates;
+ * the 44dp tap target is grown past the placeholder with [Modifier.requiredSize] so it never adds
+ * row height. Colour/glyph mirror the Word-details speaker.
+ */
+@Composable
+private fun LemmaWithSpeaker(
+    lemma: String,
+    control: LemmaAudioControl,
+) {
+    val playing = control.phase == RowAudioPhase.PLAYING
+    val playLabel = stringResource(Res.string.word_details_action_play_word)
+    val stopLabel = stringResource(Res.string.word_details_action_stop)
+    // Secondary ink, dialled back so the word stays the hero (design review #3). Theme-aware in
+    // both light/dark via onSurfaceVariant.
+    val speakerTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+    val text = buildAnnotatedString {
+        append(lemma)
+        // A normal space lets the glyph wrap onto the next line with the word rather than overflow.
+        append(' ')
+        appendInlineContent(SPEAKER_INLINE_ID, "🔊")
+    }
+    val inlineContent = mapOf(
+        SPEAKER_INLINE_ID to InlineTextContent(
+            // Width kept close to the glyph so the word-to-glyph gap reads tight (design review #4);
+            // height tracks ~1em of the lemma. The 44dp hit box overflows this slot, so the
+            // placeholder only governs layout/spacing, never the tap target.
+            Placeholder(
+                width = 1.2.em,
+                height = 1.1.em,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.Center,
+            )
+        ) {
+            // Outer box fills the placeholder slot; the inner 44dp target overflows symmetrically
+            // (centred) so the glyph stays aligned to the lemma while the hit box extends out.
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .requiredSize(44.dp)
+                        .clip(CircleShape)
+                        .clickable(
+                            onClick = control.onToggle,
+                            role = Role.Button,
+                            onClickLabel = if (playing) stopLabel else playLabel,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    when {
+                        control.phase == RowAudioPhase.PREPARING -> CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = speakerTint,
+                        )
+
+                        else -> Icon(
+                            imageVector = if (playing) Icons.Filled.StopCircle else SpeakerVector,
+                            contentDescription = if (playing) stopLabel else playLabel,
+                            tint = speakerTint,
+                            // Nudge the glyph to the lemma's optical midline (x-height centre), which
+                            // reads slightly below the line centre (design review #2). Visual only —
+                            // the hit box is unmoved.
+                            modifier = Modifier.size(18.dp).offset(y = 1.dp),
+                        )
+                    }
+                }
+            }
+        }
+    )
+    Text(
+        text = text,
+        inlineContent = inlineContent,
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontFamily = MaterialTheme.serifFontFamily
+        ),
+    )
+}
+
+private const val SPEAKER_INLINE_ID = "lemma_speaker"
+
 @Composable
 internal fun TraitsList(traits: List<LanguageCardTrait>) {
     if (traits.isEmpty()) return
@@ -437,11 +542,13 @@ private fun ExampleText(
     val annotated = buildAnnotatedString {
         appendTextWithW(this, text, highlight, highlight, emptySet())
     }
+    val bulletColor = style.color.takeOrElse { LocalContentColor.current }
 
     Text(
         text = annotated,
         style = style,
-        modifier = modifier
+        modifier = modifier,
+        inlineContent = remember(bulletColor) { centeredBulletInlineContent(bulletColor) },
     )
 }
 
@@ -495,13 +602,19 @@ internal fun TranslationHeader(
         return
     }
 
-    val multiLang = sense.translations.keys.size > 1
+    val entries = sense.cleanedTranslationEntries(sense.translations.keys)
+    val multiLang = entries.size > 1
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
     val style = MaterialTheme.typography.titleMedium
-    sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
+    val bulletColor = LocalContentColor.current
+    val bulletInlineContent = remember(bulletColor, clarificationColor) {
+        centeredBulletInlineContent(color = bulletColor, mutedColor = clarificationColor)
+    }
+    entries.forEach { (_, langTranslations) ->
         Text(
             text = buildClarificationRow(langTranslations, ambiguous, multiLang, clarificationColor),
-            style = style
+            style = style,
+            inlineContent = bulletInlineContent,
         )
     }
 }
@@ -512,7 +625,7 @@ internal fun buildClarificationRow(
     multiLang: Boolean,
     clarificationColor: Color = Color.Unspecified
 ) = buildAnnotatedString {
-    if (multiLang) append("$bullet ")
+    if (multiLang) appendWithCenteredBullets(this, "$bullet ")
     langTranslations.orderedByIdx().forEachIndexed { index, translation ->
         if (index > 0) append(", ")
         val word = translation.targetLangWord
@@ -520,21 +633,52 @@ internal fun buildClarificationRow(
         val clarification = translation.targetLangSenseClarification
         if (word in ambiguous && clarification != null) {
             withStyle(SpanStyle(color = clarificationColor)) {
-                append(" $bullet $clarification")
+                // The span only colors text; the drawn dot must be routed to the muted inline
+                // content so it matches the clarification color.
+                appendWithMutedCenteredBullets(this, " $bullet $clarification")
             }
         }
     }
 }
 
 internal fun LanguageCardResponseSense.translationsHeader(): String? {
-    if (translations.isEmpty()) {
+    val lines = translationLines(translations.keys)
+    return joinLanguageLines(lines, bulleted = lines.size > 1)
+}
+
+// One cleaned line per requested language that actually has content: words are blank-filtered
+// and de-duplicated, languages ordered stably by enum order.
+internal fun LanguageCardResponseSense.translationLines(languages: Set<Language>): List<String> =
+    cleanedTranslationEntries(languages).map { (_, entries) ->
+        entries.map { it.targetLangWord }.distinct().joinToString(separator = ", ")
+    }
+
+// Per-language translation entries with renderable content: blank words dropped, exact duplicate
+// entries collapsed (the same word with a different clarification survives — it carries distinct
+// information), words ordered by idx, languages ordered stably by enum order. Languages left with
+// no content are omitted entirely so they produce no empty rows and don't count as an extra
+// language for bullet formatting.
+internal fun LanguageCardResponseSense.cleanedTranslationEntries(
+    languages: Set<Language>,
+): List<Pair<Language, List<LanguageCardTranslation>>> =
+    translations.entries
+        .filter { it.key in languages }
+        .sortedBy { it.key }
+        .mapNotNull { (language, entries) ->
+            entries.orderedByIdx()
+                .filter { it.targetLangWord.isNotBlank() }
+                .distinctBy { it.targetLangWord to it.targetLangSenseClarification }
+                .takeIf { it.isNotEmpty() }
+                ?.let { language to it }
+        }
+
+// The single renderer of the bullet-per-language block layout shared by the word-details header
+// and the study card backs. Callers decide `bulleted` so all blocks on one surface can agree.
+internal fun joinLanguageLines(lines: List<String>, bulleted: Boolean): String? {
+    if (lines.isEmpty()) {
         return null
     }
-    val prefix = if (translations.keys.size > 1) "$bullet " else ""
-    return translations.entries.sortedBy { it.key }.joinToString(separator = "\n") {
-        prefix + it.value.orderedByIdx().map { translation -> translation.targetLangWord }
-            .joinToString(separator = ", ")
-    }
+    return lines.joinToString(separator = "\n") { line -> if (bulleted) "$bullet $line" else line }
 }
 
 private fun List<LanguageCardTranslation>.orderedByIdx(): List<LanguageCardTranslation> =
