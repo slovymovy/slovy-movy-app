@@ -602,14 +602,15 @@ internal fun TranslationHeader(
         return
     }
 
-    val multiLang = sense.translations.keys.size > 1
+    val entries = sense.cleanedTranslationEntries(sense.translations.keys)
+    val multiLang = entries.size > 1
     val clarificationColor = MaterialTheme.colorScheme.onSurfaceVariant
     val style = MaterialTheme.typography.titleMedium
     val bulletColor = LocalContentColor.current
     val bulletInlineContent = remember(bulletColor, clarificationColor) {
         centeredBulletInlineContent(color = bulletColor, mutedColor = clarificationColor)
     }
-    sense.translations.entries.sortedBy { it.key }.forEach { (_, langTranslations) ->
+    entries.forEach { (_, langTranslations) ->
         Text(
             text = buildClarificationRow(langTranslations, ambiguous, multiLang, clarificationColor),
             style = style,
@@ -648,16 +649,27 @@ internal fun LanguageCardResponseSense.translationsHeader(): String? {
 // One cleaned line per requested language that actually has content: words are blank-filtered
 // and de-duplicated, languages ordered stably by enum order.
 internal fun LanguageCardResponseSense.translationLines(languages: Set<Language>): List<String> =
+    cleanedTranslationEntries(languages).map { (_, entries) ->
+        entries.map { it.targetLangWord }.distinct().joinToString(separator = ", ")
+    }
+
+// Per-language translation entries with renderable content: blank words dropped, exact duplicate
+// entries collapsed (the same word with a different clarification survives — it carries distinct
+// information), words ordered by idx, languages ordered stably by enum order. Languages left with
+// no content are omitted entirely so they produce no empty rows and don't count as an extra
+// language for bullet formatting.
+internal fun LanguageCardResponseSense.cleanedTranslationEntries(
+    languages: Set<Language>,
+): List<Pair<Language, List<LanguageCardTranslation>>> =
     translations.entries
         .filter { it.key in languages }
         .sortedBy { it.key }
-        .mapNotNull { entry ->
-            entry.value.orderedByIdx()
-                .map { translation -> translation.targetLangWord }
-                .filter { it.isNotBlank() }
-                .distinct()
-                .joinToString(separator = ", ")
-                .takeIf { it.isNotBlank() }
+        .mapNotNull { (language, entries) ->
+            entries.orderedByIdx()
+                .filter { it.targetLangWord.isNotBlank() }
+                .distinctBy { it.targetLangWord to it.targetLangSenseClarification }
+                .takeIf { it.isNotEmpty() }
+                ?.let { language to it }
         }
 
 // The single renderer of the bullet-per-language block layout shared by the word-details header
