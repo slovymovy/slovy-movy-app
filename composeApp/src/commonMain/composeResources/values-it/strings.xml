@@ -711,7 +711,7 @@
     <string name="study_cant_listen_now">Ora non puoi ascoltare</string>
     <string name="study_listening_postponed_message">Schede di ascolto in pausa fino alla prossima ripetizione</string>
     <string name="study_rating_prompt">Quanto bene te la sei ricordata?</string>
-    <string name="study_rating_again">Dimenticata</string>
+    <string name="study_rating_again">Scordata</string>
     <string name="study_rating_hard">Quasi</string>
     <string name="study_rating_good">Ricordata</string>
     <string name="study_rating_easy">Troppo facile</string>

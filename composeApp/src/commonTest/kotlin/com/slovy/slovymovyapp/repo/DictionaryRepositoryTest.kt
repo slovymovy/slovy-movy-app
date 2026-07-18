@@ -1484,6 +1484,94 @@ class DictionaryRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun search_by_translation_chunks_lemma_lookup_above_sqlite_variable_limit() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        try {
+            // More lemma ids than the 999-bound-variable cap of SQLite on Android 11 and older,
+            // so the translation-prefix search must chunk its lemma IN (...) lookup.
+            val lemmaCount = 1100
+            val lemmaIds = List(lemmaCount) { Uuid.random() }
+
+            val localDictDb = localMgr.openLocalDictionary()
+            val q = localDictDb.dictionaryQueries
+            q.transaction {
+                lemmaIds.forEachIndexed { i, id ->
+                    q.insertLemma(id, "en", "chunkedword$i", "chunkedword$i", 5.0, false)
+                }
+            }
+
+            val localTransDb = localMgr.openLocalTranslation()
+            val tq = localTransDb.translationQueries
+            tq.transaction {
+                lemmaIds.forEachIndexed { i, id ->
+                    tq.insertSenseTranslation(
+                        sense_id = Uuid.random(),
+                        from_lang_code = "en",
+                        target_lang_code = "ru",
+                        idx = 0,
+                        target_lang_word = "чанк$i",
+                        target_lang_word_normalized = "чанк$i",
+                        target_lang_sense_clarification = null,
+                        lemma_id = id,
+                        lemma_pos_id = Uuid.random()
+                    )
+                }
+            }
+
+            val settingsRepo = settingsRepository()
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.LANGUAGE,
+                        value = JsonArray(listOf(JsonPrimitive("ru")))
+                    )
+                )
+            }
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepo)
+            val results = runBlocking {
+                repo.search("чанк", dictionaryLanguage = Language.ENGLISH, maxItems = 50)
+            }
+
+            assertEquals(50, results.size, "Translation search should fill maxItems from the chunked lemma lookup")
+            for (item in results) {
+                assertTrue(
+                    item.display.contains("translation of"),
+                    "Expected a translation result, got: ${item.display}"
+                )
+            }
+        } finally {
+            runBlocking {
+                settingsRepository().deleteById(Setting.Name.LANGUAGE)
+                localMgr.closeAll()
+            }
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
+            }
+        }
+    }
+
+    @Test
     fun getLanguageCard_withMissingLocalTranslationDb_returnsBaseCardWithoutCreatingTranslationDb() {
         val platform = testPlatformDbSupport()
         val mgr = testDataDbManager()
