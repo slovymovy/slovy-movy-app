@@ -5,11 +5,15 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,6 +24,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,8 +34,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioPhase
+import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
@@ -63,7 +74,10 @@ internal fun SenseCard(
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
     onViewFullDetails: (() -> Unit)? = null,
-    favoriteLemmas: Set<String> = emptySet()
+    favoriteLemmas: Set<String> = emptySet(),
+    // Inline lemma speaker (My words / list detail). When null no speaker is shown — Word details
+    // renders its own hero speaker, so it leaves this off.
+    lemmaAudio: LemmaAudioControl? = null,
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -111,12 +125,19 @@ internal fun SenseCard(
                         data.translationLoading -> LoadingPlaceholder(stringResource(Res.string.word_details_preparing_translation))
                     }
                     if (data.showLemma) {
-                        HighlightedText(
-                            text = data.lemma,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = MaterialTheme.serifFontFamily
+                        if (lemmaAudio != null) {
+                            LemmaWithSpeaker(
+                                lemma = data.lemma,
+                                control = lemmaAudio,
                             )
-                        )
+                        } else {
+                            HighlightedText(
+                                text = data.lemma,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = MaterialTheme.serifFontFamily
+                                )
+                            )
+                        }
                     }
                     if (sense != null) {
                         if (translationBasedHeader == null) {
@@ -333,6 +354,86 @@ internal fun SenseCard(
         }
     }
 }
+
+/**
+ * Lemma with an inline speaker glyph that follows the last fragment on wrap (spec §3). The glyph is
+ * an inline placeholder so it stays bound to the word's text run and never detaches or truncates;
+ * the 44dp tap target is grown past the placeholder with [Modifier.requiredSize] so it never adds
+ * row height. Colour/glyph mirror the Word-details speaker.
+ */
+@Composable
+private fun LemmaWithSpeaker(
+    lemma: String,
+    control: LemmaAudioControl,
+) {
+    val playing = control.phase == RowAudioPhase.PLAYING
+    val playLabel = stringResource(Res.string.word_details_action_play_word)
+    val stopLabel = stringResource(Res.string.word_details_action_stop)
+    // Secondary ink, dialled back so the word stays the hero (design review #3). Theme-aware in
+    // both light/dark via onSurfaceVariant.
+    val speakerTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+    val text = buildAnnotatedString {
+        append(lemma)
+        // A normal space lets the glyph wrap onto the next line with the word rather than overflow.
+        append(' ')
+        appendInlineContent(SPEAKER_INLINE_ID, "🔊")
+    }
+    val inlineContent = mapOf(
+        SPEAKER_INLINE_ID to InlineTextContent(
+            // Width kept close to the glyph so the word-to-glyph gap reads tight (design review #4);
+            // height tracks ~1em of the lemma. The 44dp hit box overflows this slot, so the
+            // placeholder only governs layout/spacing, never the tap target.
+            Placeholder(
+                width = 1.2.em,
+                height = 1.1.em,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.Center,
+            )
+        ) {
+            // Outer box fills the placeholder slot; the inner 44dp target overflows symmetrically
+            // (centred) so the glyph stays aligned to the lemma while the hit box extends out.
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .requiredSize(44.dp)
+                        .clip(CircleShape)
+                        .clickable(
+                            onClick = control.onToggle,
+                            role = Role.Button,
+                            onClickLabel = if (playing) stopLabel else playLabel,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    when {
+                        control.phase == RowAudioPhase.PREPARING -> CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = speakerTint,
+                        )
+
+                        else -> Icon(
+                            imageVector = if (playing) Icons.Filled.StopCircle else SpeakerVector,
+                            contentDescription = if (playing) stopLabel else playLabel,
+                            tint = speakerTint,
+                            // Nudge the glyph to the lemma's optical midline (x-height centre), which
+                            // reads slightly below the line centre (design review #2). Visual only —
+                            // the hit box is unmoved.
+                            modifier = Modifier.size(18.dp).offset(y = 1.dp),
+                        )
+                    }
+                }
+            }
+        }
+    )
+    Text(
+        text = text,
+        inlineContent = inlineContent,
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontFamily = MaterialTheme.serifFontFamily
+        ),
+    )
+}
+
+private const val SPEAKER_INLINE_ID = "lemma_speaker"
 
 @Composable
 internal fun TraitsList(traits: List<LanguageCardTrait>) {
