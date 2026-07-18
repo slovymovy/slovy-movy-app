@@ -413,19 +413,16 @@ private fun ResultView(
                     // Word + adjacent punctuation group — wrap in Row so FlowRow never splits them
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         group.forEach { token ->
-                            if (!token.isWord) {
+                            if (!token.isWord || token.lemma == null) {
+                                // Inert punctuation, or a word not found in the dictionary — plain text.
                                 Text(text = token.text, style = passageStyle)
                             } else {
-                                // Words without a dictionary hit keep no band wash but stay
-                                // tappable: Word details can still fetch them online by their
-                                // surface form.
                                 HighlightedWord(
                                     token = token,
                                     style = passageStyle,
-                                    isFavorite = token.lemma != null &&
-                                        FavoritesRepository.normalizeLemma(token.lemma) in state.favoriteLemmas,
+                                    isFavorite = FavoritesRepository.normalizeLemma(token.lemma) in state.favoriteLemmas,
                                     lookUpLabel = lookUpLabel,
-                                    onClick = { onWordClick(language, token.lemma ?: normalizeApostrophes(token.text)) }
+                                    onClick = { onWordClick(language, token.lemma) }
                                 )
                             }
                         }
