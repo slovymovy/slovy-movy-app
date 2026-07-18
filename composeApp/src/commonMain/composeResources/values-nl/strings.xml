@@ -7,7 +7,7 @@
     <string name="nav_stats">Stats</string>
     <string name="nav_settings">Instellingen</string>
 
-    <string name="welcome_tagline">De app die van opgezochte woorden geleerde woorden maakt. Gratis.</string>
+    <string name="welcome_tagline">Onthoud de woorden die je normaal tegen morgen alweer vergeet.</string>
     <string name="welcome_selling_point_translations_title">Zoek elk woord op</string>
     <string name="welcome_selling_point_translations_description">Voorbeelden, vormen, zinnen en synoniemen — alles handig op één plek.</string>
     <string name="welcome_selling_point_collection_title">Je eigen woordenlijst</string>
@@ -23,8 +23,11 @@
     <string name="search_section_explore">Ontdekken</string>
     <string name="search_pull_to_refresh_hint">Sleep omlaag voor nieuwe woorden</string>
     <string name="search_section_recently_saved">Onlangs opgeslagen</string>
-    <string name="search_section_lists_for_you">Lijsten voor jou</string>
+    <string name="search_section_lists_for_you">Klaar om te leren</string>
     <string name="search_empty_start_typing">Begin met typen om te zoeken</string>
+    <string name="search_suggest_list_button">Stel een lijst voor</string>
+    <string name="search_suggest_list_dialog_title">Stel een lijst voor</string>
+    <string name="search_suggest_list_placeholder">Beschrijf hier de woordenlijst die je graag zou willen zien...</string>
     <string name="search_no_dictionary_title">Geen woordenboek gedownload</string>
     <string name="search_no_dictionary_description">Download een woordenboek om te beginnen met zoeken</string>
     <string name="search_go_to_settings">Ga naar Instellingen</string>
@@ -58,6 +61,9 @@
     <string name="stats_library_section">Mijn woordenschat</string>
     <string name="list_detail_load_error">Kan deze lijst niet laden. Controleer je verbinding en probeer het opnieuw.</string>
     <string name="list_detail_empty">Geen woorden uit deze lijst beschikbaar in het gedownloade woordenboek.</string>
+    <string name="list_detail_in_my_words_count">%1$d in Mijn woorden</string>
+    <string name="list_detail_add_all">Alles toevoegen aan Mijn woorden</string>
+    <string name="list_detail_remove_all">Alles verwijderen uit Mijn woorden</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d woord</item>
         <item quantity="few">%1$d woorden</item>

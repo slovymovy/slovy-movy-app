@@ -11,7 +11,9 @@ import kotlin.test.assertNull
 
 class LocalDirectoryListsLoaderTest {
 
-    private val listJson = """{"title":{"en":"Animals"},"subtitle":{"en":"Some words"},"senseIds":["s-1"]}"""
+    private val listJson =
+        """{"title":{"en":"Animals"},"subtitle":{"en":"Some words"},"senses":[{"senseId":"s-1","lemma":"hond"}]}"""
+    private val legacyListJson = """{"title":{"en":"Animals"},"subtitle":{"en":"Some words"},"senseIds":["s-1"]}"""
     private val iconSvg = """<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg>"""
 
     private fun withListsDir(block: (root: Path, lang: Path) -> Unit) {
@@ -34,6 +36,26 @@ class LocalDirectoryListsLoaderTest {
                 ?: error("bundle must load for an existing language folder")
             assertEquals(1, bundle.lists.size, "one list file must yield one list")
             assertEquals(iconSvg, bundle.lists.single().iconSvg, "the {id}.svg file must be auto-paired as SVG text")
+            assertEquals(
+                listOf(ListSenseEntry(senseId = "s-1", lemma = "hond")),
+                bundle.lists.single().senses,
+                "senses must carry the authored lemma",
+            )
+        }
+    }
+
+    @Test
+    fun load_acceptsLegacySenseIdsShape_withEmptyLemma() {
+        withListsDir { root, lang ->
+            lang.resolve("dieren.json").writeText(legacyListJson)
+
+            val bundle = LocalDirectoryListsLoader(root).load("nl")
+                ?: error("bundle must load for an existing language folder")
+            assertEquals(
+                listOf(ListSenseEntry(senseId = "s-1", lemma = "")),
+                bundle.lists.single().senses,
+                "legacy senseIds must normalize to senses with an empty lemma",
+            )
         }
     }
 

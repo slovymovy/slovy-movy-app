@@ -41,6 +41,7 @@ class StudySessionMapperTest {
         assertEquals(StudyRecognitionMode.BILINGUAL, mapped.mode)
         assertEquals("cosy, sociable", mapped.back.headline)
         assertEquals("a feeling of warmth", mapped.back.definition)
+        assertEquals("een gevoel van warmte", mapped.back.definitionTranslation)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
     }
@@ -115,7 +116,7 @@ class StudySessionMapperTest {
         mapped.senses.forEach { senseUi ->
             assertEquals("gezellig", senseUi.back.headline)
         }
-        assertEquals("a feeling of warmth", mapped.senses.first().back.definition)
+        assertEquals("een gevoel van warmte", mapped.senses.first().back.definition)
         assertEquals("convivial gathering", mapped.senses.last().back.definition)
     }
 
@@ -130,7 +131,8 @@ class StudySessionMapperTest {
         assertEquals("gezellig", mapped.promptAudioText)
         assertEquals("gezellig", mapped.back.headline)
         assertEquals("cosy, sociable", mapped.back.secondary)
-        assertEquals("a feeling of warmth", mapped.back.definition)
+        assertEquals("een gevoel van warmte", mapped.back.definition)
+        assertEquals("a feeling of warmth", mapped.back.definitionTranslation)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
     }
@@ -182,7 +184,7 @@ class StudySessionMapperTest {
         val activeSenseBack = mapped.senses.single { it.id == studiedSenseId }.back
         assertEquals("gezellig", activeSenseBack.headline)
         assertEquals("cosy, sociable", activeSenseBack.secondary)
-        assertEquals("a feeling of warmth", activeSenseBack.definition)
+        assertEquals("een gevoel van warmte", activeSenseBack.definition)
         val otherBack = mapped.senses.single { it.id == otherSenseId }.back
         assertEquals("gezellig", otherBack.headline)
         assertEquals("sociable evening", otherBack.secondary)
@@ -231,17 +233,45 @@ class StudySessionMapperTest {
 
         assertEquals("Het was zo gezellig.", mapped.prompt.text)
         assertEquals(listOf(11..18), mapped.prompt.answerRanges)
+        // Fixture translation is untagged, so the hint falls back to the lemma's first-letter hint.
+        assertNull(mapped.translationHint)
         val hint = assertNotNull(mapped.firstLetterHint)
         assertEquals('g', hint.letter)
         assertEquals(8, hint.letterCount)
         assertEquals(7, hint.dotCount)
-        assertNull(mapped.translationHint)
         assertNotNull(mapped.back.cloze)
         assertEquals("gezellig", mapped.back.headline)
+        assertEquals("een gevoel van warmte", mapped.back.definition)
+        assertEquals("a feeling of warmth", mapped.back.definitionTranslation)
+        val clozeTranslation = assertNotNull(mapped.back.clozeTranslation)
+        assertEquals("It was so cosy.", clozeTranslation.text)
+        assertEquals(true, clozeTranslation.filled)
     }
 
     @Test
-    fun translationClozeCardExposesSourceExampleAsClozeHint() {
+    fun sourceClozeCardHighlightsTranslationHintWhenTranslationTagged() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.CLOZE_SOURCE, targetLang = Language.ENGLISH.code),
+            example = ExamplePair(
+                exampleIndex = 0,
+                text = "Het was zo gezellig.",
+                clozeRanges = listOf(11..18),
+            ),
+            primaryExampleTranslation = "It was so <w>cosy</w>.",
+        )
+
+        val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // Tagged translation: highlight the answer word in the translation hint, no first-letter hint.
+        assertNull(mapped.firstLetterHint)
+        val hint = assertNotNull(mapped.translationHint)
+        assertEquals("It was so cosy.", hint.text)
+        assertEquals(listOf(10..13), hint.answerRanges)
+        assertEquals(true, hint.filled)
+    }
+
+    @Test
+    fun translationClozeCardExposesFirstLetterHintFromLemma() {
         val sessionCard = sessionCard(
             variant = CardVariant(CardKind.CLOZE_TRANSLATION, targetLang = Language.ENGLISH.code),
             example = ExamplePair(
@@ -249,13 +279,18 @@ class StudySessionMapperTest {
                 text = "It was so cosy.",
                 clozeRanges = listOf(10..13),
             ),
+            // Inflected form in the source example differs from the lemma; the hint uses the lemma.
+            primaryExampleText = "Het was zo <w>gezelliger</w>.",
         )
 
         val mapped = assertIs<StudyCardUiState.Cloze>(sessionCard.toStudyCardUiState(emptySet()))
 
-        val hint = assertNotNull(mapped.translationHint)
-        assertEquals("Het was zo gezellig.", hint.text)
-        assertEquals(listOf(11..18), hint.answerRanges)
+        assertNull(mapped.translationHint)
+        val hint = assertNotNull(mapped.firstLetterHint)
+        assertEquals('g', hint.letter)
+        // "gezellig" (lemma, 8) rather than "gezelliger" (inflected form, 10).
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
     }
 
     @Test
@@ -273,10 +308,11 @@ class StudySessionMapperTest {
 
         assertEquals("Vergeet niet om je paspoort mee te nemen.", mapped.prompt.text)
         assertEquals(listOf(28..30, 35..39), mapped.prompt.answerRanges)
+        // Untagged fixture translation falls back to the lemma's first-letter hint.
         val hint = assertNotNull(mapped.firstLetterHint)
-        assertEquals('m', hint.letter)
-        assertEquals(3, hint.letterCount)
-        assertEquals(2, hint.dotCount)
+        assertEquals('g', hint.letter)
+        assertEquals(8, hint.letterCount)
+        assertEquals(7, hint.dotCount)
         assertNotNull(mapped.back.cloze)
         assertEquals(listOf(28..30, 35..39), mapped.back.cloze.answerRanges)
     }
@@ -341,6 +377,8 @@ class StudySessionMapperTest {
         studiedSenseIds: Set<String> = emptySet(),
         extraSenses: List<LanguageCardResponseSense> = emptyList(),
         synonyms: List<String> = emptyList(),
+        primaryExampleText: String = "Het was zo <w>gezellig</w>.",
+        primaryExampleTranslation: String = "It was so cosy.",
     ): SessionCard {
         return SessionCard(
             card = Card(
@@ -364,7 +402,9 @@ class StudySessionMapperTest {
                 ),
             ),
             variant = variant,
-            wordResult = WordResult(card = languageCard(extraSenses, synonyms)),
+            wordResult = WordResult(
+                card = languageCard(extraSenses, synonyms, primaryExampleText, primaryExampleTranslation),
+            ),
             senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
@@ -374,6 +414,8 @@ class StudySessionMapperTest {
     private fun languageCard(
         extraSenses: List<LanguageCardResponseSense>,
         synonyms: List<String>,
+        primaryExampleText: String,
+        primaryExampleTranslation: String,
     ): LanguageCard =
         LanguageCard(
             lemma = "gezellig",
@@ -385,14 +427,14 @@ class StudySessionMapperTest {
                     senses = listOf(
                         LanguageCardResponseSense(
                             senseId = PrimarySenseId,
-                            senseDefinition = "a feeling of warmth",
+                            senseDefinition = "een gevoel van warmte",
                             learnerLevel = LearnerLevel.A2,
                             frequency = SenseFrequency.HIGH,
                             semanticGroupId = "warmth",
                             examples = listOf(
                                 LanguageCardExample(
-                                    text = "Het was zo <w>gezellig</w>.",
-                                    targetLangTranslations = mapOf(Language.ENGLISH to "It was so cosy."),
+                                    text = primaryExampleText,
+                                    targetLangTranslations = mapOf(Language.ENGLISH to primaryExampleTranslation),
                                 ),
                             ),
                             targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),

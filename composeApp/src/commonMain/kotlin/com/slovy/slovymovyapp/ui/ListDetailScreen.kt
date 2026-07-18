@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.graphicsLayer
@@ -36,13 +37,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.favorites.NewFavorite
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
+import com.slovy.slovymovyapp.data.lists.WordListSense
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.LearnerLevel
+import com.slovy.slovymovyapp.data.remote.LemmaRecovery
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
@@ -62,8 +71,11 @@ import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.common_retry
 import slovymovyapp.composeapp.generated.resources.favorites_error_meaning_not_found
+import slovymovyapp.composeapp.generated.resources.list_detail_add_all
 import slovymovyapp.composeapp.generated.resources.list_detail_empty
+import slovymovyapp.composeapp.generated.resources.list_detail_in_my_words_count
 import slovymovyapp.composeapp.generated.resources.list_detail_load_error
+import slovymovyapp.composeapp.generated.resources.list_detail_remove_all
 import slovymovyapp.composeapp.generated.resources.search_list_word_count
 
 data class ListWordItem(
@@ -86,7 +98,11 @@ data class ListDetailUiState(
     val isLoading: Boolean = true,
     val loadFailed: Boolean = false,
     val favoriteLemmas: Set<String> = emptySet(),
-)
+    val bulkActionInProgress: Boolean = false,
+) {
+    val inMyWordsCount: Int get() = items.count { it.isFavorited }
+    val allInMyWords: Boolean get() = items.isNotEmpty() && items.all { it.isFavorited }
+}
 
 class ListDetailViewModel(
     val listId: String,
@@ -94,6 +110,7 @@ class ListDetailViewModel(
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
     private val listsService: ListsService,
+    private val lemmaRecovery: LemmaRecovery,
     private val onFavoriteChanged: (added: Boolean) -> Unit,
 ) : ViewModel() {
     var list by mutableStateOf<WordList?>(null)
@@ -103,6 +120,11 @@ class ListDetailViewModel(
     val scrollState = LazyListState()
     private var loadJob: Job? = null
     private val prefetcher = SensePrefetcher(viewModelScope, ::loadSense)
+
+    // SenseIds added by "Add all" in this session; "Remove all" only removes these so
+    // favorites that existed before the bulk add survive. When empty (e.g. the screen
+    // was opened with everything already favorited), "Remove all" removes all items.
+    private var sessionBulkAddedSenseIds: Set<String> = emptySet()
 
     init {
         load()
@@ -128,25 +150,47 @@ class ListDetailViewModel(
                 return@launch
             }
             list = resolvedList
-            val senses = repository.getListSenses(language, resolvedList.senseIds)
+            val resolved = repository.getListSenses(language, resolvedList.senseIds)
+                .associateBy { it.senseId }
             val allFavorites = favoritesRepository.getAll().filter { it.language == language }
             val favoritedIds = allFavorites.map { it.senseId }.toSet()
             val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
-            val items = senses.map { sense ->
-                // Seed from cache so already-loaded senses render their translation
-                // immediately, mirroring FavoritesViewModel.buildSenseItem.
-                val cached = repository.getCachedSense(sense.senseId)
-                ListWordItem(
-                    senseId = sense.senseId,
-                    lemma = sense.lemma,
-                    definition = sense.definition,
-                    learnerLevel = sense.learnerLevel,
-                    frequency = sense.frequency,
-                    sense = cached?.sense,
-                    relatedWords = cached?.relatedWords ?: emptyMap(),
-                    pos = cached?.pos,
-                    isFavorited = sense.senseId in favoritedIds,
-                )
+            // Build an item for every list sense in server order. Senses present in the
+            // local dictionary render immediately; senses missing from it become loading
+            // placeholders carrying the bundle lemma so they can be fetched + favorited.
+            // A sense missing locally with a blank lemma (legacy senseIds-only bundle or a
+            // pre-lemma cached row) is skipped: it can be neither fetched nor turned into a
+            // usable favorite (all fetch/recovery/intake paths are keyed by lemma), so it must
+            // not reach "Add all". This matches the pre-lemma behavior of dropping such senses.
+            val items = resolvedList.senses.mapNotNull { listSense ->
+                val sense = resolved[listSense.senseId]
+                when {
+                    sense != null -> {
+                        // Seed from cache so already-loaded senses render their translation
+                        // immediately, mirroring FavoritesViewModel.buildSenseItem.
+                        val cached = repository.getCachedSense(sense.senseId)
+                        ListWordItem(
+                            senseId = sense.senseId,
+                            lemma = sense.lemma,
+                            definition = sense.definition,
+                            learnerLevel = sense.learnerLevel,
+                            frequency = sense.frequency,
+                            sense = cached?.sense,
+                            relatedWords = cached?.relatedWords ?: emptyMap(),
+                            pos = cached?.pos,
+                            isFavorited = sense.senseId in favoritedIds,
+                        )
+                    }
+
+                    listSense.lemma.isNotBlank() -> ListWordItem(
+                        senseId = listSense.senseId,
+                        lemma = listSense.lemma,
+                        isFavorited = listSense.senseId in favoritedIds,
+                        loading = true,
+                    )
+
+                    else -> null
+                }
             }
             state = ListDetailUiState(
                 items = items,
@@ -156,6 +200,37 @@ class ListDetailViewModel(
             // Prefetch the first screenful so translations show without expanding,
             // like the favorites list. The rest is prefetched on scroll.
             prefetcher.prefetchHead(items)
+            // Fetch the senses missing from the local dictionary from the server in the
+            // background; resolved items are already on screen, so this never blocks the UI.
+            // Only senses with a usable lemma are fetchable.
+            val missing = resolvedList.senses.filter { it.senseId !in resolved && it.lemma.isNotBlank() }
+            if (missing.isNotEmpty()) fetchMissingSenses(missing)
+        }
+    }
+
+    private suspend fun fetchMissingSenses(missing: List<WordListSense>) {
+        // Hand the missing senses to LemmaRecovery, which fetches (server stream + ingest, with
+        // retry/backoff, parallelism cap and cancellation) and resolves each one, calling back as
+        // results arrive. WordListSense is itself a RecoverableSense, so no mapping is needed; the
+        // screen only maps each outcome to its per-item UI state.
+        lemmaRecovery.recoverSenses(missing) { recovered ->
+            val lookup = recovered.result
+            val senseWithPos = lookup?.sense
+            val error = when {
+                senseWithPos != null -> null
+                lookup?.missingReason != null -> lookup.missingReason.toFavoriteSenseLoadError(language)
+                else -> recovered.error?.message?.let(UiText::Plain)
+                    ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
+            }
+            updateItem(recovered.senseId) {
+                it.copy(
+                    sense = senseWithPos?.sense,
+                    relatedWords = senseWithPos?.relatedWords ?: it.relatedWords,
+                    pos = senseWithPos?.pos,
+                    loading = false,
+                    error = error,
+                )
+            }
         }
     }
 
@@ -232,14 +307,59 @@ class ListDetailViewModel(
 
     fun reloadFavorites() {
         viewModelScope.launch {
-            val allFavorites = favoritesRepository.getAll().filter { it.language == language }
-            val favoritedIds = allFavorites.map { it.senseId }.toSet()
-            val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
-            state = state.copy(
-                items = state.items.map { it.copy(isFavorited = it.senseId in favoritedIds) },
-                favoriteLemmas = favoriteLemmas,
-            )
+            refreshFavoriteFlags()
         }
+    }
+
+    fun addAllToMyWords() {
+        if (state.isLoading || state.bulkActionInProgress) return
+        val toAdd = state.items.filter { !it.isFavorited }
+        if (toAdd.isEmpty()) return
+        Analytics.logEvent(
+            AnalyticsEvent.LIST_ADD_ALL,
+            mapOf("lang" to language.code, "list_id" to listId)
+        )
+        state = state.copy(bulkActionInProgress = true)
+        viewModelScope.launch {
+            favoritesRepository.addAll(language, toAdd.map { NewFavorite(senseId = it.senseId, lemma = it.lemma) })
+            sessionBulkAddedSenseIds = sessionBulkAddedSenseIds + toAdd.map { it.senseId }
+            refreshFavoriteFlags()
+            state = state.copy(bulkActionInProgress = false)
+            onFavoriteChanged(true)
+        }
+    }
+
+    fun removeAllFromMyWords() {
+        if (state.isLoading || state.bulkActionInProgress) return
+        val favorited = state.items.filter { it.isFavorited }
+        val targets = if (sessionBulkAddedSenseIds.isNotEmpty()) {
+            favorited.filter { it.senseId in sessionBulkAddedSenseIds }
+        } else {
+            favorited
+        }
+        if (targets.isEmpty()) return
+        Analytics.logEvent(
+            AnalyticsEvent.LIST_REMOVE_ALL,
+            mapOf("lang" to language.code, "list_id" to listId)
+        )
+        state = state.copy(bulkActionInProgress = true)
+        viewModelScope.launch {
+            favoritesRepository.removeAll(targets.map { it.senseId }, language)
+            sessionBulkAddedSenseIds = emptySet()
+            refreshFavoriteFlags()
+            state = state.copy(bulkActionInProgress = false)
+            onFavoriteChanged(false)
+        }
+    }
+
+    private suspend fun refreshFavoriteFlags() {
+        val allFavorites = favoritesRepository.getAll().filter { it.language == language }
+        val favoritedIds = allFavorites.map { it.senseId }.toSet()
+        val favoriteLemmas = allFavorites.map { it.lemma }.toSet()
+        state = state.copy(
+            items = state.items.map { it.copy(isFavorited = it.senseId in favoritedIds) },
+            favoriteLemmas = favoriteLemmas,
+        )
     }
 }
 
@@ -264,6 +384,8 @@ fun ListDetailScreen(
             onBack = onBack,
             onSenseToggle = viewModel::toggleSense,
             onFavoriteToggle = viewModel::toggleFavorite,
+            onAddAll = viewModel::addAllToMyWords,
+            onRemoveAll = viewModel::removeAllFromMyWords,
             onPrefetchVisible = viewModel::prefetchVisibleRange,
             onNavigateToWordDetail = { lemma, senseId ->
                 onNavigateToWordDetail(viewModel.language, lemma, senseId)
@@ -360,6 +482,8 @@ fun ListDetailContent(
     onBack: () -> Unit = {},
     onSenseToggle: (String) -> Unit = {},
     onFavoriteToggle: (String) -> Unit = {},
+    onAddAll: () -> Unit = {},
+    onRemoveAll: () -> Unit = {},
     onPrefetchVisible: (List<ListWordItem>, IntRange) -> Unit = { _, _ -> },
     onNavigateToWordDetail: (lemma: String, senseId: String?) -> Unit = { _, _ -> },
 ) {
@@ -406,10 +530,16 @@ fun ListDetailContent(
                     title = title,
                     subtitle = subtitle,
                     wordCount = wordCount,
+                    inMyWordsCount = state.inMyWordsCount,
+                    showBulkAction = !state.isLoading && state.items.isNotEmpty(),
+                    allInMyWords = state.allInMyWords,
+                    bulkActionInProgress = state.bulkActionInProgress,
                     bgColor = bgColor,
                     fgColor = fgColor,
                     iconSvg = list.iconSvg,
                     isDark = isDark,
+                    onAddAll = onAddAll,
+                    onRemoveAll = onRemoveAll,
                 )
             }
 
@@ -490,10 +620,16 @@ private fun ListDetailHeader(
     title: String,
     subtitle: String,
     wordCount: Int,
+    inMyWordsCount: Int,
+    showBulkAction: Boolean,
+    allInMyWords: Boolean,
+    bulkActionInProgress: Boolean,
     bgColor: Color,
     fgColor: Color,
     iconSvg: String?,
     isDark: Boolean,
+    onAddAll: () -> Unit,
+    onRemoveAll: () -> Unit,
 ) {
     val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
     val shadowElevation = if (isDark) 3.dp else 4.dp
@@ -549,13 +685,61 @@ private fun ListDetailHeader(
                         modifier = Modifier.padding(top = 4.dp),
                     )
                 }
+                val inMyWordsText = stringResource(Res.string.list_detail_in_my_words_count, inMyWordsCount)
                 Text(
-                    text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
+                    text = buildAnnotatedString {
+                        append(pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount))
+                        append(", ")
+                        // Bold only the number inside the localized "%1$d in My words" segment.
+                        val number = inMyWordsCount.toString()
+                        val numberStart = inMyWordsText.indexOf(number)
+                        if (numberStart >= 0) {
+                            append(inMyWordsText.substring(0, numberStart))
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(number) }
+                            append(inMyWordsText.substring(numberStart + number.length))
+                        } else {
+                            append(inMyWordsText)
+                        }
+                    },
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     modifier = Modifier.padding(top = 6.dp),
                 )
+            }
+        }
+
+        if (showBulkAction) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                TextButton(
+                    onClick = if (allInMyWords) onRemoveAll else onAddAll,
+                    enabled = !bulkActionInProgress,
+                ) {
+                    if (bulkActionInProgress) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(14.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                    } else if (!allInMyWords) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                    }
+                    Text(
+                        text = stringResource(
+                            if (allInMyWords) Res.string.list_detail_remove_all else Res.string.list_detail_add_all
+                        ),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
             }
         }
 
@@ -591,7 +775,7 @@ private fun previewWordList() = WordList(
     title = mapOf("en" to "500 first Dutch words"),
     subtitle = mapOf("en" to "This is where your journey begins"),
     labels = mapOf("en" to listOf("A1", "Basic")),
-    senseIds = List(3) { it.toString() },
+    senses = List(3) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
     iconSvg = null,
 )
 
@@ -629,6 +813,40 @@ private fun ListDetailPreviewContent(
                 ),
                 isLoading = false,
                 favoriteLemmas = setOf("huis"),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ListDetailPreviewAllInMyWords(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            state = ListDetailUiState(
+                items = listOf(
+                    ListWordItem(
+                        senseId = "1",
+                        lemma = "huis",
+                        definition = "a building where people live",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.HIGH,
+                        isFavorited = true,
+                    ),
+                    ListWordItem(
+                        senseId = "2",
+                        lemma = "fiets",
+                        definition = "a vehicle with two wheels that you ride by pushing pedals",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.MIDDLE,
+                        isFavorited = true,
+                    ),
+                ),
+                isLoading = false,
+                favoriteLemmas = setOf("huis", "fiets"),
             ),
         )
     }

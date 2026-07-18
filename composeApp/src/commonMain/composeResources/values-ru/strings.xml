@@ -7,7 +7,7 @@
     <string name="nav_stats">Статистика</string>
     <string name="nav_settings">Настройки</string>
 
-    <string name="welcome_tagline">Приложение, чтобы не просто искать слова, а учить их. Бесплатно.</string>
+    <string name="welcome_tagline">Запоминайте слова, которые обычно забываете уже к завтрашнему дню.</string>
     <string name="welcome_selling_point_translations_title">Ищите любые слова</string>
     <string name="welcome_selling_point_translations_description">Примеры, формы, фразы и синонимы — всё в одном месте.</string>
     <string name="welcome_selling_point_collection_title">Свой список слов</string>
@@ -23,8 +23,11 @@
     <string name="search_section_explore">Узнайте новое</string>
     <string name="search_pull_to_refresh_hint">Потяните, чтобы обновить</string>
     <string name="search_section_recently_saved">Недавно сохраненные</string>
-    <string name="search_section_lists_for_you">Списки для вас</string>
+    <string name="search_section_lists_for_you">Учите прямо сейчас</string>
     <string name="search_empty_start_typing">Введите слово для поиска</string>
+    <string name="search_suggest_list_button">Предложить список</string>
+    <string name="search_suggest_list_dialog_title">Предложить список</string>
+    <string name="search_suggest_list_placeholder">Опишите список слов, который вы хотели бы здесь увидеть...</string>
     <string name="search_no_dictionary_title">Словарь не скачан</string>
     <string name="search_no_dictionary_description">Скачайте словарь, чтобы начать поиск слов</string>
     <string name="search_go_to_settings">Перейти в настройки</string>
@@ -58,6 +61,9 @@
     <string name="stats_library_section">Мой словарь</string>
     <string name="list_detail_load_error">Не удалось загрузить список. Проверьте подключение и попробуйте снова.</string>
     <string name="list_detail_empty">Слова из этого списка недоступны в скачанном словаре.</string>
+    <string name="list_detail_in_my_words_count">%1$d в «Моих словах»</string>
+    <string name="list_detail_add_all">Добавить все в «Мои слова»</string>
+    <string name="list_detail_remove_all">Удалить все из «Моих слов»</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d слово</item>
         <item quantity="few">%1$d слова</item>

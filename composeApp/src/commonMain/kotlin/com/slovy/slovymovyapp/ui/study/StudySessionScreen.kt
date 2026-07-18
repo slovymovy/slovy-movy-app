@@ -1511,13 +1511,17 @@ private fun StudyCardBackContent(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
         back.cloze?.let { cloze ->
-            StudyClozeText(
-                cloze = cloze,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
-            )
-            Spacer(Modifier.height(AppSpacing.xs))
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                StudyClozeText(
+                    cloze = cloze,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                )
+                back.clozeTranslation?.let { translation ->
+                    StudyClozeTranslationText(cloze = translation)
+                }
+            }
         }
 
         val headlineIsLemma = back.isLemmaHeadline
@@ -1564,13 +1568,22 @@ private fun StudyCardBackContent(
         }
 
         back.definition?.let { definition ->
-            StudyTaggedText(
-                text = definition,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                StudyTaggedText(
+                    text = definition,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                back.definitionTranslation?.let { translation ->
+                    StudyTaggedText(
+                        text = translation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
 
         back.examples.forEach { example ->
@@ -1888,6 +1901,35 @@ internal fun StudyClozeTextUiState.toDisplayText(): StudyClozeDisplayText {
 }
 
 @Composable
+private fun StudyClozeTranslationText(
+    cloze: StudyClozeTextUiState,
+    modifier: Modifier = Modifier,
+) {
+    val highlightColor = MaterialTheme.colorScheme.primary
+    val displayText = remember(cloze) { cloze.toDisplayText() }
+    val text = buildAnnotatedString {
+        var cursor = 0
+        displayText.answerRanges.forEach { range ->
+            append(displayText.text.substring(cursor, range.first))
+            pushStyle(SpanStyle(color = highlightColor, fontWeight = FontWeight.Medium))
+            append(displayText.text.substring(range.first, range.last + 1))
+            pop()
+            cursor = range.last + 1
+        }
+        append(displayText.text.substring(cursor))
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            fontStyle = FontStyle.Normal,
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
+    )
+}
+
+@Composable
 private fun StudyClozeText(
     cloze: StudyClozeTextUiState,
     style: TextStyle,
@@ -2008,7 +2050,6 @@ private fun HintRevealPill(
     val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
     val dashWidth = 6.dp
     val dashGap = 4.dp
-    val description = contentDescription
     Box(
         modifier = modifier
             .height(48.dp)
@@ -2032,9 +2073,9 @@ private fun HintRevealPill(
             }
             .clip(CircleShape)
             .semantics(mergeDescendants = true) {
-                this.contentDescription = description
+                this.contentDescription = contentDescription
             }
-            .clickable(role = Role.Button, onClickLabel = description) { onReveal() }
+            .clickable(role = Role.Button, onClickLabel = contentDescription) { onReveal() }
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -2319,13 +2360,14 @@ private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
 private fun productionCard() = StudyCardUiState.Production(
     id = "production",
     chipLabel = UiText.Plain("EN -> NL"),
-    promptLabel = UiText.Resource(Res.string.study_prompt_translate_to, listOf("Dutch")),
+    promptLabel = UiText.Resource(Res.string.study_prompt_translate_to, listOf("Nederlands")),
     promptText = "cosy, sociable",
     firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
-        definition = "a uniquely Dutch flavour of warm conviviality",
+        definition = "een typisch Nederlandse vorm van warme gezelligheid",
+        definitionTranslation = "a uniquely Dutch flavour of warm conviviality",
         examples = listOf(
             StudyExampleUiState(
                 text = "Bij Marja is het altijd <w>gezellig</w>.",
@@ -2347,14 +2389,24 @@ private fun clozeCard() = StudyCardUiState.Cloze(
         text = "Het was zo gezellig bij jullie thuis.",
         answerRanges = listOf(11..18),
     ),
-    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
+    translationHint = StudyClozeTextUiState(
+        text = "It was so lovely at your place.",
+        answerRanges = listOf(10..15),
+        filled = true,
+    ),
     back = StudyCardBackUiState(
         headline = "gezellig",
         secondary = "cosy, sociable",
-        definition = "a feeling of warmth and conviviality from being together",
+        definition = "een gevoel van warmte en gezelligheid van het samenzijn",
+        definitionTranslation = "a feeling of warmth and conviviality from being together",
         cloze = StudyClozeTextUiState(
             text = "Het was zo gezellig bij jullie thuis.",
             answerRanges = listOf(11..18),
+            filled = true,
+        ),
+        clozeTranslation = StudyClozeTextUiState(
+            text = "It was so lovely at your place.",
+            answerRanges = listOf(10..15),
             filled = true,
         ),
         synonyms = listOf(
@@ -2372,15 +2424,13 @@ private fun translationClozeCard() = StudyCardUiState.Cloze(
         answerRanges = listOf(10..15),
         filled = true,
     ),
-    translationHint = StudyClozeTextUiState(
-        text = "Het was zo gezellig bij jullie thuis.",
-        answerRanges = listOf(11..18),
-    ),
+    firstLetterHint = FirstLetterHint(letter = 'g', letterCount = 8, dotCount = 7),
     back = StudyCardBackUiState(
         headline = "gezellig",
         isLemmaHeadline = true,
         secondary = "cosy, sociable",
-        definition = "a feeling of warmth and conviviality from being together",
+        definition = "een gevoel van warmte en gezelligheid van het samenzijn",
+        definitionTranslation = "a feeling of warmth and conviviality from being together",
         examples = listOf(
             StudyExampleUiState(
                 text = "Het was zo gezellig bij jullie thuis.",
@@ -2634,7 +2684,7 @@ private fun StudySessionClozeFrontHintRevealedPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(
-                clozeCard().copy(firstLetterHintRevealed = true),
+                clozeCard().copy(translationHintRevealed = true),
                 StudyCardSide.FRONT,
                 current = 6,
             ),
@@ -2680,7 +2730,7 @@ private fun StudySessionTranslationClozeFrontHintRevealedPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(
-                translationClozeCard().copy(translationHintRevealed = true),
+                translationClozeCard().copy(firstLetterHintRevealed = true),
                 StudyCardSide.FRONT,
                 current = 6,
             ),

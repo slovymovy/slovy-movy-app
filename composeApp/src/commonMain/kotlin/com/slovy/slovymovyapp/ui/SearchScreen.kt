@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -27,9 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
+import com.slovy.slovymovyapp.data.lists.WordListSense
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -56,7 +57,9 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
+import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.serialization.json.JsonPrimitive
@@ -71,6 +74,7 @@ import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -93,13 +97,23 @@ data class SearchUiState(
     val isSuggestionsRefreshing: Boolean = false,
     val wordSuggestions: List<String> = emptyList(),
     val favoriteLemmas: List<String> = emptyList(),
-    val curatedLists: List<WordList> = emptyList()
+    val curatedLists: List<WordList> = emptyList(),
+    // Gates the empty-state body so it renders once fully populated instead of flashing
+    // the favorites/"start typing" fallback before curated lists finish loading.
+    val isEmptyStateLoading: Boolean = false,
+    val listSuggestionDialogVisible: Boolean = false,
+    val listSuggestionComment: String = "",
+    val listSuggestionEmail: String = "",
+    val listSuggestionSubmitting: Boolean = false,
+    val listSuggestionError: String? = null,
+    val listSuggestionIssueUrl: String? = null
 )
 
 class SearchViewModel(
     private val repository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
     private val listsService: ListsService,
+    private val dictionaryClient: DictionaryClient,
 ) : ViewModel() {
 
     data class Search(
@@ -117,7 +131,8 @@ class SearchViewModel(
                 results = emptyList(),
                 showNoResults = false,
                 availableLanguages = installed,
-                selectedLanguage = installed.firstOrNull()
+                selectedLanguage = installed.firstOrNull(),
+                isEmptyStateLoading = installed.isNotEmpty()
             )
         }
     )
@@ -191,7 +206,11 @@ class SearchViewModel(
                 // This bypasses setSelectedLanguage (the preference must not be re-saved),
                 // so drop anything the screen-open refresh loaded for the pre-restore
                 // language and reload lists for the restored one.
-                state = state.copy(selectedLanguage = savedLang, curatedLists = emptyList())
+                state = state.copy(
+                    selectedLanguage = savedLang,
+                    curatedLists = emptyList(),
+                    isEmptyStateLoading = true
+                )
                 queryFlow.value = queryFlow.value.copy(language = savedLang)
                 refreshLists()
             }
@@ -243,13 +262,85 @@ class SearchViewModel(
             // Render suggestions for this language first, then lists below them.
             suggestionsLoadedForLanguage.first { it == language }
             if (state.selectedLanguage == language) {
-                state = state.copy(curatedLists = cached)
+                // Lift the loading gate as soon as we have cached lists so the empty
+                // state renders once, fully populated. With an empty cache (first launch)
+                // keep waiting through the server sync so the favorites/"start typing"
+                // fallback does not flash before lists arrive.
+                state = if (cached.isNotEmpty()) {
+                    state.copy(curatedLists = cached, isEmptyStateLoading = false)
+                } else {
+                    state.copy(curatedLists = cached)
+                }
             }
             if (listsService.sync(language)) {
                 val updated = listsService.getLists(language)
                 if (state.selectedLanguage == language) {
                     state = state.copy(curatedLists = updated)
                 }
+            }
+            if (state.selectedLanguage == language) {
+                state = state.copy(isEmptyStateLoading = false)
+            }
+        }
+    }
+
+    fun openListSuggestionDialog() {
+        state = state.copy(
+            listSuggestionDialogVisible = true,
+            listSuggestionComment = "",
+            listSuggestionEmail = "",
+            listSuggestionSubmitting = false,
+            listSuggestionError = null,
+            listSuggestionIssueUrl = null
+        )
+    }
+
+    fun dismissListSuggestionDialog() {
+        if (state.listSuggestionSubmitting) return
+        state = state.copy(
+            listSuggestionDialogVisible = false,
+            listSuggestionComment = "",
+            listSuggestionEmail = "",
+            listSuggestionError = null,
+            listSuggestionIssueUrl = null
+        )
+    }
+
+    fun updateListSuggestionComment(comment: String) {
+        state = state.copy(listSuggestionComment = comment, listSuggestionError = null)
+    }
+
+    fun updateListSuggestionEmail(email: String) {
+        state = state.copy(listSuggestionEmail = email)
+    }
+
+    fun submitListSuggestion() {
+        if (state.listSuggestionSubmitting) return
+        val language = state.selectedLanguage ?: return
+
+        val comment = state.listSuggestionComment.trim()
+        if (comment.isBlank()) return
+
+        state = state.copy(listSuggestionSubmitting = true, listSuggestionError = null)
+        viewModelScope.launch {
+            try {
+                val response = dictionaryClient.sendListSuggestion(
+                    language = language,
+                    comment = comment,
+                    email = state.listSuggestionEmail.trim().takeIf { it.isNotBlank() }
+                )
+                state = state.copy(
+                    listSuggestionSubmitting = false,
+                    listSuggestionError = null,
+                    listSuggestionIssueUrl = response.issueUrl
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = state.copy(
+                    listSuggestionSubmitting = false,
+                    listSuggestionError = NetworkErrorClassifier.userMessage(e)
+                )
             }
         }
     }
@@ -291,7 +382,19 @@ class SearchViewModel(
         }
         val languageChanged = currentLanguage != target
         // Do not call setSelectedLanguage — that would overwrite the saved preference.
-        state = state.copy(availableLanguages = installed, selectedLanguage = target)
+        // On a language switch, drop the previous language's lists and re-gate so the
+        // empty state shows a spinner (not stale wrong-language lists) until the caller's
+        // refreshLists() repopulates. Safe because the only caller follows with refreshLists().
+        state = if (languageChanged) {
+            state.copy(
+                availableLanguages = installed,
+                selectedLanguage = target,
+                curatedLists = emptyList(),
+                isEmptyStateLoading = target != null
+            )
+        } else {
+            state.copy(availableLanguages = installed, selectedLanguage = target)
+        }
         queryFlow.value = queryFlow.value.copy(language = target)
         if (languageChanged) {
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
@@ -325,7 +428,9 @@ class SearchViewModel(
         }
         // Load suggestions and lists for new language
         if (langChanged) {
-            state = state.copy(curatedLists = emptyList())
+            // No per-language lists in "All languages" mode, so don't gate on loading there
+            // (refreshLists/loadSuggestions early-return for a null language).
+            state = state.copy(curatedLists = emptyList(), isEmptyStateLoading = language != null)
             viewModelScope.launch { loadSuggestionsForCurrentLanguage() }
             refreshLists()
         }
@@ -408,6 +513,11 @@ fun SearchScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onRefreshSuggestions = { viewModel.refreshSuggestionsFromPull() },
         onListClick = onListClick,
+        onSuggestListClick = { viewModel.openListSuggestionDialog() },
+        onListSuggestionCommentChange = { viewModel.updateListSuggestionComment(it) },
+        onListSuggestionEmailChange = { viewModel.updateListSuggestionEmail(it) },
+        onDismissListSuggestion = { viewModel.dismissListSuggestionDialog() },
+        onSubmitListSuggestion = { viewModel.submitListSuggestion() },
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
@@ -427,6 +537,11 @@ fun SearchScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onRefreshSuggestions: () -> Unit = {},
     onListClick: (WordList) -> Unit = {},
+    onSuggestListClick: () -> Unit = {},
+    onListSuggestionCommentChange: (String) -> Unit = {},
+    onListSuggestionEmailChange: (String) -> Unit = {},
+    onDismissListSuggestion: () -> Unit = {},
+    onSubmitListSuggestion: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
@@ -561,8 +676,10 @@ fun SearchScreenContent(
                                     wordSuggestions = state.wordSuggestions,
                                     favoriteLemmas = state.favoriteLemmas,
                                     curatedLists = state.curatedLists,
+                                    isLoading = state.isEmptyStateLoading,
                                     onWordClick = onSuggestionSelected,
-                                    onListClick = onListClick
+                                    onListClick = onListClick,
+                                    onSuggestListClick = onSuggestListClick
                                 )
                             }
                         }
@@ -591,6 +708,25 @@ fun SearchScreenContent(
                 }
             }
         }
+
+    if (state.listSuggestionDialogVisible) {
+        FeedbackDialog(
+            title = stringResource(Res.string.search_suggest_list_dialog_title),
+            commentPlaceholder = stringResource(Res.string.search_suggest_list_placeholder),
+            commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
+            successCopy = null,
+            allowDismissWhileSending = false,
+            comment = state.listSuggestionComment,
+            email = state.listSuggestionEmail,
+            isSending = state.listSuggestionSubmitting,
+            error = state.listSuggestionError,
+            resultUrl = state.listSuggestionIssueUrl,
+            onCommentChange = onListSuggestionCommentChange,
+            onEmailChange = onListSuggestionEmailChange,
+            onDismiss = onDismissListSuggestion,
+            onSend = onSubmitListSuggestion
+        )
+    }
 }
 
 @Composable
@@ -662,14 +798,26 @@ private fun SearchResultCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun EmptySearchState(
     wordSuggestions: List<String>,
     favoriteLemmas: List<String>,
     curatedLists: List<WordList>,
+    isLoading: Boolean,
     onWordClick: (String) -> Unit,
-    onListClick: (WordList) -> Unit
+    onListClick: (WordList) -> Unit,
+    onSuggestListClick: () -> Unit
 ) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
     val isDark = LocalIsDarkTheme.current
     Column(
         modifier = Modifier
@@ -690,8 +838,16 @@ private fun EmptySearchState(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
             )
-            wordSuggestions.forEach { lemma ->
-                SuggestionCard(lemma = lemma, onClick = { onWordClick(lemma) })
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                wordSuggestions.forEach { lemma ->
+                    WordChip(lemma = lemma, onClick = { onWordClick(lemma) })
+                }
             }
             Row(
                 modifier = Modifier
@@ -737,6 +893,26 @@ private fun EmptySearchState(
                     featured = index == 0,
                     isDark = isDark,
                     onClick = { onListClick(list) }
+                )
+            }
+            TextButton(
+                onClick = onSuggestListClick,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 4.dp),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Flag,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(Res.string.search_suggest_list_button),
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         } else if (favoriteLemmas.isNotEmpty()) {
@@ -793,28 +969,46 @@ private fun ListCard(
     val subtitle = list.subtitle[localeCode] ?: list.subtitle["en"] ?: ""
     val badge = list.labels[localeCode]?.firstOrNull() ?: list.labels["en"]?.firstOrNull()
     val wordCount = list.senseIds.size
-    val (bgColor, fgColor) = vibrantColorsForList(list.id, isDark)
-    val titleFontSize = if (featured) 19.sp else 18.sp
-    val shadowColor = if (isDark) Color.Black.copy(alpha = 0.40f) else Color.Black.copy(alpha = 0.12f)
-    val shadowElevation = if (isDark) 3.dp else 4.dp
+    // The list's stable brand color; it now lives only in the icon and accents, while the
+    // card field becomes a quiet wash of the same hue.
+    val hue = listHue(list.id)
+    val fieldColor = if (isDark) {
+        mixColors(over = hue, base = MaterialTheme.colorScheme.surfaceContainer, overFraction = 0.09f)
+    } else {
+        mixColors(over = hue, base = MaterialTheme.colorScheme.background, overFraction = 0.09f)
+    }
+    val iconColor = if (isDark) {
+        mixColors(over = hue, base = Color(0xFFFFFFFF), overFraction = 0.55f)
+    } else {
+        mixColors(over = hue, base = Color(0xFF2D2620), overFraction = 0.80f)
+    }
+    // Contrast-safe accent for the small (10sp) badge text: a darkened hue on the pale
+    // light field, a lightened hue on the dark field — keeps the brand tint while passing
+    // AA. The vivid [iconColor] is fine for the 38dp icon but too light/dark for small text.
+    val badgeTextColor = if (isDark) {
+        mixColors(over = Color(0xFFFFFFFF), base = hue, overFraction = 0.55f)
+    } else {
+        mixColors(over = Color(0xFF2D2620), base = hue, overFraction = 0.55f)
+    }
+    val titleFontSize = if (featured) 18.sp else 17.sp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = shadowElevation,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = shadowColor,
-                spotColor = shadowColor,
+            .clip(RoundedCornerShape(16.dp))
+            .background(fieldColor)
+            .border(
+                0.5.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
+                RoundedCornerShape(16.dp)
             )
-            .background(bgColor)
             .clickable(onClickLabel = title, onClick = onClick)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
@@ -825,7 +1019,8 @@ private fun ListCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(fgColor.copy(alpha = 0.15f))
+                            .background(hue.copy(alpha = 0.14f))
+                            .border(0.5.dp, hue.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 9.dp, vertical = 3.dp)
                     ) {
                         Text(
@@ -833,7 +1028,7 @@ private fun ListCard(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.4.sp,
-                            color = fgColor,
+                            color = badgeTextColor,
                         )
                     }
                 }
@@ -843,39 +1038,51 @@ private fun ListCard(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.3).sp,
                     lineHeight = (titleFontSize.value * 1.2f).sp,
-                    color = fgColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 if (subtitle.isNotEmpty()) {
                     Text(
                         text = subtitle,
-                        fontSize = 13.5.sp,
+                        fontSize = 13.sp,
                         fontStyle = FontStyle.Italic,
                         fontFamily = MaterialTheme.serifFontFamily,
-                        lineHeight = (13.5f * 1.38f).sp,
-                        color = fgColor.copy(alpha = 0.76f),
+                        lineHeight = (13f * 1.38f).sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Text(
                     text = pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount),
-                    fontSize = 12.sp,
+                    fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
-                    color = fgColor.copy(alpha = 0.62f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
 
             WordListIcon(
                 iconSvg = list.iconSvg,
-                fgColor = fgColor,
-                modifier = Modifier
-                    .size(48.dp)
-                    .alpha(0.82f),
+                fgColor = iconColor,
+                modifier = Modifier.size(38.dp),
             )
         }
     }
 }
+
+/**
+ * The list's stable saturated brand hue (terracotta, teal, …), derived from the same
+ * id→color assignment as [vibrantColorsForList] so a list keeps its color across the
+ * redesign. Reused as the icon tint and badge accent over the calm card field.
+ */
+internal fun listHue(id: String): Color = vibrantColorsForList(id, isDark = false).first
+
+/** Linear per-channel blend of [overFraction] of [over] onto [base]. */
+private fun mixColors(over: Color, base: Color, overFraction: Float): Color = Color(
+    red = base.red * (1f - overFraction) + over.red * overFraction,
+    green = base.green * (1f - overFraction) + over.green * overFraction,
+    blue = base.blue * (1f - overFraction) + over.blue * overFraction,
+)
 
 internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Color> {
     var h = 0L
@@ -895,6 +1102,39 @@ internal fun vibrantColorsForList(id: String, isDark: Boolean): Pair<Color, Colo
     )
     val (light, dark) = slots[(h % 8L).toInt()]
     return if (isDark) dark else light
+}
+
+@Composable
+private fun WordChip(lemma: String, onClick: () -> Unit) {
+    // Single quiet sage tint for every chip — one color reads as "just words". The border
+    // does the heavy lifting so the edge survives on both the cream and near-black surfaces.
+    val isDark = LocalIsDarkTheme.current
+    val bgColor = if (isDark) Color(0xFF2A3326) else Color(0xFFE6EBDD)
+    val lineColor = if (isDark) Color(0xFF3A4636) else Color(0xFFD2DCC4)
+    val textColor = if (isDark) Color(0xFFD4DEC8) else Color(0xFF2D2620)
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(9.dp))
+            .background(bgColor)
+            .border(0.5.dp, lineColor, RoundedCornerShape(9.dp))
+            .semantics { role = Role.Button }
+            .clickable(
+                onClickLabel = stringResource(Res.string.search_open_item, lemma),
+                onClick = onClick
+            )
+            // Taller vertical padding lifts the tap target without the empty centering gap
+            // that a reserved 48dp slot leaves between wrapped rows.
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Text(
+            text = lemma,
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontSize = 15.sp,
+            lineHeight = 17.25.sp,
+            letterSpacing = (-0.1).sp,
+            color = textColor
+        )
+    }
 }
 
 @Composable
@@ -1079,14 +1319,30 @@ private fun SearchScreenPreviewWithLists(
                 showNoResults = false,
                 availableLanguages = listOf(Language.DUTCH),
                 selectedLanguage = Language.DUTCH,
-                wordSuggestions = listOf("de", "het", "een", "zijn", "hebben"),
+                wordSuggestions = listOf("de", "het", "een", "zijn", "hebben", "gezelligheid", "fiets"),
                 curatedLists = listOf(
                     WordList(
                         id = "nl_a1_basic",
                         title = mapOf("en" to "500 first Dutch words", "nl" to "500 eerste Nederlandse woorden"),
                         subtitle = mapOf("en" to "This is where your journey begins", "nl" to "Hier begint jouw reis"),
                         labels = mapOf("en" to listOf("A1", "Basic"), "nl" to listOf("A1", "Basis")),
-                        senseIds = List(500) { it.toString() },
+                        senses = List(500) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
+                        iconSvg = null,
+                    ),
+                    WordList(
+                        id = "nl_doctor",
+                        title = mapOf("en" to "At the doctor's", "nl" to "Bij de huisarts"),
+                        subtitle = mapOf("en" to "Words for your next appointment", "nl" to "Woorden voor je afspraak"),
+                        labels = mapOf("en" to listOf("A2")),
+                        senses = List(64) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
+                        iconSvg = null,
+                    ),
+                    WordList(
+                        id = "nl_digital_life",
+                        title = mapOf("en" to "Digital life", "nl" to "Digitaal leven"),
+                        subtitle = mapOf("en" to "Phones, apps and the web", "nl" to "Telefoons, apps en het web"),
+                        labels = emptyMap(),
+                        senses = List(120) { WordListSense(senseId = it.toString(), lemma = "woord$it", language = Language.DUTCH) },
                         iconSvg = null,
                     )
                 )

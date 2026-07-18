@@ -10,6 +10,12 @@
             <string>nl</string>
             <string>pl</string>
             <string>ru</string>
+            <string>de</string>
+            <string>es</string>
+            <string>it</string>
+            <string>fr</string>
+            <string>cs</string>
+            <string>tr</string>
         </array>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>

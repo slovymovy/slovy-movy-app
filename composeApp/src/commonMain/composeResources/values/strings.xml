@@ -7,7 +7,7 @@
     <string name="nav_stats">Stats</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="welcome_tagline">The app that turns looked-up words into learned words. Free.</string>
+    <string name="welcome_tagline">Remember the words you usually forget by tomorrow.</string>
     <string name="welcome_selling_point_translations_title">Look up any word</string>
     <string name="welcome_selling_point_translations_description">Examples, forms, phrases, synonyms — everything about it in one place.</string>
     <string name="welcome_selling_point_collection_title">Build your personal word list</string>
@@ -23,8 +23,11 @@
     <string name="search_section_explore">Explore</string>
     <string name="search_pull_to_refresh_hint">Pull down for new words</string>
     <string name="search_section_recently_saved">Recently saved</string>
-    <string name="search_section_lists_for_you">Lists for you</string>
+    <string name="search_section_lists_for_you">Ready to Learn</string>
     <string name="search_empty_start_typing">Start typing to search</string>
+    <string name="search_suggest_list_button">Suggest a list</string>
+    <string name="search_suggest_list_dialog_title">Suggest a list</string>
+    <string name="search_suggest_list_placeholder">Describe the word list you'd like to see here...</string>
     <string name="search_no_dictionary_title">No dictionary downloaded</string>
     <string name="search_no_dictionary_description">Download a dictionary to start searching for words</string>
     <string name="search_go_to_settings">Go to Settings</string>
@@ -58,6 +61,9 @@
     <string name="stats_library_section">My vocabulary</string>
     <string name="list_detail_load_error">Couldn't load this list. Check your connection and try again.</string>
     <string name="list_detail_empty">No words from this list are available in the downloaded dictionary.</string>
+    <string name="list_detail_in_my_words_count">%1$d in My words</string>
+    <string name="list_detail_add_all">Add all to My words</string>
+    <string name="list_detail_remove_all">Remove all from My words</string>
     <plurals name="search_list_word_count">
         <item quantity="one">%1$d word</item>
         <item quantity="few">%1$d words</item>
@@ -211,8 +217,8 @@
     <string name="word_details_loading_meaning">Loading meaning…</string>
     <string name="word_details_preparing_translation">Preparing translation…</string>
     <string name="word_details_meaning_load_when_expanded">Meaning will load when expanded</string>
-    <string name="word_details_collapse_sense">Collapse sense</string>
-    <string name="word_details_expand_sense">Expand sense</string>
+    <string name="word_details_collapse_sense">Collapse meaning</string>
+    <string name="word_details_expand_sense">Expand meaning</string>
     <string name="word_details_definition">Definition</string>
     <string name="word_details_examples">Examples</string>
     <string name="word_details_common_phrases">Common phrases</string>
@@ -430,10 +436,10 @@
     <string name="common_search_placeholder">Search...</string>
     <string name="common_unknown_error">Unknown error</string>
     <plurals name="part_of_speech_with_sense_count">
-        <item quantity="one">%1$s - %2$d sense</item>
-        <item quantity="few">%1$s - %2$d senses</item>
-        <item quantity="many">%1$s - %2$d senses</item>
-        <item quantity="other">%1$s - %2$d senses</item>
+        <item quantity="one">%1$s - %2$d meaning</item>
+        <item quantity="few">%1$s - %2$d meanings</item>
+        <item quantity="many">%1$s - %2$d meanings</item>
+        <item quantity="other">%1$s - %2$d meanings</item>
     </plurals>
     <string name="part_of_speech_generating_definitions_examples">Generating definitions and examples...</string>
     <string name="sense_frequency_high">High</string>
