@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.dictionary.DictionaryQueries
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.md5
+import com.slovy.slovymovyapp.util.queryInChunks
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -581,8 +582,9 @@ class JsonIngestionBuilder(
         if (allSenseIds.isEmpty()) {
             return emptyMap()
         }
-        return dictQ.selectLemmaPosHintsBySenseIds(allSenseIds).executeAsList()
-            .associate { it.sense_id to it.lemma_pos_id }
+        return queryInChunks(allSenseIds) { chunk ->
+            dictQ.selectLemmaPosHintsBySenseIds(chunk).executeAsList()
+        }.associate { it.sense_id to it.lemma_pos_id }
     }
 
     private fun buildTranslationOperations(
