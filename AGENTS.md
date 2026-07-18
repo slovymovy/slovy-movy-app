@@ -1,558 +1,464 @@
-Project development guidelines
+# Project development guide
 
-## Overview
+This file describes the repository as it exists today. Treat Gradle configuration, CI, schemas, and the implementation
+as the source of truth when they disagree with prose. Keep this guide focused on conventions and invariants that are
+easy to miss during a change.
 
-Kotlin Multiplatform (KMP) workspace with 3 modules:
+## Repository map
 
-- **composeApp**: Compose Multiplatform UI (Android, Desktop, iOS)
-- **shared**: KMP shared library
-- **server**: JVM Ktor server
+This is a Kotlin Multiplatform workspace with four Gradle modules plus the iOS shell:
 
-**Stack**: Gradle, Kotlin, Compose Multiplatform, AGP, Ktor, SqlDelight, Valkyrie
+| Path / module | Purpose |
+| --- | --- |
+| `androidApp/` / `:androidApp` | Android application packaging, manifests, Firebase startup, and app-level smoke tests. |
+| `composeApp/` / `:composeApp` | Compose Multiplatform UI and app services for Android, desktop, and iOS. It is an Android library, not the APK module. |
+| `shared/` / `:shared` | Cross-platform domain models, ingestion, repositories, FSRS logic, and all SqlDelight schemas. |
+| `server/` / `:server` | JVM Ktor backend, AI/GitHub/Cloud Tasks integrations, and the database preparation tool. |
+| `iosApp/` | Swift/Xcode application shell which embeds the `ComposeApp` framework and installs iOS Firebase integrations. |
+| `buildSrc/` | Version-file generation, localization verification, and the test Ktor server used by client tests. |
 
-## Build Commands
+Important namespaces and entry points:
 
-**Environment Notes**:
+- Android application ID: `com.slovy.slovymovyapp`; Android app namespace: `com.slovy.slovymovyapp.androidApp`.
+- Shared Compose/library namespace: `com.slovy.slovymovyapp`.
+- Server main class: `com.slovy.slovymovyapp.ApplicationKt`.
+- Shared UI navigation and dependency wiring: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/App.kt`.
+- Versions: `gradle/libs.versions.toml`. The root build derives `versionCode` from the git commit count and
+  `versionName` as `1.3.<commit-count>`.
 
-- **MSYS/Git Bash (native Windows)**: Use `./gradlew.bat` directly
-- **WSL**: Use `cmd.exe /c gradlew.bat` prefix (Windows paths in output)
+Supported learning languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, and ES; see
+`shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`. Offline Wiktextract source mappings currently
+exist only for EN, RU, NL, and PL.
 
-### Core Tasks
+## Environment and Gradle commands
 
-- **All tests**: `gradlew test`
-- **Build all**: `gradlew build`
-- **Run desktop**: `gradlew :composeApp:run`
-- **Run server (dev)**: `gradlew -Pdevelopment :server:run`
+- Use Java 21. CI and production images use it; Java 25+ can expose Kotlin/Gradle compatibility problems.
+- On Unix, run the checked-in wrapper as `./gradlew`.
+- In native Windows terminals use `gradlew.bat` (`./gradlew.bat` from Git Bash). From WSL when using the Windows
+  toolchain, use `cmd.exe /c gradlew.bat`.
+- Android SDK levels are compile/target 36 and min 24. JVM bytecode for Android/shared targets is 11.
+- iOS targets are enabled only on macOS. Skipped/disabled iOS-target messages elsewhere are expected.
 
-### Module-Specific Tasks
+Common development commands:
 
-- **Shared tests**: `gradlew :shared:allTests`
-- **ComposeApp tests**: `gradlew :composeApp:allTests`
-- **Android instrumented tests**: `gradlew :composeApp:connectedAndroidTest`
-- **Server tests**: `gradlew :server:test`
-- **Android APK**: `gradlew :composeApp:assembleDebug`
-- **Desktop distribution**: `gradlew :composeApp:packageDistributionForCurrentOS`
+```text
+./gradlew build
+./gradlew :composeApp:run
+./gradlew -Pdevelopment :server:run
+./gradlew :androidApp:assembleDebug
+./gradlew :composeApp:packageDistributionForCurrentOS
+```
 
-## Test Structure
+Use targeted tests while iterating:
 
-- **shared**: Core logic lives in `shared/src/commonMain`; use the composeApp tests to cover DB behaviour.
-- **composeApp**: Shared tests live in `composeApp/src/commonTest`. The expect/actual `BaseTest` + `TestContext` wiring
-  lets the same tests run on every target:
-    - Android JVM (`gradlew :composeApp:androidUnitTest`) uses Robolectric to provide an Android context.
-    - Android instrumented (`gradlew :composeApp:connectedAndroidTest`) reuses the same `commonTest` sources; requires
-      an emulator/device and network access for DB download tests.
-    - Desktop JVM (`gradlew :composeApp:desktopTest`) exercises the same tests against the JDBC driver.
-    - iOS simulator (`gradlew :composeApp:iosSimulatorArm64Test`) runs the tests on macOS; native targets are skipped
-      elsewhere.
-- **server**: `server/src/test` (ktor-server-test-host, kotlin-test-junit)
+```text
+./gradlew :shared:allTests
+./gradlew :composeApp:testAndroidHostTest
+./gradlew :composeApp:desktopTest
+./gradlew :androidApp:testMinifiedTestUnitTest
+./gradlew :server:test
+```
 
-### Adding Tests
+Useful broader or platform-specific checks:
 
-- Default to `composeApp/src/commonTest` so logic executes on Android JVM, Android instrumented, Desktop, and iOS.
-- Extend `BaseTest` for KMP tests; it injects the platform context through `TestContext`.
-- If a test needs target-specific setup, update the relevant `TestContext.<platform>.kt` actual or add a new
-  expect/actual helper alongside `BaseTest`.
-- Only add platform-specific test source sets when behaviour truly diverges (e.g., Android UI instrumentation);
-  otherwise keep coverage centralized in `commonTest`.
+```text
+./gradlew :composeApp:allTests
+./gradlew :composeApp:connectedAndroidDeviceTest :androidApp:connectedAndroidTest
+./gradlew :androidApp:connectedMinifiedAndroidTest
+./gradlew iosSimulatorArm64Test                         # macOS only
+./gradlew :androidApp:checkReleaseOptimizedBuild
+./gradlew :composeApp:verifyLocalizationKeys
+./gradlew :shared:verifyCommonMainAppDatabaseMigration
+```
 
-## Configuration
+There is no single portable `test` command that covers every KMP and Android variant. CI deliberately runs these
+separately: localization parity, shared tests, Compose Android host tests, minified Android app unit tests, desktop
+tests, server tests, connected Android tests, and iOS simulator tests on macOS. Mirror the relevant CI jobs for the
+area changed.
 
-- **Versions**: All in `gradle/libs.versions.toml`
-- **JVM target**: 11 for Android/Shared
-- **iOS**: Disabled on non-macOS (expected behavior)
-- **Android SDK**: compileSdk=36, minSdk=24, targetSdk=36
-- **Java version**: Use Java 21 (via sdkman: `sdk use java 21.0.9-amzn`). Java 25+ may cause Kotlin compatibility
-  issues.
-- **Data version**: `DataDbManager.VERSION = "v15"`; when bumping, upload DBs under the new prefix in the GCS bucket and
-  keep the version in sync. App startup compares this against `Setting.DATA_VERSION`; mismatch routes to
-  `DataVersionMismatchScreen`, which deletes all downloaded DBs and re-runs `selectInitialDestination`.
-- **Supported languages**: ten total — EN, RU, NL, PL, DE, FR, IT, CS, TR, ES (see
-  `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`). Wiktextract source files are only present
-  for EN/RU/NL/PL (see `LANG_TO_SOURCE_FILE` in `JsonIngestionBuilder`).
+The `minifiedTest` Android build mirrors release shrinking/obfuscation but uses debug signing and an ID suffix. Prefer
+its unit/smoke checks for changes that could be affected by R8. `checkReleaseOptimizedBuild` combines the minified unit
+tests with release assembly.
 
-## Code Structure
+## Test layout and conventions
 
-- **KMP source sets**: commonMain/commonTest for shared code
-- **shared module**: cross-platform domain (`data/`, `ingestion/`, `data/learning/`, `data/learning/fsrs`,
-  `data/learning/stats`, `data/forms`, `data/favorites`, `data/settings`, `util/`, `api/`); also re-exports the
-  vendored FSRS implementation under `external.fsrs`.
-- **composeApp module**: Compose UI + app-specific services (`data/remote`, `data/local`,
-  `data/learning/intake|session`, `data/export`, `analytics`, `logging`, `speech`, `i18n`, `ui/...`).
-- **Compose UI**: composeApp/src/commonMain
-- **Android namespace**: com.slovy.slovymovyapp
-- **Server main**: com.slovy.slovymovyapp.ApplicationKt
-- **buildSrc** ships custom Gradle tasks: `WriteAppVersionTask` / `WriteIosVersionXcconfigTask` (write version
-  metadata from git commit count), `VerifyLocalizationKeysTask`, and `TestServerService` (test-time Ktor server).
+Most cross-platform behavior tests live in `composeApp/src/commonTest`, including tests for code owned by `shared`.
+`BaseTest` and `TestContext` provide platform-specific databases and filesystem/context wiring:
 
-### Compose UI workflow
+- `androidHostTest`: Robolectric host tests; run with `:composeApp:testAndroidHostTest`.
+- `androidDeviceTest`: instrumented tests; run with `:composeApp:connectedAndroidDeviceTest`.
+- `desktopTest`: JDBC-backed tests; run with `:composeApp:desktopTest`.
+- `iosTest`: native tests, reached by the simulator task on macOS.
+- `composeApp/src/androidTest` contains Android support code shared by the host and device test compilations.
 
-- Split each screen into a thin stateful entry point and a stateless composable that renders a `UiState` data model;
-  previews/tests should target the stateless layer.
-- Keep all mutable UI flags (loading, expanded sections, dialog visibility, etc.) inside the `UiState`; avoid
-  `remember`/`rememberSaveable` inside rendering composables.
-- Provide explicit callbacks (`onToggle`, `onRetry`, …) so the orchestrator can mutate the `UiState` while previews pass
-  no-op lambdas.
-- Add preview functions for every meaningful `UiState` variant (content, loading, error, empty) so designers/devs can
-  inspect layouts without runtime wiring.
-- When deriving default UI state from domain models (e.g., `LanguageCard`), add helper mappers (`toUiState()`) rather
-  than embedding logic inside composables.
+Default new KMP coverage to `composeApp/src/commonTest` and extend `BaseTest`. Put setup differences in the relevant
+`TestContext.<platform>.kt` actual or another small expect/actual helper. Add a platform-only test only when the
+behavior really belongs to that platform.
 
-#### Preview Functions
+`androidApp/src/androidTest` contains full application/package smoke tests. These complement, rather than replace, the
+Compose library's device tests.
 
-- All `@Preview` functions must support both light and dark themes using the themed preview pattern.
-- Use `@PreviewParameter(ThemePreviewProvider::class) isDark: Boolean` to receive theme parameter.
-- Wrap preview content with `ThemedPreview(darkTheme = isDark) { ... }` to apply the theme.
-- Import required types: `PreviewParameter` from `androidx.compose.ui.tooling.preview.PreviewParameter`.
-- The `ThemePreviewProvider` and `ThemedPreview` are defined in
-  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/Preview.kt`.
+Server tests live in `server/src/test` and use JUnit 5. They are a mixture of local unit/integration tests and live
+integration tests; do not assume every credential-dependent test skips. In particular, the GitHub client test expects
+`ACCESS_TO_GH_TOKEN` or a local GitHub key. AI tests tolerate unavailable providers where their test explicitly checks
+availability. Preserve those distinctions when adding tests.
 
-Example:
+Client database/list tests use `TestServerService` from `buildSrc`. It starts the Ktor server with `IS_TEST`,
+`SERVER_PORT`, `TEST_DB_DIR`, and `TEST_LISTS_DIR`, injects the selected port into tests, and writes logs to
+`build/test-server.log`. It may terminate an old listener occupying its configured test port. Test DB/list fixtures
+default to `.test-db-files` and `.test-lists-files`.
+
+Testing rules:
+
+- Do not leave `println` calls in tests. Use descriptive assertion messages.
+- Fail at the first bad item instead of accumulating a list of failures.
+- Keep test data deterministic. Credential/network tests must make their requirements explicit.
+- Run the narrowest relevant tests first, then the CI-equivalent checks for the changed area.
+
+## Generated code and build-owned files
+
+- Do not edit `composeApp/build/generated/sources/valkyrie/`; it is generated from SVG resources.
+- `WriteAppVersionTask` generates Kotlin version metadata. `WriteIosVersionXcconfigTask` generates the Xcode version
+  include. Both derive their values from git history.
+- SqlDelight generates query/database types from `shared/src/commonMain/sqldelight`; change `.sq`/`.sqm` sources, not
+  generated Kotlin.
+- Gradle build/cache directories and platform build products are not source files and should not be committed.
+
+## Compose UI and navigation
+
+Use a thin stateful screen entry point and a stateless rendering composable:
+
+```kotlin
+data class ScreenUiState(...)
+
+class ScreenViewModel(...) : ViewModel() {
+    var state by mutableStateOf(ScreenUiState(...))
+        private set
+    val scrollState = LazyListState()
+}
+
+@Composable
+fun Screen(viewModel: ScreenViewModel) {
+    ScreenContent(
+        state = viewModel.state,
+        scrollState = viewModel.scrollState,
+        onAction = viewModel::onAction,
+    )
+}
+```
+
+- Put durable mutable screen state, loading/error flags, dialog visibility, and scroll state in the ViewModel/`UiState`
+  so they survive recomposition and configuration changes. `remember` is still appropriate for derived/render-only
+  state whose lifetime is intentionally local; do not use it to hide screen business state.
+- Give `*Content` explicit callbacks and enough state to render without runtime services. Keep defaults only when their
+  omitted meaning is truly unambiguous, such as a fresh preview scroll state.
+- Map domain objects to UI models outside the rendering composable when the mapping contains decisions.
+- Add previews for meaningful content/loading/error/empty states.
+
+`App.kt` uses typed destinations (`AppDestination`) with Compose Navigation. Screen ViewModels are normally created
+with `viewModel(viewModelStoreOwner = backStackEntry) { ... }` so their lifetime matches the navigation entry. The
+current intentional exceptions are app-scoped Favorites/Settings ViewModels and the bounded Word Details ViewModel
+cache. Do not accidentally change those lifetimes when refactoring navigation.
+
+Every preview must render light and dark themes:
 
 ```kotlin
 @Preview
 @Composable
-private fun MyScreenPreview(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+private fun ScreenPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
 ) {
     ThemedPreview(darkTheme = isDark) {
-        MyScreenContent(state = MyUiState(...))
+        ScreenContent(...)
     }
 }
 ```
 
-### ViewModel pattern
+Import `PreviewParameter` from `androidx.compose.ui.tooling.preview.PreviewParameter`. `ThemePreviewProvider` and
+`ThemedPreview` are in `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/Preview.kt`.
 
-- Every screen should use a ViewModel to manage state and survive configuration changes.
-- Create a `<ScreenName>ViewModel` class that extends `ViewModel` and holds the screen's `UiState`.
-- State should be exposed as `var state by mutableStateOf(...)` with `private set`.
-- Store scroll states (`LazyListState`, `ScrollState`) in the ViewModel to preserve scroll position across navigation.
-- The screen composable receives the ViewModel as a parameter: `fun Screen(viewModel: ScreenViewModel)`.
-- In `App.kt`, create ViewModels using `viewModel(viewModelStoreOwner = backStackEntry) { ScreenViewModel(...) }` to
-  scope them to the navigation entry.
-- The stateless `*Content` composable receives `state` and `scrollState` as parameters with default values for previews.
-- Example structure:
-  ```kotlin
-  data class ScreenUiState(...)
+## Localization
 
-  class ScreenViewModel(...) : ViewModel() {
-      var state by mutableStateOf(ScreenUiState(...))
-          private set
-      val scrollState = LazyListState() // or ScrollState(0)
+Compose resources live under `composeApp/src/commonMain/composeResources`. Base UI strings are in `values/strings.xml`;
+localized UI resource sets currently exist for DE, ES, IT, NL, PL, and RU. That is intentionally a smaller set than
+the ten learning languages.
 
-      fun updateState(...) { state = state.copy(...) }
-  }
+- Use `stringResource(Res.string.<key>)` for composable UI and accessibility text. Use XML placeholders and `<plurals>`
+  rather than building grammar in Kotlin.
+- Keep user-visible `commonMain` UI text out of Kotlin literals. Preview-only literals are acceptable.
+- `stringResource` follows the OS/UI locale. Copy that must be in the studied language belongs in a `Language`-keyed
+  model resolved by the ViewModel, as in `StudyCompletionMessages.kt`.
+- For text that must be represented before composition, use the `UiText` pattern in `composeApp/.../i18n` or pass the
+  localized value down from the UI boundary.
+- Platform-owned surfaces need platform resources: Android notification/service strings are under
+  `composeApp/src/androidMain/res/values*`; iOS metadata/permission text belongs in native localization files.
+- Run `./gradlew :composeApp:verifyLocalizationKeys`. It checks every localized Compose resource set against the base,
+  including plural names and quantities.
 
-  @Composable
-  fun Screen(viewModel: ScreenViewModel, ...) {
-      ScreenContent(
-          state = viewModel.state,
-          scrollState = viewModel.scrollState,
-          ...
-      )
-  }
+## Icons and images
 
-  @Composable
-  fun ScreenContent(
-      state: ScreenUiState,
-      scrollState: LazyListState = LazyListState(),
-      ...
-  ) { ... }
-  ```
-### Learning / Spaced Repetition
-
-The app drives study via an FSRS-backed pipeline. Domain types live in `shared` and are reused by app services in
-`composeApp`.
-
-- **Domain types** (`shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/learning/`):
-    - `Card` = `id`, `senseId`, `lemmaId`, `langCode`, `family`, `answerKey`, `scheduling`.
-    - `CardFamily` (RECOGNIZE_SENSE, PRODUCE_WORD, PRODUCE_WORD_IN_CONTEXT, RECOGNIZE_VOICE) — only PRODUCE_* /
-      RECOGNIZE_VOICE families set `testsWordRecall = true`.
-    - `CardKind` describes a presentation variant per family (e.g. `SOURCE_DEFINITION_TO_WORD`, `WORD_TO_TRANSLATION`,
-      `CLOZE_TRANSLATION`, `LISTENING_TRANSLATION`). Each carries `requiresTranslation`, `isCloze`, `family`, `priority`
-      and a `minStability` gate for review-time selection.
-    - `CardState`: NEW → LEARNING → REVIEW → RELEARNING. **Stored by ordinal** in the `card` table — keep the order
-      stable; any change requires a migration + an update to every state-sensitive SQL query.
-    - `Rating` is stored using the FSRS numeric value (1..4) via `ratingFsrsAdapter`, not by ordinal. New ratings
-      must extend `fsrsValue` and may not reorder the existing ones.
-- **FSRS plumbing** (`shared/.../data/learning/fsrs/`):
-    - `FsrsScheduler` wraps `external.fsrs.FSRS`, converts between `CardScheduling` and FSRS `FlashCard`, and produces
-      `GradeOutcome` lists for `Again/Hard/Good/Easy`. `apply()` writes back stability/difficulty/due/reps/lapses.
-    - `FsrsDefaults.config()` is the single source of truth for tuning constants (weights, retention target,
-      cross-family credits, cooldown ratios and floors/caps, exposure gates, daily intake budget). When tuning the
-      algorithm, change values here — services pull a `FsrsConfig` instance from `FsrsDefaults` so a single edit
-      propagates.
-    - Avoid raw day/hour millisecond constants; the config defines durations with `kotlin.time.Duration` helpers.
-- **Intake** (`composeApp/.../data/learning/intake/IntakeService.kt`): activates pending favorites by inserting cards
-  per `defaultIntakeFamilies`. Honors a daily new-card budget, two pause conditions
-  (`pauseIntakeIfQueueAbove`, retention floor over the last 7d), and skips when no variant is buildable. Two run
-  modes: `DAILY` (capped by budget) and `CONTINUE_NOW` (capped by `continueNowPendingLemmaLimit`). Logs analytics
-  event `LEARNING_INTAKE_RUN` with per-reason skip counters.
-- **Session selection & review** (`composeApp/.../data/learning/session/`):
-    - `SessionService.nextCard` ranks candidates by `memoryUrgency + overdueBonus - collisionPenalty`. Recent
-      same-sense, same-lemma, same-answer, and same-family reviews are penalized to spread practice; same sense within
-      the last 3 reviews is hard-excluded.
-    - `submitReview` writes the card update and `review_log` row in a single transaction. On Good/Easy/Hard it spaces
-      sibling cards (`burySiblingCardsBy{Sense,Lemma,Answer}`) with jittered cooldowns, propagates same-sense credit
-      across families (`crossFamilyCredits`), and unlocks the next family once the source card's stability crosses
-      `productionUnlockStability` / `contextUnlockStability`.
-    - `buildTaskVariants` enumerates the playable `CardVariant`s for a sense + family + translation targets;
-      `selectVariantsForReview` applies the `minStability` gate and de-prioritises the last-shown variant.
-    - `ExamplePicker` chooses a cloze example, preferring ones the user hasn't seen recently for that sense.
-    - `SessionCard.loadState()` distinguishes LOADING / READY / ERROR with explicit `SessionCardLoadErrorReason`s
-      (sense missing, translation missing, example missing, etc.) so the UI can show retry vs. skip.
-- **Stats** (`shared/.../data/learning/stats/StatsService.kt`): exposes `globalStats`, `reviewQueueStats`,
-  `dueNow`, and the screen-shaped `statsScreenData` (streak, monthly practice log, pipeline distribution by stability:
-  NEW → FRESH → MIDDLE → STRONG → LEARNED). `retrievability(stabilityDays, elapsedDays)` is reused by the session
-  priority function.
-- **Wiring**: `App.kt` builds one `IntakeService`, one `SessionService`, and one `StatsService` per session and
-  passes them through to ViewModels. `FavoritesReviewCoordinator` debounces full intake runs (5-min cache per
-  language) while `refreshDueCountsOnly` re-reads stats without rerunning intake — important on iOS, where intake
-  serializes against the visible screen's dictionary queries.
-
-### Localization
-
-- Localization uses Compose Multiplatform resources from `composeApp/src/commonMain/composeResources/`.
-- Base locale is `values/strings.xml`.
-- Supported locales are separate folders (for example `values-ru`, `values-nl`, `values-pl`).
-- App language follows the OS locale (no in-app language override).
-
-#### Adding or changing text
-
-- For UI text in composables, use `stringResource(Res.string.<key>)`.
-- Localize accessibility text too (`contentDescription`, `onClickLabel`, `stateDescription`).
-- For parameterized strings, use placeholders in XML (`%1$s`, `%1$d`) and pass args from code.
-- If pluralization is needed, add `<plurals>` resources instead of manual `"s"` suffix logic.
-- Keep user-visible copy out of Kotlin literals in `commonMain` UI code.
-- Preview-only literals are acceptable in `@Preview` functions.
-- Exception: copy that must render in the *studied* language (not the user's UI locale) does not belong in
-  `composeResources/`. `stringResource` resolves by OS locale, so it cannot pick by a per-session language code. For
-  these cases, hold the strings in a Kotlin map keyed by `Language` (see
-  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/ui/study/StudyCompletionMessages.kt`) and resolve in the
-  ViewModel/state — not in the composable, so random picks are stable across recompositions.
-
-#### Non-composable and shared text
-
-- `stringResource(...)` is composable-only. For non-composable flows, prefer passing localized text from UI layer.
-- If text must be represented before rendering, use the `UiText` pattern in
-  `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/i18n/` and resolve at the composable boundary.
-
-#### Platform-specific localization
-
-- Android platform UI surfaces (notifications, foreground service channel names, chooser titles) must be localized too.
-- iOS app metadata shown by the system (for example display name and permission copy) should use localized
-  `InfoPlist.strings` where applicable.
-- Keep Compose resources as source of truth for shared UI, and use native platform resources only for
-  platform-owned surfaces.
-
-#### Quality gates
-
-- Key parity check task: `gradlew :composeApp:verifyLocalizationKeys`.
-- CI runs the same parity task and fails if any locale is missing/has extra keys vs base `values/`.
-
-### SVG Icons (Valkyrie)
-
-- The [Valkyrie Gradle plugin](https://github.com/ComposeGears/Valkyrie) converts SVG files into Compose `ImageVector`
-  constants at build time.
-- **Source SVGs**: `composeApp/src/commonMain/valkyrieResources/` — drop `.svg` files here (no spaces in filenames).
-- **Generated output**: `composeApp/build/generated/sources/valkyrie/` (not committed to git).
-- **Icon pack**: `SlovyIcons` in package `com.slovy.slovymovyapp.ui.icons`; access icons as `SlovyIcons.IconName`.
-- **Generation task**: `generateValkyrieImageVector` runs automatically before Kotlin compilation.
-- **Import pattern**: Extension properties require importing both the pack and the icon:
-  ```kotlin
-  import com.slovy.slovymovyapp.ui.icons.SlovyIcons
-  import com.slovy.slovymovyapp.ui.icons.MyIcon
-  // then use: SlovyIcons.MyIcon
-  ```
-- **Icon vs Image**: Use `Icon()` for simple monochrome icons (applies tint). Use `Image()` for multi-color
-  illustrations — `Icon()` flattens colors into a solid tint, making detailed SVGs appear as filled rectangles.
-- The `EmptyState` component has two overloads: one taking `ImageVector` (renders with `Icon` + tint), and one taking
-  `iconContent: @Composable () -> Unit` for custom rendering (e.g., `Image()` for illustrations).
-- **Runtime SVGs** (server-delivered, e.g. curated word-list icons) cannot go through Valkyrie; they are decoded with
-  Coil 3 (`coil-svg`) via the singleton image loader configured in `App` and rendered tinted by `WordListIcon`.
-
-### Analytics
-
-- `Analytics` is an `expect object` (per-platform actual). Android wires in `FirebaseAnalyticsLogger`; desktop/iOS
-  default to `NoOpAnalyticsLogger` so tests don't crash without an SDK.
-- All event names live in the `AnalyticsEvent` enum
-  (`composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/analytics/Analytics.kt`). Add new events there so call
-  sites stay symbolic; the logger lowercases the enum name when forwarding.
-- `Analytics.setUserProperty` is used for stable per-user dimensions: `ui_lang`, `learning_lang`, `data_version`.
-
-### Logging
-
-- `AppLogger` is `expect object` with `debug/info/warn/error(tag, message, throwable)`. Avoid `println` outside tools;
-  prefer `AppLogger.warn(TAG, "...", e)` for non-fatal flows (see `FavoriteLemmaRecovery`).
-
-### Data export
-
-- `AppDataExporter` is `expect class` per platform (`androidContext` is only used on Android). Returns
-  `AppDataExportResult` carrying an artifact name and an optional share reference.
-- Shared logic in `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/data/export/` — `AppDataArchiveWriter`
-  emits POSIX tar entries via `TarArchive`. `AppDataSnapshotter` makes consistent SQLite snapshots with
-  `VACUUM INTO`, falling back to `wal_checkpoint(FULL)` + file copy when the driver rejects `VACUUM INTO`.
-- Snapshots cover `app.db`, `local_dictionary.db`, `local_translation.db` (plus `-wal`/`-shm` sidecars). The
-  temp file pattern `*.part` is used for atomic moves.
-
-### Speech / TTS
-
-- `TextToSpeechManager` has platform actuals (Android, iOS, desktop no-op) and emits word-boundary + status callbacks.
-- Voice filtering is stored in settings under `Setting.Name.ENABLED_VOICES` (JSON per language). `VoiceFilterHelper`
-  loads/saves the enabled IDs and defaults to local (offline) voices when first seen.
-- Allow users to open system TTS settings via `openSettings()`; Android uses install/check intents, iOS opens
-  Accessibility Speech if allowed.
-
-## Database (SqlDelight)
-
-### Schema Locations
-
-- App DB schema (`appdb`): `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/`
-    - Files: `Settings.sq` (key/value JSON store), `Favorites.sq` (`favorites`, `card`, `review_log` tables),
-      `WordLists.sq` (`word_list`, `word_list_text`, `word_list_label`, `word_list_sense`, `word_list_meta` —
-      relational cache of server-curated word lists plus per-language bundle version).
-    - Migrations: `shared/src/commonMain/sqldelight/appdb/com/slovy/slovymovyapp/db/migrations/`
-    - Verification DBs: `1.db` … `7.db` alongside the schema files; regenerate the newest one with
-      `gradlew :shared:generateCommonMainAppDatabaseSchema` after schema changes
-- Dictionary DB schema: `shared/src/commonMain/sqldelight/dictionarydb/com/slovy/slovymovyapp/dictionary/`
-    - Includes `lemma`, `lemma_pos`, `lemma_pos_sense_hint` (routes senses to the correct cluster — adapter wired in
-      `DatabaseProvider`), `lemma_word_family`, `sense`, `form`, `form_tag`, and per-sense detail tables.
-- Translation DB schema: `shared/src/commonMain/sqldelight/translationdb/com/slovy/slovymovyapp/translation/`
-- Repository pattern: `SettingsRepository` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/settings/`,
-  `FavoritesRepository` in `shared/.../data/favorites/`, `WordListsRepository` in `shared/.../data/lists/`.
-  Curated word lists are served from the DB via `ListsService` (`composeApp/.../data/lists/`), which syncs against
-  `/lists/{lang}/version` and refetches the bundle only on version mismatch (`ListsClient` is the HTTP layer).
-  `Setting.Name` is the canonical list of setting keys
-  (LANGUAGE, DICTIONARY, DATA_VERSION, ENABLED_VOICES, VOICE_SETUP_SHOWN, WELCOME_COMPLETED, plus per-screen language
-  persistence: SEARCH_LANGUAGE, FAVORITES_LANGUAGE, STATS_LANGUAGE).
-- Database bootstrap: `DatabaseProvider` in `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/db/` —
-  configures every column adapter (UUIDs as `BLOB`, enums via `enumOrdinalAdapter()`, FSRS rating via
-  `ratingFsrsAdapter()`).
-- Platform DB support: expect/actual `PlatformDbSupport` + helpers in
-  `composeApp/src/*/kotlin/com/slovy/slovymovyapp/data/remote/`
-- Local writable DBs: `local_dictionary.db` and `local_translation.db` via `LocalDbManager` — these survive data
-  version bumps and back up online-fetched words.
-- Downloaded read-only DBs live in the platform database dir and are cached via `ReadOnlyDatabaseCache`; use the cache
-  helpers so drivers get closed when deleting files.
-- `DataDbManager` enforces query-only mode for read-only drivers, checks available disk before downloads, writes to
-  a `.part` temp file before renaming, and `cleanupCorruptDownloadedDbs()` runs at startup (probes for
-  `lemma`/`sense_translation` tables and deletes truncated files so routing sees an accurate has-DB picture).
-- `WordFetchManager` reuses in-flight `DictionaryClient.getWord` calls via a `MutableSharedFlow(replay=1)` keyed by
-  `(language, lemma, translationsKey, pushToRepo)`. The shared flow keeps fetches alive past ViewModel cancellation so
-  the next requester gets the same emissions. Completed entries are removed on the next call.
-- `DownloadCoordinator` manages per-key download state (`Idle/Running/Done/Failed/Cancelled`) for setup and
-  settings-triggered downloads.
-- `FavoriteLemmaRecovery` re-fetches favorite lemmas after a data-version download so locally cached translations stay
-  populated; it runs under `platform.runWithProcessKeepAlive` to survive backgrounding.
-- `NetworkErrorClassifier` translates exceptions into `NetworkError` enums (Offline, Timeout, ServerError(status),
-  InsufficientStorage, Unknown). Use it (not raw `e.message`) when surfacing user-visible network errors.
-
-### SqlDelight enum columns
-
-- For columns declared as `INTEGER AS SomeEnum`, keep query parameters typed as the enum whenever possible. Compare or
-  assign through the enum-backed column (for example `state = :state` or `state != :new_state`) and pass
-  `CardState.NEW`, `CardState.REVIEW`, etc. from Kotlin.
-- Do not pass enum ordinals by hand from Kotlin service code. If SqlDelight infers a parameter as `Long` because the
-  query compares it to numeric literals, move that state decision into Kotlin and pass the final enum value into SQL.
-- Raw enum ordinals are acceptable only in migrations, adapter implementations, or tightly documented legacy data
-  handling. Persisted enum order should be covered by a small test when the enum is stored by ordinal.
-
-### Migrations
-
-- Migration files are named `<version>.sqm` (e.g., `1.sqm` to migrate from version 1 to 2)
-- Stored in the `migrations/` subdirectory alongside schema files
-- Contain SQL statements to upgrade database schema
-- Verification `.db` files (e.g., `2.db`, …, `5.db` for appdb) represent the expected schema after each migration step
-- Verification tasks: `gradlew :shared:verifyCommonMainAppDatabaseMigration`
-    - **Windows Note**: Migration verification is disabled on Windows due to
-      [SqlDelight issue #5312](https://github.com/sqldelight/sqldelight/issues/5312)
-    - Configured in `shared/build.gradle.kts` with `verifyMigrations.set(!OperatingSystem.current().isWindows)`
-    - On non-Windows platforms, the verification task confirms migrations produce the expected schema
-
-### Ingestion determinism
-
-- `JsonIngestionBuilder` uses deterministic IDs: lemma/lemma_pos derived from MD5 of lemma + normalized lemma + POS;
-  other IDs come from input JSON; duplicates or existing lemma IDs fail.
-- Requires Zipf frequency for every lemma; ingestion fails if the lemma is missing from the frequency map.
-- Prefers native raw entries per `LANG_TO_SOURCE_FILE` for forms/POS mapping; forms deduplicated by form + normalized
-  form + tags (first occurrence wins).
-- `sense_id` duplicates across raw entries are errors; UUID parsing pads incomplete IDs to keep ingestion resilient.
-- Online-only lemmas are ingested from raw data first; processed data can be added later via `ingestProcessedOverRaw`,
-  and translations-only ingestion is supported once senses exist.
-- When streaming words from the server, `DictionaryClient` ingests base → translated stages into local DBs, copying raw
-  rows from downloaded DBs first if needed.
-
-## External API Clients (Server Module)
-
-### API Key/Token Management
-
-All external API clients follow a consistent pattern for credentials:
-
-1. **Environment variable** (checked first, preferred for CI)
-2. **Local file** (fallback for local development)
-
-| Service | Environment Variable | File Location                         |
-|---------|----------------------|---------------------------------------|
-| OpenAI  | `OPENAI_API_KEY`     | `.openai_api_key`                     |
-| Gemini  | `AISTUDIO_KEY`       | `.aistudio_key`                       |
-| GitHub  | `ACCESS_TO_GH_TOKEN` | `server/.github_key` or `.github_key` |
-
-All key files are in `.gitignore`. For CI, secrets are configured in GitHub Actions.
-
-### AI Providers
-
-Located in `server/src/main/kotlin/com/slovy/slovymovyapp/server/ai/`:
-
-- **AIProvider interface**: Common interface for AI completions with caching and retry support
-- **OpenAIProvider**: OpenAI API integration (`OpenAI.kt`)
-- **GeminiProvider**: Google AI Studio integration (`Gemini.kt`)
-- **Enhancers**: `enhancer/` subdirectory contains domain-specific AI enhancement logic
-- **Race with fallback**: `Application.kt` defines `raceWithFallback(...)` — starts Gemini immediately and, if it
-  fails or doesn't return within `AI_FALLBACK_TIMEOUT_MS` (20s), kicks off OpenAI in parallel and returns whichever
-  completes first. Used by both `enhanceWithAI` (base card) and `enhanceWithTranslations` (per target language).
-  Cancels the loser. If both providers are unavailable it throws; if only one is configured it bypasses the race.
-
-Pattern for new providers:
+Valkyrie converts bundled SVGs from `composeApp/src/commonMain/valkyrieResources/` into `SlovyIcons` extension
+properties in package `com.slovy.slovymovyapp.ui.icons`. Filenames must not contain spaces. Generation runs before
+Kotlin compilation.
 
 ```kotlin
-object MyProvider {
-    fun clientProvider(): () -> Client = {
-        val apiKey = System.getenv("MY_API_KEY")?.takeIf { it.isNotBlank() } ?: run {
-            val keyFile = File(".my_api_key")
-            require(keyFile.exists()) { "Missing .my_api_key file and MY_API_KEY env var" }
-            keyFile.readText().trim()
-        }
-        // Create and return client
-    }
-}
+import com.slovy.slovymovyapp.ui.icons.SlovyIcons
+import com.slovy.slovymovyapp.ui.icons.MyIcon
+
+SlovyIcons.MyIcon
 ```
 
-### GitHub Client
+Use `Icon` for monochrome vectors that should receive a tint and `Image` for multicolor illustrations. `EmptyState`
+has both an `ImageVector` overload and an `iconContent` overload for that reason. Server-delivered curated-list SVGs
+cannot use Valkyrie; `WordListIcon` renders them through the app's singleton Coil 3 loader with SVG support.
 
-Located in `server/src/main/kotlin/com/slovy/slovymovyapp/server/github/GitHubClient.kt`:
+## Application services and platform wiring
 
-- Uses `org.kohsuke:github-api` SDK
-- Pre-configured to access `slovymovy/words` repository
-- Reads larger files via `downloadUrl` when GitHub returns encoding `none`
-- Main methods:
-    - `isAvailable()`: Check if token is configured
-    - `getToken()`: Get the configured token
-    - `loadDbExtractContent(folder, file)`: Load from `db-extract/{folder}/{file}`
-    - `loadFileContent(owner, repo, path, ref)`: Generic file loading
-    - Branch helpers: `ensurePushBranch()` creates `push` from `main` if missing; `loadWordsContentFromPushBranch()`
-      returns content + sha; `createWordsContent*`/`updateWordsContent*` write to `push` with optimistic locking (sha
-      required for updates)
+`App.kt` creates the app/session-level repositories and services, including dictionary/list clients, local/downloaded
+database managers, `WordFetchManager`, lemma recovery, intake/session/stats services, downloads, TTS, and export. Keep
+expensive managers stable across recompositions; do not recreate caches or coordinators in screen content.
 
-Usage:
+Platform services use expect/actual or injectable interfaces:
 
-```kotlin
-if (GitHubClient.isAvailable()) {
-    val content = GitHubClient.loadDbExtractContent("en", "test.json")
-}
+- `Analytics` defaults to a no-op logger, but Android `MainActivity` and the iOS Swift shell install Firebase Analytics.
+  Event names come from `AnalyticsEvent` and are lowercased by the Firebase logger. Stable user properties are
+  `ui_lang`, `learning_lang`, and `data_version`.
+- `PerformanceMonitoring` is also Firebase-backed on Android/iOS and no-op for desktop/tests.
+- `AppLogger` writes to the platform console and a bounded developer log buffer. Android/iOS install a Crashlytics
+  sink for warnings/errors; desktop uses console output. Use lazy `debug(tag, throwable) { ... }` and the structured
+  `info`/`warn`/`error` methods instead of `println`.
+- `TextToSpeechManager` has Android and iOS implementations and a desktop no-op. It reports `IDLE`/`SPEAKING` status;
+  it does not expose word-boundary callbacks. Voice selection is stored as per-language JSON in `ENABLED_VOICES`.
+  `VoiceFilterHelper` honors each platform voice's `enabledByDefault` flag and otherwise favors offline voices.
+
+## Database architecture
+
+All schemas are in `shared/src/commonMain/sqldelight`:
+
+- `appdb`: writable `app.db`. `Settings.sq`, `Favorites.sq`, and `WordLists.sq` define settings, favorites/cards/review
+  logs, and the curated-list cache. Repository entry points are `SettingsRepository`, `FavoritesRepository`, and
+  `WordListsRepository`.
+- `dictionarydb`: lemma/POS/sense/form tables and `lemma_pos_sense_hint` routing.
+- `translationdb`: per-sense translations.
+
+`DatabaseProvider` is the central adapter wiring. UUIDs are stored as BLOBs. Ordinal enums use
+`enumOrdinalAdapter()`. FSRS `Rating` uses `ratingFsrsAdapter()` because its persisted values are the FSRS protocol
+numbers 1..4, not Kotlin ordinals.
+
+There are three distinct database lifecycles:
+
+1. `app.db` is the persistent app/state database.
+2. `local_dictionary.db` and `local_translation.db` are writable caches for online-fetched content.
+3. Versioned dictionary/translation DBs are downloaded read-only assets managed by `DataDbManager`.
+
+Do not assume the writable local caches survive a data-version reset. The data-version mismatch flow closes and deletes
+both downloaded DBs and local dictionary/translation caches before rerunning initial routing. `LemmaRecovery` then
+repopulates missing content for favorites and curated-list senses. Recovery items are deduplicated by language and
+normalized lemma, and the controller keeps recovery alive with platform process-keepalive support.
+
+`DataDbManager.VERSION` is currently `v15`. Downloaded DB URLs are under that prefix in the `slovymovy` GCS bucket.
+Startup removes `.part`, undersized, or schema-invalid downloads before routing. Downloads check disk space, use a
+`.part` file plus atomic move, validate the expected schema, and only then record the installed data version.
+
+Read-only and local database managers coordinate active readers with leases/locks. Use their public suspending
+`withDictionary...` / `withTranslation...` helpers so deletion waits for readers and drivers are closed safely,
+especially on iOS. Application code must not retain a query/driver beyond the helper block or bypass the manager with
+a direct driver; direct opens are reserved for manager internals and controlled test setup.
+
+### Schema and migration changes
+
+Migrations are named `<version>.sqm`, where `N.sqm` upgrades schema N to N+1. Current verification snapshots are:
+
+- app DB: `1.db` through `9.db`, with migrations `1.sqm` through `8.sqm`;
+- dictionary DB: `1.db` through `5.db`, with migrations `1.sqm` through `4.sqm`;
+- translation DB: `1.db` through `2.db`, with migration `1.sqm`.
+
+After an app schema change, add the migration, regenerate the newest schema snapshot, and verify it:
+
+```text
+./gradlew :shared:generateCommonMainAppDatabaseSchema
+./gradlew :shared:verifyCommonMainAppDatabaseMigration
 ```
 
-### Word data API and repo updates
+Migration verification is disabled on native Windows because of SqlDelight issue #5312. It runs on supported
+non-Windows hosts.
 
-- `/word/{lang}/{word}` streams NDJSON (`application/x-ndjson`): base chunk comes from `words` on the `push` branch (
-  fallback to `main`, otherwise AI-enhanced from db-extract), optional translated chunk is added when `translations`
-  query includes missing target language codes.
-- `translations` codes are validated; only languages absent from the current card are processed, and Gemini + db-extract
-  data must be available.
-- `push` query enqueues Cloud Tasks updates **only when something was processed** (new base card or new translations);
-  no-op when nothing changed.
-- Client-side `DictionaryClient` filters server responses to requested translation languages, handles online-only lemmas
-  by copying raw data before ingesting processed content, and wraps errors in `DictionaryClientException`.
-- `/internal/update-repo/{lang}/{word}` pretty-prints JSON, ensures `push` exists, merges with existing via
-  `WordDataMerger`, and skips commits when content is identical. Authenticated via `CloudTasksAuthVerifier`
-  (OIDC Bearer token; audience = the deterministic Cloud Run service URL).
-- `WordDataMerger` merges by `sense_id`; existing translations/definitions/examples win, only new language codes/example
-  translations (matched by normalized text without `<w>` tags) are appended.
-- `POST /feedback` posts to a `Feedback` discussion category on the `slovymovy/slovy-movy-app` repo;
-  `POST /feedback/{lang}/{word}` creates a labeled feedback issue on `slovymovy/words`. Both require
-  `GitHubClient.isAvailable()`.
+For `INTEGER AS SomeEnum` columns, keep query parameters enum-typed and pass the enum from Kotlin. Never hand an
+ordinal from service code to a query. Raw ordinals belong only in migrations/adapters or explicitly documented legacy
+handling.
 
-### Cloud Tasks / Cloud Run integration
+SQLite versions on Android 11 and older cap a statement at 999 bound variables. For an unbounded SqlDelight `IN ?`
+query, use `queryInChunks` from `shared/.../util/SqlInChunks.kt`; its 500-item chunks leave room for other parameters.
+It deduplicates inputs and concatenates chunk results, so callers that need a global ordering must sort the combined
+result themselves.
 
-- `CloudRunMetadata` reads service account / numeric project ID / region from the Cloud Run metadata server; the
-  deterministic service URL (`https://$K_SERVICE-$projectNumber.$region.run.app`) is used both for queueing tasks and
-  for verifying their OIDC audience on the way back in.
-- `RepoUpdateTaskClient.queueRepoUpdate(lang, word, json)` enqueues a Cloud Task that POSTs back to
-  `/internal/update-repo/{lang}/{word}` with the LanguageCardResponse JSON, signed with an OIDC token from the
-  service account. Queue name comes from `CLOUD_TASKS_QUEUE` env (default `repo-updates`).
-- A 409 response surfaces as `Conflict` so Cloud Tasks will retry. Other failures are logged but don't fail the
-  originating `/word/...` stream.
+Persisted enum/protocol invariants:
 
-### Server test mode
+- `CardState` order is `NEW`, `LEARNING`, `REVIEW`, `RELEARNING`. Reordering or inserting values changes stored data
+  and requires a migration plus review of every state-sensitive query.
+- `Rating.fsrsValue` is 1..4 for Again/Hard/Good/Easy. Preserve existing values and use its dedicated adapter.
+- Other ordinal-backed enums require the same care; add a small persistence-order test when introducing one.
 
-- When `IS_TEST=true`, `Application.module()` mounts `Routing.testDataEndpoints()` from `TestApplication.kt`:
-  `GET /test/db/list` enumerates DB files in `TEST_DB_DIR` (defaulting to `.test-db-files`) and `GET /test/db/file/{name}`
-  serves them. `TestServerDataProvider` in `commonTest` is the client side of this API and replaces
-  `GoogleStorageBucketDataProvider` for tests.
-- Test mode also mounts `Routing.testListsEndpoints()` and skips the GitHub-backed `/lists/{lang}` routes:
-  `PUT /test/lists/{lang}` stages a `LanguageListsResponse` JSON bundle in an in-memory store,
-  `DELETE /test/lists/{lang}` removes it, and `GET /lists/{lang}` + `GET /lists/{lang}/version` serve from that store.
-  Languages without a staged bundle fall back to the committed `TEST_LISTS_DIR` directory (default
-  `.test-lists-files/{lang}/`), which `LocalDirectoryListsLoader` reads in the same `{id}.json` + `{id}.svg`
-  layout as the production GitHub `lists/{lang}/` folder. `ListsServiceServerTest` in `commonTest` uses both
-  paths to exercise the full client → server → DB sync flow.
+## Dictionary ingestion and fetching
 
-### Server Test Patterns
+`JsonIngestionBuilder` is intentionally strict and deterministic:
 
-- Tests use real integrations (no mocking) with `assumeTrue()` for graceful skipping
-- Test resources in `server/src/test/resources/`
-- Use `@EnabledIf` or `assumeTrue(Client.isAvailable())` for tests requiring credentials
-- JUnit 5 with `@ParameterizedTest` for testing multiple providers
+- Lemma IDs are MD5-derived from the lemma plus its normalized form. Raw input IDs supply sense and lemma-POS cluster
+  identity; malformed/incomplete UUID strings are padded by the parser for resilience.
+- Every lemma must have Zipf frequency data. Duplicate sense IDs across raw entries are errors.
+- Native raw entries drive POS/form clustering. Equivalent native form sets are merged; other entries are assigned to
+  the best matching cluster, and `lemma_pos_sense_hint` records the resulting sense route.
+- Forms are deduplicated by form, normalized form, tags, and source; do not silently collapse source-specific forms.
+- Raw-only online lemmas can be ingested first, processed data can later overlay them, and translations-only ingestion
+  is supported only after the base senses exist.
 
-## Code Style
+Build or rebuild downloadable DB files with the server CLI task:
 
-- Avoid adding free-standing helper methods (top-level functions or private extensions) in unrelated files. Place new
-  methods on the actual class/service that owns the behaviour, in the file where that class is implemented.
-- Do not declare extension functions on stdlib/runtime types you don't own (`String`, `Collection`, `List`, `Map`,
-  etc.) — a helper like `Collection<String>.filterSelfReferences(...)` reads as general-purpose API while encoding
-  class-specific logic. Write a regular function and pass the data as a parameter. Extensions on project-owned or
-  generated types (e.g. `DictionaryQueries.resolveRelatedForm`) are fine.
-- Avoid default parameter values if possible. Prefer explicit call sites so behaviour is obvious at the call and
-  refactors don't silently change semantics for existing callers. Use defaults only when omission has a single,
-  obvious meaning that all callers genuinely share.
-- For time arithmetic, use `kotlin.time.Duration` helpers (`1.seconds`, `7.days`, `500.milliseconds`) and
-  `Instant +/- Duration`; avoid raw millisecond constants like `86_400_000L` or manual multipliers. Convert to epoch
-  milliseconds only at API/database boundaries with `toEpochMilliseconds()` or `inWholeMilliseconds`.
-- For FSRS / scheduling tuning, edit `FsrsDefaults` constants (and the `FsrsConfig` it produces) rather than
-  hard-coding fresh thresholds at the call site. Services receive `FsrsConfig` so a single source of truth keeps
-  intake, session selection, cooldowns, and stats in sync.
-- Persisted enums: prefer `INTEGER AS Enum` columns with `enumOrdinalAdapter()`; if the enum participates in a
-  numeric protocol (e.g. `Rating.fsrsValue`), use a dedicated adapter (`ratingFsrsAdapter`) and keep the protocol
-  value stable across versions.
+```text
+./gradlew :server:runDbPrepTool --args='--db-extract <path> --processed <path> --out <path> --freq <path>'
+```
 
-## Testing Guidelines
+Append `--test` inside the quoted arguments for a deterministic subset of 500 words per language.
 
-- Do not leave println statements in tests.
-    - Prefer descriptive assertion messages (assertTrue, assertEquals, fail with context) to convey failures.
-    - If you need temporary debugging during local development, use a debugger or temporary logs and remove them before
-      committing.
-- Fail fast in tests: do not aggregate errors.
-    - Validate items inside loops using immediate assertions; abort the test on the first failure.
-    - Avoid collecting errors into lists and failing at the end.
+`DictionaryClient` streams and ingests base content before translated content. If an online result depends on raw rows
+from an installed DB, it copies those rows into the writable local DB before applying processed data. It filters server
+translations to the requested target languages and wraps transport/protocol errors in `DictionaryClientException`.
 
-## AI enhancer validation
+`WordFetchManager` shares in-flight work by normalized `(language, lemma, translations, push)` key using replaying
+flows, so requests survive an individual ViewModel cancellation and the next requester observes the same emissions.
+Completed entries are removed on the next call. Preserve cancellation semantics: rethrow `CancellationException`
+instead of classifying or logging it as a failure.
 
-- `LanguageCardEnhancer` and `TranslationEnhancer` reject unknown `sense_id` values; responses must only reference IDs
-  from the source card.
-- Translation enrichment adds only missing target languages and needs db-extract data + Gemini; existing
-  translations/definitions are left untouched.
+Use `NetworkErrorClassifier` to turn failures into `Offline`, `Timeout`, `ServerError`, `InsufficientStorage`, or
+`Unknown`; do not surface raw exception messages as user-facing copy. `DownloadCoordinator` is the source of truth for
+per-key `Idle`/`Running`/`Done`/`Failed`/`Cancelled` download state.
 
-## CI notes
+## Learning and spaced repetition
 
-- Android emulator workflow caches AVDs by workflow-hash key; cache misses wipe old AVD data. Emulator disk size is
-  2048MB and `jlumbroso/free-disk-space` keeps runners lean.
+The shared learning domain is under `shared/.../data/learning`; app intake/session orchestration is under
+`composeApp/.../data/learning`.
 
-## Key Notes
+- `Card` identifies a sense/lemma/language, a `CardFamily`, an answer key, and scheduling data.
+- Families are `RECOGNIZE_SENSE`, `PRODUCE_WORD`, `PRODUCE_WORD_IN_CONTEXT`, and `RECOGNIZE_VOICE`. Every family except
+  `RECOGNIZE_SENSE` tests word recall.
+- `CardKind` is a playable presentation variant with translation/cloze requirements, family, priority, and a minimum
+  stability gate.
+- `FsrsScheduler` converts between app scheduling data and the vendored `external.fsrs` implementation and produces
+  outcomes for Again/Hard/Good/Easy.
+- `FsrsDefaults.config()` owns scheduling, cross-family credit, cooldown, unlocking, exposure, and intake tuning.
+  Change those policies there rather than adding a threshold at a call site. Stats pipeline display thresholds are a
+  separate concern currently owned by `StatsService`.
 
-- Module accessors: :composeApp, :shared, :server
-- iOS warnings on non-macOS are expected and harmless
-- Downloads are served from the `slovymovy` GCS bucket under the version prefix; `GoogleStorageBucketDataProvider`
-  builds URLs and list calls. In tests the bucket is swapped out for `TestServerDataProvider`, which talks to the
-  in-process server's `/test/db/*` endpoints.
-- Gradle test service `TestServerService` starts the Ktor server for tests with `IS_TEST`, `SERVER_PORT`,
-  `TEST_DB_DIR`, and `TEST_LISTS_DIR`; it kills any existing listener on the port and tails logs at
-  `build/test-server.log`.
-- Production server URL (`DictionaryClient.PRODUCTION_SERVER_URL`): `https://backend.openwords.ai`.
+`IntakeService` activates pending favorites within the daily task-family budget. It applies queue and seven-day
+retention pause rules and has `DAILY` and explicitly bounded `CONTINUE_NOW` modes. It skips families with no buildable
+variant and reports performance plus `LEARNING_INTAKE_RUN` analytics with per-reason counts.
+
+`SessionService.nextCard` ranks candidates by memory urgency plus overdue bonus minus collision penalties. A sense seen
+within the last three reviews is excluded; recent same-sense/lemma/answer/family work is otherwise penalized. Review
+submission updates the card and review log in one transaction. Non-Again answers bury siblings; eligible successful
+answers also apply same-sense cross-family credit and unlock the next family once configured stability gates are met.
+
+`buildTaskVariants` enumerates valid `CardVariant`s and review selection applies `minStability` while de-prioritizing
+the last-shown kind. `ExamplePicker` favors examples that were not seen recently. `SessionCard.loadState()` exposes
+explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can distinguish retry from skip.
+
+`StatsService` owns queue/global/screen snapshots, streak/practice data, and the pipeline stages `QUEUE`, `NEW`,
+`FRESH`, `MIDDLE`, `STRONG`, and `LEARNED`. Its retrievability function is reused in session priority.
+`FavoritesReviewCoordinator` caches a full intake refresh for five minutes per language; `refreshDueCountsOnly` must
+not rerun intake. It also avoids intake during a data-version mismatch.
+
+## Curated word lists
+
+Production list data comes from `lists/{lang}/` in the `slovymovy/words` repository. Each list is `{id}.json` with an
+optional `{id}.svg`; explicit JSON icon data is the fallback. `ListsService` compares `/lists/{lang}/version` and only
+replaces the app DB bundle on a version mismatch. The repository serves cached DB data without requiring the network.
+
+The server version is derived from the Git tree and cached/coalesced. Feed order is ascending explicit `order`, with
+missing order last and ID as the final tie-break. Keep an English base text for list metadata. Legacy `senseIds` can be
+decoded, but entries without lemma text cannot participate in missing-lemma recovery; new data should use the current
+sense objects.
+
+In `IS_TEST=true` mode, `PUT`/`DELETE /test/lists/{lang}` manage an in-memory bundle. Unstaged languages fall back to
+`TEST_LISTS_DIR/{lang}` using the same JSON/SVG layout. `/lists/{lang}` and `/lists/{lang}/version` serve either source.
+
+## Server APIs and external integrations
+
+Credentials are resolved from environment first, then ignored local files:
+
+| Service | Environment | Local fallback |
+| --- | --- | --- |
+| OpenAI | `OPENAI_API_KEY` | `.openai_api_key` |
+| Gemini | `AISTUDIO_KEY` | `.aistudio_key` |
+| GitHub | `ACCESS_TO_GH_TOKEN` | `server/.github_key`, then `.github_key` |
+
+Fallback paths are relative to the server process working directory. Never commit key files.
+
+AI providers implement the common `AIProvider` contract with caching/retry support. `raceWithFallback` starts Gemini
+first, starts OpenAI after `AI_FALLBACK_TIMEOUT_MS` or a Gemini failure, returns the first success, and cancels the
+loser. If only one provider is configured it uses that provider directly. Base and translation enhancement require
+db-extract source data; translation enhancement can use either configured provider and adds only missing target
+languages. Both enhancers reject response sense IDs absent from the source card.
+
+Important routes and data flow:
+
+- `GET /word/{lang}/{word}` returns NDJSON: a base chunk, then an optional translated chunk. Base data comes from the
+  words repo `push` branch, then `main`, then AI enhancement of db-extract. Requested translation codes are validated,
+  self/available translations are filtered, and only missing languages are processed.
+- The `push` query queues a repo update only when base or translation processing changed something.
+- `GET /lists/{lang}` and `/lists/{lang}/version` serve curated list bundles.
+- `POST /feedback` creates a Feedback discussion in `slovymovy/slovy-movy-app`.
+- `POST /feedback/{lang}/{word}` and `POST /list-suggestion/{lang}` create labeled issues in `slovymovy/words`.
+- `POST /internal/update-repo/{lang}/{word}` is the authenticated Cloud Tasks callback.
+
+`GitHubClient` handles large `encoding=none` files through `downloadUrl`, ensures a `push` branch from `main`, and uses
+SHA-based optimistic locking for updates. `WordDataMerger` merges by `sense_id`: existing definitions/translations/
+examples win, while missing languages and normalized example translations are appended. Identical merged content does
+not create a commit; a 409 conflict remains retryable.
+
+`RepoUpdateTaskClient` posts the processed JSON back to the deterministic Cloud Run service URL using a service-account
+OIDC token. `CloudTasksAuthVerifier` verifies the same URL as audience. Queue name is `CLOUD_TASKS_QUEUE`, defaulting to
+`repo-updates`. Task-queue failures are logged without failing the originating word stream.
+
+With `IS_TEST=true`, the server mounts test-only DB routes (`/test/db/list`, `/test/db/file/{name}`) and list routes,
+using `TEST_DB_DIR`/`TEST_LISTS_DIR`. Production list routes backed by GitHub are replaced by the test list source.
+
+Production client server URL is `https://backend.openwords.ai`.
+
+## Export, settings, and data-version behavior
+
+`AppDataExporter` is expect/actual; shared tar/snapshot logic is in `composeApp/.../data/export` and
+`composeApp/.../data/remote/AppDataSnapshotter.kt`. A consistent snapshot uses `VACUUM INTO`, with
+`wal_checkpoint(FULL)` plus copy as fallback. The archive contains the three main snapshots (`app.db`,
+`local_dictionary.db`, `local_translation.db`), not live `-wal`/`-shm` sidecars. `.part` names are used for atomic
+file destinations where the platform permits.
+
+`Setting.Name` is the canonical key list. It includes onboarding/language/data/voice settings, per-screen persisted
+languages, developer mode, and migration markers. Add keys there and use `SettingsRepository`; do not invent raw
+string keys at call sites.
+
+When changing `DataDbManager.VERSION`, upload every required dictionary/translation DB under the new GCS prefix and
+keep app routing/recovery behavior in mind. Startup compares the installed `Setting.DATA_VERSION`; a mismatch is an
+intentional destructive cache refresh, followed by initial-destination selection and recovery.
+
+## Code style and review checklist
+
+- Put behavior on the class/service that owns it. Avoid unrelated top-level helpers and extensions on stdlib/runtime
+  types (`String`, `List`, `Map`, and so on). Extensions on project-owned/generated types are fine.
+- Prefer explicit call sites over default parameter values. Use a default only when omission has one stable, obvious
+  meaning for every caller.
+- Use `kotlin.time.Duration` (`500.milliseconds`, `7.days`) and `Instant +/- Duration`; convert to epoch milliseconds
+  only at storage/API boundaries.
+- In coroutine catch blocks, rethrow `CancellationException` before retrying, logging, or mapping errors.
+- Keep FSRS policy in `FsrsDefaults`, DB adapters in `DatabaseProvider`, settings keys in `Setting.Name`, analytics
+  names in `AnalyticsEvent`, and user-facing copy in localization resources or the studied-language model.
+- Use `AppLogger` for diagnostics and `NetworkErrorClassifier` for user-visible network categories.
+- Preserve unrelated working-tree changes. Never edit generated output to work around a source/configuration problem.
+
+Before considering a change complete, check the relevant subset of:
+
+1. Common behavior has a `composeApp/src/commonTest` test when it can run cross-platform.
+2. Persisted enum/schema changes include migration and adapter/query review.
+3. UI states have stateless content, explicit callbacks, and themed previews.
+4. New UI/accessibility copy is localized and localization parity passes.
+5. Cancellation is not swallowed and database leases do not escape their block.
+6. Targeted tests pass, followed by the CI-equivalent task(s) for the affected module/platform.
