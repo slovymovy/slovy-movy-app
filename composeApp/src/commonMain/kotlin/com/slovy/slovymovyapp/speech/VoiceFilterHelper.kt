@@ -120,12 +120,21 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
     }
 
     suspend fun loadEnabledVoices(
-        ttsManager: TextToSpeechManager,
+        speechPlayer: SpeechPlayer,
         language: Text2SpeechLanguage,
     ): List<Text2SpeechVoice> {
-        val allVoices = ttsManager.getVoicesForLanguage(language)
+        val allVoices = speechPlayer.getVoicesForLanguage(language)
         initializeDefaultVoices(language, allVoices)
         return filterVoicesByEnabled(allVoices, language)
+    }
+
+    /**
+     * Whether the first-run voice setup sheet should interrupt playback for [language]: true when
+     * [voices] offers no better-than-medium quality voice and the sheet has not been shown yet.
+     */
+    suspend fun needsVoiceSetupPrompt(language: Language, voices: List<Text2SpeechVoice>): Boolean {
+        if (voices.any { it.quality != VoiceQuality.MEDIUM }) return false
+        return !isVoiceSetupShown(language)
     }
 
     private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {

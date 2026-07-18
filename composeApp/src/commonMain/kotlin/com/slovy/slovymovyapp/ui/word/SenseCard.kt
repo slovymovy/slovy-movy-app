@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -36,11 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.material3.CircularProgressIndicator
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.text.Typography.bullet
@@ -74,11 +75,9 @@ internal fun SenseCard(
     onWordClick: (String) -> Unit = {},
     onViewFullDetails: (() -> Unit)? = null,
     favoriteLemmas: Set<String> = emptySet(),
-    // Inline lemma speaker (My words / list detail). When [onToggleAudio] is null no speaker is
-    // shown — Word details renders its own hero speaker, so it leaves this off.
-    onToggleAudio: (() -> Unit)? = null,
-    audioPlaying: Boolean = false,
-    audioPreparing: Boolean = false,
+    // Inline lemma speaker (My words / list detail). When null no speaker is shown — Word details
+    // renders its own hero speaker, so it leaves this off.
+    lemmaAudio: LemmaAudioControl? = null,
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -126,12 +125,10 @@ internal fun SenseCard(
                         data.translationLoading -> LoadingPlaceholder(stringResource(Res.string.word_details_preparing_translation))
                     }
                     if (data.showLemma) {
-                        if (onToggleAudio != null) {
+                        if (lemmaAudio != null) {
                             LemmaWithSpeaker(
                                 lemma = data.lemma,
-                                playing = audioPlaying,
-                                preparing = audioPreparing,
-                                onToggle = onToggleAudio,
+                                control = lemmaAudio,
                             )
                         } else {
                             HighlightedText(
@@ -367,10 +364,9 @@ internal fun SenseCard(
 @Composable
 private fun LemmaWithSpeaker(
     lemma: String,
-    playing: Boolean,
-    preparing: Boolean,
-    onToggle: () -> Unit,
+    control: LemmaAudioControl,
 ) {
+    val playing = control.phase == RowAudioPhase.PLAYING
     val playLabel = stringResource(Res.string.word_details_action_play_word)
     val stopLabel = stringResource(Res.string.word_details_action_stop)
     // Secondary ink, dialled back so the word stays the hero (design review #3). Theme-aware in
@@ -401,14 +397,14 @@ private fun LemmaWithSpeaker(
                         .requiredSize(44.dp)
                         .clip(CircleShape)
                         .clickable(
-                            onClick = onToggle,
+                            onClick = control.onToggle,
                             role = Role.Button,
                             onClickLabel = if (playing) stopLabel else playLabel,
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
                     when {
-                        preparing -> CircularProgressIndicator(
+                        control.phase == RowAudioPhase.PREPARING -> CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp,
                             color = speakerTint,

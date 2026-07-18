@@ -64,8 +64,11 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioActions
 import com.slovy.slovymovyapp.speech.RowAudioController
-import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.RowAudioUiState
+import com.slovy.slovymovyapp.speech.SpeechPlayer
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
@@ -174,7 +177,7 @@ class FavoritesViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val dictionaryRepository: DictionaryRepository,
     private val settingsRepository: SettingsRepository,
-    ttsManager: TextToSpeechManager,
+    speechPlayer: SpeechPlayer,
     voiceFilterHelper: VoiceFilterHelper,
     private val clock: Clock,
 ) : ViewModel() {
@@ -187,10 +190,17 @@ class FavoritesViewModel(
     val snackbarHostState = SnackbarHostState()
 
     val rowAudio = RowAudioController(
-        ttsManager = ttsManager,
+        speechPlayer = speechPlayer,
         voiceFilterHelper = voiceFilterHelper,
         scope = viewModelScope,
         analyticsSource = "favorites",
+    )
+
+    val rowAudioActions = RowAudioActions(
+        onToggle = ::toggleAudio,
+        onOpenVoiceSettings = rowAudio::openVoiceSettings,
+        onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
+        onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
     )
 
     fun toggleAudio(senseId: String) {
@@ -804,14 +814,8 @@ fun FavoritesScreen(
         onSetLanguageDropdownExpanded = { viewModel.setLanguageDropdownExpanded(it) },
         onStartStudy = onStartStudy,
         onContinueStudyingNow = onContinueStudyingNow,
-        isAudioAvailable = viewModel.rowAudio::isLanguagePlayable,
-        playingSenseId = viewModel.rowAudio.playingSenseId,
-        preparingSenseId = viewModel.rowAudio.preparingSenseId,
-        onToggleAudio = viewModel::toggleAudio,
-        voiceSetupLanguage = viewModel.rowAudio.voiceSetupLanguage,
-        onOpenVoiceSettings = viewModel.rowAudio::openVoiceSettings,
-        onDismissVoiceSetup = viewModel.rowAudio::dismissVoiceSetup,
-        onLaterVoiceSetup = viewModel.rowAudio::dismissVoiceSetupAndPlay,
+        rowAudio = viewModel.rowAudio.uiState,
+        rowAudioActions = viewModel.rowAudioActions,
     )
 }
 
@@ -835,14 +839,8 @@ fun FavoritesScreenContent(
     onSetLanguageDropdownExpanded: (Boolean) -> Unit = {},
     onStartStudy: (Language) -> Unit = {},
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
-    isAudioAvailable: (Language) -> Boolean = { true },
-    playingSenseId: String? = null,
-    preparingSenseId: String? = null,
-    onToggleAudio: (String) -> Unit = {},
-    voiceSetupLanguage: Language? = null,
-    onOpenVoiceSettings: () -> Unit = {},
-    onDismissVoiceSetup: () -> Unit = {},
-    onLaterVoiceSetup: () -> Unit = {},
+    rowAudio: RowAudioUiState = RowAudioUiState(),
+    rowAudioActions: RowAudioActions = RowAudioActions(),
 ) {
     val focusManager = LocalFocusManager.current
     val resolvedEmptyStateScrollState = emptyStateScrollState ?: remember { ScrollState(0) }
@@ -1118,15 +1116,11 @@ fun FavoritesScreenContent(
                                                     onNavigateToWordDetail(item.targetLang, word, null)
                                                 },
                                                 favoriteLemmas = state.favoriteLemmas,
-                                                // Hide the speaker when the row's language can't be
-                                                // spoken (e.g. Desktop) — no dead control.
-                                                onToggleAudio = if (isAudioAvailable(item.targetLang)) {
-                                                    { onToggleAudio(item.senseId) }
-                                                } else {
-                                                    null
-                                                },
-                                                audioPlaying = playingSenseId == item.senseId,
-                                                audioPreparing = preparingSenseId == item.senseId,
+                                                lemmaAudio = rowAudio.controlFor(
+                                                    senseId = item.senseId,
+                                                    language = item.targetLang,
+                                                    actions = rowAudioActions,
+                                                ),
                                             )
                                         }
                                     }
@@ -1139,14 +1133,7 @@ fun FavoritesScreenContent(
         }
     }
 
-    voiceSetupLanguage?.let { language ->
-        VoiceSetupBottomSheet(
-            language = language,
-            onOpenSettings = onOpenVoiceSettings,
-            onDismiss = onDismissVoiceSetup,
-            onLater = onLaterVoiceSetup,
-        )
-    }
+    RowAudioVoiceSetupHost(state = rowAudio, actions = rowAudioActions)
 }
 
 @Composable
@@ -1278,9 +1265,7 @@ private fun FavoriteSenseCard(
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet(),
-    onToggleAudio: (() -> Unit)? = null,
-    audioPlaying: Boolean = false,
-    audioPreparing: Boolean = false,
+    lemmaAudio: LemmaAudioControl? = null,
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -1309,9 +1294,7 @@ private fun FavoriteSenseCard(
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas,
-        onToggleAudio = onToggleAudio,
-        audioPlaying = audioPlaying,
-        audioPreparing = audioPreparing,
+        lemmaAudio = lemmaAudio,
     )
 }
 

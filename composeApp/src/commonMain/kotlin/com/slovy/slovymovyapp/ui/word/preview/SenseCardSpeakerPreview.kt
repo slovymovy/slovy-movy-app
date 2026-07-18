@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.SenseCard
@@ -45,25 +47,19 @@ private fun SenseCardSpeakerStatesPreview(
                 data = speakerRowData("uitgang"),
                 state = speakerRowState("uitgang"),
                 onToggle = {},
-                onToggleAudio = {},
-                audioPlaying = false,
-                audioPreparing = false,
+                lemmaAudio = LemmaAudioControl(RowAudioPhase.IDLE) {},
             )
             SenseCard(
                 data = speakerRowData("ontlading"),
                 state = speakerRowState("ontlading"),
                 onToggle = {},
-                onToggleAudio = {},
-                audioPlaying = false,
-                audioPreparing = true,
+                lemmaAudio = LemmaAudioControl(RowAudioPhase.PREPARING) {},
             )
             SenseCard(
                 data = speakerRowData("duwen"),
                 state = speakerRowState("duwen"),
                 onToggle = {},
-                onToggleAudio = {},
-                audioPlaying = true,
-                audioPreparing = false,
+                lemmaAudio = LemmaAudioControl(RowAudioPhase.PLAYING) {},
             )
         }
     }
@@ -84,17 +80,13 @@ private fun SenseCardSpeakerLongWordsPreview(
                 data = speakerRowData("ontoegankelijkheid"),
                 state = speakerRowState("ontoegankelijkheid"),
                 onToggle = {},
-                onToggleAudio = {},
-                audioPlaying = false,
-                audioPreparing = false,
+                lemmaAudio = LemmaAudioControl(RowAudioPhase.IDLE) {},
             )
             SenseCard(
                 data = speakerRowData("meervoudigepersoonlijkheidsstoornis"),
                 state = speakerRowState("meervoudigepersoonlijkheidsstoornis"),
                 onToggle = {},
-                onToggleAudio = {},
-                audioPlaying = false,
-                audioPreparing = false,
+                lemmaAudio = LemmaAudioControl(RowAudioPhase.IDLE) {},
             )
         }
     }

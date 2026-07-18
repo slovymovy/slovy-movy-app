@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -15,52 +16,66 @@ import kotlinx.coroutines.launch
  * Word-details playback flow ([com.slovy.slovymovyapp.ui.word.WordDetailViewModel.playWord]) but is
  * keyed by `senseId` so any number of rows can share one player while only one plays at a time.
  *
- * Rows live in their own per-row [Language] (My words can mix languages), so voices are loaded and
- * cached per language. The low-quality-voice gate still routes through [VoiceSetupBottomSheet] via
- * [voiceSetupLanguage]; the screen renders the sheet from that state.
+ * Rows live in their own per-row [Language] (My words can mix languages), so voices are loaded per
+ * language via [RotatingVoiceSelector] on every play — enable/disable changes made in Settings
+ * apply immediately. The low-quality-voice gate routes through the voice setup sheet, surfaced to
+ * screens as [RowAudioUiState.voiceSetupLanguage].
  */
 class RowAudioController(
-    private val ttsManager: TextToSpeechManager,
+    private val speechPlayer: SpeechPlayer,
     private val voiceFilterHelper: VoiceFilterHelper,
     private val scope: CoroutineScope,
     private val analyticsSource: String,
 ) {
-    /** Sense whose audio is loading (spinner). Null when nothing is preparing. */
-    var preparingSenseId by mutableStateOf<String?>(null)
+    /** Snapshot for the hosting screen; derived from [playback] plus language availability. */
+    var uiState by mutableStateOf(RowAudioUiState())
         private set
 
-    /** Sense currently speaking (stop glyph). Null when nothing is playing. */
-    var playingSenseId by mutableStateOf<String?>(null)
-        private set
+    private val voiceSelector = RotatingVoiceSelector(speechPlayer, voiceFilterHelper)
 
-    /** Non-null while the first-run voice setup sheet should be shown for this language. */
-    var voiceSetupLanguage by mutableStateOf<Language?>(null)
-        private set
+    private data class PlayRequest(val senseId: String, val lemma: String, val language: Language)
 
-    // Languages the TTS engine can speak. Null until [ensureAvailabilityLoaded] resolves it; empty
-    // means no playable language (e.g. Desktop). Drives whether a row shows the speaker at all.
-    private var availableLanguages by mutableStateOf<Set<Language>?>(null)
-    private var availabilityLoadStarted = false
+    /**
+     * The playback lifecycle of the single active request. Only [Starting] and [Playing] mean an
+     * utterance of ours is in (or entering) the shared [SpeechPlayer]; the status listener uses
+     * that to ignore audio started by other screens sharing the player (word detail, study,
+     * settings) so it can't flip a row's state.
+     */
+    private sealed interface Playback {
+        data object Idle : Playback
 
-    // Platform language lookup is stable, so it's cached. The enabled-voice filter is NOT cached:
-    // this controller is as long-lived as the (remembered) view model, so voices are re-resolved on
-    // every play to pick up enable/disable changes made in Settings.
-    private val targetLanguageByLanguage = mutableMapOf<Language, Text2SpeechLanguage>()
-    private val voiceIndexByLanguage = mutableMapOf<Language, Int>()
-    private var pendingPlay: PendingPlay? = null
-    private var listenerAttached = false
+        /** Voices are loading for [request]; the row shows a spinner. */
+        data class LoadingVoices(val request: PlayRequest) : Playback
+
+        /** The voice setup sheet is up; [request] resumes if the user picks "later". */
+        data class AwaitingVoiceSetup(val request: PlayRequest) : Playback
+
+        /** Handed to the engine, waiting for its SPEAKING callback; the row still shows a spinner. */
+        data class Starting(val request: PlayRequest) : Playback
+
+        data class Playing(val senseId: String) : Playback
+    }
+
+    private var playback: Playback = Playback.Idle
+        set(value) {
+            field = value
+            uiState = uiState.copy(
+                playingSenseId = (value as? Playback.Playing)?.senseId,
+                preparingSenseId = when (value) {
+                    is Playback.LoadingVoices -> value.request.senseId
+                    is Playback.Starting -> value.request.senseId
+                    else -> null
+                },
+                voiceSetupLanguage = (value as? Playback.AwaitingVoiceSetup)?.request?.language,
+            )
+        }
 
     // Monotonic token bumped on every play/stop request. A voice-load coroutine captures the token
     // it started with and bails if a newer request superseded it, so a slow first-time load for row
-    // A can't speak or clobber row B's state after the user re-taps (P1).
-    private var requestToken: Long = 0L
-
-    // The sense whose utterance *this* controller just handed to the shared TextToSpeechManager. The
-    // status listener only adopts SPEAKING/IDLE while this is set, so audio started by other screens
-    // sharing the manager (word detail, study, settings) can't flip a row's state (P2).
-    private var pendingSpeakSenseId: String? = null
-
-    private data class PendingPlay(val senseId: String, val lemma: String, val language: Language)
+    // A can't speak or clobber row B's state after the user re-taps.
+    private var requestToken = 0L
+    private var availabilityLoadStarted = false
+    private var listenerAttached = false
 
     /**
      * Loads the set of speakable languages once. Call when a host screen becomes visible (not at
@@ -71,35 +86,60 @@ class RowAudioController(
         if (availabilityLoadStarted) return
         availabilityLoadStarted = true
         scope.launch {
-            availableLanguages = try {
-                ttsManager.getAvailableLanguages()
+            val languages = try {
+                speechPlayer.getAvailableLanguages()
                     .filter { it.isAvailable }
                     .map { it.language }
                     .toSet()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load TTS language availability", e)
                 emptySet()
             }
+            uiState = uiState.copy(availableLanguages = languages)
         }
-    }
-
-    /**
-     * Whether [language] can be spoken. Returns true while availability is still unknown so the
-     * speaker shows optimistically; once resolved, unplayable languages (incl. all of Desktop) hide
-     * it. Read during composition so the row recomposes when availability resolves.
-     */
-    fun isLanguagePlayable(language: Language): Boolean {
-        val known = availableLanguages ?: return true
-        return language in known
     }
 
     /** Play [lemma] for [senseId], or stop if that row is already preparing/playing. */
     fun toggle(senseId: String, lemma: String, language: Language) {
-        if (playingSenseId == senseId || preparingSenseId == senseId) {
+        if (uiState.phaseFor(senseId) != RowAudioPhase.IDLE) {
             stop()
         } else {
             play(senseId, lemma, language)
         }
+    }
+
+    fun stop() {
+        Analytics.logEvent(AnalyticsEvent.WORD_STOP_PLAY_CLICK)
+        // Invalidate any in-flight voice load so it can't speak after this stop.
+        ++requestToken
+        speechPlayer.stop()
+        playback = Playback.Idle
+    }
+
+    fun dismissVoiceSetup() {
+        consumeVoiceSetup()
+    }
+
+    fun dismissVoiceSetupAndPlay() {
+        val request = consumeVoiceSetup() ?: return
+        startPlayback(request, gateOnVoiceSetup = false)
+    }
+
+    fun openVoiceSettings() {
+        consumeVoiceSetup()
+        speechPlayer.openSettings()
+    }
+
+    fun dispose() {
+        if (listenerAttached) {
+            speechPlayer.removeOnStatusChangeListener(this)
+            listenerAttached = false
+        }
+        ++requestToken
+        speechPlayer.stop()
+        playback = Playback.Idle
     }
 
     private fun play(senseId: String, lemma: String, language: Language) {
@@ -108,177 +148,88 @@ class RowAudioController(
             AnalyticsEvent.WORD_PLAY_CLICK,
             mapOf("lang" to language.code, "source" to analyticsSource),
         )
+        startPlayback(PlayRequest(senseId, lemma, language), gateOnVoiceSetup = true)
+    }
+
+    private fun startPlayback(request: PlayRequest, gateOnVoiceSetup: Boolean) {
         // A new utterance replaces any in-flight one; no explicit stop (mirrors Word details and
-        // avoids the IDLE callback racing the preparing state we set below).
+        // avoids the IDLE callback racing the LoadingVoices state we set below).
         val token = ++requestToken
-        pendingSpeakSenseId = null
-        playingSenseId = null
-        preparingSenseId = senseId
+        playback = Playback.LoadingVoices(request)
         scope.launch {
-            val voices = loadVoices(language)
+            // Voices are re-resolved on every play to pick up Settings changes.
+            val voices = voiceSelector.loadVoices(request.language)
             if (token != requestToken) return@launch
             if (voices.isEmpty()) {
-                preparingSenseId = null
+                playback = Playback.Idle
                 return@launch
             }
-            val hasHighQualityVoice = voices.any { it.quality != VoiceQuality.MEDIUM }
-            if (!hasHighQualityVoice && !voiceFilterHelper.isVoiceSetupShown(language)) {
-                pendingPlay = PendingPlay(senseId, lemma, language)
-                preparingSenseId = null
-                voiceSetupLanguage = language
+            if (gateOnVoiceSetup && voiceFilterHelper.needsVoiceSetupPrompt(request.language, voices)) {
+                // The gate check suspends; re-check the token so a stale load can't raise the sheet.
+                if (token != requestToken) return@launch
+                playback = Playback.AwaitingVoiceSetup(request)
                 return@launch
             }
-            doPlay(senseId, lemma, language, voices, token)
+            if (token != requestToken) return@launch
+            speak(request, voices)
         }
     }
 
-    private fun doPlay(
-        senseId: String,
-        lemma: String,
-        language: Language,
-        voices: List<Text2SpeechVoice>,
-        token: Long,
-    ) {
-        if (token != requestToken) return
+    private fun speak(request: PlayRequest, voices: List<Text2SpeechVoice>) {
         try {
-            // Rotate to the next voice for this language, matching Word details.
-            val nextIndex = ((voiceIndexByLanguage[language] ?: -1) + 1).mod(voices.size)
-            voiceIndexByLanguage[language] = nextIndex
-            preparingSenseId = senseId
-            playingSenseId = null
-            pendingSpeakSenseId = senseId
-            ttsManager.setVoice(voices[nextIndex])
-            ttsManager.speak(lemma)
+            playback = Playback.Starting(request)
+            speechPlayer.setVoice(voiceSelector.nextVoice(request.language, voices))
+            speechPlayer.speak(request.lemma)
         } catch (e: Exception) {
-            AppLogger.warn(TAG, "Unable to play row audio for ${language.code}", e)
+            AppLogger.warn(TAG, "Unable to play row audio for ${request.language.code}", e)
             Analytics.logEvent(
                 AnalyticsEvent.TTS_PLAY_FAILED,
                 mapOf(
-                    "lang" to language.code,
+                    "lang" to request.language.code,
                     "source" to analyticsSource,
                     "error" to (e.message ?: e::class.simpleName ?: "unknown"),
                 ),
             )
-            pendingSpeakSenseId = null
-            preparingSenseId = null
+            playback = Playback.Idle
         }
     }
 
-    fun stop() {
-        Analytics.logEvent(AnalyticsEvent.WORD_STOP_PLAY_CLICK)
-        // Invalidate any in-flight voice load so it can't speak after this stop.
-        ++requestToken
-        pendingSpeakSenseId = null
-        ttsManager.stop()
-        preparingSenseId = null
-        playingSenseId = null
-    }
-
-    fun dismissVoiceSetup() {
-        markSetupShownAndClear()
-    }
-
-    fun dismissVoiceSetupAndPlay() {
-        val pending = pendingPlay
-        markSetupShownAndClear()
-        if (pending != null) {
-            val token = ++requestToken
-            pendingSpeakSenseId = null
-            playingSenseId = null
-            preparingSenseId = pending.senseId
-            scope.launch {
-                val voices = loadVoices(pending.language)
-                if (token != requestToken) return@launch
-                if (voices.isEmpty()) {
-                    preparingSenseId = null
-                    return@launch
-                }
-                doPlay(pending.senseId, pending.lemma, pending.language, voices, token)
-            }
-        }
-    }
-
-    fun openVoiceSettings() {
-        markSetupShownAndClear()
-        ttsManager.openSettings()
-    }
-
-    private fun markSetupShownAndClear() {
-        val language = voiceSetupLanguage
-        voiceSetupLanguage = null
-        pendingPlay = null
-        if (language != null) {
-            scope.launch { voiceFilterHelper.markVoiceSetupShown(language) }
-        }
-    }
-
-    private suspend fun loadVoices(language: Language): List<Text2SpeechVoice> {
-        return try {
-            val target = targetLanguageByLanguage[language]
-                ?: ttsManager.getAvailableLanguages().firstOrNull { it.language == language }
-                    ?.also { targetLanguageByLanguage[language] = it }
-                ?: return emptyList()
-            // Re-resolve enabled voices each play so Settings changes are reflected immediately.
-            val voices = voiceFilterHelper.loadEnabledVoices(ttsManager, target)
-            if (voices.isNotEmpty() && voiceIndexByLanguage[language] == null) {
-                voiceIndexByLanguage[language] = voices.indices.random()
-            }
-            voices
-        } catch (e: Exception) {
-            AppLogger.warn(TAG, "Unable to load row audio voices for ${language.code}", e)
-            emptyList()
-        }
+    /** Marks the sheet as shown and closes it, returning the request it interrupted (if any). */
+    private fun consumeVoiceSetup(): PlayRequest? {
+        val awaiting = playback as? Playback.AwaitingVoiceSetup ?: return null
+        playback = Playback.Idle
+        scope.launch { voiceFilterHelper.markVoiceSetupShown(awaiting.request.language) }
+        return awaiting.request
     }
 
     private fun ensureListener() {
         if (listenerAttached) return
         listenerAttached = true
-        ttsManager.addOnStatusChangeListener(this) { status ->
+        speechPlayer.addOnStatusChangeListener(this) { status ->
             when (status) {
-                TTSStatus.SPEAKING -> {
-                    // Only adopt SPEAKING for the utterance we just started; events from other
-                    // screens sharing this manager arrive while pendingSpeakSenseId is null.
-                    val target = pendingSpeakSenseId
-                    if (target != null) {
-                        pendingSpeakSenseId = null
-                        preparingSenseId = null
-                        playingSenseId = target
-                    } else if (playingSenseId != null) {
-                        // A SPEAKING we didn't start while a row shows "playing" means another owner
-                        // of the shared manager preempted our utterance. Android QUEUE_FLUSH / iOS
-                        // stop-then-speak swallow the IDLE for the flushed utterance, so release our
-                        // state here — otherwise the row stays stuck on the stop icon and a tap
-                        // would stop the other feature's audio.
-                        playingSenseId = null
-                    }
+                TTSStatus.SPEAKING -> when (val current = playback) {
+                    is Playback.Starting -> playback = Playback.Playing(current.request.senseId)
+
+                    // A SPEAKING we didn't start while a row shows "playing" means another owner of
+                    // the shared player preempted our utterance. Android QUEUE_FLUSH / iOS
+                    // stop-then-speak swallow the IDLE for the flushed utterance, so release our
+                    // state here — otherwise the row stays stuck on the stop icon and a tap would
+                    // stop the other feature's audio.
+                    is Playback.Playing -> playback = Playback.Idle
+
+                    // Not ours (another screen's audio) — nothing of ours is in the engine.
+                    else -> Unit
                 }
 
-                TTSStatus.IDLE -> {
-                    // Clear only once our utterance is in flight (speaking or handed off). While a
-                    // row is still loading voices, an unrelated screen's IDLE must not kill the
-                    // spinner.
-                    if (playingSenseId != null || pendingSpeakSenseId != null) {
-                        pendingSpeakSenseId = null
-                        preparingSenseId = null
-                        playingSenseId = null
-                    }
+                TTSStatus.IDLE -> when (playback) {
+                    is Playback.Starting, is Playback.Playing -> playback = Playback.Idle
+
+                    // While a row is still loading voices, an unrelated screen's IDLE must not kill
+                    // the spinner.
+                    else -> Unit
                 }
             }
         }
-    }
-
-    fun dispose() {
-        if (listenerAttached) {
-            ttsManager.removeOnStatusChangeListener(this)
-            listenerAttached = false
-        }
-        ++requestToken
-        ttsManager.stop()
-        pendingSpeakSenseId = null
-        preparingSenseId = null
-        playingSenseId = null
-        voiceSetupLanguage = null
-        pendingPlay = null
     }
 
     private companion object {

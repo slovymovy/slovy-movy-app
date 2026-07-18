@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 import java.util.*
 
 // androidMain
-actual class TextToSpeechManager actual constructor(androidContext: Any?) {
+actual class TextToSpeechManager actual constructor(androidContext: Any?) : SpeechPlayer {
     private val context: Context = androidContext as Context
     private lateinit var tts: TextToSpeech
 
@@ -57,7 +57,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         })
     }
 
-    actual fun speak(text: String) {
+    actual override fun speak(text: String) {
         val id = "tts_${System.currentTimeMillis()}"
         val params = Bundle().apply {
             putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, id)
@@ -73,7 +73,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         speak(text)
     }
 
-    actual suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
+    actual override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
         val languages = mutableListOf<Text2SpeechLanguage>()
 
 
@@ -99,7 +99,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         languages
     }
 
-    actual suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
+    actual override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
             val locale = toLocale(language.language)
             val voices = tts.voices?.filter { voice ->
@@ -124,7 +124,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             }
         }
 
-    actual fun setVoice(voice: Text2SpeechVoice) {
+    actual override fun setVoice(voice: Text2SpeechVoice) {
         val tssVoice = tts.voices?.find { it.name == voice.id }
         if (tssVoice == null) {
             throw IllegalStateException("Voice with id ${voice.id} not found")
@@ -132,7 +132,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         tts.voice = tssVoice
     }
 
-    actual fun openSettings() {
+    actual override fun openSettings() {
         try {
             val intent = Intent(ACTION_INSTALL_TTS_DATA)
             intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
@@ -149,16 +149,16 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         return builder.setLanguage(lang.code).build()
     }
 
-    actual fun stop() {
+    actual override fun stop() {
         tts.stop()
         statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
     }
 
-    actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
+    actual override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
         statusListeners[key] = listener
     }
 
-    actual fun removeOnStatusChangeListener(key: Any) {
+    actual override fun removeOnStatusChangeListener(key: Any) {
         statusListeners.remove(key)
     }
 }

@@ -390,7 +390,7 @@ fun App(
             favoritesRepository = favoritesRepository,
             dictionaryRepository = dictionaryRepository,
             settingsRepository = settingsRepository,
-            ttsManager = ttsManager,
+            speechPlayer = ttsManager,
             voiceFilterHelper = voiceFilterHelper,
             clock = Clock.System,
         ).also { it.start() }
@@ -864,7 +864,7 @@ fun App(
                             favoritesRepository = favoritesRepository,
                             listsService = listsService,
                             lemmaRecovery = lemmaRecovery,
-                            ttsManager = ttsManager,
+                            speechPlayer = ttsManager,
                             voiceFilterHelper = voiceFilterHelper,
                             onFavoriteChanged = { _ ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)

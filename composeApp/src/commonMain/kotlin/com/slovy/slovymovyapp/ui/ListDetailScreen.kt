@@ -57,8 +57,11 @@ import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.RowAudioActions
 import com.slovy.slovymovyapp.speech.RowAudioController
-import com.slovy.slovymovyapp.speech.TextToSpeechManager
+import com.slovy.slovymovyapp.speech.RowAudioUiState
+import com.slovy.slovymovyapp.speech.SpeechPlayer
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -114,7 +117,7 @@ class ListDetailViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val listsService: ListsService,
     private val lemmaRecovery: LemmaRecovery,
-    ttsManager: TextToSpeechManager,
+    speechPlayer: SpeechPlayer,
     voiceFilterHelper: VoiceFilterHelper,
     private val onFavoriteChanged: (added: Boolean) -> Unit,
 ) : ViewModel() {
@@ -127,10 +130,17 @@ class ListDetailViewModel(
     private val prefetcher = SensePrefetcher(viewModelScope, ::loadSense)
 
     val rowAudio = RowAudioController(
-        ttsManager = ttsManager,
+        speechPlayer = speechPlayer,
         voiceFilterHelper = voiceFilterHelper,
         scope = viewModelScope,
         analyticsSource = "list_detail",
+    )
+
+    val rowAudioActions = RowAudioActions(
+        onToggle = ::toggleAudio,
+        onOpenVoiceSettings = rowAudio::openVoiceSettings,
+        onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
+        onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
     )
 
     fun toggleAudio(senseId: String) {
@@ -393,8 +403,10 @@ fun ListDetailScreen(
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     LaunchedEffect(lifecycle) {
-        viewModel.rowAudio.ensureAvailabilityLoaded()
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            // Same on-visible trigger as My words: don't touch the TTS engine until the user can
+            // see a speaker.
+            viewModel.rowAudio.ensureAvailabilityLoaded()
             viewModel.reloadFavorites()
         }
     }
@@ -402,6 +414,7 @@ fun ListDetailScreen(
     when {
         list != null -> ListDetailContent(
             list = list,
+            language = viewModel.language,
             state = viewModel.state,
             scrollState = viewModel.scrollState,
             onBack = onBack,
@@ -413,14 +426,8 @@ fun ListDetailScreen(
             onNavigateToWordDetail = { lemma, senseId ->
                 onNavigateToWordDetail(viewModel.language, lemma, senseId)
             },
-            audioAvailable = viewModel.rowAudio.isLanguagePlayable(viewModel.language),
-            playingSenseId = viewModel.rowAudio.playingSenseId,
-            preparingSenseId = viewModel.rowAudio.preparingSenseId,
-            onToggleAudio = viewModel::toggleAudio,
-            voiceSetupLanguage = viewModel.rowAudio.voiceSetupLanguage,
-            onOpenVoiceSettings = viewModel.rowAudio::openVoiceSettings,
-            onDismissVoiceSetup = viewModel.rowAudio::dismissVoiceSetup,
-            onLaterVoiceSetup = viewModel.rowAudio::dismissVoiceSetupAndPlay,
+            rowAudio = viewModel.rowAudio.uiState,
+            rowAudioActions = viewModel.rowAudioActions,
         )
 
         viewModel.state.isLoading -> ListDetailLoadingScreen(onBack = onBack)
@@ -508,6 +515,7 @@ private fun ListDetailScaffold(
 @Composable
 fun ListDetailContent(
     list: WordList,
+    language: Language,
     state: ListDetailUiState,
     scrollState: LazyListState = LazyListState(),
     onBack: () -> Unit = {},
@@ -517,14 +525,8 @@ fun ListDetailContent(
     onRemoveAll: () -> Unit = {},
     onPrefetchVisible: (List<ListWordItem>, IntRange) -> Unit = { _, _ -> },
     onNavigateToWordDetail: (lemma: String, senseId: String?) -> Unit = { _, _ -> },
-    audioAvailable: Boolean = true,
-    playingSenseId: String? = null,
-    preparingSenseId: String? = null,
-    onToggleAudio: (String) -> Unit = {},
-    voiceSetupLanguage: Language? = null,
-    onOpenVoiceSettings: () -> Unit = {},
-    onDismissVoiceSetup: () -> Unit = {},
-    onLaterVoiceSetup: () -> Unit = {},
+    rowAudio: RowAudioUiState = RowAudioUiState(),
+    rowAudioActions: RowAudioActions = RowAudioActions(),
 ) {
     val isDark = LocalIsDarkTheme.current
 
@@ -610,25 +612,18 @@ fun ListDetailContent(
                         onFavoriteToggle = { onFavoriteToggle(item.senseId) },
                         onViewFullDetails = { onNavigateToWordDetail(item.lemma, item.senseId) },
                         onWordClick = { word -> onNavigateToWordDetail(word, null) },
-                        // Hide the speaker when the language can't be spoken (e.g. Desktop) so the
-                        // row never shows a dead control.
-                        onToggleAudio = if (audioAvailable) ({ onToggleAudio(item.senseId) }) else null,
-                        audioPlaying = playingSenseId == item.senseId,
-                        audioPreparing = preparingSenseId == item.senseId,
+                        lemmaAudio = rowAudio.controlFor(
+                            senseId = item.senseId,
+                            language = language,
+                            actions = rowAudioActions,
+                        ),
                     )
                 }
             }
         }
     }
 
-    voiceSetupLanguage?.let { language ->
-        VoiceSetupBottomSheet(
-            language = language,
-            onOpenSettings = onOpenVoiceSettings,
-            onDismiss = onDismissVoiceSetup,
-            onLater = onLaterVoiceSetup,
-        )
-    }
+    RowAudioVoiceSetupHost(state = rowAudio, actions = rowAudioActions)
 }
 
 @Composable
@@ -639,9 +634,7 @@ private fun ListWordSenseCard(
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit,
-    onToggleAudio: (() -> Unit)?,
-    audioPlaying: Boolean,
-    audioPreparing: Boolean,
+    lemmaAudio: LemmaAudioControl?,
 ) {
     SenseCard(
         data = SenseCardData(
@@ -668,9 +661,7 @@ private fun ListWordSenseCard(
         relatedWords = item.relatedWords,
         onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas,
-        onToggleAudio = onToggleAudio,
-        audioPlaying = audioPlaying,
-        audioPreparing = audioPreparing,
+        lemmaAudio = lemmaAudio,
     )
 }
 
@@ -846,6 +837,7 @@ private fun ListDetailPreviewContent(
     ThemedPreview(darkTheme = isDark) {
         ListDetailContent(
             list = previewWordList(),
+            language = Language.DUTCH,
             state = ListDetailUiState(
                 items = listOf(
                     ListWordItem(
@@ -879,12 +871,49 @@ private fun ListDetailPreviewContent(
 
 @Preview
 @Composable
+private fun ListDetailPreviewRowPlaying(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            language = Language.DUTCH,
+            state = ListDetailUiState(
+                items = listOf(
+                    ListWordItem(
+                        senseId = "1",
+                        lemma = "huis",
+                        definition = "a building where people live",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.HIGH,
+                        isFavorited = true,
+                    ),
+                    ListWordItem(
+                        senseId = "2",
+                        lemma = "fiets",
+                        definition = "a vehicle with two wheels that you ride by pushing pedals",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.MIDDLE,
+                    ),
+                ),
+                isLoading = false,
+                favoriteLemmas = setOf("huis"),
+            ),
+            // Row 1 is speaking (stop glyph); tapping any other row would move playback there.
+            rowAudio = RowAudioUiState(playingSenseId = "1"),
+        )
+    }
+}
+
+@Preview
+@Composable
 private fun ListDetailPreviewAllInMyWords(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         ListDetailContent(
             list = previewWordList(),
+            language = Language.DUTCH,
             state = ListDetailUiState(
                 items = listOf(
                     ListWordItem(
@@ -919,6 +948,7 @@ private fun ListDetailPreviewLoading(
     ThemedPreview(darkTheme = isDark) {
         ListDetailContent(
             list = previewWordList(),
+            language = Language.DUTCH,
             state = ListDetailUiState(isLoading = true),
         )
     }
@@ -932,6 +962,7 @@ private fun ListDetailPreviewEmpty(
     ThemedPreview(darkTheme = isDark) {
         ListDetailContent(
             list = previewWordList(),
+            language = Language.DUTCH,
             state = ListDetailUiState(isLoading = false),
         )
     }
