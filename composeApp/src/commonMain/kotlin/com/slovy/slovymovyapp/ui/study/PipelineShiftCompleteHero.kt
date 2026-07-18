@@ -17,15 +17,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
@@ -66,10 +71,11 @@ internal fun PipelineShiftCompleteHero(
                 modifier = Modifier.fillMaxWidth(),
             )
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                stages.forEach { stage ->
+                stages.forEachIndexed { index, stage ->
                     PipelineShiftRow(
                         stage = stage,
                         maxValue = maxValue,
+                        index = index,
                     )
                 }
             }
@@ -81,9 +87,27 @@ internal fun PipelineShiftCompleteHero(
 private fun PipelineShiftRow(
     stage: PipelineShiftStageUiState,
     maxValue: Int,
+    index: Int,
 ) {
     val beforePct = stage.before.toFloat() / maxValue.toFloat()
     val afterPct = stage.after.toFloat() / maxValue.toFloat()
+
+    // Solid fill slides beforePct -> afterPct (§4f / §8e); ghost stays pinned at beforePct.
+    val solidFraction by rememberRewardEntranceFloat(
+        hiddenValue = beforePct,
+        playedValue = afterPct,
+        delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis,
+        durationMillis = ShiftBarDurationMillis,
+        easing = ShiftBarEase,
+        label = "bar[$index]",
+    )
+
+    val deltaCount by rememberCountUp(
+        target = stage.delta,
+        delayMillis = ShiftBarBaseDelayMillis + index * ShiftBarRowStaggerMillis + ShiftDeltaExtraDelayMillis,
+        durationMillis = ShiftDeltaDurationMillis,
+        label = "delta[$index]",
+    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -124,14 +148,14 @@ private fun PipelineShiftRow(
             )
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(afterPct)
+                    .fillMaxWidth(solidFraction)
                     .height(10.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(stageColor(stage.id)),
             )
         }
         Text(
-            text = formatDelta(stage.delta),
+            text = formatDelta(stage.delta, deltaCount),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -169,8 +193,30 @@ private fun stageColor(stage: StatsPipelineStageId): Color = when (stage) {
     StatsPipelineStageId.LEARNED -> Color(0xFF7CB078)
 }
 
-private fun formatDelta(delta: Int): String = when {
-    delta > 0 -> "+$delta"
-    delta < 0 -> "\u2212${-delta}"
-    else -> "\u2014"
+// Signed delta with the true minus glyph; the magnitude tracks the count-up while the sign holds.
+private fun formatDelta(delta: Int, current: Int): String = when {
+    delta == 0 -> "\u2014"
+    delta > 0 -> "+${current.coerceAtLeast(0)}"
+    else -> "\u2212${(-current).coerceAtLeast(0)}"
+}
+
+// Run this preview in interactive mode and tap the hero to (re)play the bar/delta choreography.
+@Preview
+@Composable
+private fun PipelineShiftCompleteHeroEntrancePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        RewardEntrancePreviewPlayer {
+            PipelineShiftCompleteHero(
+                stages = listOf(
+                    PipelineShiftStageUiState(StatsPipelineStageId.NEW, before = 18, after = 12),
+                    PipelineShiftStageUiState(StatsPipelineStageId.FRESH, before = 22, after = 28),
+                    PipelineShiftStageUiState(StatsPipelineStageId.MIDDLE, before = 16, after = 20),
+                    PipelineShiftStageUiState(StatsPipelineStageId.STRONG, before = 11, after = 13),
+                    PipelineShiftStageUiState(StatsPipelineStageId.LEARNED, before = 5, after = 6),
+                ),
+            )
+        }
+    }
 }

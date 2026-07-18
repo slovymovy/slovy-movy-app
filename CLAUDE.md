@@ -36,7 +36,7 @@ exist only for EN, RU, NL, and PL.
 - On Unix, run the checked-in wrapper as `./gradlew`.
 - In native Windows terminals use `gradlew.bat` (`./gradlew.bat` from Git Bash). From WSL when using the Windows
   toolchain, use `cmd.exe /c gradlew.bat`.
-- Android SDK levels are compile/target 36 and min 24. JVM bytecode for Android/shared targets is 11.
+- Android SDK levels are compile 37, target 36, and min 24. JVM bytecode for Android/shared targets is 11.
 - iOS targets are enabled only on macOS. Skipped/disabled iOS-target messages elsewhere are expected.
 
 Common development commands:
