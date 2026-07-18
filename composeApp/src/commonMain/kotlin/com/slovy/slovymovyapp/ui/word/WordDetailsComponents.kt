@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository.Companion.normalizeLemma
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
+import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
+import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -170,12 +173,14 @@ internal fun HighlightedText(
             appendTextWithW(this, text, highlight, clickableHighlight, clickableWords, onWordClick)
         }
     }
+    val bulletColor = style.color.takeOrElse { LocalContentColor.current }
 
     Text(
         text = annotated,
         style = style.merge(TextStyle(color = style.color)),
         modifier = modifier,
-        textAlign = textAlign
+        textAlign = textAlign,
+        inlineContent = remember(bulletColor) { centeredBulletInlineContent(bulletColor) },
     )
 }
 
@@ -207,7 +212,9 @@ internal fun appendTextWithW(
                 builder.withStyle(styleToUse) { builder.append(word) }
             }
         } else {
-            builder.append(segment.text)
+            // Bullets render as drawn inline circles (see CenteredBulletText); every Text that
+            // displays this builder's output must pass centeredBulletInlineContent.
+            appendWithCenteredBullets(builder, segment.text)
         }
     }
 }

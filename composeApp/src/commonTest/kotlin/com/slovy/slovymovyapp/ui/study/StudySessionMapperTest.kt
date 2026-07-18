@@ -20,9 +20,11 @@ import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.data.remote.WordResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 private const val PrimarySenseId = "00000000-0000-0000-0000-000000000101"
@@ -40,6 +42,7 @@ class StudySessionMapperTest {
         assertEquals("gezellig", mapped.promptWord)
         assertEquals(StudyRecognitionMode.BILINGUAL, mapped.mode)
         assertEquals("cosy, sociable", mapped.back.headline)
+        assertFalse(mapped.back.isMultiLanguageHeadline, "Single-language headline keeps full size")
         assertEquals("a feeling of warmth", mapped.back.definition)
         assertEquals("een gevoel van warmte", mapped.back.definitionTranslation)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
@@ -130,11 +133,119 @@ class StudySessionMapperTest {
 
         assertEquals("gezellig", mapped.promptAudioText)
         assertEquals("gezellig", mapped.back.headline)
-        assertEquals("cosy, sociable", mapped.back.secondary)
+        assertEquals("cosy, sociable", mapped.back.translations)
         assertEquals("een gevoel van warmte", mapped.back.definition)
         assertEquals("a feeling of warmth", mapped.back.definitionTranslation)
         assertEquals("Het was zo <w>gezellig</w>.", mapped.back.examples.single().text)
         assertEquals("It was so cosy.", mapped.back.examples.single().translation)
+    }
+
+    @Test
+    fun sourceBackShowsAllConfiguredTranslationLanguagesEqually() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code),
+            translationTargets = listOf(Language.RUSSIAN, Language.ENGLISH),
+            extraTranslations = mapOf(
+                Language.RUSSIAN to listOf(LanguageCardTranslation(targetLangWord = "уютный")),
+            ),
+            extraTargetLangDefinitions = mapOf(Language.RUSSIAN to "чувство тепла"),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // Same bullet-per-language block as the word-details screen, one line per language.
+        assertEquals("• cosy, sociable\n• уютный", mapped.back.translations)
+        assertEquals("• a feeling of warmth\n• чувство тепла", mapped.back.definitionTranslation)
+    }
+
+    @Test
+    fun sourceBackSkipsConfiguredLanguagesWithoutData_andDropsBulletsForSingleLanguage() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code),
+            translationTargets = listOf(Language.ENGLISH, Language.RUSSIAN),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // Russian is configured but has no data for this sense, so only English renders — and a
+        // single displayed language needs no bullet prefix.
+        assertEquals("cosy, sociable", mapped.back.translations)
+    }
+
+    @Test
+    fun oneMultiLanguageBlockBulletsBothBlocks() {
+        // Words exist in EN+RU but a definition translation only in EN: both blocks still agree
+        // on the bulleted format so one card never mixes styles.
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code),
+            translationTargets = listOf(Language.ENGLISH, Language.RUSSIAN),
+            extraTranslations = mapOf(
+                Language.RUSSIAN to listOf(LanguageCardTranslation(targetLangWord = "уютный")),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState(emptySet()))
+
+        assertEquals("• cosy, sociable\n• уютный", mapped.back.translations)
+        assertEquals("• a feeling of warmth", mapped.back.definitionTranslation)
+    }
+
+    @Test
+    fun blankAndDuplicateTranslationDataIsFilteredFromTheBack() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code),
+            translationTargets = listOf(Language.ENGLISH, Language.RUSSIAN),
+            extraTranslations = mapOf(
+                Language.RUSSIAN to listOf(
+                    LanguageCardTranslation(targetLangWord = "уютный"),
+                    LanguageCardTranslation(targetLangWord = ""),
+                    LanguageCardTranslation(targetLangWord = "уютный"),
+                ),
+            ),
+            extraTargetLangDefinitions = mapOf(Language.RUSSIAN to ""),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Production>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // Blank and duplicate words are dropped; the blank Russian definition produces no orphan
+        // bullet line.
+        assertEquals("• cosy, sociable\n• уютный", mapped.back.translations)
+        assertEquals("• a feeling of warmth", mapped.back.definitionTranslation)
+    }
+
+    @Test
+    fun monolingualBackStaysTranslationFree() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null),
+            translationTargets = listOf(Language.ENGLISH, Language.RUSSIAN),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
+
+        assertNull(mapped.back.translations)
+        assertNull(mapped.back.definitionTranslation)
+    }
+
+    @Test
+    fun bilingualBackShowsAllConfiguredLanguagesEqually() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code),
+            translationTargets = listOf(Language.ENGLISH, Language.RUSSIAN),
+            extraTranslations = mapOf(
+                Language.RUSSIAN to listOf(LanguageCardTranslation(targetLangWord = "уютный")),
+            ),
+            extraTargetLangDefinitions = mapOf(Language.RUSSIAN to "чувство тепла"),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // The answer headline and the definition both carry every configured language in the
+        // shared format; the source-language definition follows below.
+        assertEquals("• cosy, sociable\n• уютный", mapped.back.headline)
+        assertTrue(mapped.back.isMultiLanguageHeadline, "Multi-language headline must step the type down")
+        assertNull(mapped.back.translations)
+        assertEquals("• a feeling of warmth\n• чувство тепла", mapped.back.definition)
+        assertEquals("een gevoel van warmte", mapped.back.definitionTranslation)
     }
 
     @Test
@@ -183,11 +294,11 @@ class StudySessionMapperTest {
         assertEquals(listOf(1, 2), mapped.senses.map { it.num })
         val activeSenseBack = mapped.senses.single { it.id == studiedSenseId }.back
         assertEquals("gezellig", activeSenseBack.headline)
-        assertEquals("cosy, sociable", activeSenseBack.secondary)
+        assertEquals("cosy, sociable", activeSenseBack.translations)
         assertEquals("een gevoel van warmte", activeSenseBack.definition)
         val otherBack = mapped.senses.single { it.id == otherSenseId }.back
         assertEquals("gezellig", otherBack.headline)
-        assertEquals("sociable evening", otherBack.secondary)
+        assertEquals("sociable evening", otherBack.translations)
         assertEquals("convivial gathering", otherBack.definition)
     }
 
@@ -214,8 +325,8 @@ class StudySessionMapperTest {
         assertEquals(studiedSenseId, mapped.activeSenseId)
         assertEquals(listOf(studiedSenseId, otherSenseId), mapped.senses.map { it.id })
         assertEquals("gezellig", mapped.senses.first().back.headline)
-        assertEquals("cosy, sociable", mapped.senses.first().back.secondary)
-        assertEquals("sociable evening", mapped.senses.last().back.secondary)
+        assertEquals("cosy, sociable", mapped.senses.first().back.translations)
+        assertEquals("sociable evening", mapped.senses.last().back.translations)
     }
 
     @Test
@@ -379,6 +490,9 @@ class StudySessionMapperTest {
         synonyms: List<String> = emptyList(),
         primaryExampleText: String = "Het was zo <w>gezellig</w>.",
         primaryExampleTranslation: String = "It was so cosy.",
+        translationTargets: List<Language> = listOf(Language.ENGLISH),
+        extraTranslations: Map<Language, List<LanguageCardTranslation>> = emptyMap(),
+        extraTargetLangDefinitions: Map<Language, String> = emptyMap(),
     ): SessionCard {
         return SessionCard(
             card = Card(
@@ -403,11 +517,19 @@ class StudySessionMapperTest {
             ),
             variant = variant,
             wordResult = WordResult(
-                card = languageCard(extraSenses, synonyms, primaryExampleText, primaryExampleTranslation),
+                card = languageCard(
+                    extraSenses,
+                    synonyms,
+                    primaryExampleText,
+                    primaryExampleTranslation,
+                    extraTranslations,
+                    extraTargetLangDefinitions,
+                ),
             ),
             senseId = PrimarySenseId,
             example = example,
             studiedSenseIds = studiedSenseIds,
+            translationTargets = translationTargets,
         )
     }
 
@@ -416,6 +538,8 @@ class StudySessionMapperTest {
         synonyms: List<String>,
         primaryExampleText: String,
         primaryExampleTranslation: String,
+        extraTranslations: Map<Language, List<LanguageCardTranslation>>,
+        extraTargetLangDefinitions: Map<Language, String>,
     ): LanguageCard =
         LanguageCard(
             lemma = "gezellig",
@@ -437,14 +561,15 @@ class StudySessionMapperTest {
                                     targetLangTranslations = mapOf(Language.ENGLISH to primaryExampleTranslation),
                                 ),
                             ),
-                            targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),
+                            targetLangDefinitions =
+                                mapOf(Language.ENGLISH to "a feeling of warmth") + extraTargetLangDefinitions,
                             synonyms = synonyms,
                             translations = mapOf(
                                 Language.ENGLISH to listOf(
                                     LanguageCardTranslation(targetLangWord = "cosy"),
                                     LanguageCardTranslation(targetLangWord = "sociable"),
                                 ),
-                            ),
+                            ) + extraTranslations,
                         ),
                     ) + extraSenses,
                 ),

@@ -142,6 +142,47 @@ class AmbiguousTranslationsTest {
     }
 
     @Test
+    fun cleanedTranslationEntries_dropsBlankWordsDuplicatesAndEmptyLanguages() {
+        val sense = sense(
+            "1",
+            mapOf(
+                Language.ENGLISH to trans("cosy", "", "cosy", "sociable"),
+                Language.RUSSIAN to trans("", " ")
+            )
+        )
+
+        val entries = sense.cleanedTranslationEntries(sense.translations.keys)
+
+        // Russian holds only blank words, so it must not surface as a row at all — otherwise the
+        // clarification path would render an empty bullet line and count it as a second language.
+        assertEquals(listOf(Language.ENGLISH), entries.map { it.first })
+        assertEquals(listOf("cosy", "sociable"), entries.single().second.map { it.targetLangWord })
+    }
+
+    @Test
+    fun cleanedTranslationEntries_keepsSameWordWithDistinctClarifications() {
+        val sense = sense(
+            "1",
+            mapOf(
+                Language.ENGLISH to listOf(
+                    LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "someone"),
+                    LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target"),
+                    LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
+                )
+            )
+        )
+
+        val entries = sense.cleanedTranslationEntries(sense.translations.keys)
+
+        // Two clarifications for one word are distinct information; only the exact duplicate
+        // entry collapses.
+        assertEquals(
+            listOf("someone", "a target"),
+            entries.single().second.map { it.targetLangSenseClarification },
+        )
+    }
+
+    @Test
     fun duplicate_entries_within_sense_treated_as_single_word() {
         // same word listed twice in one sense — should still match a sense with it once
         val senses = listOf(

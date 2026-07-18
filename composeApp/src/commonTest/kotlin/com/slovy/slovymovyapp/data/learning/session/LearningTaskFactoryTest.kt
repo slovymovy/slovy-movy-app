@@ -68,6 +68,61 @@ class LearningTaskFactoryTest {
     }
 
     @Test
+    fun buildTaskVariants_ignoresLanguagesNotConfigured_evenWhenSenseHasData() {
+        // The fixture sense carries English translations, definitions, and example translations,
+        // but the user has not configured English as a translation language.
+        val sense = sense(definition = "a feeling of warmth and comfort")
+
+        val variants = buildTaskVariants(
+            family = CardFamily.RECOGNIZE_SENSE,
+            sense = sense,
+            translationTargets = emptyList(),
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null)),
+            variants,
+            "Cached sense data in unconfigured languages must not produce translation-cued variants",
+        )
+    }
+
+    @Test
+    fun buildTaskVariants_requiresWordsAndDefinition_forWordToTranslation() {
+        // A definition translation alone cannot render the WORD_TO_TRANSLATION back (the answer
+        // headline is translation words), so the variant must not be built for that language.
+        val sense = senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort")
+
+        val variants = buildTaskVariants(
+            family = CardFamily.RECOGNIZE_SENSE,
+            sense = sense,
+            translationTargets = listOf(Language.ENGLISH),
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null)),
+            variants,
+            "WORD_TO_TRANSLATION must not be built when the target language has no translation words",
+        )
+    }
+
+    @Test
+    fun buildTaskVariants_requiresWords_forTranslationToWord() {
+        val sense = senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort")
+
+        val variants = buildTaskVariants(
+            family = CardFamily.PRODUCE_WORD,
+            sense = sense,
+            translationTargets = listOf(Language.ENGLISH),
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null)),
+            variants,
+            "TRANSLATION_TO_WORD must not be built when the target language has no translation words to cue from",
+        )
+    }
+
+    @Test
     fun selectVariantsForReview_filtersHardVariants_belowMinStability() {
         val sense = sense(definition = "a feeling of warmth and comfort")
 
@@ -207,6 +262,23 @@ class LearningTaskFactoryTest {
             translations = mapOf(
                 Language.ENGLISH to listOf(LanguageCardTranslation(targetLangWord = "cosy")),
             ),
+        )
+
+    private fun senseWithDefinitionOnlyTranslation(definition: String): LanguageCardResponseSense =
+        LanguageCardResponseSense(
+            senseId = "00000000-0000-0000-0000-000000000004",
+            senseDefinition = definition,
+            learnerLevel = LearnerLevel.A2,
+            frequency = SenseFrequency.HIGH,
+            semanticGroupId = "group",
+            examples = listOf(
+                LanguageCardExample(
+                    text = "Het was zo <w>gezellig</w>.",
+                    targetLangTranslations = emptyMap(),
+                ),
+            ),
+            targetLangDefinitions = mapOf(Language.ENGLISH to "a feeling of warmth"),
+            translations = emptyMap(),
         )
 
     private fun senseWithoutTranslations(definition: String): LanguageCardResponseSense =
