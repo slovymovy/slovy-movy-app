@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
+import com.slovy.slovymovyapp.util.queryInChunks
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -302,8 +303,9 @@ class DictionaryRepository(
         for (db in databases) {
             try {
                 val q = db.dictionaryQueries
-                q.selectLemmasByWords(language.code, lookupWords.toList())
-                    .executeAsList()
+                queryInChunks(lookupWords) { chunk ->
+                    q.selectLemmasByWords(language.code, chunk).executeAsList()
+                }
                     .forEach { row ->
                         putFromLemma(row.lemma, relatedWord(row.lemma, row.zipf_frequency, row.online_only))
                         foundAsLemmaKeys.add(row.lemma)
@@ -537,7 +539,9 @@ class DictionaryRepository(
                     val lemmaIds = out.filter { it.language == lang && it.pos.isEmpty() }
                         .map { it.lemmaId }.toSet().toList()
                     if (lemmaIds.isNotEmpty()) {
-                        val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
+                        val posResults = queryInChunks(lemmaIds) { chunk ->
+                            q.selectLemmaIdAndPosByLemmaIds(chunk).executeAsList()
+                        }
                         val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
                         for (i in out.indices) {
                             if (out[i].language == lang && out[i].pos.isEmpty()) {
@@ -632,7 +636,9 @@ class DictionaryRepository(
                             tq.selectSenseTranslationsByNormalizedPrefix(lang.code, tgt.code, prefixStart, prefixEnd)
                                 .executeAsList()
                         val lemmaRows =
-                            dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
+                            queryInChunks(trRows.map { it.lemma_id }) { chunk ->
+                                dq.selectLemmasByIds(chunk).executeAsList()
+                            }.associateBy { it.id }
                         val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
                         for (row in trRowsSorted) {
                             val lemmaRow = lemmaRows[row.lemma_id]
@@ -842,8 +848,7 @@ class DictionaryRepository(
 
         // Batch load form tags
         val formTagsMap: Map<Uuid, List<String>> = if (allFormIds.isNotEmpty()) {
-            q.selectFormTagsByFormIds(allFormIds)
-                .executeAsList()
+            queryInChunks(allFormIds) { chunk -> q.selectFormTagsByFormIds(chunk).executeAsList() }
                 .groupBy({ it.form_id }, { it.tag })
         } else emptyMap()
 
@@ -858,30 +863,30 @@ class DictionaryRepository(
         val examplesMap: Map<Uuid, List<ExampleData>>
 
         if (allUncachedSenseIds.isNotEmpty()) {
-            synonymsMap = q.selectSenseSynonymsBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }, { it.synonym })
+            synonymsMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseSynonymsBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }, { it.synonym })
 
-            antonymsMap = q.selectSenseAntonymsBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }, { it.antonym })
+            antonymsMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseAntonymsBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }, { it.antonym })
 
-            phrasesMap = q.selectSenseCommonPhrasesBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }, { it.phrase })
+            phrasesMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseCommonPhrasesBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }, { it.phrase })
 
-            traitsMap = q.selectSenseTraitsBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }) { row ->
-                    LanguageCardTrait(
-                        traitType = TraitType.valueOf(row.trait_type.name),
-                        comment = row.comment
-                    )
-                }
+            traitsMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseTraitsBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }) { row ->
+                LanguageCardTrait(
+                    traitType = TraitType.valueOf(row.trait_type.name),
+                    comment = row.comment
+                )
+            }
 
-            examplesMap = q.selectSenseExamplesBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }) { ExampleData(it.example_id, it.text) }
+            examplesMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseExamplesBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }) { ExampleData(it.example_id, it.text) }
         } else {
             synonymsMap = emptyMap()
             antonymsMap = emptyMap()
@@ -906,18 +911,18 @@ class DictionaryRepository(
                 for (transDb in transDbs) {
                     val queries = transDb.translationQueries
 
-                    queries
-                        .selectDefinitionsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                        .executeAsList()
+                    queryInChunks(allUncachedSenseIds) { chunk ->
+                        queries.selectDefinitionsBySenseIds(chunk, language.code, tgt.code).executeAsList()
+                    }
                         .forEach { row ->
                             if (row.sense_id !in definitions) {
                                 definitions[row.sense_id] = row.definition
                             }
                         }
 
-                    queries
-                        .selectSenseTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                        .executeAsList()
+                    queryInChunks(allUncachedSenseIds) { chunk ->
+                        queries.selectSenseTranslationsBySenseIds(chunk, language.code, tgt.code).executeAsList()
+                    }
                         .groupBy({ it.sense_id }) { row ->
                             LanguageCardTranslation(
                                 targetLangWord = row.target_lang_word,
@@ -931,9 +936,9 @@ class DictionaryRepository(
                             }
                         }
 
-                    queries
-                        .selectExampleTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                        .executeAsList()
+                    queryInChunks(allUncachedSenseIds) { chunk ->
+                        queries.selectExampleTranslationsBySenseIds(chunk, language.code, tgt.code).executeAsList()
+                    }
                         .forEach { row ->
                             val senseTranslations = exampleTranslations.getOrPut(row.sense_id) { LinkedHashMap() }
                             if (row.example_id !in senseTranslations) {
@@ -1492,11 +1497,11 @@ class DictionaryRepository(
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
             val localLemmaIds: Set<Uuid> = localDbManager.withLocalDictionaryIfExists { localDb ->
-                localDb?.dictionaryQueries
-                    ?.selectLemmasByIds(onlineOnlyIds)
-                    ?.executeAsList()
-                    ?.map { it.id }
-                    ?.toSet() ?: emptySet()
+                localDb?.dictionaryQueries?.let { q ->
+                    queryInChunks(onlineOnlyIds) { chunk -> q.selectLemmasByIds(chunk).executeAsList() }
+                        .map { it.id }
+                        .toSet()
+                } ?: emptySet()
             }
 
             result = result.map { item ->

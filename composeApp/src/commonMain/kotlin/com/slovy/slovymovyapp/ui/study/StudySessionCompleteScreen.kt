@@ -19,9 +19,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.rememberReduceMotion
 import com.slovy.slovymovyapp.ui.icons.ImageOtterSessionComplete
 import com.slovy.slovymovyapp.ui.icons.OtterDaysStreakC
 import com.slovy.slovymovyapp.ui.icons.OtterPipelineStreakC
@@ -43,6 +50,31 @@ import slovymovyapp.composeapp.generated.resources.*
 
 @Composable
 internal fun StudySessionCompleteContent(
+    reward: StudySessionCompleteUiState,
+    scrollState: ScrollState,
+    onClose: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+    animate: Boolean = true,
+    respectReduceMotion: Boolean = true,
+) {
+    val reduceMotion = rememberReduceMotion()
+    val entrance = rememberRewardEntrance(
+        animate = animate && !LocalInspectionMode.current && !(respectReduceMotion && reduceMotion),
+    )
+    CompositionLocalProvider(LocalRewardEntrance provides entrance) {
+        StudySessionCompleteScaffold(
+            reward = reward,
+            scrollState = scrollState,
+            onClose = onClose,
+            snackbarHostState = snackbarHostState,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun StudySessionCompleteScaffold(
     reward: StudySessionCompleteUiState,
     scrollState: ScrollState,
     onClose: () -> Unit,
@@ -83,6 +115,7 @@ internal fun StudySessionCompleteContent(
                         imageVector = with(SlovyIcons) { completeIllustration(reward.hero) },
                         contentDescription = null,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.OTTER)
                             .size(width = 148.dp, height = 168.dp),
                     )
                     Spacer(Modifier.height(AppSpacing.lg))
@@ -94,6 +127,7 @@ internal fun StudySessionCompleteContent(
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.HEADLINE)
                             .fillMaxWidth()
                             .padding(horizontal = AppSpacing.xl),
                     )
@@ -101,20 +135,33 @@ internal fun StudySessionCompleteContent(
                     CompletionSubtext(
                         reward = reward,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.STATS)
                             .fillMaxWidth()
                             .padding(horizontal = AppSpacing.xl),
                     )
                     CompletionHero(
                         hero = reward.hero,
                         modifier = Modifier
+                            .rewardEntrance(RewardElement.HERO_TILE)
                             .padding(top = AppSpacing.xxl)
                             .widthIn(max = 332.dp),
                     )
                 }
             }
+            // The button is fully transparent until its entrance starts, but a
+            // graphicsLayer alpha keeps hit target and semantics alive. Gate interaction and
+            // semantics on the entrance having begun so an early tap in the bottom-bar area can't
+            // dismiss the screen and assistive tech can't focus an invisible action.
+            val actionBarProgress = rememberElementProgress(RewardElement.ACTION_BAR)
+            val actionBarVisible by remember(actionBarProgress) {
+                derivedStateOf { actionBarProgress.value > 0f }
+            }
             Button(
                 onClick = onClose,
+                enabled = actionBarVisible,
                 modifier = Modifier
+                    .rewardEntrance(RewardElement.ACTION_BAR, actionBarProgress)
+                    .then(if (actionBarVisible) Modifier else Modifier.clearAndSetSemantics {})
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = MaterialTheme.shapes.extraLarge,
@@ -215,6 +262,7 @@ private fun StudySessionCompleteMilestonePreview(
             scrollState = ScrollState(0),
             onClose = {},
             snackbarHostState = SnackbarHostState(),
+            animate = false,
         )
     }
 }
@@ -244,6 +292,7 @@ private fun StudySessionCompletePipelineShiftPreview(
             scrollState = ScrollState(0),
             onClose = {},
             snackbarHostState = SnackbarHostState(),
+            animate = false,
         )
     }
 }

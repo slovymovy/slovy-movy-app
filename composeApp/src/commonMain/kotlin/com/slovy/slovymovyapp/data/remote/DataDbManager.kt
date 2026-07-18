@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.translation.TranslationDatabase
+import com.slovy.slovymovyapp.util.queryInChunks
 import io.ktor.client.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -368,9 +369,9 @@ class DataDbManager(
         withDictionaryReadOnlyIfExists(language) { db ->
             if (db == null) return@withDictionaryReadOnlyIfExists emptySet()
             val queries = db.dictionaryQueries
-            val rowsByLemma = normalizedLemmas.chunked(999)
-                .flatMap { chunk -> queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList() }
-                .groupBy { it.lemma_normalized.lowercase() }
+            val rowsByLemma = queryInChunks(normalizedLemmas) { chunk ->
+                queries.selectLemmasByNormalizedWords(language.code, chunk).executeAsList()
+            }.groupBy { it.lemma_normalized.lowercase() }
 
             val missingLemmas = normalizedLemmas - rowsByLemma.keys
             val onlineOnlyLemmas = rowsByLemma
@@ -424,10 +425,9 @@ class DataDbManager(
                     }
                 }.distinct()
 
-                val present: Set<Uuid> = parsedSenseIds.chunked(999)
-                    .flatMap { chunk ->
-                        queries.selectSenseTranslationsBySenseIds(chunk, language.code, target.code).executeAsList()
-                    }
+                val present: Set<Uuid> = queryInChunks(parsedSenseIds) { chunk ->
+                    queries.selectSenseTranslationsBySenseIds(chunk, language.code, target.code).executeAsList()
+                }
                     .map { it.sense_id }
                     .toSet()
 
