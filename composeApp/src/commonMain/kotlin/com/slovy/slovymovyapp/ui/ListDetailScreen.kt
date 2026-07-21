@@ -63,6 +63,7 @@ import com.slovy.slovymovyapp.speech.RowAudioController
 import com.slovy.slovymovyapp.speech.RowAudioUiState
 import com.slovy.slovymovyapp.speech.SpeechPlayer
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.ChapterRule
@@ -442,7 +443,7 @@ private fun ListDetailLoadingScreen(onBack: () -> Unit) {
         Box(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentAlignment = Alignment.Center,
-        ) { CircularProgressIndicator() }
+        ) { SpinningProgressIndicator() }
     }
 }
 
@@ -590,7 +591,7 @@ fun ListDetailContent(
                         modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        SpinningProgressIndicator()
                     }
                 }
             } else if (state.items.isEmpty()) {
@@ -769,7 +770,7 @@ private fun ListDetailHeader(
                     enabled = !bulkActionInProgress,
                 ) {
                     if (bulkActionInProgress) {
-                        CircularProgressIndicator(
+                        SpinningProgressIndicator(
                             modifier = Modifier.size(14.dp),
                             strokeWidth = 2.dp,
                         )

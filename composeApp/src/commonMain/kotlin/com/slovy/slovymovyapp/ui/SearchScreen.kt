@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
@@ -821,7 +822,7 @@ private fun EmptySearchState(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            SpinningProgressIndicator()
         }
         return
     }

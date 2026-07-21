@@ -42,6 +42,7 @@ import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
@@ -288,7 +289,7 @@ private fun InputView(
         ) {
             if (isAnalyzing) {
                 val analyzingLabel = stringResource(Res.string.reader_analyzing)
-                CircularProgressIndicator(
+                SpinningProgressIndicator(
                     modifier = Modifier.semantics { contentDescription = analyzingLabel }
                 )
             } else {

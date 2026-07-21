@@ -26,7 +26,6 @@ import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -71,6 +70,7 @@ import com.slovy.slovymovyapp.logging.AppLogLevel
 import com.slovy.slovymovyapp.logging.AppLogSink
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.logging.NoOpAppLogSink
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.study.StudySessionCompleteContent
 import com.slovy.slovymovyapp.ui.study.StudySessionCompletePreviewCase
 import com.slovy.slovymovyapp.ui.study.StudySessionCompletePreviewData
@@ -885,7 +885,7 @@ private fun DeveloperTerminalCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                    SpinningProgressIndicator(modifier = Modifier.size(16.dp))
                     Text(
                         text = stringResource(
                             Res.string.developer_terminal_running,
@@ -1150,7 +1150,7 @@ private fun SchedulingStatsCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                    SpinningProgressIndicator(modifier = Modifier.size(16.dp))
                     Text(
                         text = stringResource(Res.string.developer_stats_loading),
                         style = MaterialTheme.typography.bodySmall,
@@ -1457,7 +1457,7 @@ private fun LoadingStatusRow(text: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
     ) {
-        CircularProgressIndicator(modifier = Modifier.size(16.dp))
+        SpinningProgressIndicator(modifier = Modifier.size(16.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
