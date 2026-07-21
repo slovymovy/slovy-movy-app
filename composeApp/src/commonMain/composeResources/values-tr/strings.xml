@@ -745,20 +745,20 @@
     <string name="favorites_study_done_next_review_a11y">Sonraki tekrar: %1$s sonra</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Oku</string>
-    <string name="reader_title_with_lang">Kelimeler · %1$s</string>
-    <string name="reader_error_analyzing">Metin analiz edilemedi</string>
-    <string name="reader_text_too_long">Bu metin biraz uzun — en fazla %1$d kelime dene.</string>
+    <string name="reader_title">Metni incele</string>
+    <string name="reader_title_with_lang">Metnin · %1$s</string>
+    <string name="reader_error_analyzing">Metin analiz edilemedi — tekrar denemek için karta dokun.</string>
+    <string name="reader_text_too_long">Bu metin çok uzun — tek seferde en fazla %1$d kelime yapıştır.</string>
     <string name="reader_paste_from_clipboard">Panodaki metni yapıştır</string>
     <string name="reader_analyzing">Metin analiz ediliyor</string>
-    <string name="reader_tap_to_paste">Metni yapıştırmak için dokun</string>
-    <string name="reader_paste_blurb">Birkaç kelime kopyalayıp buraya yapıştır. Her kelimeye bakabilir ve hatırlamak istediğin anlamları kaydedebilirsin.</string>
-    <string name="reader_clipboard_empty">Pano boş. Bir metin kopyalayıp buraya yapıştır.</string>
+    <string name="reader_tap_to_paste">Yapıştırmak için dokun</string>
+    <string name="reader_paste_blurb">Metnindeki her kelimeye dokunabilirsin: anlamlarına bak, hatırlamak istediklerini kaydet.</string>
+    <string name="reader_clipboard_empty">Henüz yapıştırılacak bir şey yok — başka bir uygulamada bir metin kopyala, sonra buraya dön.</string>
     <string name="reader_look_up">Sözlükte ara</string>
-    <string name="reader_frequency_legend">Sıklık göstergesi</string>
-    <string name="reader_frequency">Sıklık</string>
+    <string name="reader_frequency_legend">Kelime sıklığı göstergesi</string>
+    <string name="reader_frequency">Kelime sıklığı</string>
     <string name="reader_a11y_saved">Kaydedildi, %1$s</string>
     <string name="search_add_words">Kelime ekle</string>
-    <string name="search_add_words_row">Metnini kopyala ve yapıştır</string>
-    <string name="search_add_words_cd">Metnini yapıştır</string>
+    <string name="search_add_words_row">Metin yapıştır — her kelimeye bak</string>
+    <string name="search_add_words_cd">Metin yapıştır ve her kelimeye bak</string>
 </resources>

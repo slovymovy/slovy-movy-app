@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
@@ -103,12 +105,30 @@ class TextReaderViewModel(
             state = state.copy(isAnalyzing = true, isError = false, isTooLong = false)
             // Length pre-check: rejects oversized pastes before tokenization does any work.
             if (text.length > MAX_CHARS) {
+                Analytics.logEvent(
+                    AnalyticsEvent.READER_TEXT_TOO_LONG,
+                    mapOf(
+                        "lang" to language.code,
+                        "reason" to "chars",
+                        "char_count" to text.length.toLong(),
+                    ),
+                )
                 state = state.copy(isAnalyzing = false, isTooLong = true)
                 return@launch
             }
             try {
                 val tokens = withContext(Dispatchers.Default) { tokenize(text) }
-                if (tokens.count { it.isWord } > MAX_WORDS) {
+                val wordCount = tokens.count { it.isWord }
+                if (wordCount > MAX_WORDS) {
+                    Analytics.logEvent(
+                        AnalyticsEvent.READER_TEXT_TOO_LONG,
+                        mapOf(
+                            "lang" to language.code,
+                            "reason" to "words",
+                            "char_count" to text.length.toLong(),
+                            "word_count" to wordCount.toLong(),
+                        ),
+                    )
                     state = state.copy(isAnalyzing = false, isTooLong = true)
                     return@launch
                 }
@@ -126,10 +146,20 @@ class TextReaderViewModel(
                     }
                 }
                 val favoriteLemmas = favoritesRepository.getFavoriteLemmas(language)
+                Analytics.logEvent(
+                    AnalyticsEvent.READER_ANALYZE_DONE,
+                    mapOf(
+                        "lang" to language.code,
+                        "word_count" to wordCount.toLong(),
+                        "unique_word_count" to words.size.toLong(),
+                        "found_count" to results.size.toLong(),
+                    ),
+                )
                 state = state.copy(tokens = resolvedTokens, favoriteLemmas = favoriteLemmas, isAnalyzing = false)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                Analytics.logEvent(AnalyticsEvent.READER_ANALYZE_FAILED, mapOf("lang" to language.code))
                 state = state.copy(isAnalyzing = false, isError = true)
             }
         }
@@ -142,6 +172,19 @@ class TextReaderViewModel(
             state = state.copy(favoriteLemmas = favoriteLemmas)
         }
     }
+
+    // The reader auto-reads the clipboard once per entry (ViewModel lifetime), so the iOS
+    // paste permission dialog doubles as the paste confirmation instead of requiring an
+    // extra tap. Guarded here so recomposition, returning from word details, or a denied
+    // prompt never re-triggers the system dialog; the tap-to-paste card stays as the
+    // manual retry path.
+    private var autoPasteAttempted = false
+
+    fun consumeAutoPasteAttempt(): Boolean {
+        if (autoPasteAttempted || state.hasResults || state.isAnalyzing) return false
+        autoPasteAttempted = true
+        return true
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -153,13 +196,42 @@ fun TextReaderScreen(
 ) {
     val clipboard = LocalClipboardManager.current
     // Whether the clipboard holds text — checked here in the stateful layer (not in the
-    // stateless content) and refreshed on resume. We only read the clipboard's *content*
-    // when the user actually taps to paste, never eagerly.
+    // stateless content) and refreshed on resume. The clipboard's *content* is read once
+    // automatically on entry (opening the reader is already an explicit paste intent) and
+    // afterwards only when the user taps to paste.
     var clipboardHasText by remember { mutableStateOf(runCatching { clipboard.hasText() }.getOrDefault(true)) }
+    // Shared by the entry auto-paste and the empty→filled resume transition below. A blank
+    // auto read (denied prompt or empty clipboard) falls through to the manual tap-to-paste
+    // card, which stays enabled as the retry path.
+    val autoPasteNow = {
+        val text = runCatching { clipboard.getText()?.text }.getOrNull().orEmpty()
+        Analytics.logEvent(
+            AnalyticsEvent.READER_PASTE_CLICK,
+            mapOf(
+                "lang" to viewModel.language.code,
+                "has_text" to text.isNotBlank().toString(),
+                "auto" to "true",
+            ),
+        )
+        if (text.isNotBlank()) viewModel.analyzeText(text)
+    }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshFavorites()
+        val hadText = clipboardHasText
         clipboardHasText = runCatching { clipboard.hasText() }.getOrDefault(true)
+        // The empty-clipboard card says "copy a text in another app, then come back here" —
+        // honor that: if the clipboard went from empty to filled while we sat on the input
+        // card, paste right away instead of demanding another tap. Denied iOS prompts leave
+        // clipboardHasText true, so they never re-trigger this on app switches.
+        if (!hadText && clipboardHasText && !viewModel.state.hasResults && !viewModel.state.isAnalyzing) {
+            autoPasteNow()
+        }
         onPauseOrDispose {}
+    }
+    LaunchedEffect(Unit) {
+        if (clipboardHasText && viewModel.consumeAutoPasteAttempt()) {
+            autoPasteNow()
+        }
     }
     TextReaderContent(
         state = viewModel.state,
@@ -168,9 +240,30 @@ fun TextReaderScreen(
         clipboardHasText = clipboardHasText,
         onPaste = {
             val text = clipboard.getText()?.text.orEmpty()
+            Analytics.logEvent(
+                AnalyticsEvent.READER_PASTE_CLICK,
+                mapOf(
+                    "lang" to viewModel.language.code,
+                    "has_text" to text.isNotBlank().toString(),
+                    "auto" to "false",
+                ),
+            )
             if (text.isNotBlank()) viewModel.analyzeText(text) else clipboardHasText = false
         },
-        onWordClick = onWordClick,
+        onWordClick = { language, token ->
+            token.lemma?.let { lemma ->
+                Analytics.logEvent(
+                    AnalyticsEvent.READER_WORD_CLICK,
+                    mapOf(
+                        "lang" to language.code,
+                        "band" to (token.band?.name?.lowercase() ?: ""),
+                        "is_favorite" to
+                            (FavoritesRepository.normalizeLemma(lemma) in viewModel.state.favoriteLemmas).toString(),
+                    ),
+                )
+                onWordClick(language, lemma)
+            }
+        },
         onBack = onBack
     )
 }
@@ -183,7 +276,7 @@ fun TextReaderContent(
     language: Language = Language.DUTCH,
     clipboardHasText: Boolean = true,
     onPaste: () -> Unit = {},
-    onWordClick: (language: Language, lemma: String) -> Unit = { _, _ -> },
+    onWordClick: (language: Language, token: TextToken) -> Unit = { _, _ -> },
     onBack: () -> Unit = {}
 ) {
     val title = if (state.hasResults) {
@@ -366,7 +459,7 @@ private fun ResultView(
     state: TextReaderUiState,
     scrollState: ScrollState,
     language: Language,
-    onWordClick: (language: Language, lemma: String) -> Unit,
+    onWordClick: (language: Language, token: TextToken) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val passageStyle = TextStyle(
@@ -422,7 +515,7 @@ private fun ResultView(
                                     style = passageStyle,
                                     isFavorite = FavoritesRepository.normalizeLemma(token.lemma) in state.favoriteLemmas,
                                     lookUpLabel = lookUpLabel,
-                                    onClick = { onWordClick(language, token.lemma) }
+                                    onClick = { onWordClick(language, token) }
                                 )
                             }
                         }
@@ -491,32 +584,27 @@ private fun FrequencyLegend() {
             modifier = Modifier.clearAndSetSemantics {}
         )
         Row(
-            horizontalArrangement = Arrangement.spacedBy(13.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clearAndSetSemantics {}
         ) {
             FreqBand.entries.forEach { band ->
-                val (_, fg) = colorsForBand(band)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(9.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(fg)
-                    )
-                    Text(
-                        text = bandLabel(band),
-                        style = TextStyle(
-                            fontSize = 11.5.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.2.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-                }
+                // Each label is a mini chip with the same background wash the passage words
+                // get, so the legend reads exactly like the highlighting it explains.
+                val (bg, _) = colorsForBand(band)
+                Text(
+                    text = bandLabel(band),
+                    style = TextStyle(
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.2.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(bg)
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                )
             }
         }
     }

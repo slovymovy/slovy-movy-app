@@ -747,20 +747,20 @@
     <string name="favorites_study_done_next_review_a11y">Następna powtórka za %1$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Czytaj</string>
-    <string name="reader_title_with_lang">Słowa · %1$s</string>
-    <string name="reader_error_analyzing">Nie udało się przeanalizować tekstu</string>
-    <string name="reader_text_too_long">Ten tekst jest trochę za długi — spróbuj maksymalnie %1$d słów.</string>
+    <string name="reader_title">Sprawdź tekst</string>
+    <string name="reader_title_with_lang">Twój tekst · %1$s</string>
+    <string name="reader_error_analyzing">Nie udało się przeanalizować tekstu — dotknij karty, aby spróbować ponownie.</string>
+    <string name="reader_text_too_long">Ten tekst jest za długi — wklej najwyżej %1$d słów naraz.</string>
     <string name="reader_paste_from_clipboard">Wklej tekst ze schowka</string>
     <string name="reader_analyzing">Analizowanie tekstu</string>
-    <string name="reader_tap_to_paste">Dotknij, aby wkleić tekst</string>
-    <string name="reader_paste_blurb">Skopiuj kilka słów i wklej je tutaj. Każde słowo sprawdzisz w słowniku i zapiszesz znaczenia, które chcesz zapamiętać.</string>
-    <string name="reader_clipboard_empty">Schowek jest pusty. Skopiuj jakiś tekst i wklej go tutaj.</string>
+    <string name="reader_tap_to_paste">Dotknij, aby wkleić</string>
+    <string name="reader_paste_blurb">Każde słowo w tekście będzie można dotknąć — zobacz jego znaczenia i zapisz te, które chcesz zapamiętać.</string>
+    <string name="reader_clipboard_empty">Nie ma jeszcze nic do wklejenia — skopiuj tekst w innej aplikacji i wróć tutaj.</string>
     <string name="reader_look_up">Sprawdź</string>
-    <string name="reader_frequency_legend">Legenda częstotliwości</string>
-    <string name="reader_frequency">Częstotliwość</string>
+    <string name="reader_frequency_legend">Legenda częstotliwości słów</string>
+    <string name="reader_frequency">Częstotliwość słów</string>
     <string name="reader_a11y_saved">Zapisano, %1$s</string>
     <string name="search_add_words">Dodaj słowa</string>
-    <string name="search_add_words_row">Skopiuj i wklej swój tekst</string>
-    <string name="search_add_words_cd">Wklej swój tekst</string>
+    <string name="search_add_words_row">Wklej tekst — sprawdź każde słowo</string>
+    <string name="search_add_words_cd">Wklej tekst i sprawdź każde słowo</string>
 </resources>
