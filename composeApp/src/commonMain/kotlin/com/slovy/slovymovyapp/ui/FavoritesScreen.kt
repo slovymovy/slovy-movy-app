@@ -111,7 +111,7 @@ data class FavoriteSenseItem(
 
 data class WordListExportUiState(
     val format: WordListExportFormat = WordListExportFormat.CSV,
-    val includeStats: Boolean = true,
+    val includeStats: Boolean = false,
     val inProgress: Boolean = false,
 )
 
