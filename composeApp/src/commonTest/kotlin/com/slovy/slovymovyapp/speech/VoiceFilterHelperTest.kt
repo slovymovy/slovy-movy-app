@@ -396,6 +396,63 @@ open class VoiceFilterHelperTest : BaseTest() {
     }
 
     @Test
+    fun reconcileVoicesForEngineChange_reapplies_defaults_when_stored_ids_are_from_another_engine() =
+        runBlocking {
+            val helper = VoiceFilterHelper(settingsRepository())
+            helper.setEnabledVoices(testLanguage, setOf("rhvoice-anna", "rhvoice-elena"))
+
+            val result = helper.reconcileVoicesForEngineChange(testLanguage, testVoices)
+
+            assertEquals(
+                setOf("voice1", "voice3"),
+                result,
+                "Selection from an unbound engine should be replaced by the current engine's defaults"
+            )
+            assertEquals(setOf("voice1", "voice3"), helper.getEnabledVoices(testLanguage))
+        }
+
+    @Test
+    fun reconcileVoicesForEngineChange_keeps_selection_that_overlaps_current_engine() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("voice1"))
+
+        val result = helper.reconcileVoicesForEngineChange(testLanguage, testVoices)
+
+        assertEquals(
+            setOf("voice1"),
+            result,
+            "A deliberate single-voice choice on the bound engine must not be widened to the defaults"
+        )
+    }
+
+    @Test
+    fun reconcileVoicesForEngineChange_keeps_selection_when_engine_reports_no_voices() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("voice1"))
+
+        val result = helper.reconcileVoicesForEngineChange(testLanguage, emptyList())
+
+        assertEquals(
+            setOf("voice1"),
+            result,
+            "An engine that reports no voices yet must not clear the stored selection"
+        )
+    }
+
+    @Test
+    fun reconcileVoicesForEngineChange_writes_nothing_when_no_selection_stored() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+
+        val result = helper.reconcileVoicesForEngineChange(testLanguage, testVoices)
+
+        assertTrue(result.isEmpty(), "Reconciliation should defer to initializeDefaultVoices")
+        assertFalse(
+            helper.hasEnabledVoices(testLanguage),
+            "Reconciliation must not create a selection where none existed"
+        )
+    }
+
+    @Test
     fun isVoiceSetupShown_returns_false_when_no_setting() = runBlocking {
         val helper = VoiceFilterHelper(settingsRepository())
 

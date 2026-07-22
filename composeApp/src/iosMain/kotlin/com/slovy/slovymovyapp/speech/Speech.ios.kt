@@ -180,6 +180,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         }
     }
 
+    actual fun rebindEngine() {
+        // iOS exposes a single system synthesizer; there is no engine to rebind.
+    }
+
     actual override fun stop() {
         // Clear map BEFORE stopping so any sync callback is ignored (generation won't match)
         delegate.clearUtterances()

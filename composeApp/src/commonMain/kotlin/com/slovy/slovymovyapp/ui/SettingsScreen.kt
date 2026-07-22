@@ -138,6 +138,9 @@ class SettingsViewModel(
     private var versionTapCount = 0
     private var lastVersionTapAtMs = 0L
 
+    /** Set when the user leaves for system TTS settings, where the default engine can change. */
+    private var awaitingEngineChange = false
+
     companion object {
         private const val TAG = "SettingsViewModel"
         private const val VERSION_TAPS_FOR_DEVELOPER_MODE = 7
@@ -663,7 +666,7 @@ class SettingsViewModel(
                     try {
                         val voices = ttsManager.getVoicesForLanguage(language)
                         voiceFilterHelper.initializeDefaultVoices(language, voices)
-                        val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                        val enabledIds = voiceFilterHelper.reconcileVoicesForEngineChange(language, voices)
                         updateLanguageState(language) { it.copy(voices = voices, enabledVoiceIds = enabledIds) }
                     } catch (e: CancellationException) {
                         throw e
@@ -700,7 +703,7 @@ class SettingsViewModel(
 
                 voiceFilterHelper.initializeDefaultVoices(language, voices)
 
-                val enabledIds = voiceFilterHelper.getEnabledVoices(language)
+                val enabledIds = voiceFilterHelper.reconcileVoicesForEngineChange(language, voices)
                 updateLanguageState(language) {
                     it.copy(voices = voices, enabledVoiceIds = enabledIds, isLoadingVoices = false)
                 }
@@ -753,7 +756,25 @@ class SettingsViewModel(
 
     fun openSystemSettings() {
         Analytics.logEvent(AnalyticsEvent.SETTINGS_OPEN_SYSTEM_SETTINGS_CLICK)
+        awaitingEngineChange = true
         ttsManager.openSettings()
+    }
+
+    /**
+     * The engine binding is made once and survives a default-engine change made in system
+     * settings, so it is dropped and remade on the way back rather than requiring a restart.
+     */
+    fun rebindVoiceEngineIfNeeded() {
+        if (!awaitingEngineChange) return
+        awaitingEngineChange = false
+
+        ttsManager.rebindEngine()
+        state = state.copy(
+            languages = state.languages.mapValues { (_, langState) ->
+                langState.copy(voices = emptyList(), enabledVoiceIds = emptySet())
+            }
+        )
+        loadLanguages()
     }
 
     fun exportAppData() {
@@ -1077,6 +1098,7 @@ fun SettingsScreen(
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.reloadSettings()
+        viewModel.rebindVoiceEngineIfNeeded()
         onPauseOrDispose { }
     }
 

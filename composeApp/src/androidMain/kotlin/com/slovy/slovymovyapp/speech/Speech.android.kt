@@ -11,9 +11,13 @@ import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice.QUALITY_HIGH
 import android.speech.tts.Voice.QUALITY_VERY_HIGH
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.logging.AppLogger
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 // androidMain
 actual class TextToSpeechManager actual constructor(androidContext: Any?) : SpeechPlayer {
@@ -22,16 +26,35 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
 
+    /** Completed with the engine connection result; replaced on every rebind. */
+    private var engineReady = CompletableDeferred<Boolean>()
+
     init {
         initializeTTS()
     }
 
     private fun initializeTTS() {
+        val pending = engineReady
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 setupUtteranceProgressListener()
+            } else {
+                AppLogger.warn(TAG, "TTS engine failed to initialize with status $status", null)
             }
+            pending.complete(status == TextToSpeech.SUCCESS)
         }
+    }
+
+    /**
+     * Engine connection is asynchronous, so [tts] reports no voices until it completes.
+     * Callers that read voice data await this instead of racing the binding.
+     */
+    private suspend fun awaitEngineReady(): Boolean {
+        val ready = withTimeoutOrNull(ENGINE_INIT_TIMEOUT) { engineReady.await() }
+        if (ready == null) {
+            AppLogger.warn(TAG, "Timed out waiting for the TTS engine to initialize", null)
+        }
+        return ready == true
     }
 
     private fun setupUtteranceProgressListener() {
@@ -74,6 +97,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
     }
 
     actual override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
+        if (!awaitEngineReady()) return@withContext emptyList()
+
         val languages = mutableListOf<Text2SpeechLanguage>()
 
 
@@ -101,6 +126,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     actual override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
+            if (!awaitEngineReady()) return@withContext emptyList()
+
             val locale = toLocale(language.language)
             val voices = tts.voices?.filter { voice ->
                 voice.locale.language == locale.language &&
@@ -133,15 +160,31 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
     }
 
     actual override fun openSettings() {
-        try {
-            val intent = Intent(ACTION_INSTALL_TTS_DATA)
-            intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-        } catch (_: Exception) {
-            val intent = Intent(ACTION_CHECK_TTS_DATA)
-            intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+        // The engine picker comes first: the install/check actions only open an engine's
+        // voice-data screen, and resolve to a chooser when several engines are installed.
+        val actions = listOf(ACTION_TTS_SETTINGS, ACTION_INSTALL_TTS_DATA, ACTION_CHECK_TTS_DATA)
+        for (action in actions) {
+            try {
+                val intent = Intent(action)
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+                return
+            } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to open TTS settings via $action", e)
+            }
         }
+    }
+
+    actual fun rebindEngine() {
+        try {
+            tts.stop()
+            tts.shutdown()
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to shut down the previous TTS engine", e)
+        }
+        statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+        engineReady = CompletableDeferred()
+        initializeTTS()
     }
 
     private fun toLocale(lang: Language): Locale {
@@ -160,5 +203,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     actual override fun removeOnStatusChangeListener(key: Any) {
         statusListeners.remove(key)
+    }
+
+    private companion object {
+        const val TAG = "TextToSpeechManager"
+
+        /** Not exposed by the SDK; the documented action for the system TTS output screen. */
+        const val ACTION_TTS_SETTINGS = "com.android.settings.TTS_SETTINGS"
+
+        val ENGINE_INIT_TIMEOUT = 5.seconds
     }
 }

@@ -73,6 +73,32 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         getEnabledVoices(language)
     }
 
+    /**
+     * Re-applies defaults when the stored selection belongs to an engine that is no longer bound.
+     *
+     * Voice ids are engine-specific, so a stored set that shares nothing with the voices the
+     * current engine reports can only have come from a different engine. Requiring zero overlap
+     * keeps deliberate per-voice choices intact for the engine they were made on.
+     */
+    suspend fun reconcileVoicesForEngineChange(
+        language: Text2SpeechLanguage,
+        allVoices: List<Text2SpeechVoice>
+    ): Set<String> = withContext(Dispatchers.IO) {
+        if (allVoices.isEmpty()) return@withContext getEnabledVoices(language)
+
+        val stored = getEnabledVoices(language)
+        if (stored.isEmpty()) return@withContext stored
+
+        val availableIds = allVoices.map { it.id }.toSet()
+        if (stored.any { it in availableIds }) return@withContext stored
+
+        val defaultVoices = selectDefaultVoiceIds(allVoices)
+        if (defaultVoices.isEmpty()) return@withContext stored
+
+        setEnabledVoices(language, defaultVoices)
+        defaultVoices
+    }
+
     @Deprecated("Temporary migration for old local-voice defaults. Remove after legacy settings are no longer expected.")
     suspend fun migrateLegacyDefaultVoiceSelection(
         language: Text2SpeechLanguage,

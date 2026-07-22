@@ -30,6 +30,12 @@ expect class TextToSpeechManager(androidContext: Any? = null) : SpeechPlayer {
 
     override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit)
     override fun removeOnStatusChangeListener(key: Any)
+
+    /**
+     * Drops the current engine binding and connects again, picking up a default-engine
+     * change the user made in system settings. No-op on platforms without pluggable engines.
+     */
+    fun rebindEngine()
 }
 
 data class Text2SpeechLanguage(
