@@ -21,8 +21,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -163,6 +164,8 @@ sealed interface FavoritesUiState {
         val studyDone: FavoritesStudyDoneUiState? = null,
         val reviewDueCount: Int = 0,
         val scrollToTop: Boolean = false,
+        val totalMeaningCount: Int = 0,
+        val isTopBarMenuExpanded: Boolean = false,
         val export: WordListExportUiState? = null,
         val exportMessage: UiText? = null,
     ) : FavoritesUiState {
@@ -466,6 +469,7 @@ class FavoritesViewModel(
             study = study,
             studyDone = studyDone,
             reviewDueCount = visibleReviewStateByLanguage.values.sumOf { it.dueCount },
+            totalMeaningCount = langFiltered.size,
         )
     }
 
@@ -595,6 +599,7 @@ class FavoritesViewModel(
         state = newState.copy(
             query = preservedQuery,
             scrollToTop = scrollToTop,
+            isTopBarMenuExpanded = current?.isTopBarMenuExpanded ?: false,
             export = current?.export,
             exportMessage = current?.exportMessage,
         )
@@ -743,10 +748,15 @@ class FavoritesViewModel(
 
     val isExportSupported: Boolean get() = wordListExporter.isSupported
 
+    fun setTopBarMenuExpanded(expanded: Boolean) {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(isTopBarMenuExpanded = expanded)
+    }
+
     fun openExportDialog() {
         val content = state as? FavoritesUiState.Content ?: return
         if (!wordListExporter.isSupported || !content.hasAnyFavorites) return
-        state = content.copy(export = WordListExportUiState())
+        state = content.copy(isTopBarMenuExpanded = false, export = WordListExportUiState())
     }
 
     fun dismissExportDialog() {
@@ -935,6 +945,7 @@ fun FavoritesScreen(
         rowAudio = viewModel.rowAudio.uiState,
         rowAudioActions = viewModel.rowAudioActions,
         isExportSupported = viewModel.isExportSupported,
+        onSetTopBarMenuExpanded = viewModel::setTopBarMenuExpanded,
         onOpenExport = viewModel::openExportDialog,
         onDismissExport = viewModel::dismissExportDialog,
         onExportFormatChange = viewModel::setExportFormat,
@@ -966,6 +977,7 @@ fun FavoritesScreenContent(
     rowAudio: RowAudioUiState = RowAudioUiState(),
     rowAudioActions: RowAudioActions = RowAudioActions(),
     isExportSupported: Boolean = false,
+    onSetTopBarMenuExpanded: (Boolean) -> Unit = {},
     onOpenExport: () -> Unit = {},
     onDismissExport: () -> Unit = {},
     onExportFormatChange: (WordListExportFormat) -> Unit = {},
@@ -988,14 +1000,13 @@ fun FavoritesScreenContent(
                     )
                 },
                 actions = {
-                    val hasExportableWords = (state as? FavoritesUiState.Content)?.hasAnyFavorites == true
-                    if (isExportSupported && hasExportableWords) {
-                        IconButton(onClick = onOpenExport) {
-                            Icon(
-                                Icons.Default.Share,
-                                contentDescription = stringResource(Res.string.favorites_export_action)
-                            )
-                        }
+                    val content = state as? FavoritesUiState.Content
+                    if (isExportSupported && content?.hasAnyFavorites == true) {
+                        FavoritesTopBarMenu(
+                            expanded = content.isTopBarMenuExpanded,
+                            onSetExpanded = onSetTopBarMenuExpanded,
+                            onExportClick = onOpenExport,
+                        )
                     }
                 }
             )
@@ -1274,17 +1285,53 @@ fun FavoritesScreenContent(
         }
     }
 
-    (state as? FavoritesUiState.Content)?.export?.let { export ->
-        WordListExportDialog(
-            state = export,
-            onFormatChange = onExportFormatChange,
-            onIncludeStatsChange = onExportIncludeStatsChange,
-            onConfirm = onExportConfirm,
-            onDismiss = onDismissExport,
-        )
+    (state as? FavoritesUiState.Content)?.let { content ->
+        content.export?.let { export ->
+            WordListExportDialog(
+                state = export,
+                wordCount = content.favoriteLemmas.size,
+                meaningCount = content.totalMeaningCount,
+                onFormatChange = onExportFormatChange,
+                onIncludeStatsChange = onExportIncludeStatsChange,
+                onConfirm = onExportConfirm,
+                onDismiss = onDismissExport,
+            )
+        }
     }
 
     RowAudioVoiceSetupHost(state = rowAudio, actions = rowAudioActions)
+}
+
+@Composable
+private fun FavoritesTopBarMenu(
+    expanded: Boolean,
+    onSetExpanded: (Boolean) -> Unit,
+    onExportClick: () -> Unit,
+) {
+    Box {
+        val activeColor = MaterialTheme.colorScheme.primary
+        IconButton(
+            onClick = { onSetExpanded(!expanded) },
+            modifier = if (expanded) {
+                Modifier.background(activeColor.copy(alpha = 0.14f), CircleShape)
+            } else {
+                Modifier
+            },
+        ) {
+            Icon(
+                Icons.Default.MoreVert,
+                contentDescription = stringResource(Res.string.favorites_more_actions),
+                tint = if (expanded) activeColor else LocalContentColor.current,
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { onSetExpanded(false) }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.favorites_export_action)) },
+                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
+                onClick = onExportClick,
+            )
+        }
+    }
 }
 
 @Composable

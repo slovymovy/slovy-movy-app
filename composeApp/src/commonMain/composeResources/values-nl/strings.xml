@@ -165,10 +165,12 @@
     <string name="favorites_removed_undo">Ongedaan maken</string>
     <string name="favorites_export_action">Woordenlijst exporteren</string>
     <string name="favorites_export_dialog_title">Woordenlijst exporteren</string>
-    <string name="favorites_export_format_csv_title">Spreadsheet (CSV)</string>
-    <string name="favorites_export_format_csv_subtitle">Voor Excel of Google Spreadsheets</string>
-    <string name="favorites_export_format_tsv_title">Flashcards (TSV)</string>
-    <string name="favorites_export_format_tsv_subtitle">Voor Anki of Quizlet</string>
+    <string name="favorites_export_subtitle">%1$d woorden · %2$d betekenissen in je bibliotheek</string>
+    <string name="favorites_more_actions">Meer</string>
+    <string name="favorites_export_format_csv_title">CSV</string>
+    <string name="favorites_export_format_csv_subtitle">Gescheiden door komma\'s</string>
+    <string name="favorites_export_format_tsv_title">TSV</string>
+    <string name="favorites_export_format_tsv_subtitle">Gescheiden door tabs</string>
     <string name="favorites_export_include_stats">Leervoortgang meenemen</string>
     <string name="favorites_export_confirm">Exporteren</string>
     <string name="favorites_export_success">Opgeslagen in %1$s</string>

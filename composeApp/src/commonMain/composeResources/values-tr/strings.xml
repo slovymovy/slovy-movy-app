@@ -165,10 +165,12 @@
     <string name="favorites_removed_undo">Geri al</string>
     <string name="favorites_export_action">Kelime listesini dışa aktar</string>
     <string name="favorites_export_dialog_title">Kelime listesini dışa aktar</string>
-    <string name="favorites_export_format_csv_title">Tablo (CSV)</string>
-    <string name="favorites_export_format_csv_subtitle">Excel veya Google E-Tablolar için</string>
-    <string name="favorites_export_format_tsv_title">Kartlar (TSV)</string>
-    <string name="favorites_export_format_tsv_subtitle">Anki veya Quizlet için</string>
+    <string name="favorites_export_subtitle">Kitaplığında %1$d kelime · %2$d anlam</string>
+    <string name="favorites_more_actions">Diğer</string>
+    <string name="favorites_export_format_csv_title">CSV</string>
+    <string name="favorites_export_format_csv_subtitle">Virgülle ayrılmış</string>
+    <string name="favorites_export_format_tsv_title">TSV</string>
+    <string name="favorites_export_format_tsv_subtitle">Sekmeyle ayrılmış</string>
     <string name="favorites_export_include_stats">Öğrenme ilerlemesini dahil et</string>
     <string name="favorites_export_confirm">Dışa aktar</string>
     <string name="favorites_export_success">%1$s konumuna kaydedildi</string>

@@ -164,10 +164,12 @@
     <string name="favorites_removed_undo">Cofnij</string>
     <string name="favorites_export_action">Eksportuj listę słów</string>
     <string name="favorites_export_dialog_title">Eksportuj listę słów</string>
-    <string name="favorites_export_format_csv_title">Arkusz kalkulacyjny (CSV)</string>
-    <string name="favorites_export_format_csv_subtitle">Do Excela lub Arkuszy Google</string>
-    <string name="favorites_export_format_tsv_title">Fiszki (TSV)</string>
-    <string name="favorites_export_format_tsv_subtitle">Do Anki lub Quizleta</string>
+    <string name="favorites_export_subtitle">%1$d słów · %2$d znaczeń w twojej bibliotece</string>
+    <string name="favorites_more_actions">Więcej</string>
+    <string name="favorites_export_format_csv_title">CSV</string>
+    <string name="favorites_export_format_csv_subtitle">Rozdzielany przecinkami</string>
+    <string name="favorites_export_format_tsv_title">TSV</string>
+    <string name="favorites_export_format_tsv_subtitle">Rozdzielany tabulatorami</string>
     <string name="favorites_export_include_stats">Dołącz postępy w nauce</string>
     <string name="favorites_export_confirm">Eksportuj</string>
     <string name="favorites_export_success">Zapisano w %1$s</string>

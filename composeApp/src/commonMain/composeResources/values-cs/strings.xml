@@ -165,10 +165,12 @@
     <string name="favorites_removed_undo">Vrátit</string>
     <string name="favorites_export_action">Exportovat seznam slov</string>
     <string name="favorites_export_dialog_title">Exportovat seznam slov</string>
-    <string name="favorites_export_format_csv_title">Tabulka (CSV)</string>
-    <string name="favorites_export_format_csv_subtitle">Pro Excel nebo Tabulky Google</string>
-    <string name="favorites_export_format_tsv_title">Kartičky (TSV)</string>
-    <string name="favorites_export_format_tsv_subtitle">Pro Anki nebo Quizlet</string>
+    <string name="favorites_export_subtitle">%1$d slov · %2$d významů ve tvé knihovně</string>
+    <string name="favorites_more_actions">Více</string>
+    <string name="favorites_export_format_csv_title">CSV</string>
+    <string name="favorites_export_format_csv_subtitle">Oddělené čárkami</string>
+    <string name="favorites_export_format_tsv_title">TSV</string>
+    <string name="favorites_export_format_tsv_subtitle">Oddělené tabulátory</string>
     <string name="favorites_export_include_stats">Zahrnout pokrok v učení</string>
     <string name="favorites_export_confirm">Exportovat</string>
     <string name="favorites_export_success">Uloženo do %1$s</string>

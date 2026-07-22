@@ -165,10 +165,12 @@
     <string name="favorites_removed_undo">Deshacer</string>
     <string name="favorites_export_action">Exportar lista de palabras</string>
     <string name="favorites_export_dialog_title">Exportar lista de palabras</string>
-    <string name="favorites_export_format_csv_title">Hoja de cálculo (CSV)</string>
-    <string name="favorites_export_format_csv_subtitle">Para Excel o Google Sheets</string>
-    <string name="favorites_export_format_tsv_title">Tarjetas (TSV)</string>
-    <string name="favorites_export_format_tsv_subtitle">Para Anki o Quizlet</string>
+    <string name="favorites_export_subtitle">%1$d palabras · %2$d significados en tu biblioteca</string>
+    <string name="favorites_more_actions">Más</string>
+    <string name="favorites_export_format_csv_title">CSV</string>
+    <string name="favorites_export_format_csv_subtitle">Separado por comas</string>
+    <string name="favorites_export_format_tsv_title">TSV</string>
+    <string name="favorites_export_format_tsv_subtitle">Separado por tabulaciones</string>
     <string name="favorites_export_include_stats">Incluir progreso de aprendizaje</string>
     <string name="favorites_export_confirm">Exportar</string>
     <string name="favorites_export_success">Guardado en %1$s</string>
