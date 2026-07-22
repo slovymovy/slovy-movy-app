@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,6 +56,8 @@ import com.slovy.slovymovyapp.analytics.PerformanceMonitoring
 import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.WordListExportFormat
+import com.slovy.slovymovyapp.data.export.WordListExporter
 import com.slovy.slovymovyapp.data.favorites.Favorite
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository.Companion.normalizeLemma
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -105,6 +108,12 @@ data class FavoriteSenseItem(
     override val error: UiText? = null
 ) : PrefetchableSenseItem
 
+data class WordListExportUiState(
+    val format: WordListExportFormat = WordListExportFormat.CSV,
+    val includeStats: Boolean = true,
+    val inProgress: Boolean = false,
+)
+
 data class FavoritesStudyUiState(
     val language: Language,
     val dueCount: Int,
@@ -153,7 +162,9 @@ sealed interface FavoritesUiState {
         val study: FavoritesStudyUiState? = null,
         val studyDone: FavoritesStudyDoneUiState? = null,
         val reviewDueCount: Int = 0,
-        val scrollToTop: Boolean = false
+        val scrollToTop: Boolean = false,
+        val export: WordListExportUiState? = null,
+        val exportMessage: UiText? = null,
     ) : FavoritesUiState {
         val showNoResults: Boolean get() = senses.isEmpty() && query.isNotBlank()
         val showLanguagePicker: Boolean get() = availableLanguages.size > 1
@@ -180,6 +191,7 @@ class FavoritesViewModel(
     speechPlayer: SpeechPlayer,
     voiceFilterHelper: VoiceFilterHelper,
     private val clock: Clock,
+    private val wordListExporter: WordListExporter,
 ) : ViewModel() {
 
     var state by mutableStateOf<FavoritesUiState>(FavoritesUiState.Loading)
@@ -580,7 +592,12 @@ class FavoritesViewModel(
         } else {
             current?.scrollToTop ?: false
         }
-        state = newState.copy(query = preservedQuery, scrollToTop = scrollToTop)
+        state = newState.copy(
+            query = preservedQuery,
+            scrollToTop = scrollToTop,
+            export = current?.export,
+            exportMessage = current?.exportMessage,
+        )
     }
 
     /** Computes and applies favorites state. Exposed for tests; production code uses the
@@ -723,6 +740,98 @@ class FavoritesViewModel(
     fun prefetchVisibleRange(senses: List<FavoriteSenseItem>, range: IntRange) {
         prefetcher.prefetchVisibleRange(senses, range)
     }
+
+    val isExportSupported: Boolean get() = wordListExporter.isSupported
+
+    fun openExportDialog() {
+        val content = state as? FavoritesUiState.Content ?: return
+        if (!wordListExporter.isSupported || !content.hasAnyFavorites) return
+        state = content.copy(export = WordListExportUiState())
+    }
+
+    fun dismissExportDialog() {
+        val content = state as? FavoritesUiState.Content ?: return
+        if (content.export?.inProgress == true) return
+        state = content.copy(export = null)
+    }
+
+    fun setExportFormat(format: WordListExportFormat) {
+        updateExport { it.copy(format = format) }
+    }
+
+    fun setExportIncludeStats(includeStats: Boolean) {
+        updateExport { it.copy(includeStats = includeStats) }
+    }
+
+    fun exportWordList() {
+        val content = state as? FavoritesUiState.Content ?: return
+        val export = content.export ?: return
+        if (export.inProgress) return
+        val language = content.selectedLanguage ?: return
+
+        viewModelScope.launch {
+            updateExport { it.copy(inProgress = true) }
+            try {
+                val outcome = withContext(Dispatchers.Default) {
+                    wordListExporter.export(language, export.format, export.includeStats)
+                }
+                Analytics.logEvent(
+                    AnalyticsEvent.FAVORITES_EXPORT,
+                    mapOf(
+                        "lang" to language.code,
+                        "format" to export.format.name.lowercase(),
+                        "include_stats" to export.includeStats.toString(),
+                        "row_count" to outcome.rowCount.toLong(),
+                        "rows_without_details" to outcome.rowsWithoutDetails.toLong(),
+                    ),
+                )
+                val message = if (outcome.rowsWithoutDetails > 0) {
+                    UiText.Resource(
+                        Res.string.favorites_export_success_partial,
+                        listOf(outcome.saved.destinationLabel)
+                    )
+                } else {
+                    UiText.Resource(
+                        Res.string.favorites_export_success,
+                        listOf(outcome.saved.destinationLabel)
+                    )
+                }
+                val afterExport = state as? FavoritesUiState.Content ?: return@launch
+                state = afterExport.copy(export = null, exportMessage = message)
+                if (wordListExporter.canShare) {
+                    try {
+                        wordListExporter.share(outcome)
+                    } catch (e: Exception) {
+                        showExportError(e)
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                updateExport { it.copy(inProgress = false) }
+                showExportError(e)
+            }
+        }
+    }
+
+    fun consumeExportMessage() {
+        val content = state as? FavoritesUiState.Content ?: return
+        state = content.copy(exportMessage = null)
+    }
+
+    private fun showExportError(e: Exception) {
+        val content = state as? FavoritesUiState.Content ?: return
+        val reason = e.message?.takeIf { it.isNotBlank() } ?: NetworkErrorClassifier.userMessage(e)
+        state = content.copy(
+            exportMessage = UiText.Resource(Res.string.favorites_export_error, listOf(reason))
+        )
+    }
+
+    private fun updateExport(transform: (WordListExportUiState) -> WordListExportUiState) {
+        val content = state as? FavoritesUiState.Content ?: return
+        val export = content.export ?: return
+        state = content.copy(export = transform(export))
+    }
 }
 
 internal fun DictionaryRepository.FavoriteSenseMissingReason.toFavoriteSenseLoadError(language: Language): UiText {
@@ -796,6 +905,15 @@ fun FavoritesScreen(
         onRefreshReviewState()
     }
 
+    val exportMessage = (viewModel.state as? FavoritesUiState.Content)?.exportMessage
+    val resolvedExportMessage = exportMessage?.resolve()
+    LaunchedEffect(exportMessage) {
+        if (exportMessage != null && resolvedExportMessage != null) {
+            viewModel.consumeExportMessage()
+            viewModel.snackbarHostState.showSnackbar(resolvedExportMessage)
+        }
+    }
+
     FavoritesScreenContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
@@ -816,6 +934,12 @@ fun FavoritesScreen(
         onContinueStudyingNow = onContinueStudyingNow,
         rowAudio = viewModel.rowAudio.uiState,
         rowAudioActions = viewModel.rowAudioActions,
+        isExportSupported = viewModel.isExportSupported,
+        onOpenExport = viewModel::openExportDialog,
+        onDismissExport = viewModel::dismissExportDialog,
+        onExportFormatChange = viewModel::setExportFormat,
+        onExportIncludeStatsChange = viewModel::setExportIncludeStats,
+        onExportConfirm = viewModel::exportWordList,
     )
 }
 
@@ -841,6 +965,12 @@ fun FavoritesScreenContent(
     onContinueStudyingNow: (Language, FavoritesStudyDoneAction) -> Unit = { _, _ -> },
     rowAudio: RowAudioUiState = RowAudioUiState(),
     rowAudioActions: RowAudioActions = RowAudioActions(),
+    isExportSupported: Boolean = false,
+    onOpenExport: () -> Unit = {},
+    onDismissExport: () -> Unit = {},
+    onExportFormatChange: (WordListExportFormat) -> Unit = {},
+    onExportIncludeStatsChange: (Boolean) -> Unit = {},
+    onExportConfirm: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     val resolvedEmptyStateScrollState = emptyStateScrollState ?: remember { ScrollState(0) }
@@ -856,6 +986,17 @@ fun FavoritesScreenContent(
                             fontWeight = FontWeight.Medium
                         )
                     )
+                },
+                actions = {
+                    val hasExportableWords = (state as? FavoritesUiState.Content)?.hasAnyFavorites == true
+                    if (isExportSupported && hasExportableWords) {
+                        IconButton(onClick = onOpenExport) {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = stringResource(Res.string.favorites_export_action)
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -1131,6 +1272,16 @@ fun FavoritesScreenContent(
                 }
             }
         }
+    }
+
+    (state as? FavoritesUiState.Content)?.export?.let { export ->
+        WordListExportDialog(
+            state = export,
+            onFormatChange = onExportFormatChange,
+            onIncludeStatsChange = onExportIncludeStatsChange,
+            onConfirm = onExportConfirm,
+            onDismiss = onDismissExport,
+        )
     }
 
     RowAudioVoiceSetupHost(state = rowAudio, actions = rowAudioActions)

@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.lifecycle.ViewModelStore
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.WordListExporter
+import com.slovy.slovymovyapp.data.export.WordListFileSaver
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
@@ -11,6 +13,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.test.BaseTest
+import com.slovy.slovymovyapp.test.TestContext
 import kotlinx.coroutines.test.runTest
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.duration_unit_hours
@@ -81,6 +84,12 @@ open class FavoritesViewModelTest : BaseTest() {
             FakeSpeechPlayer(),
             VoiceFilterHelper(settingsRepo),
             clock,
+            WordListExporter(
+                favoritesRepository = favRepo,
+                dictionaryRepository = dictRepo,
+                fileSaver = WordListFileSaver(TestContext.androidContext()),
+                clock = clock,
+            ),
         )
         viewModelStore.put("test", vm)
         return vm

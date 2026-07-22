@@ -163,6 +163,17 @@
     <string name="favorites_stats">%1$d meanings · %2$d words</string>
     <string name="favorites_removed_message">Word removed</string>
     <string name="favorites_removed_undo">Undo</string>
+    <string name="favorites_export_action">Export word list</string>
+    <string name="favorites_export_dialog_title">Export word list</string>
+    <string name="favorites_export_format_csv_title">Spreadsheet (CSV)</string>
+    <string name="favorites_export_format_csv_subtitle">For Excel or Google Sheets</string>
+    <string name="favorites_export_format_tsv_title">Flashcards (TSV)</string>
+    <string name="favorites_export_format_tsv_subtitle">For Anki or Quizlet</string>
+    <string name="favorites_export_include_stats">Include learning progress</string>
+    <string name="favorites_export_confirm">Export</string>
+    <string name="favorites_export_success">Saved to %1$s</string>
+    <string name="favorites_export_success_partial">Saved to %1$s. Some words were exported without details.</string>
+    <string name="favorites_export_error">Export failed: %1$s</string>
     <string name="favorites_error_dictionary_not_downloaded">Download %1$s dictionary in Settings</string>
     <string name="favorites_error_meaning_not_found">Meaning not found</string>
     <string name="favorites_error_word_needs_download">Word needs to be downloaded</string>

@@ -163,6 +163,17 @@
     <string name="favorites_stats">%1$d significati · %2$d parole</string>
     <string name="favorites_removed_message">Parola rimossa</string>
     <string name="favorites_removed_undo">Annulla</string>
+    <string name="favorites_export_action">Esporta lista di parole</string>
+    <string name="favorites_export_dialog_title">Esporta lista di parole</string>
+    <string name="favorites_export_format_csv_title">Foglio di calcolo (CSV)</string>
+    <string name="favorites_export_format_csv_subtitle">Per Excel o Fogli Google</string>
+    <string name="favorites_export_format_tsv_title">Flashcard (TSV)</string>
+    <string name="favorites_export_format_tsv_subtitle">Per Anki o Quizlet</string>
+    <string name="favorites_export_include_stats">Includi i progressi di apprendimento</string>
+    <string name="favorites_export_confirm">Esporta</string>
+    <string name="favorites_export_success">Salvato in %1$s</string>
+    <string name="favorites_export_success_partial">Salvato in %1$s. Alcune parole sono state esportate senza dettagli.</string>
+    <string name="favorites_export_error">Esportazione non riuscita: %1$s</string>
     <string name="favorites_error_dictionary_not_downloaded">Scarica il dizionario %1$s nelle Impostazioni</string>
     <string name="favorites_error_meaning_not_found">Significato non trovato</string>
     <string name="favorites_error_word_needs_download">La parola deve essere scaricata</string>

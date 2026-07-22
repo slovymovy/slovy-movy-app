@@ -46,6 +46,17 @@ data class CardFamilyDebugCount(
     val cardCount: Long,
 )
 
+/** Scheduling data of one active (non-suspended) card, used for word-list export. */
+data class SenseCardExportRow(
+    val senseId: String,
+    val state: CardState,
+    val stability: Double,
+    val due: Long,
+    val lastReview: Long?,
+    val reps: Long,
+    val lapses: Long,
+)
+
 data class NewFavorite(
     val senseId: String,
     val lemma: String,
@@ -319,6 +330,25 @@ class FavoritesRepository(private val db: AppDatabase) {
                     suspended = row.suspended,
                 )
             }
+        }
+
+    /** Active-card scheduling rows for [language], grouped by canonical sense-ID string. */
+    suspend fun getCardExportRowsBySense(language: Language): Map<String, List<SenseCardExportRow>> =
+        withContext(Dispatchers.IO) {
+            db.favoritesQueries.selectCardExportRowsByLang(lang_code = language.code)
+                .executeAsList()
+                .map { row ->
+                    SenseCardExportRow(
+                        senseId = row.sense_id.toString(),
+                        state = row.state,
+                        stability = row.stability,
+                        due = row.due,
+                        lastReview = row.last_review,
+                        reps = row.reps,
+                        lapses = row.lapses,
+                    )
+                }
+                .groupBy { it.senseId }
         }
 
     suspend fun getCardFamilyDebugCounts(): List<CardFamilyDebugCount> = withContext(Dispatchers.IO) {

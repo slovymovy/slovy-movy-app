@@ -163,6 +163,17 @@
     <string name="favorites_stats">%1$d anlam · %2$d kelime</string>
     <string name="favorites_removed_message">Kelime kaldırıldı</string>
     <string name="favorites_removed_undo">Geri al</string>
+    <string name="favorites_export_action">Kelime listesini dışa aktar</string>
+    <string name="favorites_export_dialog_title">Kelime listesini dışa aktar</string>
+    <string name="favorites_export_format_csv_title">Tablo (CSV)</string>
+    <string name="favorites_export_format_csv_subtitle">Excel veya Google E-Tablolar için</string>
+    <string name="favorites_export_format_tsv_title">Kartlar (TSV)</string>
+    <string name="favorites_export_format_tsv_subtitle">Anki veya Quizlet için</string>
+    <string name="favorites_export_include_stats">Öğrenme ilerlemesini dahil et</string>
+    <string name="favorites_export_confirm">Dışa aktar</string>
+    <string name="favorites_export_success">%1$s konumuna kaydedildi</string>
+    <string name="favorites_export_success_partial">%1$s konumuna kaydedildi. Bazı kelimeler ayrıntılar olmadan dışa aktarıldı.</string>
+    <string name="favorites_export_error">Dışa aktarma başarısız: %1$s</string>
     <string name="favorites_error_dictionary_not_downloaded">Ayarlar'dan %1$s sözlüğünü indir</string>
     <string name="favorites_error_meaning_not_found">Anlam bulunamadı</string>
     <string name="favorites_error_word_needs_download">Kelimenin indirilmesi gerekiyor</string>

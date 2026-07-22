@@ -20,6 +20,8 @@ import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
+import com.slovy.slovymovyapp.data.export.WordListExporter
+import com.slovy.slovymovyapp.data.export.WordListFileSaver
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
@@ -379,6 +381,14 @@ fun App(
     val downloadCoordinator = remember { DownloadCoordinator() }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val appDataExporter = remember(androidContext) { AppDataExporter(androidContext) }
+    val wordListExporter = remember(androidContext, favoritesRepository, dictionaryRepository) {
+        WordListExporter(
+            favoritesRepository = favoritesRepository,
+            dictionaryRepository = dictionaryRepository,
+            fileSaver = WordListFileSaver(androidContext),
+            clock = Clock.System,
+        )
+    }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
 
     val navController = rememberNavController()
@@ -398,6 +408,7 @@ fun App(
             speechPlayer = ttsManager,
             voiceFilterHelper = voiceFilterHelper,
             clock = Clock.System,
+            wordListExporter = wordListExporter,
         ).also { it.start() }
     }
 

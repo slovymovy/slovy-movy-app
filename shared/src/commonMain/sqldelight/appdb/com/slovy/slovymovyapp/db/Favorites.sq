@@ -608,6 +608,12 @@ FROM card
 WHERE lang_code = :lang_code
   AND suspended = 0;
 
+selectCardExportRowsByLang:
+SELECT sense_id, state, stability, due, last_review, reps, lapses
+FROM card
+WHERE lang_code = :lang_code
+  AND suspended = 0;
+
 selectDeveloperCardTable:
 SELECT
   f.lemma AS lemma,

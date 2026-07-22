@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import platform.Foundation.*
-import platform.UIKit.*
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual class AppDataExporter actual constructor(androidContext: Any?) {
@@ -66,14 +65,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
 
     actual fun shareExport(result: AppDataExportResult) {
         val shareReference = result.shareReference ?: error("Missing share reference for export.")
-        val presenter = topViewController() ?: error("No iOS view controller available for sharing.")
-        val fileUrl = NSURL.fileURLWithPath(shareReference)
-        val shareSheet = UIActivityViewController(
-            activityItems = listOf(fileUrl),
-            applicationActivities = null
-        )
-        shareSheet.popoverPresentationController?.sourceView = presenter.view
-        presenter.presentViewController(shareSheet, animated = true, completion = null)
+        presentFileShareSheet(shareReference)
     }
 
     private fun archiveEntries(snapshots: List<AppDataSnapshot>): List<AppDataArchiveEntry> =
@@ -124,28 +116,5 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
         if (!fileManager.fileExistsAtPath(path)) {
             fileManager.createDirectoryAtPath(path, true, null, null)
         }
-    }
-
-    private fun topViewController(): UIViewController? {
-        val controller = activeWindow()
-            ?.rootViewController
-            ?: UIApplication.sharedApplication.keyWindow?.rootViewController
-        var current = controller
-        while (current?.presentedViewController != null) {
-            current = current.presentedViewController
-        }
-        return current
-    }
-
-    private fun activeWindow(): UIWindow? {
-        val scenes = UIApplication.sharedApplication.connectedScenes
-            .mapNotNull { it as? UIWindowScene }
-        val foregroundScenes = scenes.filter { scene ->
-            scene.activationState == UISceneActivationStateForegroundActive
-        }
-        val windows = (foregroundScenes.ifEmpty { scenes }).flatMap { scene ->
-            scene.windows.mapNotNull { it as? UIWindow }
-        }
-        return windows.firstOrNull { window -> window.isKeyWindow() } ?: windows.firstOrNull()
     }
 }
