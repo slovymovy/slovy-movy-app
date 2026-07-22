@@ -672,6 +672,8 @@
     <string name="study_complete_milestone_subtitle_50">Aralıksız elli gün. Kararlı ve istikrarlı.</string>
     <string name="study_complete_milestone_subtitle_100">Aralıksız yüz gün. İnanılmaz bir dönüm noktası.</string>
     <string name="study_complete_milestone_subtitle_generic">Aralıksız %1$d gün. Seriyi sürdür.</string>
+    <string name="study_complete_words_milestone_title">%1$d kelime tamamen öğrenildi!</string>
+    <string name="study_complete_words_milestone_subtitle">Gerçekten kullanacağın kelimeler.</string>
     <string name="study_action_done_for_now">Şimdilik bu kadar</string>
     <string name="study_progress_count">%1$d / %2$d</string>
     <string name="study_tap_to_flip">Çevirmek için dokun</string>

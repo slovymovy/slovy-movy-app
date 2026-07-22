@@ -17,6 +17,10 @@ sealed interface StudySessionCompleteHero {
         val streakDays: Int,
     ) : StudySessionCompleteHero
 
+    data class WordsMilestone(
+        val learnedTotal: Int,
+    ) : StudySessionCompleteHero
+
     data class PipelineShift(
         val stages: List<PipelineShiftStageUiState>,
     ) : StudySessionCompleteHero

@@ -180,6 +180,7 @@ private fun StudySessionCompleteScaffold(
 private fun SlovyIcons.completeIllustration(hero: StudySessionCompleteHero): ImageVector =
     when (hero) {
         is StudySessionCompleteHero.Milestone -> OtterDaysStreakC
+        is StudySessionCompleteHero.WordsMilestone -> ImageOtterSessionComplete
         is StudySessionCompleteHero.PipelineShift -> OtterPipelineStreakC
         StudySessionCompleteHero.None -> ImageOtterSessionComplete
     }
@@ -236,6 +237,11 @@ private fun CompletionHero(
             modifier = modifier.fillMaxWidth(),
         )
 
+        is StudySessionCompleteHero.WordsMilestone -> WordsMilestoneCompleteHero(
+            learnedTotal = hero.learnedTotal,
+            modifier = modifier.fillMaxWidth(),
+        )
+
         is StudySessionCompleteHero.PipelineShift -> PipelineShiftCompleteHero(
             stages = hero.stages,
             modifier = modifier.fillMaxWidth(),
@@ -258,6 +264,28 @@ private fun StudySessionCompleteMilestonePreview(
                 streakDays = 7,
                 message = "Goed gedaan!",
                 hero = StudySessionCompleteHero.Milestone(streakDays = 7),
+            ),
+            scrollState = ScrollState(0),
+            onClose = {},
+            snackbarHostState = SnackbarHostState(),
+            animate = false,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionCompleteWordsMilestonePreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionCompleteContent(
+            reward = StudySessionCompleteUiState(
+                cardsReviewed = 15,
+                minutes = 7,
+                streakDays = 5,
+                message = "Goed gedaan!",
+                hero = StudySessionCompleteHero.WordsMilestone(learnedTotal = 11),
             ),
             scrollState = ScrollState(0),
             onClose = {},

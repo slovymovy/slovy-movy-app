@@ -42,6 +42,17 @@ object StudySessionCompletePreviewData {
             reward = milestone(days = 100, cardsReviewed = 21, minutes = 10),
         ),
         StudySessionCompletePreviewCase(
+            label = "Words milestone",
+            description = "Lifetime words-learned mark crossed this session.",
+            reward = StudySessionCompleteUiState(
+                cardsReviewed = 16,
+                minutes = 7,
+                streakDays = 5,
+                message = "Nicely done!",
+                hero = StudySessionCompleteHero.WordsMilestone(learnedTotal = 51),
+            ),
+        ),
+        StudySessionCompletePreviewCase(
             label = "Pipeline shift",
             description = "Multiple stages move forward.",
             reward = StudySessionCompleteUiState(
