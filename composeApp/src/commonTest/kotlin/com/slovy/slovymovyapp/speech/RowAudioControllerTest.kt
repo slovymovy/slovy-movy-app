@@ -392,6 +392,50 @@ open class RowAudioControllerTest : BaseTest() {
     }
 
     @Test
+    fun returningFromVoiceSettingsRebindsTheEngineOnce() = runBlocking {
+        val fake = fakeWithEnglishVoices(voice("v1", quality = VoiceQuality.MEDIUM))
+        withController(fake) { controller ->
+            controller.refreshAvailability()
+            awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
+            assertEquals(0, fake.rebindCount, "Nothing to rebind before the user leaves for settings")
+
+            controller.toggle(SENSE_A, LEMMA_A, Language.ENGLISH)
+            awaitUntil("voice setup sheet requested") { controller.uiState.voiceSetupLanguage != null }
+            controller.openVoiceSettings()
+
+            // The user changes the default engine and comes back to this screen.
+            controller.refreshAvailability()
+            awaitUntil("engine rebound on resume") { fake.rebindCount == 1 }
+
+            controller.refreshAvailability()
+            awaitUntil("second probe resolved") { controller.uiState.availableLanguages != null }
+            assertEquals(1, fake.rebindCount, "A later resume must not drop a working engine binding")
+        }
+    }
+
+    @Test
+    fun playAfterEngineChangeUsesTheNewEnginesVoices() = runBlocking {
+        val fake = fakeWithEnglishVoices(voice("old-engine-v1"))
+        withController(fake) { controller ->
+            controller.toggle(SENSE_A, LEMMA_A, Language.ENGLISH)
+            awaitUntil("first utterance handed to the engine") { fake.setVoices.size == 1 }
+            fake.emitStatus(TTSStatus.SPEAKING)
+            fake.emitStatus(TTSStatus.IDLE)
+
+            // Switching the default engine replaces every voice id the stored selection holds.
+            fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("new-engine-v1")))
+
+            controller.toggle(SENSE_A, LEMMA_A, Language.ENGLISH)
+            awaitUntil("second utterance handed to the engine") { fake.setVoices.size == 2 }
+            assertEquals(
+                "new-engine-v1",
+                fake.setVoices.last().id,
+                "A selection stranded on the previous engine must not leave the row silent"
+            )
+        }
+    }
+
+    @Test
     fun allVoicesDisabledHidesSpeaker() = runBlocking {
         val fake = fakeWithEnglishVoices(voice("v1"))
         // The user disabled every English voice in Settings.

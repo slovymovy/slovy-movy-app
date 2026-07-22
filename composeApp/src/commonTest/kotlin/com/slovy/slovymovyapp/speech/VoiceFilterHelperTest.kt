@@ -453,6 +453,42 @@ open class VoiceFilterHelperTest : BaseTest() {
     }
 
     @Test
+    fun loadEnabledVoices_replaces_selection_left_by_another_engine() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("rhvoice-anna", "rhvoice-elena"))
+        val player = FakeSpeechPlayer().apply {
+            languages = listOf(testLanguage)
+            voicesByLanguage = mapOf(Language.ENGLISH to testVoices)
+        }
+
+        val result = helper.loadEnabledVoices(player, testLanguage)
+
+        assertEquals(
+            listOf("voice1", "voice3"),
+            result.map { it.id },
+            "Playback must fall back to the bound engine's defaults instead of going silent"
+        )
+    }
+
+    @Test
+    fun loadEnabledVoices_keeps_deliberate_selection_on_the_bound_engine() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("voice3"))
+        val player = FakeSpeechPlayer().apply {
+            languages = listOf(testLanguage)
+            voicesByLanguage = mapOf(Language.ENGLISH to testVoices)
+        }
+
+        val result = helper.loadEnabledVoices(player, testLanguage)
+
+        assertEquals(
+            listOf("voice3"),
+            result.map { it.id },
+            "A selection that matches the bound engine must survive the reconciliation"
+        )
+    }
+
+    @Test
     fun isVoiceSetupShown_returns_false_when_no_setting() = runBlocking {
         val helper = VoiceFilterHelper(settingsRepository())
 

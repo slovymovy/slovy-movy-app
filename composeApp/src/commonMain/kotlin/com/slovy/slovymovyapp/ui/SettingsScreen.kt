@@ -52,8 +52,20 @@ data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
     val isExpanded: Boolean = false,
     val isLoadingVoices: Boolean = false,
+    /** True once the engine has answered for this language, so an empty [voices] means "none". */
+    val voicesLoaded: Boolean = false,
     val enabledVoiceIds: Set<String> = emptySet()
-)
+) {
+    /**
+     * The enabled voices the bound engine actually offers. Voice ids are engine-specific and
+     * [enabledVoiceIds] is kept as stored — a selection made on another engine survives so it
+     * returns intact if the user switches back — so counting it directly would promise voices that
+     * cannot play, for instance an English selection left over from an engine that is no longer
+     * the default.
+     */
+    val enabledInstalledVoices: List<Text2SpeechVoice>
+        get() = voices.filter { it.id in enabledVoiceIds }
+}
 
 data class SettingsUiState(
     // Languages I learn
@@ -137,9 +149,6 @@ class SettingsViewModel(
 
     private var versionTapCount = 0
     private var lastVersionTapAtMs = 0L
-
-    /** Set when the user leaves for system TTS settings, where the default engine can change. */
-    private var awaitingEngineChange = false
 
     companion object {
         private const val TAG = "SettingsViewModel"
@@ -667,7 +676,9 @@ class SettingsViewModel(
                         val voices = ttsManager.getVoicesForLanguage(language)
                         voiceFilterHelper.initializeDefaultVoices(language, voices)
                         val enabledIds = voiceFilterHelper.reconcileVoicesForEngineChange(language, voices)
-                        updateLanguageState(language) { it.copy(voices = voices, enabledVoiceIds = enabledIds) }
+                        updateLanguageState(language) {
+                            it.copy(voices = voices, enabledVoiceIds = enabledIds, voicesLoaded = true)
+                        }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -687,7 +698,7 @@ class SettingsViewModel(
 
     fun toggleLanguageExpansion(language: Text2SpeechLanguage) {
         val s = state.languages[language] ?: return
-        if (!s.isExpanded && s.voices.isEmpty()) {
+        if (!s.isExpanded && !s.voicesLoaded) {
             loadVoicesForLanguage(language)
         }
 
@@ -705,7 +716,12 @@ class SettingsViewModel(
 
                 val enabledIds = voiceFilterHelper.reconcileVoicesForEngineChange(language, voices)
                 updateLanguageState(language) {
-                    it.copy(voices = voices, enabledVoiceIds = enabledIds, isLoadingVoices = false)
+                    it.copy(
+                        voices = voices,
+                        enabledVoiceIds = enabledIds,
+                        isLoadingVoices = false,
+                        voicesLoaded = true
+                    )
                 }
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
@@ -756,22 +772,20 @@ class SettingsViewModel(
 
     fun openSystemSettings() {
         Analytics.logEvent(AnalyticsEvent.SETTINGS_OPEN_SYSTEM_SETTINGS_CLICK)
-        awaitingEngineChange = true
         ttsManager.openSettings()
     }
 
     /**
-     * The engine binding is made once and survives a default-engine change made in system
-     * settings, so it is dropped and remade on the way back rather than requiring a restart.
+     * Reloads the voice lists when the player rebound to a different engine, since voices and
+     * their ids are engine-specific. The pending-rebind state belongs to the player: the user can
+     * also reach system settings from the voice setup sheet on another screen.
      */
     fun rebindVoiceEngineIfNeeded() {
-        if (!awaitingEngineChange) return
-        awaitingEngineChange = false
+        if (!ttsManager.rebindEngineIfNeeded()) return
 
-        ttsManager.rebindEngine()
         state = state.copy(
             languages = state.languages.mapValues { (_, langState) ->
-                langState.copy(voices = emptyList(), enabledVoiceIds = emptySet())
+                langState.copy(voices = emptyList(), enabledVoiceIds = emptySet(), voicesLoaded = false)
             }
         )
         loadLanguages()
@@ -1554,11 +1568,12 @@ private fun SettingsScreenPreviewWithLanguages(
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState(),
+                    // The bound engine reports no voices for this language.
                     Text2SpeechLanguage(
                         language = Language.ENGLISH,
                         isAvailable = true,
                         missingData = false
-                    ) to LanguageUiState()
+                    ) to LanguageUiState(voicesLoaded = true)
                 )
             )
         )
@@ -1597,6 +1612,8 @@ private fun SettingsScreenPreviewWithExpandedVoice(
                         missingData = false
                     ) to LanguageUiState(
                         isExpanded = true,
+                        voicesLoaded = true,
+                        enabledVoiceIds = setOf("en-us-x-sfg#female_1-local", "en-us-x-sfg#male_1-local"),
                         voices = listOf(
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#female_1-local",

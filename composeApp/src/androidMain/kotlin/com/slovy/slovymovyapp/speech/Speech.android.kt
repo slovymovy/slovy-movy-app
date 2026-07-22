@@ -29,6 +29,9 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
     /** Completed with the engine connection result; replaced on every rebind. */
     private var engineReady = CompletableDeferred<Boolean>()
 
+    /** Set once the user actually reaches system settings, where the default engine can change. */
+    private var settingsVisited = false
+
     init {
         initializeTTS()
     }
@@ -168,6 +171,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
                 val intent = Intent(action)
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
+                settingsVisited = true
                 return
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to open TTS settings via $action", e)
@@ -175,7 +179,18 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         }
     }
 
-    actual fun rebindEngine() {
+    actual override fun rebindEngineIfNeeded(): Boolean {
+        if (!settingsVisited) return false
+        settingsVisited = false
+        rebindEngine()
+        return true
+    }
+
+    /**
+     * The binding is made once and survives a default-engine change made in system settings, so it
+     * is dropped and remade rather than requiring a restart.
+     */
+    private fun rebindEngine() {
         try {
             tts.stop()
             tts.shutdown()

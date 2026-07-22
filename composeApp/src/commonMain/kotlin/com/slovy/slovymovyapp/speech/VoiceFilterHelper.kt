@@ -145,12 +145,18 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         return voices.filter { it.id in enabledVoiceIds }
     }
 
+    /**
+     * The enabled voices to play [language] with. Reconciling here is what keeps playback working
+     * after an engine change: a selection stored for the previous engine matches none of the new
+     * engine's ids, so filtering alone would leave the language silent even though voices exist.
+     */
     suspend fun loadEnabledVoices(
         speechPlayer: SpeechPlayer,
         language: Text2SpeechLanguage,
     ): List<Text2SpeechVoice> {
         val allVoices = speechPlayer.getVoicesForLanguage(language)
         initializeDefaultVoices(language, allVoices)
+        reconcileVoicesForEngineChange(language, allVoices)
         return filterVoicesByEnabled(allVoices, language)
     }
 

@@ -15,6 +15,16 @@ interface SpeechPlayer {
     fun setVoice(voice: Text2SpeechVoice)
     fun openSettings()
 
+    /**
+     * Drops the current engine binding and connects again when [openSettings] has sent the user to
+     * system settings since the last call, picking up a default-engine change made there. Returns
+     * whether a rebind happened, so callers can reload engine-derived state. Every screen that can
+     * open system settings calls this when it resumes; the pending flag lives in the player so the
+     * entry point and the return point do not have to be the same screen. Always false on platforms
+     * without pluggable engines.
+     */
+    fun rebindEngineIfNeeded(): Boolean
+
     fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit)
     fun removeOnStatusChangeListener(key: Any)
 }
@@ -28,14 +38,10 @@ expect class TextToSpeechManager(androidContext: Any? = null) : SpeechPlayer {
     override fun setVoice(voice: Text2SpeechVoice)
     override fun openSettings()
 
+    override fun rebindEngineIfNeeded(): Boolean
+
     override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit)
     override fun removeOnStatusChangeListener(key: Any)
-
-    /**
-     * Drops the current engine binding and connects again, picking up a default-engine
-     * change the user made in system settings. No-op on platforms without pluggable engines.
-     */
-    fun rebindEngine()
 }
 
 data class Text2SpeechLanguage(

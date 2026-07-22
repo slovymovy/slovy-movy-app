@@ -85,9 +85,13 @@ class RowAudioController(
      * installed or disabled while away in Settings; only one probe runs at a time. A language
      * counts as playable only when the engine supports it AND at least one enabled voice remains,
      * so rows never show a speaker that cannot produce sound.
+     *
+     * The voice setup sheet can send the user to system settings from here ([openVoiceSettings]),
+     * so the engine is rebound first when they changed the default one while away.
      */
     fun refreshAvailability() {
         if (availabilityLoadJob?.isActive == true) return
+        speechPlayer.rebindEngineIfNeeded()
         availabilityLoadJob = scope.launch {
             val languages = try {
                 speechPlayer.getAvailableLanguages()
