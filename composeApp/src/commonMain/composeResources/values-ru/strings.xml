@@ -256,7 +256,7 @@
 
     <string name="voice_setup_title">Качество озвучки</string>
     <string name="voice_setup_description">Стандартный голос может звучать механически. Вот как это исправить:</string>
-    <string name="voice_setup_step_android">Откройте настройки синтеза речи на телефоне и скачайте качественный голос для %1$s.</string>
+    <string name="voice_setup_step_android">Откройте настройки синтеза речи на телефоне. Выберите приложение озвучки, которое вам нравится, и скачайте качественные голоса для %1$s.</string>
     <string name="voice_setup_step_ios">Перейдите в Настройки > Универсальный доступ > Зрение > Чтение вслух > Голоса, выберите язык и скачайте нужные голоса.</string>
     <string name="voice_setup_step_other">Скачайте качественный голос для %1$s в системных настройках.</string>
     <string name="voice_setup_step_two">Вернитесь в OpenWords (Настройки > Озвучка) и выберите новый голос.</string>
@@ -267,10 +267,11 @@
     <string name="voice_many_enabled">%1$d голосов включено</string>
     <string name="voice_no_voices_available">Нет доступных голосов</string>
     <string name="voice_download_more_title">Добавить новые голоса</string>
-    <string name="voice_download_more_step_android">Откройте настройки синтеза речи на телефоне и загрузите качественный голос.</string>
+    <string name="voice_download_more_step_android">Откройте настройки синтеза речи на телефоне. Выберите приложение озвучки, которое вам нравится, и скачайте качественные голоса.</string>
     <string name="voice_download_more_step_ios">Настройки > Универсальный доступ > Зрение > Чтение вслух > Голоса. Выберите язык и скачайте нужные голоса.</string>
     <string name="voice_download_more_step_other">Загрузите качественный голос в системных настройках.</string>
     <string name="voice_download_more_step_two">Вернитесь в OpenWords (Настройки > Озвучка) и включите его.</string>
+    <string name="voice_step_two_android">Вернитесь в OpenWords (Настройки → Озвучка) — новые голоса появятся там автоматически. Включите те, которые вам нравятся.</string>
     <string name="voice_quality_high">Высокое</string>
     <string name="voice_quality_good">Хорошее</string>
     <string name="voice_quality_medium">Среднее</string>

@@ -256,10 +256,10 @@
 
     <string name="voice_setup_title">Obtiens une meilleure prononciation</string>
     <string name="voice_setup_description">La voix par défaut peut sembler robotique. Voici comment en obtenir une meilleure :</string>
-    <string name="voice_setup_step_android">Ouvre les réglages de synthèse vocale de ton téléphone et télécharge une voix de haute qualité pour %1$s.</string>
+    <string name="voice_setup_step_android">Ouvre les réglages de synthèse vocale de ton téléphone. Choisis l'appli de voix que tu préfères et télécharge des voix de qualité pour %1$s.</string>
     <string name="voice_setup_step_ios">Va dans Réglages iPhone - Accessibilité - Vision - Contenu énoncé - Voix, sélectionne une langue, puis télécharge les voix dont tu as besoin.</string>
     <string name="voice_setup_step_other">Télécharge une voix de haute qualité pour %1$s depuis les réglages de ton système.</string>
-    <string name="voice_setup_step_two">Reviens dans les réglages d'Open Words - Voix et active la nouvelle voix.</string>
+    <string name="voice_setup_step_two">Reviens dans les réglages d'OpenWords - Voix et active la nouvelle voix.</string>
 
     <string name="voice_no_voices_enabled">Aucune voix activée</string>
     <string name="voice_unknown_name">Inconnue</string>
@@ -267,10 +267,11 @@
     <string name="voice_many_enabled">%1$d voix activées</string>
     <string name="voice_no_voices_available">Aucune voix disponible</string>
     <string name="voice_download_more_title">Télécharger plus de voix</string>
-    <string name="voice_download_more_step_android">Ouvre les réglages de synthèse vocale de ton téléphone et télécharge une voix de haute qualité.</string>
+    <string name="voice_download_more_step_android">Ouvre les réglages de synthèse vocale de ton téléphone. Choisis l'appli de voix que tu préfères et télécharge des voix de qualité.</string>
     <string name="voice_download_more_step_ios">Va dans Réglages iPhone - Accessibilité - Vision - Contenu énoncé - Voix, sélectionne une langue, puis télécharge les voix dont tu as besoin.</string>
     <string name="voice_download_more_step_other">Télécharge une voix de haute qualité depuis les réglages de ton système.</string>
-    <string name="voice_download_more_step_two">Reviens dans les réglages d'Open Words - Voix et active la nouvelle voix.</string>
+    <string name="voice_download_more_step_two">Reviens dans les réglages d'OpenWords - Voix et active la nouvelle voix.</string>
+    <string name="voice_step_two_android">Reviens dans les réglages d'OpenWords → Voix : les nouvelles voix y apparaissent automatiquement. Active celles qui te plaisent.</string>
     <string name="voice_quality_high">Élevée</string>
     <string name="voice_quality_good">Bonne</string>
     <string name="voice_quality_medium">Moyenne</string>

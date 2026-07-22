@@ -256,10 +256,10 @@
 
     <string name="voice_setup_title">Bessere Aussprache erhalten</string>
     <string name="voice_setup_description">Die Standardstimme klingt vielleicht roboterhaft. So bekommst du eine bessere:</string>
-    <string name="voice_setup_step_android">Öffne die Text-zu-Sprache-Einstellungen deines Telefons und lade eine hochwertige Stimme für %1$s herunter.</string>
+    <string name="voice_setup_step_android">Öffne die Text-zu-Sprache-Einstellungen deines Telefons. Wähle deine bevorzugte Sprach-App und lade hochwertige Stimmen für %1$s herunter.</string>
     <string name="voice_setup_step_ios">Gehe zu iPhone-Einstellungen - Bedienungshilfen - Sehen - Vorlesen - Stimmen, wähle eine Sprache und lade die benötigten Stimmen herunter.</string>
     <string name="voice_setup_step_other">Lade eine hochwertige Stimme für %1$s aus deinen Systemeinstellungen herunter.</string>
-    <string name="voice_setup_step_two">Komm zurück zu den Open Words-Einstellungen - Stimmen und aktiviere die neue Stimme.</string>
+    <string name="voice_setup_step_two">Komm zurück zu den OpenWords-Einstellungen - Stimmen und aktiviere die neue Stimme.</string>
 
     <string name="voice_no_voices_enabled">Keine Stimmen aktiviert</string>
     <string name="voice_unknown_name">Unbekannt</string>
@@ -267,10 +267,11 @@
     <string name="voice_many_enabled">%1$d Stimmen aktiviert</string>
     <string name="voice_no_voices_available">Keine Stimmen verfügbar</string>
     <string name="voice_download_more_title">Mehr Stimmen herunterladen</string>
-    <string name="voice_download_more_step_android">Öffne die Text-zu-Sprache-Einstellungen deines Telefons und lade eine hochwertige Stimme herunter.</string>
+    <string name="voice_download_more_step_android">Öffne die Text-zu-Sprache-Einstellungen deines Telefons. Wähle deine bevorzugte Sprach-App und lade hochwertige Stimmen herunter.</string>
     <string name="voice_download_more_step_ios">Gehe zu iPhone-Einstellungen - Bedienungshilfen - Sehen - Vorlesen - Stimmen, wähle eine Sprache und lade die benötigten Stimmen herunter.</string>
     <string name="voice_download_more_step_other">Lade eine hochwertige Stimme aus deinen Systemeinstellungen herunter.</string>
-    <string name="voice_download_more_step_two">Komm zurück zu den Open Words-Einstellungen - Stimme und aktiviere die neue Stimme.</string>
+    <string name="voice_download_more_step_two">Komm zurück zu den OpenWords-Einstellungen - Stimme und aktiviere die neue Stimme.</string>
+    <string name="voice_step_two_android">Komm zurück zu den OpenWords-Einstellungen → Stimme — neue Stimmen erscheinen dort automatisch. Aktiviere die, die dir gefallen.</string>
     <string name="voice_quality_high">Hoch</string>
     <string name="voice_quality_good">Gut</string>
     <string name="voice_quality_medium">Mittel</string>

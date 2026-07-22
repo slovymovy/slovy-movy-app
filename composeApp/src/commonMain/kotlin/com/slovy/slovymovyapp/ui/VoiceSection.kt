@@ -56,6 +56,7 @@ import slovymovyapp.composeapp.generated.resources.voice_download_more_step_ios
 import slovymovyapp.composeapp.generated.resources.voice_download_more_step_other
 import slovymovyapp.composeapp.generated.resources.voice_download_more_step_two
 import slovymovyapp.composeapp.generated.resources.voice_download_more_title
+import slovymovyapp.composeapp.generated.resources.voice_step_two_android
 import slovymovyapp.composeapp.generated.resources.voice_enable_label
 import slovymovyapp.composeapp.generated.resources.voice_many_enabled
 import slovymovyapp.composeapp.generated.resources.voice_network_online
@@ -226,6 +227,12 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
         else -> stringResource(Res.string.voice_download_more_step_other)
     }
 
+    val step2Instruction = if (isAndroid) {
+        stringResource(Res.string.voice_step_two_android)
+    } else {
+        stringResource(Res.string.voice_download_more_step_two)
+    }
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -255,7 +262,7 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
             }
 
             StepRow(number = 1, text = step1Instruction)
-            StepRow(number = 2, text = stringResource(Res.string.voice_download_more_step_two))
+            StepRow(number = 2, text = step2Instruction)
 
             if (isAndroid || isIos) {
                 FilledTonalButton(

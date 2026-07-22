@@ -256,10 +256,10 @@
 
     <string name="voice_setup_title">Verbeter je uitspraak</string>
     <string name="voice_setup_description">De standaardstem kan robotachtig klinken. Zo krijg je een betere:</string>
-    <string name="voice_setup_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een hoogwaardige stem voor %1$s.</string>
+    <string name="voice_setup_step_android">Open de tekst-naar-spraakinstellingen op je telefoon. Kies de spraak-app die je wilt en download stemmen van goede kwaliteit voor %1$s.</string>
     <string name="voice_setup_step_ios">Ga naar Instellingen > Toegankelijkheid > Zien > Lezen en spreken > Stemmen, selecteer een taal en download de stemmen die je nodig hebt.</string>
     <string name="voice_setup_step_other">Download een hoogwaardige stem voor %1$s via je systeeminstellingen.</string>
-    <string name="voice_setup_step_two">Ga terug naar de Open Words-instellingen > Stemmen en schakel de nieuwe stem in.</string>
+    <string name="voice_setup_step_two">Ga terug naar de OpenWords-instellingen > Stemmen en schakel de nieuwe stem in.</string>
 
     <string name="voice_no_voices_enabled">Geen stemmen ingeschakeld</string>
     <string name="voice_unknown_name">Onbekend</string>
@@ -267,10 +267,11 @@
     <string name="voice_many_enabled">%1$d stemmen ingeschakeld</string>
     <string name="voice_no_voices_available">Geen stemmen beschikbaar</string>
     <string name="voice_download_more_title">Download meer stemmen</string>
-    <string name="voice_download_more_step_android">Open de tekst-naar-spraakinstellingen op je telefoon en download een hoogwaardige stem.</string>
+    <string name="voice_download_more_step_android">Open de tekst-naar-spraakinstellingen op je telefoon. Kies de spraak-app die je wilt en download stemmen van goede kwaliteit.</string>
     <string name="voice_download_more_step_ios">Ga naar Instellingen > Toegankelijkheid > Zien > Lezen en spreken > Stemmen, selecteer een taal en download de stemmen die je nodig hebt.</string>
     <string name="voice_download_more_step_other">Download een hoogwaardige stem via je systeeminstellingen.</string>
-    <string name="voice_download_more_step_two">Ga terug naar de Open Words-instellingen > Stem en schakel de nieuwe stem in.</string>
+    <string name="voice_download_more_step_two">Ga terug naar de OpenWords-instellingen > Stem en schakel de nieuwe stem in.</string>
+    <string name="voice_step_two_android">Ga terug naar de OpenWords-instellingen → Stem — nieuwe stemmen verschijnen daar automatisch. Schakel de stemmen in die je mooi vindt.</string>
     <string name="voice_quality_high">Hoog</string>
     <string name="voice_quality_good">Goed</string>
     <string name="voice_quality_medium">Gemiddeld</string>

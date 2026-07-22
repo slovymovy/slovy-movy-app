@@ -255,10 +255,10 @@
 
     <string name="voice_setup_title">Lepsza wymowa</string>
     <string name="voice_setup_description">Domyślny głos może brzmieć mechanicznie. Oto jak to zmienić:</string>
-    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos dla języka %1$s.</string>
+    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie. Wybierz aplikację głosową, którą wolisz, i pobierz głosy dobrej jakości dla języka %1$s.</string>
     <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Wzrok > Czytaj i mów > Głosy, wybierz język i pobierz potrzebne głosy.</string>
     <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.</string>
-    <string name="voice_setup_step_two">Wróć do: Ustawienia Open Words > Głosy i włącz nowy głos.</string>
+    <string name="voice_setup_step_two">Wróć do: Ustawienia OpenWords > Głosy i włącz nowy głos.</string>
 
     <string name="voice_no_voices_enabled">Brak włączonych głosów</string>
     <string name="voice_unknown_name">Nieznany</string>
@@ -266,10 +266,11 @@
     <string name="voice_many_enabled">%1$d aktywnych głosów</string>
     <string name="voice_no_voices_available">Brak dostępnych głosów</string>
     <string name="voice_download_more_title">Pobierz więcej głosów</string>
-    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos.</string>
+    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie. Wybierz aplikację głosową, którą wolisz, i pobierz głosy dobrej jakości.</string>
     <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Wzrok > Czytaj i mów > Głosy, wybierz język i pobierz potrzebne głosy.</string>
     <string name="voice_download_more_step_other">Pobierz wysokiej jakości głos w ustawieniach systemowych.</string>
-    <string name="voice_download_more_step_two">Wróć do: Ustawienia Open Words > Głos i włącz nowy głos.</string>
+    <string name="voice_download_more_step_two">Wróć do: Ustawienia OpenWords > Głos i włącz nowy głos.</string>
+    <string name="voice_step_two_android">Wróć do: Ustawienia OpenWords → Głos — nowe głosy pojawią się tam automatycznie. Włącz te, które ci się podobają.</string>
     <string name="voice_quality_high">Wysoka</string>
     <string name="voice_quality_good">Dobra</string>
     <string name="voice_quality_medium">Średnia</string>
