@@ -84,17 +84,9 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         language: Text2SpeechLanguage,
         allVoices: List<Text2SpeechVoice>
     ): Set<String> = withContext(Dispatchers.IO) {
-        if (allVoices.isEmpty()) return@withContext getEnabledVoices(language)
-
-        val stored = getEnabledVoices(language)
-        if (stored.isEmpty()) return@withContext stored
-
-        val availableIds = allVoices.map { it.id }.toSet()
-        if (stored.any { it in availableIds }) return@withContext stored
+        if (!isSelectionFromUnboundEngine(language, allVoices)) return@withContext getEnabledVoices(language)
 
         val defaultVoices = selectDefaultVoiceIds(allVoices)
-        if (defaultVoices.isEmpty()) return@withContext stored
-
         setEnabledVoices(language, defaultVoices)
         defaultVoices
     }
@@ -172,12 +164,39 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
     /**
      * Whether [language] has at least one voice the user would actually hear: any installed voice
      * when no enabled-voice selection is stored, otherwise at least one still-enabled voice.
-     * Unlike [loadEnabledVoices] this never seeds a default selection, so it is safe to probe
+     * Unlike [loadEnabledVoices] this never seeds or rewrites a selection, so it is safe to probe
      * every language.
+     *
+     * A selection stored for a different engine counts as playable too: it matches none of the
+     * bound engine's ids, but the [loadEnabledVoices] on the next play reconciles it to that
+     * engine's defaults. Reporting it as unplayable would hide the row speakers right after an
+     * engine change, before playback ever gets the chance to repair the selection.
      */
     suspend fun hasPlayableVoice(speechPlayer: SpeechPlayer, language: Text2SpeechLanguage): Boolean {
         val allVoices = speechPlayer.getVoicesForLanguage(language)
-        return filterVoicesByEnabled(allVoices, language).isNotEmpty()
+        if (filterVoicesByEnabled(allVoices, language).isNotEmpty()) return true
+        return isSelectionFromUnboundEngine(language, allVoices)
+    }
+
+    /**
+     * Whether the stored selection for [language] can only have come from an engine other than the
+     * one that reported [allVoices]: it is non-empty, shares no id with them, and the current
+     * engine offers defaults to fall back to. An empty stored set is a deliberate "nothing enabled"
+     * choice, not a stale one.
+     */
+    private suspend fun isSelectionFromUnboundEngine(
+        language: Text2SpeechLanguage,
+        allVoices: List<Text2SpeechVoice>
+    ): Boolean {
+        if (allVoices.isEmpty()) return false
+
+        val stored = getEnabledVoices(language)
+        if (stored.isEmpty()) return false
+
+        val availableIds = allVoices.map { it.id }.toSet()
+        if (stored.any { it in availableIds }) return false
+
+        return selectDefaultVoiceIds(allVoices).isNotEmpty()
     }
 
     private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {
