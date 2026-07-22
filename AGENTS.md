@@ -108,6 +108,23 @@ Client database/list tests use `TestServerService` from `buildSrc`. It starts th
 `build/test-server.log`. It may terminate an old listener occupying its configured test port. Test DB/list fixtures
 default to `.test-db-files` and `.test-lists-files`.
 
+### Known local failures without a GitHub token
+
+The word-fetch cases in `DictionaryClientTest` drive the test server's `/word/{lang}/{word}` route, which reads base
+data from the `slovymovy/words` repository. Without `ACCESS_TO_GH_TOKEN` (or a local GitHub key file) the server
+answers `503 GitHub token not configured` and these five fail in both `:composeApp:testAndroidHostTest` and
+`:composeApp:desktopTest`:
+
+- `getWord_fetchesFromServer_whenOnlineOnlyWithoutTranslations`
+- `getWord_fetchesBothWordAndTranslations_whenOnlineOnlyWithTranslations`
+- `getWord_fetchesTranslations_whenWordExistsButTranslationsMissing`
+- `getWord_fetchesTranslations_ru_to_german`
+- `getWord_fetchesTranslations_ru_to_english_and_german`
+
+Treat exactly this set, with exactly that 503, as an environment gap rather than a regression: note it and move on
+instead of investigating. Any other failing test, or one of these failing for a different reason, is a real failure.
+CI supplies the token, so they must pass there.
+
 Testing rules:
 
 - Do not leave `println` calls in tests. Use descriptive assertion messages.
