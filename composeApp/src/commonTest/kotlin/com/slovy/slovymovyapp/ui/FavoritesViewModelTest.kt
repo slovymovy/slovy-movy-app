@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui
 
 import androidx.lifecycle.ViewModelStore
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.WordListExportFormat
 import com.slovy.slovymovyapp.data.export.WordListExporter
 import com.slovy.slovymovyapp.data.export.WordListFileSaver
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -98,6 +99,36 @@ open class FavoritesViewModelTest : BaseTest() {
     private fun contentState(vm: FavoritesViewModel): FavoritesUiState.Content {
         assertIs<FavoritesUiState.Content>(vm.state, "Expected Content but was ${vm.state::class.simpleName}")
         return vm.state as FavoritesUiState.Content
+    }
+
+    @Test
+    fun exportDialog_openConfigureDismiss() = runTest {
+        val favRepo = favoritesRepository()
+        favRepo.deleteAll()
+        favRepo.add(SENSE_1, Language.ENGLISH, "hello")
+
+        val vm = createViewModel(favRepo)
+        vm.loadAndApplyState("")
+
+        vm.openExportDialog()
+        var content = contentState(vm)
+        val export = content.export
+        assertNotNull(export, "Export dialog should open when favorites exist")
+        assertEquals(WordListExportFormat.CSV, export.format, "Format must default to CSV")
+        assertFalse(export.includeStats, "Learning progress must default to off")
+
+        vm.setExportFormat(WordListExportFormat.TSV)
+        vm.setExportIncludeStats(true)
+        content = contentState(vm)
+        assertEquals(WordListExportFormat.TSV, content.export?.format)
+        assertEquals(true, content.export?.includeStats)
+
+        // A background favorites refresh must not close the open dialog.
+        vm.loadAndApplyState("")
+        assertNotNull(contentState(vm).export, "State refresh should preserve the open dialog")
+
+        vm.dismissExportDialog()
+        assertNull(contentState(vm).export, "Dismiss should close the export dialog")
     }
 
     @Test

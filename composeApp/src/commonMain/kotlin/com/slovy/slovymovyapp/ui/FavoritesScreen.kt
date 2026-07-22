@@ -818,7 +818,6 @@ class FavoritesViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                updateExport { it.copy(inProgress = false) }
                 showExportError(e)
             }
         }
@@ -829,10 +828,12 @@ class FavoritesViewModel(
         state = content.copy(exportMessage = null)
     }
 
+    /** Closes the dialog before reporting: an open Dialog overlay would hide the snackbar. */
     private fun showExportError(e: Exception) {
         val content = state as? FavoritesUiState.Content ?: return
         val reason = e.message?.takeIf { it.isNotBlank() } ?: NetworkErrorClassifier.userMessage(e)
         state = content.copy(
+            export = null,
             exportMessage = UiText.Resource(Res.string.favorites_export_error, listOf(reason))
         )
     }
