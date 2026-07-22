@@ -75,6 +75,9 @@ class RowAudioController(
     // it started with and bails if a newer request superseded it, so a slow first-time load for row
     // A can't speak or clobber row B's state after the user re-taps.
     private var requestToken = 0L
+    // Bumped for every availability probe, so a probe superseded by a rebind cannot publish the
+    // old engine's languages if it was already past its last suspension point when cancelled.
+    private var availabilityToken = 0L
     private var availabilityLoadJob: Job? = null
     private var listenerAttached = false
 
@@ -87,11 +90,19 @@ class RowAudioController(
      * so rows never show a speaker that cannot produce sound.
      *
      * The voice setup sheet can send the user to system settings from here ([openVoiceSettings]),
-     * so the engine is rebound first when they changed the default one while away.
+     * so the engine is rebound first when they changed the default one while away. That happens
+     * ahead of the single-probe guard: the pending settings visit must be consumed even when a
+     * probe is still running, and a probe started on the old binding reports the old engine's
+     * voices, so it is cancelled and restarted instead of being left to finish.
      */
     fun refreshAvailability() {
-        if (availabilityLoadJob?.isActive == true) return
-        speechPlayer.rebindEngineIfNeeded()
+        val rebound = speechPlayer.rebindEngineIfNeeded()
+        if (rebound) {
+            availabilityLoadJob?.cancel()
+        } else if (availabilityLoadJob?.isActive == true) {
+            return
+        }
+        val token = ++availabilityToken
         availabilityLoadJob = scope.launch {
             val languages = try {
                 speechPlayer.getAvailableLanguages()
@@ -105,6 +116,7 @@ class RowAudioController(
                 AppLogger.warn(TAG, "Unable to load TTS language availability", e)
                 emptySet()
             }
+            if (token != availabilityToken) return@launch
             uiState = uiState.copy(availableLanguages = languages)
         }
     }

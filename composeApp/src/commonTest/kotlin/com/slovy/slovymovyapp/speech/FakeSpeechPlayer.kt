@@ -26,6 +26,10 @@ class FakeSpeechPlayer : SpeechPlayer {
     /** When set, [getVoicesForLanguage] suspends until the deferred completes. */
     var voiceLoadGate: CompletableDeferred<Unit>? = null
 
+    /** Counts [getVoicesForLanguage] entries, so a test can tell a probe actually started. */
+    var voiceLoadRequests = 0
+        private set
+
     private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
 
     val hasStatusListeners: Boolean get() = statusListeners.isNotEmpty()
@@ -46,6 +50,7 @@ class FakeSpeechPlayer : SpeechPlayer {
     override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = languages
 
     override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> {
+        voiceLoadRequests++
         voiceLoadGate?.await()
         return voicesByLanguage[language.language] ?: emptyList()
     }

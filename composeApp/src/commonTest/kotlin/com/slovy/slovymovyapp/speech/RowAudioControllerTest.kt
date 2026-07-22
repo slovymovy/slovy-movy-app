@@ -414,6 +414,39 @@ open class RowAudioControllerTest : BaseTest() {
     }
 
     @Test
+    fun resumeDuringSlowProbeRebindsAndReprobesTheNewEngine() = runBlocking {
+        val fake = FakeSpeechPlayer().apply {
+            languages = listOf(ttsLanguage(Language.ENGLISH))
+        }
+        withController(fake) { controller ->
+            // The user leaves for system settings, then comes back before the resume probe of an
+            // earlier visit has finished loading voices from the old binding.
+            controller.openVoiceSettings()
+            val gate = CompletableDeferred<Unit>()
+            fake.voiceLoadGate = gate
+            controller.refreshAvailability()
+            awaitUntil("first probe reached the voice load") { fake.voiceLoadRequests == 1 }
+            assertEquals(1, fake.rebindCount, "The first resume consumes the pending settings visit")
+
+            // Second visit: a different default engine, whose voices only the rebind can see.
+            controller.openVoiceSettings()
+            fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("new-engine-v1")))
+            controller.refreshAvailability()
+            assertEquals(
+                2,
+                fake.rebindCount,
+                "An in-flight probe must not swallow the pending engine change"
+            )
+
+            gate.complete(Unit)
+            awaitUntil("re-probe published the new engine's voices") {
+                controller.uiState.availableLanguages != null && controller.uiState.isPlayable(Language.ENGLISH)
+            }
+            assertEquals(2, fake.voiceLoadRequests, "The stale probe should be restarted, not left to finish")
+        }
+    }
+
+    @Test
     fun playAfterEngineChangeUsesTheNewEnginesVoices() = runBlocking {
         val fake = fakeWithEnglishVoices(voice("old-engine-v1"))
         withController(fake) { controller ->
