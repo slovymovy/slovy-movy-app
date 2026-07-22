@@ -672,7 +672,12 @@
     <string name="study_complete_milestone_subtitle_50">Fünfzig Tage ohne Unterbrechung. Engagiert und beständig.</string>
     <string name="study_complete_milestone_subtitle_100">Einhundert Tage ohne Unterbrechung. Ein unglaublicher Meilenstein.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d Tage ohne Unterbrechung. Halte die Serie am Laufen.</string>
-    <string name="study_complete_words_milestone_title">%1$d Wörter vollständig gelernt!</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d Wort vollständig gelernt!</item>
+        <item quantity="few">%1$d Wörter vollständig gelernt!</item>
+        <item quantity="many">%1$d Wörter vollständig gelernt!</item>
+        <item quantity="other">%1$d Wörter vollständig gelernt!</item>
+    </plurals>
     <string name="study_complete_words_milestone_subtitle">Wörter, die du wirklich benutzen wirst.</string>
     <string name="study_action_done_for_now">Für jetzt genug</string>
     <string name="study_progress_count">%1$d von %2$d</string>

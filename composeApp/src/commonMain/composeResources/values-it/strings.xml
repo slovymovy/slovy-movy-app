@@ -672,7 +672,12 @@
     <string name="study_complete_milestone_subtitle_50">Cinquanta giorni senza interruzioni. Dedizione e costanza.</string>
     <string name="study_complete_milestone_subtitle_100">Cento giorni senza interruzioni. Un traguardo incredibile.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d giorni senza interruzioni. Continua la serie.</string>
-    <string name="study_complete_words_milestone_title">%1$d parole imparate a fondo!</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d parola imparata a fondo!</item>
+        <item quantity="few">%1$d parole imparate a fondo!</item>
+        <item quantity="many">%1$d parole imparate a fondo!</item>
+        <item quantity="other">%1$d parole imparate a fondo!</item>
+    </plurals>
     <string name="study_complete_words_milestone_subtitle">Parole che userai davvero.</string>
     <string name="study_action_done_for_now">Per ora basta</string>
     <string name="study_progress_count">%1$d di %2$d</string>

@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -25,7 +26,7 @@ internal fun WordsMilestoneCompleteHero(
     val dark = LocalIsDarkTheme.current
     MilestoneHeroCard(
         medallionTarget = learnedTotal,
-        title = stringResource(Res.string.study_complete_words_milestone_title, learnedTotal),
+        title = pluralStringResource(Res.plurals.study_complete_words_milestone_title, learnedTotal, learnedTotal),
         subtitle = stringResource(Res.string.study_complete_words_milestone_subtitle),
         colors = MilestoneHeroColors(
             container = if (dark) Color(0xFF26341F) else Color(0xFFE5F0E0),
