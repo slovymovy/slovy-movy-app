@@ -6,7 +6,7 @@ import java.io.File
 
 actual class WordListFileSaver actual constructor(androidContext: Any?) {
     private val homeDir = File(System.getProperty("user.home") ?: ".")
-    private val exportsDir = File(homeDir, "Downloads/SlovyMovy")
+    private val exportsDir = File(homeDir, "Downloads")
 
     actual val isSupported: Boolean = true
     actual val canShare: Boolean = false

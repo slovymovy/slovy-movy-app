@@ -135,7 +135,7 @@ class WordListExporter(
             append(now.minute.toString().padStart(2, '0'))
             append(now.second.toString().padStart(2, '0'))
         }
-        return "slovymovy-words-${language.code}-$timestamp.${format.fileExtension}"
+        return "openwords-${language.code}-$timestamp.${format.fileExtension}"
     }
 
     companion object {
