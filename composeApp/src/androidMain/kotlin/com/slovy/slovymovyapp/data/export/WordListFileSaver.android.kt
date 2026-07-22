@@ -38,7 +38,7 @@ actual class WordListFileSaver actual constructor(androidContext: Any?) {
             put(MediaStore.Downloads.MIME_TYPE, mimeType)
             put(
                 MediaStore.Downloads.RELATIVE_PATH,
-                "${Environment.DIRECTORY_DOWNLOADS}/SlovyMovy"
+                "${Environment.DIRECTORY_DOWNLOADS}/OpenWords"
             )
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
@@ -57,7 +57,7 @@ actual class WordListFileSaver actual constructor(androidContext: Any?) {
             writeSucceeded = true
             return WordListSaveResult(
                 fileName = fileName,
-                destinationLabel = "Downloads/SlovyMovy/$fileName",
+                destinationLabel = "Downloads/OpenWords/$fileName",
                 shareReference = uri.toString(),
             )
         } finally {
@@ -70,7 +70,7 @@ actual class WordListFileSaver actual constructor(androidContext: Any?) {
     private fun saveToAppExternalFiles(fileName: String, content: String): WordListSaveResult {
         val downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
             ?: error("Failed to access external downloads directory")
-        val exportDir = File(downloadsDir, "SlovyMovy").apply { mkdirs() }
+        val exportDir = File(downloadsDir, "OpenWords").apply { mkdirs() }
         val outputFile = File(exportDir, fileName)
         outputFile.writeText(content, Charsets.UTF_8)
         return WordListSaveResult(

@@ -12,7 +12,7 @@ actual class WordListFileSaver actual constructor(androidContext: Any?) {
     private val exportsRoot: String by lazy {
         val paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
         val dir = (paths as NSArray).objectAtIndex(0u) as? String ?: NSHomeDirectory()
-        val full = "$dir/SlovyMovy"
+        val full = "$dir/OpenWords"
         if (!fileManager.fileExistsAtPath(full)) {
             fileManager.createDirectoryAtPath(full, true, null, null)
         }
@@ -34,7 +34,7 @@ actual class WordListFileSaver actual constructor(androidContext: Any?) {
             if (!written) error("Failed to write $fileName")
             WordListSaveResult(
                 fileName = fileName,
-                destinationLabel = "Documents/SlovyMovy/$fileName",
+                destinationLabel = "Documents/OpenWords/$fileName",
                 shareReference = outputPath,
             )
         }
