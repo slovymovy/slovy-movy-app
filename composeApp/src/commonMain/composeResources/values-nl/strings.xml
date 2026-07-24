@@ -753,20 +753,20 @@
     <string name="favorites_study_done_next_review_a11y">Volgende herhaling over %1$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Lezen</string>
-    <string name="reader_title_with_lang">Woorden · %1$s</string>
-    <string name="reader_error_analyzing">De tekst kon niet worden geanalyseerd</string>
-    <string name="reader_text_too_long">Die tekst is wat lang — probeer maximaal %1$d woorden.</string>
+    <string name="reader_title">Tekst verkennen</string>
+    <string name="reader_title_with_lang">Jouw tekst · %1$s</string>
+    <string name="reader_error_analyzing">De tekst kon niet worden geanalyseerd — tik op de kaart om het opnieuw te proberen.</string>
+    <string name="reader_text_too_long">Die tekst is te lang — plak maximaal %1$d woorden tegelijk.</string>
     <string name="reader_paste_from_clipboard">Tekst vanaf het klembord plakken</string>
     <string name="reader_analyzing">Tekst analyseren</string>
-    <string name="reader_tap_to_paste">Tik om tekst te plakken</string>
-    <string name="reader_paste_blurb">Kopieer wat woorden en plak ze hier. Je kunt elk woord opzoeken en de betekenissen bewaren die je wilt onthouden.</string>
-    <string name="reader_clipboard_empty">Het klembord is leeg. Kopieer wat tekst en plak die hier.</string>
+    <string name="reader_tap_to_paste">Tik om te plakken</string>
+    <string name="reader_paste_blurb">Je kunt op elk woord in je tekst tikken — bekijk de betekenissen en bewaar wat je wilt onthouden.</string>
+    <string name="reader_clipboard_empty">Nog niets om te plakken — kopieer een tekst in een andere app en kom dan hier terug.</string>
     <string name="reader_look_up">Opzoeken</string>
-    <string name="reader_frequency_legend">Frequentielegenda</string>
-    <string name="reader_frequency">Frequentie</string>
+    <string name="reader_frequency_legend">Legenda woordfrequentie</string>
+    <string name="reader_frequency">Woordfrequentie</string>
     <string name="reader_a11y_saved">Bewaard, %1$s</string>
     <string name="search_add_words">Woorden toevoegen</string>
-    <string name="search_add_words_row">Kopieer en plak je tekst</string>
-    <string name="search_add_words_cd">Plak je tekst</string>
+    <string name="search_add_words_row">Plak een tekst — zoek elk woord op</string>
+    <string name="search_add_words_cd">Plak een tekst en zoek elk woord op</string>
 </resources>

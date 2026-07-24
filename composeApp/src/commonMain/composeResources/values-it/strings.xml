@@ -752,20 +752,20 @@
     <string name="favorites_study_done_next_review_a11y">Prossima ripetizione tra %1$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Leggi</string>
-    <string name="reader_title_with_lang">Parole · %1$s</string>
-    <string name="reader_error_analyzing">Impossibile analizzare il testo</string>
-    <string name="reader_text_too_long">Questo testo è un po' lungo — prova con al massimo %1$d parole.</string>
+    <string name="reader_title">Esplora un testo</string>
+    <string name="reader_title_with_lang">Il tuo testo · %1$s</string>
+    <string name="reader_error_analyzing">Impossibile analizzare il testo — tocca la scheda per riprovare.</string>
+    <string name="reader_text_too_long">Questo testo è troppo lungo — incolla al massimo %1$d parole alla volta.</string>
     <string name="reader_paste_from_clipboard">Incolla il testo dagli appunti</string>
     <string name="reader_analyzing">Analisi del testo</string>
-    <string name="reader_tap_to_paste">Tocca per incollare il testo</string>
-    <string name="reader_paste_blurb">Copia qualche parola e incollala qui. Potrai cercare ogni parola e salvare i significati che vuoi ricordare.</string>
-    <string name="reader_clipboard_empty">Gli appunti sono vuoti. Copia del testo e incollalo qui.</string>
+    <string name="reader_tap_to_paste">Tocca per incollare</string>
+    <string name="reader_paste_blurb">Potrai toccare ogni parola del tuo testo per vederne i significati e salvare quelli che vuoi ricordare.</string>
+    <string name="reader_clipboard_empty">Non c'è ancora niente da incollare — copia un testo in un'altra app e poi torna qui.</string>
     <string name="reader_look_up">Cerca</string>
-    <string name="reader_frequency_legend">Legenda della frequenza</string>
-    <string name="reader_frequency">Frequenza</string>
+    <string name="reader_frequency_legend">Legenda della frequenza delle parole</string>
+    <string name="reader_frequency">Frequenza delle parole</string>
     <string name="reader_a11y_saved">Salvato, %1$s</string>
     <string name="search_add_words">Aggiungi parole</string>
-    <string name="search_add_words_row">Copia e incolla il tuo testo</string>
-    <string name="search_add_words_cd">Incolla il tuo testo</string>
+    <string name="search_add_words_row">Incolla un testo — cerca ogni parola</string>
+    <string name="search_add_words_cd">Incolla un testo e cerca ogni parola</string>
 </resources>

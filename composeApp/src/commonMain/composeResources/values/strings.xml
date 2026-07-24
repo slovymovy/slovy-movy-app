@@ -752,20 +752,20 @@
     <string name="favorites_study_done_next_review_a11y">Next review in %1$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Read</string>
-    <string name="reader_title_with_lang">Words · %1$s</string>
-    <string name="reader_error_analyzing">Couldn't analyze the text</string>
-    <string name="reader_text_too_long">That text is a bit long — try up to %1$d words.</string>
+    <string name="reader_title">Look up a text</string>
+    <string name="reader_title_with_lang">Your text · %1$s</string>
+    <string name="reader_error_analyzing">Couldn't analyze the text — tap the card to try again.</string>
+    <string name="reader_text_too_long">That text is too long — paste up to %1$d words at a time.</string>
     <string name="reader_paste_from_clipboard">Paste text from clipboard</string>
     <string name="reader_analyzing">Analyzing text</string>
-    <string name="reader_tap_to_paste">Tap to paste text</string>
-    <string name="reader_paste_blurb">Copy some words and paste them here. You'll be able to look every word up and save meanings you need to remember.</string>
-    <string name="reader_clipboard_empty">Clipboard is empty. Copy some text and paste it here.</string>
+    <string name="reader_tap_to_paste">Tap to paste</string>
+    <string name="reader_paste_blurb">Every word in your text becomes tappable — see its meanings and save the ones you need to remember.</string>
+    <string name="reader_clipboard_empty">Nothing to paste yet — copy a text in another app, then come back here.</string>
     <string name="reader_look_up">Look up</string>
-    <string name="reader_frequency_legend">Frequency legend</string>
-    <string name="reader_frequency">Frequency</string>
+    <string name="reader_frequency_legend">Word frequency legend</string>
+    <string name="reader_frequency">Word frequency</string>
     <string name="reader_a11y_saved">Saved, %1$s</string>
     <string name="search_add_words">Add words</string>
-    <string name="search_add_words_row">Copy &amp; paste your text</string>
-    <string name="search_add_words_cd">Paste your text</string>
+    <string name="search_add_words_row">Paste a text — look up every word</string>
+    <string name="search_add_words_cd">Paste a text and look up every word</string>
 </resources>
