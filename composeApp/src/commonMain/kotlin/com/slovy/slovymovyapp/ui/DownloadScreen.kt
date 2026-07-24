@@ -27,6 +27,7 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
@@ -466,7 +467,7 @@ fun DownloadScreenContent(
             when (state) {
                 is DownloadUiState.Loading -> {
                     val loadingInfoContentDescription = stringResource(Res.string.download_content_desc_loading_info)
-                    CircularProgressIndicator(
+                    SpinningProgressIndicator(
                         modifier = Modifier.semantics {
                             contentDescription = loadingInfoContentDescription
                         }
@@ -533,7 +534,7 @@ fun DownloadScreenContent(
                 is DownloadUiState.Idle,
                 is DownloadUiState.Finalizing -> {
                     val preparingContentDescription = stringResource(Res.string.download_content_desc_preparing)
-                    CircularProgressIndicator(
+                    SpinningProgressIndicator(
                         modifier = Modifier.semantics {
                             contentDescription = preparingContentDescription
                         }
