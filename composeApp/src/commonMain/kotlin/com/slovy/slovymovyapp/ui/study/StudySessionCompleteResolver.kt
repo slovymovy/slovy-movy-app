@@ -17,6 +17,24 @@ fun resolveStudySessionCompleteHero(
     pipelineBefore: List<StatsPipelineStage>,
     pipelineAfter: List<StatsPipelineStage>,
 ): StudySessionCompleteHero {
+    // Words milestone outranks everything: a lifetime vocabulary landmark is the rarest,
+    // biggest moment. Detection is intentionally session-window only (no persisted
+    // high-water mark), so a word slipping below the LEARNED threshold and recovering
+    // later may re-celebrate the same mark — accepted product decision.
+    // The empty-before guard keeps a missing session-start snapshot from reading as a
+    // giant crossing.
+    if (pipelineBefore.isNotEmpty()) {
+        val learnedAfter = learnedCount(pipelineAfter)
+        val mark = wordsMilestoneMark(
+            learnedBefore = learnedCount(pipelineBefore),
+            learnedAfter = learnedAfter,
+        )
+        if (mark != null) {
+            // The ladder mark only gates the celebration; the hero shows the real total.
+            return StudySessionCompleteHero.WordsMilestone(learnedTotal = learnedAfter)
+        }
+    }
+
     if (streakDays in MilestoneDays) {
         return StudySessionCompleteHero.Milestone(streakDays)
     }
@@ -27,6 +45,22 @@ fun resolveStudySessionCompleteHero(
     } else {
         StudySessionCompleteHero.None
     }
+}
+
+private fun learnedCount(pipeline: List<StatsPipelineStage>): Int =
+    pipeline.firstOrNull { it.id == StatsPipelineStageId.LEARNED }?.count ?: 0
+
+// Ladder: 5, then every 10 up to 100, then every 50 (unbounded). Returns the highest
+// mark crossed this session (before < mark <= after), or null when none was crossed.
+private fun wordsMilestoneMark(learnedBefore: Int, learnedAfter: Int): Int? {
+    val highestMarkAtOrBelowAfter = when {
+        learnedAfter >= 150 -> (learnedAfter / 50) * 50
+        learnedAfter >= 100 -> 100
+        learnedAfter >= 10 -> (learnedAfter / 10) * 10
+        learnedAfter >= 5 -> 5
+        else -> return null
+    }
+    return highestMarkAtOrBelowAfter.takeIf { it > learnedBefore }
 }
 
 private val PipelineShiftStageUiState.isHighSignalMove: Boolean

@@ -672,6 +672,13 @@
     <string name="study_complete_milestone_subtitle_50">Padesát dní bez přerušení. Odhodlání a pravidelnost.</string>
     <string name="study_complete_milestone_subtitle_100">Sto dní bez přerušení. Neuvěřitelný milník.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d dní bez přerušení. Jen tak dál.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d plně naučené slovo!</item>
+        <item quantity="few">%1$d plně naučená slova!</item>
+        <item quantity="many">%1$d plně naučených slov!</item>
+        <item quantity="other">%1$d plně naučených slov!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Slova, která opravdu použiješ.</string>
     <string name="study_action_done_for_now">Pro teď hotovo</string>
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Klepni pro otočení</string>

@@ -672,6 +672,13 @@
     <string name="study_complete_milestone_subtitle_50">Fifty days unbroken. Dedicated and consistent.</string>
     <string name="study_complete_milestone_subtitle_100">One hundred days unbroken. An incredible milestone.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d days unbroken. Keep the streak going.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d word fully learned!</item>
+        <item quantity="few">%1$d words fully learned!</item>
+        <item quantity="many">%1$d words fully learned!</item>
+        <item quantity="other">%1$d words fully learned!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Words you'll actually use.</string>
     <string name="study_action_done_for_now">Done for now</string>
     <string name="study_progress_count">%1$d of %2$d</string>
     <string name="study_tap_to_flip">Tap to flip</string>

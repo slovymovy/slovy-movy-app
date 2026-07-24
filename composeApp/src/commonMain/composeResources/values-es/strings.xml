@@ -672,6 +672,13 @@
     <string name="study_complete_milestone_subtitle_50">Cincuenta días sin fallar. Dedicación y constancia.</string>
     <string name="study_complete_milestone_subtitle_100">Cien días sin fallar. Un hito increíble.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d días sin fallar. Mantén la racha.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">¡%1$d palabra aprendida por completo!</item>
+        <item quantity="few">¡%1$d palabras aprendidas por completo!</item>
+        <item quantity="many">¡%1$d palabras aprendidas por completo!</item>
+        <item quantity="other">¡%1$d palabras aprendidas por completo!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Palabras que de verdad usarás.</string>
     <string name="study_action_done_for_now">Por ahora basta</string>
     <string name="study_progress_count">%1$d de %2$d</string>
     <string name="study_tap_to_flip">Toca para girar</string>

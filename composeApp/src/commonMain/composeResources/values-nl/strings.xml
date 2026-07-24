@@ -673,6 +673,13 @@
     <string name="study_complete_milestone_subtitle_50">Vijftig dagen zonder pauze. Pure toewijding en discipline.</string>
     <string name="study_complete_milestone_subtitle_100">Honderd dagen onafgebroken. Een ongelooflijke mijlpaal.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d dagen zonder te missen. Houd deze streak vast.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d woord volledig geleerd!</item>
+        <item quantity="few">%1$d woorden volledig geleerd!</item>
+        <item quantity="many">%1$d woorden volledig geleerd!</item>
+        <item quantity="other">%1$d woorden volledig geleerd!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Woorden die je echt gaat gebruiken.</string>
     <string name="study_action_done_for_now">Klaar voor nu</string>
     <string name="study_progress_count">%1$d van %2$d</string>
     <string name="study_tap_to_flip">Tik om te draaien</string>
