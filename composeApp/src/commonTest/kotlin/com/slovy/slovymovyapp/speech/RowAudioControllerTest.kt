@@ -432,6 +432,7 @@ open class RowAudioControllerTest : BaseTest() {
             controller.openVoiceSettings()
             fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("new-engine-v1")))
             controller.refreshAvailability()
+            awaitUntil("replacement probe consumed the engine change") { fake.rebindCount == 2 }
             assertEquals(
                 2,
                 fake.rebindCount,

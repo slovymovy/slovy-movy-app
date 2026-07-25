@@ -775,14 +775,8 @@ class SettingsViewModel(
         ttsManager.openSettings()
     }
 
-    /**
-     * Reloads the voice lists when the player rebound to a different engine, since voices and
-     * their ids are engine-specific. The pending-rebind state belongs to the player: the user can
-     * also reach system settings from the voice setup sheet on another screen.
-     */
-    fun rebindVoiceEngineIfNeeded() {
-        if (!ttsManager.rebindEngineIfNeeded()) return
-
+    /** Clears cached engine-specific ids before the resumed screen reloads its voice lists. */
+    fun refreshVoiceEngineState() {
         state = state.copy(
             languages = state.languages.mapValues { (_, langState) ->
                 langState.copy(voices = emptyList(), enabledVoiceIds = emptySet(), voicesLoaded = false)
@@ -1112,7 +1106,7 @@ fun SettingsScreen(
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.reloadSettings()
-        viewModel.rebindVoiceEngineIfNeeded()
+        viewModel.refreshVoiceEngineState()
         onPauseOrDispose { }
     }
 

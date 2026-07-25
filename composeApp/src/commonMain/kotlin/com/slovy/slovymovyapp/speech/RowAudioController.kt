@@ -75,8 +75,7 @@ class RowAudioController(
     // it started with and bails if a newer request superseded it, so a slow first-time load for row
     // A can't speak or clobber row B's state after the user re-taps.
     private var requestToken = 0L
-    // Bumped for every availability probe, so a probe superseded by a rebind cannot publish the
-    // old engine's languages if it was already past its last suspension point when cancelled.
+    // Bumped for every availability probe, so a superseded probe cannot publish stale languages.
     private var availabilityToken = 0L
     private var availabilityLoadJob: Job? = null
     private var listenerAttached = false
@@ -85,23 +84,15 @@ class RowAudioController(
      * Re-probes which languages are speakable. Call when a host screen becomes visible or resumes
      * (not at controller construction, so the shared TTS engine isn't initialised at app start for
      * the app-lifetime Favorites controller). Refreshing on every resume picks up voices the user
-     * installed or disabled while away in Settings; only one probe runs at a time. A language
+     * installed or disabled while away in Settings. A language
      * counts as playable only when the engine supports it AND at least one enabled voice remains,
      * so rows never show a speaker that cannot produce sound.
      *
-     * The voice setup sheet can send the user to system settings from here ([openVoiceSettings]),
-     * so the engine is rebound first when they changed the default one while away. That happens
-     * ahead of the single-probe guard: the pending settings visit must be consumed even when a
-     * probe is still running, and a probe started on the old binding reports the old engine's
-     * voices, so it is cancelled and restarted instead of being left to finish.
+     * Each refresh replaces an in-flight probe. Voice queries themselves pick up an engine change
+     * made through [openVoiceSettings], so this controller only owns its UI refresh lifecycle.
      */
     fun refreshAvailability() {
-        val rebound = speechPlayer.rebindEngineIfNeeded()
-        if (rebound) {
-            availabilityLoadJob?.cancel()
-        } else if (availabilityLoadJob?.isActive == true) {
-            return
-        }
+        availabilityLoadJob?.cancel()
         val token = ++availabilityToken
         availabilityLoadJob = scope.launch {
             val languages = try {

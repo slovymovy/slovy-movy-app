@@ -100,6 +100,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
     }
 
     actual override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
+        rebindEngineIfNeeded()
         if (!awaitEngineReady()) return@withContext emptyList()
 
         val languages = mutableListOf<Text2SpeechLanguage>()
@@ -129,6 +130,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     actual override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
+            rebindEngineIfNeeded()
             if (!awaitEngineReady()) return@withContext emptyList()
 
             val locale = toLocale(language.language)
@@ -179,11 +181,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         }
     }
 
-    actual override fun rebindEngineIfNeeded(): Boolean {
-        if (!settingsVisited) return false
-        settingsVisited = false
+    /** Refreshes the binding before any voice query, keeping engine lifecycle out of UI callers. */
+    @Synchronized
+    private fun rebindEngineIfNeeded() {
+        if (!settingsVisited) return
         rebindEngine()
-        return true
+        // Clear only after the replacement binding has been created. If that throws, the next
+        // query retries instead of silently considering the settings visit handled.
+        settingsVisited = false
     }
 
     /**

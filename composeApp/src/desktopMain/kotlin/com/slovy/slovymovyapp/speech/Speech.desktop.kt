@@ -30,8 +30,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
     actual override fun openSettings() {
     }
 
-    actual override fun rebindEngineIfNeeded(): Boolean = false
-
     actual override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
         statusListeners[key] = listener
     }

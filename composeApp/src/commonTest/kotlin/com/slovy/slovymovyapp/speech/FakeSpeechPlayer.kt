@@ -47,9 +47,13 @@ class FakeSpeechPlayer : SpeechPlayer {
         stopCount++
     }
 
-    override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = languages
+    override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> {
+        rebindEngineIfNeeded()
+        return languages
+    }
 
     override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> {
+        rebindEngineIfNeeded()
         voiceLoadRequests++
         voiceLoadGate?.await()
         return voicesByLanguage[language.language] ?: emptyList()
@@ -64,11 +68,10 @@ class FakeSpeechPlayer : SpeechPlayer {
         settingsVisited = true
     }
 
-    override fun rebindEngineIfNeeded(): Boolean {
-        if (!settingsVisited) return false
-        settingsVisited = false
+    private fun rebindEngineIfNeeded() {
+        if (!settingsVisited) return
         rebindCount++
-        return true
+        settingsVisited = false
     }
 
     override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {

@@ -510,17 +510,8 @@ class WordDetailViewModel(
         }
     }
 
-    /**
-     * Voices are loaded once per screen, so a voice installed — or an engine chosen — after
-     * [openVoiceSettings] would otherwise stay invisible until the screen is reopened.
-     *
-     * Reloading only after a trip to system settings keeps an ordinary resume free: querying the
-     * engine and the stored selection on every resume is wasted work on slow devices, and a voice
-     * installed without going through [openVoiceSettings] is rare enough to wait for the screen to
-     * be reopened.
-     */
+    /** Reloads voices installed or selected while this screen was paused. */
     fun refreshVoicesOnResume() {
-        if (!ttsManager.rebindEngineIfNeeded()) return
         loadVoices()
     }
 
