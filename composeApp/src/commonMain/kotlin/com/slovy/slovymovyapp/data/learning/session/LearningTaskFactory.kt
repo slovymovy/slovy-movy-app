@@ -17,17 +17,15 @@ fun buildTaskVariants(
     sense: LanguageCardResponseSense,
     translationTargets: List<Language>,
 ): List<CardVariant> {
-    val targets = translationTargets
-        .plus(sense.targetLangDefinitions.keys)
-        .plus(sense.translations.keys)
-        .plus(sense.examples.flatMap { it.targetLangTranslations.keys })
-        .distinctBy { it.code }
+    // Only the user's configured translation languages may cue a card; languages that merely
+    // happen to exist in cached sense data must not be tested.
+    val targets = translationTargets.distinctBy { it.code }
 
     return when (family) {
         CardFamily.RECOGNIZE_SENSE -> buildList {
             add(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null))
             targets
-                .filter { sense.hasTranslationCue(it) }
+                .filter { sense.satisfiesTranslationData(CardKind.WORD_TO_TRANSLATION, it) }
                 .forEach { add(CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = it.code)) }
         }
 
@@ -36,14 +34,14 @@ fun buildTaskVariants(
             add(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null))
             }
             targets
-                .filter { sense.hasTranslationCue(it) }
+                .filter { sense.satisfiesTranslationData(CardKind.TRANSLATION_TO_WORD, it) }
                 .forEach { add(CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = it.code)) }
         }
 
         CardFamily.PRODUCE_WORD_IN_CONTEXT -> buildList {
             if (sense.examples.any { it.hasCloze() }) {
                 targets
-                    .filter { target -> sense.examples.any { sense.hasTranslationCue(target) } }
+                    .filter { sense.satisfiesTranslationData(CardKind.CLOZE_SOURCE, it) }
                     .forEach { add(CardVariant(CardKind.CLOZE_SOURCE, targetLang = it.code)) }
             }
             targets
@@ -53,11 +51,31 @@ fun buildTaskVariants(
 
         CardFamily.RECOGNIZE_VOICE -> buildList {
             targets
-                .filter { sense.hasTranslationCue(it) }
+                .filter { sense.satisfiesTranslationData(CardKind.LISTENING_TRANSLATION, it) }
                 .forEach { add(CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = it.code)) }
         }
     }
 }
+
+// The data a variant needs before it is playable in a given target language. This is the single
+// source of truth shared by variant building (here), fetch-result readiness (SessionCard.loadState),
+// and the bilingual back renderer (bilingualBack in StudySessionMapper) so a card can never be
+// selected in a shape its renderer rejects: WORD_TO_TRANSLATION renders translation words as the
+// answer headline and the target-language definition as the body, TRANSLATION_TO_WORD cues from
+// translation words, and the remaining bilingual kinds only need some translation cue for the
+// card back.
+internal fun LanguageCardResponseSense.satisfiesTranslationData(kind: CardKind, language: Language): Boolean =
+    when (kind) {
+        CardKind.WORD_TO_TRANSLATION -> hasTranslationWords(language) && hasTranslationDefinition(language)
+        CardKind.TRANSLATION_TO_WORD -> hasTranslationWords(language)
+        else -> hasTranslationWords(language) || hasTranslationDefinition(language)
+    }
+
+private fun LanguageCardResponseSense.hasTranslationWords(language: Language): Boolean =
+    translations[language].orEmpty().any { it.targetLangWord.isNotBlank() }
+
+private fun LanguageCardResponseSense.hasTranslationDefinition(language: Language): Boolean =
+    !targetLangDefinitions[language].isNullOrBlank()
 
 fun selectVariantsForReview(
     family: CardFamily,
@@ -97,9 +115,6 @@ fun selectVariantsForReview(
             .thenBy { it.targetLang ?: "" }
     )
 }
-
-private fun LanguageCardResponseSense.hasTranslationCue(language: Language): Boolean =
-    targetLangDefinitions[language] != null || translations[language].orEmpty().isNotEmpty()
 
 private fun LanguageCardExample.hasCloze(): Boolean =
     text.hasTaggedWord()

@@ -29,6 +29,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.getPlatform
+import com.slovy.slovymovyapp.speech.RowAudioActions
+import com.slovy.slovymovyapp.speech.RowAudioUiState
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
@@ -40,6 +42,21 @@ import slovymovyapp.composeapp.generated.resources.voice_setup_step_ios
 import slovymovyapp.composeapp.generated.resources.voice_setup_step_other
 import slovymovyapp.composeapp.generated.resources.voice_setup_step_two
 import slovymovyapp.composeapp.generated.resources.voice_setup_title
+
+/**
+ * Renders the first-run voice setup sheet whenever row audio requests it. Shared by every screen
+ * that hosts a [com.slovy.slovymovyapp.speech.RowAudioController].
+ */
+@Composable
+fun RowAudioVoiceSetupHost(state: RowAudioUiState, actions: RowAudioActions) {
+    val language = state.voiceSetupLanguage ?: return
+    VoiceSetupBottomSheet(
+        language = language,
+        onOpenSettings = actions.onOpenVoiceSettings,
+        onDismiss = actions.onDismissVoiceSetup,
+        onLater = actions.onDismissVoiceSetupAndPlay,
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

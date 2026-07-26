@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
+import com.slovy.slovymovyapp.util.queryInChunks
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -302,8 +303,9 @@ class DictionaryRepository(
         for (db in databases) {
             try {
                 val q = db.dictionaryQueries
-                q.selectLemmasByWords(language.code, lookupWords.toList())
-                    .executeAsList()
+                queryInChunks(lookupWords) { chunk ->
+                    q.selectLemmasByWords(language.code, chunk).executeAsList()
+                }
                     .forEach { row ->
                         putFromLemma(row.lemma, relatedWord(row.lemma, row.zipf_frequency, row.online_only))
                         foundAsLemmaKeys.add(row.lemma)
@@ -537,7 +539,9 @@ class DictionaryRepository(
                     val lemmaIds = out.filter { it.language == lang && it.pos.isEmpty() }
                         .map { it.lemmaId }.toSet().toList()
                     if (lemmaIds.isNotEmpty()) {
-                        val posResults = q.selectLemmaIdAndPosByLemmaIds(lemmaIds).executeAsList()
+                        val posResults = queryInChunks(lemmaIds) { chunk ->
+                            q.selectLemmaIdAndPosByLemmaIds(chunk).executeAsList()
+                        }
                         val lemmaIdToPosMap = posResults.groupBy({ it.id }, { it.pos.toPartOfSpeech() })
                         for (i in out.indices) {
                             if (out[i].language == lang && out[i].pos.isEmpty()) {
@@ -632,7 +636,9 @@ class DictionaryRepository(
                             tq.selectSenseTranslationsByNormalizedPrefix(lang.code, tgt.code, prefixStart, prefixEnd)
                                 .executeAsList()
                         val lemmaRows =
-                            dq.selectLemmasByIds(trRows.map { it.lemma_id }).executeAsList().associateBy { it.id }
+                            queryInChunks(trRows.map { it.lemma_id }) { chunk ->
+                                dq.selectLemmasByIds(chunk).executeAsList()
+                            }.associateBy { it.id }
                         val trRowsSorted = trRows.sortedByDescending { lemmaRows[it.lemma_id]?.zipf_frequency }
                         for (row in trRowsSorted) {
                             val lemmaRow = lemmaRows[row.lemma_id]
@@ -842,8 +848,7 @@ class DictionaryRepository(
 
         // Batch load form tags
         val formTagsMap: Map<Uuid, List<String>> = if (allFormIds.isNotEmpty()) {
-            q.selectFormTagsByFormIds(allFormIds)
-                .executeAsList()
+            queryInChunks(allFormIds) { chunk -> q.selectFormTagsByFormIds(chunk).executeAsList() }
                 .groupBy({ it.form_id }, { it.tag })
         } else emptyMap()
 
@@ -858,30 +863,30 @@ class DictionaryRepository(
         val examplesMap: Map<Uuid, List<ExampleData>>
 
         if (allUncachedSenseIds.isNotEmpty()) {
-            synonymsMap = q.selectSenseSynonymsBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }, { it.synonym })
+            synonymsMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseSynonymsBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }, { it.synonym })
 
-            antonymsMap = q.selectSenseAntonymsBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }, { it.antonym })
+            antonymsMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseAntonymsBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }, { it.antonym })
 
-            phrasesMap = q.selectSenseCommonPhrasesBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }, { it.phrase })
+            phrasesMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseCommonPhrasesBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }, { it.phrase })
 
-            traitsMap = q.selectSenseTraitsBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }) { row ->
-                    LanguageCardTrait(
-                        traitType = TraitType.valueOf(row.trait_type.name),
-                        comment = row.comment
-                    )
-                }
+            traitsMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseTraitsBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }) { row ->
+                LanguageCardTrait(
+                    traitType = TraitType.valueOf(row.trait_type.name),
+                    comment = row.comment
+                )
+            }
 
-            examplesMap = q.selectSenseExamplesBySenseIds(allUncachedSenseIds)
-                .executeAsList()
-                .groupBy({ it.sense_id }) { ExampleData(it.example_id, it.text) }
+            examplesMap = queryInChunks(allUncachedSenseIds) { chunk ->
+                q.selectSenseExamplesBySenseIds(chunk).executeAsList()
+            }.groupBy({ it.sense_id }) { ExampleData(it.example_id, it.text) }
         } else {
             synonymsMap = emptyMap()
             antonymsMap = emptyMap()
@@ -906,18 +911,18 @@ class DictionaryRepository(
                 for (transDb in transDbs) {
                     val queries = transDb.translationQueries
 
-                    queries
-                        .selectDefinitionsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                        .executeAsList()
+                    queryInChunks(allUncachedSenseIds) { chunk ->
+                        queries.selectDefinitionsBySenseIds(chunk, language.code, tgt.code).executeAsList()
+                    }
                         .forEach { row ->
                             if (row.sense_id !in definitions) {
                                 definitions[row.sense_id] = row.definition
                             }
                         }
 
-                    queries
-                        .selectSenseTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                        .executeAsList()
+                    queryInChunks(allUncachedSenseIds) { chunk ->
+                        queries.selectSenseTranslationsBySenseIds(chunk, language.code, tgt.code).executeAsList()
+                    }
                         .groupBy({ it.sense_id }) { row ->
                             LanguageCardTranslation(
                                 targetLangWord = row.target_lang_word,
@@ -931,9 +936,9 @@ class DictionaryRepository(
                             }
                         }
 
-                    queries
-                        .selectExampleTranslationsBySenseIds(allUncachedSenseIds, language.code, tgt.code)
-                        .executeAsList()
+                    queryInChunks(allUncachedSenseIds) { chunk ->
+                        queries.selectExampleTranslationsBySenseIds(chunk, language.code, tgt.code).executeAsList()
+                    }
                         .forEach { row ->
                             val senseTranslations = exampleTranslations.getOrPut(row.sense_id) { LinkedHashMap() }
                             if (row.example_id !in senseTranslations) {
@@ -1404,6 +1409,80 @@ class DictionaryRepository(
         return allRelatedWords
     }
 
+    data class TokenResult(
+        val lemma: String,
+        val lemmaId: Uuid,
+        val zipf: Double
+    )
+
+    /**
+     * How a reader token matched a dictionary row, in ascending strength: an exact spelling
+     * beats an accent-insensitive one, and a lemma beats an inflected form at equal exactness.
+     * So Dutch "wat" stays on the lemma "wat" instead of a form of a higher-frequency word,
+     * and Polish "laska"/"łaska" each resolve to their own lemma.
+     */
+    private enum class TokenMatchRank { FORM_NORMALIZED, LEMMA_NORMALIZED, FORM_EXACT, LEMMA_EXACT }
+
+    private data class RankedTokenResult(val rank: TokenMatchRank, val result: TokenResult)
+
+    /**
+     * Batch-resolves reader tokens to lemmas for [language]. Returns a map keyed by the exact
+     * strings passed in [words] (missing keys mean the word is not in the dictionary).
+     *
+     * Each word takes its best [TokenMatchRank] candidate across the form and lemma tables,
+     * with corpus frequency as the tie-break within a database. Later databases (the writable
+     * local cache) override earlier ones only with an equally strong or stronger match, so a
+     * local form hit cannot displace an exact lemma from the downloaded DB.
+     */
+    suspend fun lookupTokens(
+        words: Collection<String>,
+        language: Language
+    ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
+        if (words.isEmpty()) return@withContext emptyMap()
+        val wordsByNormalized = words.distinct().groupBy { stripAccents(it) }
+
+        withDictionaryDatabases(language) { databases ->
+            val best = mutableMapOf<String, RankedTokenResult>()
+            for (db in databases) {
+                val q = db.dictionaryQueries
+                val dbBest = mutableMapOf<String, RankedTokenResult>()
+
+                fun offer(word: String, candidate: RankedTokenResult) {
+                    val current = dbBest[word]
+                    if (current == null || candidate.rank > current.rank ||
+                        (candidate.rank == current.rank && candidate.result.zipf > current.result.zipf)
+                    ) dbBest[word] = candidate
+                }
+
+                queryInChunks(wordsByNormalized.keys) { chunk ->
+                    q.selectTokenCandidatesByForms(language.code, chunk).executeAsList()
+                }.forEach { row ->
+                    val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
+                    wordsByNormalized[row.form_normalized]?.forEach { word ->
+                        val exact = row.form.equals(word, ignoreCase = true)
+                        offer(word, RankedTokenResult(if (exact) TokenMatchRank.FORM_EXACT else TokenMatchRank.FORM_NORMALIZED, result))
+                    }
+                }
+
+                queryInChunks(wordsByNormalized.keys) { chunk ->
+                    q.selectTokenCandidatesByLemmas(language.code, chunk).executeAsList()
+                }.forEach { row ->
+                    val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
+                    wordsByNormalized[row.lemma_normalized]?.forEach { word ->
+                        val exact = row.lemma.equals(word, ignoreCase = true)
+                        offer(word, RankedTokenResult(if (exact) TokenMatchRank.LEMMA_EXACT else TokenMatchRank.LEMMA_NORMALIZED, result))
+                    }
+                }
+
+                dbBest.forEach { (word, candidate) ->
+                    val current = best[word]
+                    if (current == null || candidate.rank >= current.rank) best[word] = candidate
+                }
+            }
+            best.mapValues { (_, ranked) -> ranked.result }
+        }
+    }
+
     private suspend fun finalizeSearchResults(
         out: List<SearchItem>,
         maxItems: Int
@@ -1417,11 +1496,11 @@ class DictionaryRepository(
         val onlineOnlyIds = result.filter { it.onlineOnly }.map { it.lemmaId }
         if (onlineOnlyIds.isNotEmpty()) {
             val localLemmaIds: Set<Uuid> = localDbManager.withLocalDictionaryIfExists { localDb ->
-                localDb?.dictionaryQueries
-                    ?.selectLemmasByIds(onlineOnlyIds)
-                    ?.executeAsList()
-                    ?.map { it.id }
-                    ?.toSet() ?: emptySet()
+                localDb?.dictionaryQueries?.let { q ->
+                    queryInChunks(onlineOnlyIds) { chunk -> q.selectLemmasByIds(chunk).executeAsList() }
+                        .map { it.id }
+                        .toSet()
+                } ?: emptySet()
             }
 
             result = result.map { item ->

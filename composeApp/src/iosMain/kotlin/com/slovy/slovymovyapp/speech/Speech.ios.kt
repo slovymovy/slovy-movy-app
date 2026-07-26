@@ -16,7 +16,7 @@ import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
 import platform.darwin.NSObject
 
-actual class TextToSpeechManager actual constructor(androidContext: Any?) {
+actual class TextToSpeechManager actual constructor(androidContext: Any?) : SpeechPlayer {
 
     private val synthesizer = AVSpeechSynthesizer()
     private val delegate = TTSDelegate()
@@ -88,7 +88,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         speak(text)
     }
 
-    actual fun speak(text: String) {
+    actual override fun speak(text: String) {
         // Stop any current speech first - maintains consistent behavior regardless of text/voice state
         synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
         if (text.isEmpty()) return
@@ -111,7 +111,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         synthesizer.speakUtterance(utterance)
     }
 
-    actual suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> =
+    actual override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> =
         withContext(Dispatchers.IO) {
             val languages = mutableListOf<Text2SpeechLanguage>()
             val availableVoices = AVSpeechSynthesisVoice.speechVoices()
@@ -137,7 +137,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
             languages
         }
 
-    actual suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
+    actual override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
             val allVoices = AVSpeechSynthesisVoice.speechVoices()
 
@@ -164,7 +164,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
                 }
         }
 
-    actual fun setVoice(voice: Text2SpeechVoice) {
+    actual override fun setVoice(voice: Text2SpeechVoice) {
         val selectedVoice = AVSpeechSynthesisVoice.voiceWithIdentifier(voice.id)
         if (selectedVoice == null) {
             AppLogger.warn(TAG, "Unable to select iOS TTS voice ${voice.id}", null)
@@ -172,7 +172,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         currentVoice = selectedVoice
     }
 
-    actual fun openSettings() {
+    actual override fun openSettings() {
         //TODO will work not for all iOS, in general access to device settings can be restricted grom app.
         val settingsUrl = NSURL.URLWithString("App-prefs:root=General&path=ACCESSIBILITY/VOICEOVER/Speech")
         if (settingsUrl != null && UIApplication.sharedApplication.canOpenURL(settingsUrl)) {
@@ -180,7 +180,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         }
     }
 
-    actual fun stop() {
+    actual override fun stop() {
         // Clear map BEFORE stopping so any sync callback is ignored (generation won't match)
         delegate.clearUtterances()
         // Stop synthesizer to cancel any queued utterances
@@ -190,11 +190,11 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) {
         statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
     }
 
-    actual fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
+    actual override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {
         statusListeners[key] = listener
     }
 
-    actual fun removeOnStatusChangeListener(key: Any) {
+    actual override fun removeOnStatusChangeListener(key: Any) {
         statusListeners.remove(key)
     }
 

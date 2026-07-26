@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -85,7 +86,7 @@ fun CancellableProgressIndicator(
         contentAlignment = Alignment.Center
     ) {
         if (isIndeterminate) {
-            CircularProgressIndicator(
+            SpinningProgressIndicator(
                 modifier = Modifier.size(size),
                 strokeWidth = strokeWidth,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -181,7 +182,7 @@ fun DeleteConfirmationDialog(
 @Composable
 fun LoadingIndicator(modifier: Modifier = Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+        SpinningProgressIndicator()
     }
 }
 

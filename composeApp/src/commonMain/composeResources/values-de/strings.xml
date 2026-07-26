@@ -672,6 +672,13 @@
     <string name="study_complete_milestone_subtitle_50">Fünfzig Tage ohne Unterbrechung. Engagiert und beständig.</string>
     <string name="study_complete_milestone_subtitle_100">Einhundert Tage ohne Unterbrechung. Ein unglaublicher Meilenstein.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d Tage ohne Unterbrechung. Halte die Serie am Laufen.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d Wort vollständig gelernt!</item>
+        <item quantity="few">%1$d Wörter vollständig gelernt!</item>
+        <item quantity="many">%1$d Wörter vollständig gelernt!</item>
+        <item quantity="other">%1$d Wörter vollständig gelernt!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Wörter, die du wirklich benutzen wirst.</string>
     <string name="study_action_done_for_now">Für jetzt genug</string>
     <string name="study_progress_count">%1$d von %2$d</string>
     <string name="study_tap_to_flip">Zum Umdrehen tippen</string>
@@ -743,4 +750,22 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d Std. %2$d Min.</string>
     <string name="favorites_study_done_next_review_a11y">Nächste Wiederholung in %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Text nachschlagen</string>
+    <string name="reader_title_with_lang">Dein Text · %1$s</string>
+    <string name="reader_error_analyzing">Der Text konnte nicht analysiert werden — tippe auf die Karte, um es erneut zu versuchen.</string>
+    <string name="reader_text_too_long">Der Text ist zu lang — füge höchstens %1$d Wörter auf einmal ein.</string>
+    <string name="reader_paste_from_clipboard">Text aus der Zwischenablage einfügen</string>
+    <string name="reader_analyzing">Text wird analysiert</string>
+    <string name="reader_tap_to_paste">Zum Einfügen tippen</string>
+    <string name="reader_paste_blurb">Jedes Wort in deinem Text lässt sich antippen — sieh dir die Bedeutungen an und speichere die, die du dir merken willst.</string>
+    <string name="reader_clipboard_empty">Noch nichts zum Einfügen — kopiere einen Text in einer anderen App und komm dann hierher zurück.</string>
+    <string name="reader_look_up">Nachschlagen</string>
+    <string name="reader_frequency_legend">Legende zur Worthäufigkeit</string>
+    <string name="reader_frequency">Worthäufigkeit</string>
+    <string name="reader_a11y_saved">Gespeichert, %1$s</string>
+    <string name="search_add_words">Wörter hinzufügen</string>
+    <string name="search_add_words_row">Text einfügen — jedes Wort nachschlagen</string>
+    <string name="search_add_words_cd">Text einfügen und jedes Wort nachschlagen</string>
 </resources>

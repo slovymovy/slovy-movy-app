@@ -31,6 +31,7 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -46,6 +47,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -454,6 +457,7 @@ fun SearchScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToTextReader: (Language) -> Unit = {},
     hasFavoritesToReview: Boolean = false,
     onListClick: (WordList) -> Unit = {},
 ) {
@@ -521,6 +525,12 @@ fun SearchScreen(
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
+        onNavigateToTextReader = {
+            viewModel.state.selectedLanguage?.let { language ->
+                Analytics.logEvent(AnalyticsEvent.READER_OPEN_CLICK, mapOf("lang" to language.code))
+                onNavigateToTextReader(language)
+            }
+        },
         hasFavoritesToReview = hasFavoritesToReview,
     )
 }
@@ -545,6 +555,7 @@ fun SearchScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToTextReader: () -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
@@ -679,7 +690,8 @@ fun SearchScreenContent(
                                     isLoading = state.isEmptyStateLoading,
                                     onWordClick = onSuggestionSelected,
                                     onListClick = onListClick,
-                                    onSuggestListClick = onSuggestListClick
+                                    onSuggestListClick = onSuggestListClick,
+                                    onNavigateToTextReader = onNavigateToTextReader
                                 )
                             }
                         }
@@ -807,14 +819,15 @@ private fun EmptySearchState(
     isLoading: Boolean,
     onWordClick: (String) -> Unit,
     onListClick: (WordList) -> Unit,
-    onSuggestListClick: () -> Unit
+    onSuggestListClick: () -> Unit,
+    onNavigateToTextReader: () -> Unit = {}
 ) {
     if (isLoading) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            SpinningProgressIndicator()
         }
         return
     }
@@ -872,6 +885,10 @@ private fun EmptySearchState(
                 )
             }
         }
+
+        // "Add words" entry into the Read (paste-to-highlight) flow — its own feed
+        // section, sitting below Explore and above the curated lists.
+        ReadSection(onClick = onNavigateToTextReader)
 
         if (curatedLists.isNotEmpty()) {
             Text(
@@ -952,6 +969,74 @@ private fun EmptySearchState(
                     .fillMaxWidth()
                     .padding(top = 32.dp),
                 textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+/**
+ * "ADD WORDS" feed section — the entry into the Read (paste-to-highlight) flow.
+ * A flat utility row matching the list cards' surface + hairline border; the copper accent
+ * is confined to the eyebrow and the small clipboard tile so it reads as utility, not a CTA.
+ */
+@Composable
+private fun ReadSection(onClick: () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    val shape = RoundedCornerShape(16.dp)
+    // Warm but flat: a 16% primary wash over the container, no border, no shadow/glow.
+    val rowFill = lerp(MaterialTheme.colorScheme.surfaceContainer, primary, 0.16f)
+    Column(modifier = Modifier.padding(bottom = 4.dp)) {
+        Text(
+            text = stringResource(Res.string.search_add_words).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.6.sp,
+                fontSize = 10.5.sp,
+            ),
+            color = primary,
+            modifier = Modifier.padding(top = 8.dp, bottom = 10.dp)
+        )
+        // Min height + real vertical padding so the row grows when a localized label wraps
+        // to two lines (e.g. German) instead of crowding or clipping on a fixed height.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .clip(shape)
+                .background(rowFill)
+                .clickable(onClickLabel = stringResource(Res.string.search_add_words_cd), role = Role.Button) { onClick() }
+                .padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(13.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(primary.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ClipboardVector,
+                    contentDescription = null,
+                    tint = primary,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+            Text(
+                text = stringResource(Res.string.search_add_words_row),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    lineHeight = 19.sp, // 1.25 × font size so wrapped lines don't sit too tight
+                    letterSpacing = 0.1.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                // Centers the first text line (19sp line height) on the 34dp icon tile, so the
+                // icon stays anchored to line one instead of floating mid-gap on two-line copy.
+                modifier = Modifier.weight(1f).padding(top = 7.dp)
             )
         }
     }

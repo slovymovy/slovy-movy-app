@@ -52,6 +52,7 @@ import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -273,7 +274,7 @@ class WordDetailViewModel(
     private val dictionaryClient: DictionaryClient,
     private val wordFetchManager: WordFetchManager,
     private val favoritesRepository: FavoritesRepository,
-    private val ttsManager: TextToSpeechManager,
+    private val ttsManager: SpeechPlayer,
     private val voiceFilterHelper: VoiceFilterHelper,
     val dictionaryLanguage: Language,
     private val lemma: String = "",
@@ -323,7 +324,7 @@ class WordDetailViewModel(
         return url
     }
 
-    private var currentVoiceIndex: Int = 0
+    private val voiceSelector = RotatingVoiceSelector(ttsManager, voiceFilterHelper)
     private var hasScrolledToTarget = false
     private var requestedTranslationLanguages: List<Language> =
         translationLanguages?.distinctBy { it.code } ?: emptyList()
@@ -504,20 +505,8 @@ class WordDetailViewModel(
 
     private fun loadVoices() {
         viewModelScope.launch {
-            try {
-                val languages = ttsManager.getAvailableLanguages()
-                val targetLanguage = languages.firstOrNull { it.language == dictionaryLanguage }
-                if (targetLanguage != null) {
-                    availableVoices = voiceFilterHelper.loadEnabledVoices(ttsManager, targetLanguage)
-                    if (availableVoices.isNotEmpty()) {
-                        currentVoiceIndex = availableVoices.indices.random()
-                    }
-                }
-            } catch (e: Exception) {
-                AppLogger.warn(TAG, "Unable to load word detail voices for ${dictionaryLanguage.code}", e)
-                // Failed to load voices, button will be disabled
-                availableVoices = emptyList()
-            }
+            // Loaded once per screen; an empty result leaves the play button disabled.
+            availableVoices = voiceSelector.loadVoices(dictionaryLanguage)
         }
     }
 
@@ -698,26 +687,18 @@ class WordDetailViewModel(
         )
         if (availableVoices.isEmpty()) return
 
-        val hasHighQualityVoice = availableVoices.any { it.quality != VoiceQuality.MEDIUM }
-        if (!hasHighQualityVoice) {
-            viewModelScope.launch {
-                if (!voiceFilterHelper.isVoiceSetupShown(dictionaryLanguage)) {
-                    showVoiceSetupSheet = true
-                    return@launch
-                }
-                doPlayWord()
+        viewModelScope.launch {
+            if (voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, availableVoices)) {
+                showVoiceSetupSheet = true
+                return@launch
             }
-            return
+            doPlayWord()
         }
-
-        doPlayWord()
     }
 
     private fun doPlayWord() {
         try {
-            // Rotate to the next voice
-            currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
-            val selectedVoice = availableVoices[currentVoiceIndex]
+            val selectedVoice = voiceSelector.nextVoice(dictionaryLanguage, availableVoices)
             isPreparing = true
             ttsManager.setVoice(selectedVoice)
             ttsManager.speak(lemma)
@@ -948,7 +929,7 @@ fun WordDetailScreenContent(
                                     modifier = Modifier.size(36.dp)
                                 ) {
                                     when {
-                                        isPreparing -> CircularProgressIndicator(
+                                        isPreparing -> SpinningProgressIndicator(
                                             modifier = Modifier.size(20.dp),
                                             strokeWidth = 2.dp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1149,7 +1130,7 @@ private fun WordDetailContent(
                         .size(36.dp)
                 ) {
                     when {
-                        isPreparing -> CircularProgressIndicator(
+                        isPreparing -> SpinningProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

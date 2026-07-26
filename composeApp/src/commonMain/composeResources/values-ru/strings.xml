@@ -672,6 +672,13 @@
     <string name="study_complete_milestone_subtitle_50">Пятьдесят дней без единого пропуска. Отличная дисциплина.</string>
     <string name="study_complete_milestone_subtitle_100">Сто дней без перерыва. Невероятное достижение.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d дней без пропусков. Продолжайте в том же духе.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d слово выучено полностью!</item>
+        <item quantity="few">%1$d слова выучены полностью!</item>
+        <item quantity="many">%1$d слов выучено полностью!</item>
+        <item quantity="other">%1$d слова выучены полностью!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Слова, которые теперь в вашем активном запасе.</string>
     <string name="study_action_done_for_now">На сегодня хватит</string>
     <string name="study_progress_count">%1$d из %2$d</string>
     <string name="study_tap_to_flip">Нажмите, чтобы перевернуть</string>
@@ -743,4 +750,22 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d ч %2$d мин</string>
     <string name="favorites_study_done_next_review_a11y">Следующее повторение через %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Разбор текста</string>
+    <string name="reader_title_with_lang">Ваш текст · %1$s</string>
+    <string name="reader_error_analyzing">Не удалось разобрать текст — нажмите на карточку, чтобы попробовать ещё раз.</string>
+    <string name="reader_text_too_long">Текст слишком длинный — вставляйте не больше %1$d слов за раз.</string>
+    <string name="reader_paste_from_clipboard">Вставить текст из буфера обмена</string>
+    <string name="reader_analyzing">Анализ текста</string>
+    <string name="reader_tap_to_paste">Нажмите, чтобы вставить</string>
+    <string name="reader_paste_blurb">Каждое слово в тексте можно будет нажать: посмотрите его значения и сохраните те, что хотите запомнить.</string>
+    <string name="reader_clipboard_empty">Пока нечего вставить — скопируйте текст в другом приложении и вернитесь сюда.</string>
+    <string name="reader_look_up">Посмотреть</string>
+    <string name="reader_frequency_legend">Обозначения частотности слов</string>
+    <string name="reader_frequency">Частотность слов</string>
+    <string name="reader_a11y_saved">Сохранено, %1$s</string>
+    <string name="search_add_words">Добавить слова</string>
+    <string name="search_add_words_row">Вставьте текст — разберите каждое слово</string>
+    <string name="search_add_words_cd">Вставьте текст и разберите каждое слово</string>
 </resources>

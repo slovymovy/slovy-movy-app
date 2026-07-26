@@ -672,6 +672,13 @@
     <string name="study_complete_milestone_subtitle_50">Cinquanta giorni senza interruzioni. Dedizione e costanza.</string>
     <string name="study_complete_milestone_subtitle_100">Cento giorni senza interruzioni. Un traguardo incredibile.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d giorni senza interruzioni. Continua la serie.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d parola imparata a fondo!</item>
+        <item quantity="few">%1$d parole imparate a fondo!</item>
+        <item quantity="many">%1$d parole imparate a fondo!</item>
+        <item quantity="other">%1$d parole imparate a fondo!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Parole che userai davvero.</string>
     <string name="study_action_done_for_now">Per ora basta</string>
     <string name="study_progress_count">%1$d di %2$d</string>
     <string name="study_tap_to_flip">Tocca per girare</string>
@@ -711,7 +718,7 @@
     <string name="study_cant_listen_now">Ora non puoi ascoltare</string>
     <string name="study_listening_postponed_message">Schede di ascolto in pausa fino alla prossima ripetizione</string>
     <string name="study_rating_prompt">Quanto bene te la sei ricordata?</string>
-    <string name="study_rating_again">Dimenticata</string>
+    <string name="study_rating_again">Scordata</string>
     <string name="study_rating_hard">Quasi</string>
     <string name="study_rating_good">Ricordata</string>
     <string name="study_rating_easy">Troppo facile</string>
@@ -743,4 +750,22 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Prossima ripetizione tra %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Esplora un testo</string>
+    <string name="reader_title_with_lang">Il tuo testo · %1$s</string>
+    <string name="reader_error_analyzing">Impossibile analizzare il testo — tocca la scheda per riprovare.</string>
+    <string name="reader_text_too_long">Questo testo è troppo lungo — incolla al massimo %1$d parole alla volta.</string>
+    <string name="reader_paste_from_clipboard">Incolla il testo dagli appunti</string>
+    <string name="reader_analyzing">Analisi del testo</string>
+    <string name="reader_tap_to_paste">Tocca per incollare</string>
+    <string name="reader_paste_blurb">Potrai toccare ogni parola del tuo testo per vederne i significati e salvare quelli che vuoi ricordare.</string>
+    <string name="reader_clipboard_empty">Non c'è ancora niente da incollare — copia un testo in un'altra app e poi torna qui.</string>
+    <string name="reader_look_up">Cerca</string>
+    <string name="reader_frequency_legend">Legenda della frequenza delle parole</string>
+    <string name="reader_frequency">Frequenza delle parole</string>
+    <string name="reader_a11y_saved">Salvato, %1$s</string>
+    <string name="search_add_words">Aggiungi parole</string>
+    <string name="search_add_words_row">Incolla un testo — cerca ogni parola</string>
+    <string name="search_add_words_cd">Incolla un testo e cerca ogni parola</string>
 </resources>

@@ -674,6 +674,13 @@
     <string name="study_complete_milestone_subtitle_50">Pięćdziesiąt dni bez żadnej przerwy. Wyjątkowa dyscyplina.</string>
     <string name="study_complete_milestone_subtitle_100">Sto dni bez przerwy. Niesamowite osiągnięcie.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d dni bez przerwy. Utrzymaj tę serię.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d słowo w pełni opanowane!</item>
+        <item quantity="few">%1$d słowa w pełni opanowane!</item>
+        <item quantity="many">%1$d słów w pełni opanowanych!</item>
+        <item quantity="other">%1$d słowa w pełni opanowane!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Słowa, których naprawdę użyjesz.</string>
     <string name="study_action_done_for_now">Na dziś wystarczy</string>
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Dotknij, aby odwrócić</string>
@@ -745,4 +752,22 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d godz. %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Następna powtórka za %1$s</string>
+
+    <!-- Text reader (paste-to-highlight) -->
+    <string name="reader_title">Sprawdź tekst</string>
+    <string name="reader_title_with_lang">Twój tekst · %1$s</string>
+    <string name="reader_error_analyzing">Nie udało się przeanalizować tekstu — dotknij karty, aby spróbować ponownie.</string>
+    <string name="reader_text_too_long">Ten tekst jest za długi — wklej najwyżej %1$d słów naraz.</string>
+    <string name="reader_paste_from_clipboard">Wklej tekst ze schowka</string>
+    <string name="reader_analyzing">Analizowanie tekstu</string>
+    <string name="reader_tap_to_paste">Dotknij, aby wkleić</string>
+    <string name="reader_paste_blurb">Każde słowo w tekście będzie można dotknąć — zobacz jego znaczenia i zapisz te, które chcesz zapamiętać.</string>
+    <string name="reader_clipboard_empty">Nie ma jeszcze nic do wklejenia — skopiuj tekst w innej aplikacji i wróć tutaj.</string>
+    <string name="reader_look_up">Sprawdź</string>
+    <string name="reader_frequency_legend">Legenda częstotliwości słów</string>
+    <string name="reader_frequency">Częstotliwość słów</string>
+    <string name="reader_a11y_saved">Zapisano, %1$s</string>
+    <string name="search_add_words">Dodaj słowa</string>
+    <string name="search_add_words_row">Wklej tekst — sprawdź każde słowo</string>
+    <string name="search_add_words_cd">Wklej tekst i sprawdź każde słowo</string>
 </resources>
