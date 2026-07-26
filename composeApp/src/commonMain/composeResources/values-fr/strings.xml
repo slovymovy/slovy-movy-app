@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Échec du téléchargement du dictionnaire : %1$s</string>
     <string name="settings_error_download_translation_with_reason">Échec du téléchargement de la traduction : %1$s</string>
     <string name="settings_error_load_voices_with_reason">Échec du chargement des voix : %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Échec du test de la voix : %1$s</string>
     <string name="settings_export_success">%1$s exporté vers %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Échec de l'ouverture du partage : %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Échec de l'export des données de l'app : %1$s</string>

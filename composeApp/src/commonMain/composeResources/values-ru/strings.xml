@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Не удалось скачать словарь: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Не удалось скачать перевод: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Не удалось загрузить данные озвучки: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Ошибка при проверке голоса: %1$s</string>
     <string name="settings_export_success">Экспортировано %1$s в %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Не удалось открыть окно обратной связи: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Ошибка при экспорте данных: %1$s</string>

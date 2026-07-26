@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Woordenboek downloaden mislukt: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Vertaling downloaden mislukt: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Stemmen laden mislukt: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Stem testen mislukt: %1$s</string>
     <string name="settings_export_success">%1$s geëxporteerd naar %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Delenvenster openen mislukt: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Exporteren van appgegevens mislukt: %1$s</string>

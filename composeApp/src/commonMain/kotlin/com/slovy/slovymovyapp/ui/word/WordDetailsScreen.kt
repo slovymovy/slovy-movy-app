@@ -522,15 +522,7 @@ class WordDetailViewModel(
 
     fun dismissVoiceSetupAndPlay() {
         dismissVoiceSetup()
-        viewModelScope.launch {
-            isPreparing = true
-            val voices = resolveVoices()
-            if (voices == null) {
-                isPreparing = false
-                return@launch
-            }
-            doPlayWord(voices)
-        }
+        viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup = false) }
     }
 
     fun openVoiceSettings() {
@@ -700,32 +692,23 @@ class WordDetailViewModel(
         )
         if (availableVoices.isEmpty()) return
 
-        viewModelScope.launch {
-            // Resolving voices can wait on a freshly bound engine, so the button spins meanwhile.
-            isPreparing = true
-            val voices = resolveVoices()
-            if (voices == null) {
-                isPreparing = false
-                return@launch
-            }
-            if (voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, voices)) {
-                isPreparing = false
-                showVoiceSetupSheet = true
-                return@launch
-            }
-            doPlayWord(voices)
-        }
+        viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup = true) }
     }
 
     /**
-     * The voices to speak with, re-resolved on every play like row audio does: voice ids only work
-     * on the engine that reported them, so a list cached before the user changed voices or the
-     * default TTS engine cannot be handed to the engine. Null when this language has none left.
+     * Resolves the voices to speak with and plays. Voices are re-read on every play, like row audio
+     * does: ids only work on the engine that reported them, so a list cached before the user changed
+     * voices or the default TTS engine cannot be handed to the engine.
      */
-    private suspend fun resolveVoices(): List<Text2SpeechVoice>? {
+    private suspend fun prepareAndPlay(gateOnVoiceSetup: Boolean) {
         val voices = voiceSelector.loadVoices(dictionaryLanguage)
         availableVoices = voices
-        return voices.ifEmpty { null }
+        if (voices.isEmpty()) return
+        if (gateOnVoiceSetup && voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, voices)) {
+            showVoiceSetupSheet = true
+            return
+        }
+        doPlayWord(voices)
     }
 
     private fun doPlayWord(voices: List<Text2SpeechVoice>) {

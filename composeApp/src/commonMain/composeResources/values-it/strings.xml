@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Impossibile scaricare il dizionario: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Impossibile scaricare la traduzione: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Impossibile caricare le voci: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Impossibile provare la voce: %1$s</string>
     <string name="settings_export_success">%1$s esportato in %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Impossibile aprire la finestra di condivisione: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Impossibile esportare i dati dell'app: %1$s</string>

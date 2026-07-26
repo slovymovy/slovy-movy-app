@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Stažení slovníku se nezdařilo: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Stažení překladu se nezdařilo: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Načtení hlasů se nezdařilo: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Test hlasu se nezdařil: %1$s</string>
     <string name="settings_export_success">%1$s exportováno do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Otevření dialogu sdílení se nezdařilo: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Export dat aplikace se nezdařil: %1$s</string>

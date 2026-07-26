@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Nie udało się pobrać słownika: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Nie udało się pobrać tłumaczenia: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Nie udało się załadować głosów: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Nie udało się przetestować głosu: %1$s</string>
     <string name="settings_export_success">Wyeksportowano %1$s do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Nie udało się otworzyć okna udostępniania: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s

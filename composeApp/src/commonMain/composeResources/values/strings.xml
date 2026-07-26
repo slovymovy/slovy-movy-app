@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Failed to download dictionary: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Failed to download translation: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Failed to load voices: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Failed to test voice: %1$s</string>
     <string name="settings_export_success">Exported %1$s to %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Failed to open share dialog: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Failed to export app data: %1$s</string>

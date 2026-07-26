@@ -665,12 +665,7 @@ class SettingsViewModel(
 
                 filteredLanguages.forEach { language ->
                     try {
-                        val voices = ttsManager.getVoicesForLanguage(language)
-                        voiceFilterHelper.initializeDefaultVoices(language, voices)
-                        val enabledIds = voiceFilterHelper.enabledVoiceIds(voices, language)
-                        updateLanguageState(language) {
-                            it.copy(voices = voices, enabledVoiceIds = enabledIds, voicesLoaded = true)
-                        }
+                        refreshVoices(language)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -697,24 +692,24 @@ class SettingsViewModel(
         updateLanguageState(language) { it.copy(isExpanded = !it.isExpanded) }
     }
 
+    /** Reads [language]'s voices from the bound engine into its row and returns them. */
+    private suspend fun refreshVoices(language: Text2SpeechLanguage): List<Text2SpeechVoice> {
+        val voices = ttsManager.getVoicesForLanguage(language)
+        voiceFilterHelper.initializeDefaultVoices(language, voices)
+        val enabledIds = voiceFilterHelper.enabledVoiceIds(voices, language)
+        updateLanguageState(language) {
+            it.copy(voices = voices, enabledVoiceIds = enabledIds, voicesLoaded = true)
+        }
+        return voices
+    }
+
     private fun loadVoicesForLanguage(language: Text2SpeechLanguage) {
         viewModelScope.launch {
             updateLanguageState(language) { it.copy(isLoadingVoices = true) }
 
             try {
-                val voices = ttsManager.getVoicesForLanguage(language)
-
-                voiceFilterHelper.initializeDefaultVoices(language, voices)
-
-                val enabledIds = voiceFilterHelper.enabledVoiceIds(voices, language)
-                updateLanguageState(language) {
-                    it.copy(
-                        voices = voices,
-                        enabledVoiceIds = enabledIds,
-                        isLoadingVoices = false,
-                        voicesLoaded = true
-                    )
-                }
+                refreshVoices(language)
+                updateLanguageState(language) { it.copy(isLoadingVoices = false) }
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
@@ -751,14 +746,11 @@ class SettingsViewModel(
             ttsManager.setVoice(voice)
             ttsManager.speak(text)
         } catch (e: Exception) {
+            // Only reachable when the engine does not have this id, which means the row predates a
+            // default-engine change. Reload the rows instead of reporting an id the user never saw.
             AppLogger.warn(TAG, "Unable to test voice ${voice.id} for ${voice.language.code}", e)
-            state = state.copy(
-                testingVoice = null,
-                errorMessage = UiText.Resource(
-                    Res.string.settings_error_test_voice_with_reason,
-                    listOf(messageOrUnknown(e))
-                )
-            )
+            state = state.copy(testingVoice = null)
+            loadLanguages()
         }
     }
 
