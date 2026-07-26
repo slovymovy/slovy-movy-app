@@ -506,7 +506,8 @@ class WordDetailViewModel(
 
     /**
      * Loads the voices this screen can play with; an empty result leaves the play button disabled.
-     * Also called on resume, to pick up voices or a TTS engine the user changed while away.
+     * Also called on resume, to pick up voices or a TTS engine the user changed while away. This
+     * list is the button's signal only — [playWord] resolves the voice it speaks with itself.
      */
     fun loadVoices() {
         viewModelScope.launch {
@@ -521,7 +522,15 @@ class WordDetailViewModel(
 
     fun dismissVoiceSetupAndPlay() {
         dismissVoiceSetup()
-        doPlayWord()
+        viewModelScope.launch {
+            isPreparing = true
+            val voices = resolveVoices()
+            if (voices == null) {
+                isPreparing = false
+                return@launch
+            }
+            doPlayWord(voices)
+        }
     }
 
     fun openVoiceSettings() {
@@ -692,17 +701,36 @@ class WordDetailViewModel(
         if (availableVoices.isEmpty()) return
 
         viewModelScope.launch {
-            if (voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, availableVoices)) {
+            // Resolving voices can wait on a freshly bound engine, so the button spins meanwhile.
+            isPreparing = true
+            val voices = resolveVoices()
+            if (voices == null) {
+                isPreparing = false
+                return@launch
+            }
+            if (voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, voices)) {
+                isPreparing = false
                 showVoiceSetupSheet = true
                 return@launch
             }
-            doPlayWord()
+            doPlayWord(voices)
         }
     }
 
-    private fun doPlayWord() {
+    /**
+     * The voices to speak with, re-resolved on every play like row audio does: voice ids only work
+     * on the engine that reported them, so a list cached before the user changed voices or the
+     * default TTS engine cannot be handed to the engine. Null when this language has none left.
+     */
+    private suspend fun resolveVoices(): List<Text2SpeechVoice>? {
+        val voices = voiceSelector.loadVoices(dictionaryLanguage)
+        availableVoices = voices
+        return voices.ifEmpty { null }
+    }
+
+    private fun doPlayWord(voices: List<Text2SpeechVoice>) {
         try {
-            val selectedVoice = voiceSelector.nextVoice(dictionaryLanguage, availableVoices)
+            val selectedVoice = voiceSelector.nextVoice(dictionaryLanguage, voices)
             isPreparing = true
             ttsManager.setVoice(selectedVoice)
             ttsManager.speak(lemma)
