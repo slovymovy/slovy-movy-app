@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -75,25 +76,22 @@ class RowAudioController(
     // it started with and bails if a newer request superseded it, so a slow first-time load for row
     // A can't speak or clobber row B's state after the user re-taps.
     private var requestToken = 0L
-    // Bumped for every availability probe, so a superseded probe cannot publish stale languages.
-    private var availabilityToken = 0L
     private var availabilityLoadJob: Job? = null
     private var listenerAttached = false
 
     /**
      * Re-probes which languages are speakable. Call when a host screen becomes visible or resumes
      * (not at controller construction, so the shared TTS engine isn't initialised at app start for
-     * the app-lifetime Favorites controller). Refreshing on every resume picks up voices the user
-     * installed or disabled while away in Settings. A language
-     * counts as playable only when the engine supports it AND at least one enabled voice remains,
-     * so rows never show a speaker that cannot produce sound.
-     *
-     * Each refresh replaces an in-flight probe. Voice queries themselves pick up an engine change
-     * made through [openVoiceSettings], so this controller only owns its UI refresh lifecycle.
+     * the app-lifetime Favorites controller). Refreshing on every resume picks up whatever the user
+     * changed while away in Settings — voices installed or disabled, or a different TTS engine,
+     * which [SpeechPlayer] handles behind its voice queries. A language counts as playable only when
+     * the engine supports it AND at least one enabled voice remains, so rows never show a speaker
+     * that cannot produce sound.
      */
     fun refreshAvailability() {
+        // A newer refresh supersedes the running probe: a slow one must not outlive the state it
+        // was probing, nor publish over the result of the refresh that replaced it.
         availabilityLoadJob?.cancel()
-        val token = ++availabilityToken
         availabilityLoadJob = scope.launch {
             val languages = try {
                 speechPlayer.getAvailableLanguages()
@@ -107,7 +105,7 @@ class RowAudioController(
                 AppLogger.warn(TAG, "Unable to load TTS language availability", e)
                 emptySet()
             }
-            if (token != availabilityToken) return@launch
+            if (!isActive) return@launch
             uiState = uiState.copy(availableLanguages = languages)
         }
     }

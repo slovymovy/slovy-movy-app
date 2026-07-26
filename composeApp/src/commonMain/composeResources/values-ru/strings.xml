@@ -263,7 +263,6 @@
 
     <string name="voice_no_voices_enabled">Нет включенных голосов</string>
     <string name="voice_unknown_name">Неизвестно</string>
-    <string name="voice_single_enabled">1 голос включен</string>
     <string name="voice_many_enabled">%1$d голосов включено</string>
     <string name="voice_no_voices_available">Нет доступных голосов</string>
     <string name="voice_download_more_title">Добавить новые голоса</string>

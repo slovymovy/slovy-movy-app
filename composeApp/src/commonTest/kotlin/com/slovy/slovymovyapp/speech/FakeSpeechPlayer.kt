@@ -15,11 +15,6 @@ class FakeSpeechPlayer : SpeechPlayer {
     var openSettingsCount = 0
         private set
 
-    /** Mirrors the Android engine: [openSettings] arms a rebind that the next check consumes. */
-    var rebindCount = 0
-        private set
-    private var settingsVisited = false
-
     var languages: List<Text2SpeechLanguage> = emptyList()
     var voicesByLanguage: Map<Language, List<Text2SpeechVoice>> = emptyMap()
 
@@ -47,13 +42,9 @@ class FakeSpeechPlayer : SpeechPlayer {
         stopCount++
     }
 
-    override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> {
-        rebindEngineIfNeeded()
-        return languages
-    }
+    override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = languages
 
     override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> {
-        rebindEngineIfNeeded()
         voiceLoadRequests++
         voiceLoadGate?.await()
         return voicesByLanguage[language.language] ?: emptyList()
@@ -65,13 +56,6 @@ class FakeSpeechPlayer : SpeechPlayer {
 
     override fun openSettings() {
         openSettingsCount++
-        settingsVisited = true
-    }
-
-    private fun rebindEngineIfNeeded() {
-        if (!settingsVisited) return
-        rebindCount++
-        settingsVisited = false
     }
 
     override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {

@@ -73,24 +73,6 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         getEnabledVoices(language)
     }
 
-    /**
-     * Re-applies defaults when the stored selection belongs to an engine that is no longer bound.
-     *
-     * Voice ids are engine-specific, so a stored set that shares nothing with the voices the
-     * current engine reports can only have come from a different engine. Requiring zero overlap
-     * keeps deliberate per-voice choices intact for the engine they were made on.
-     */
-    suspend fun reconcileVoicesForEngineChange(
-        language: Text2SpeechLanguage,
-        allVoices: List<Text2SpeechVoice>
-    ): Set<String> = withContext(Dispatchers.IO) {
-        if (!isSelectionFromUnboundEngine(language, allVoices)) return@withContext getEnabledVoices(language)
-
-        val defaultVoices = selectDefaultVoiceIds(allVoices)
-        setEnabledVoices(language, defaultVoices)
-        defaultVoices
-    }
-
     @Deprecated("Temporary migration for old local-voice defaults. Remove after legacy settings are no longer expected.")
     suspend fun migrateLegacyDefaultVoiceSelection(
         language: Text2SpeechLanguage,
@@ -127,6 +109,15 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         repo.insert(Setting(Setting.Name.VOICE_SETUP_SHOWN, JsonArray(currentCodes.map { JsonPrimitive(it) })))
     }
 
+    /**
+     * The voices among [voices] the user enabled for [language].
+     *
+     * Voice ids belong to the engine that reported them, so a stored selection can match nothing in
+     * [voices] — the user switched the default TTS engine, or uninstalled the voices they had
+     * picked. Such a selection is ignored in favour of this engine's defaults rather than rewritten,
+     * so audio keeps working and the original choice applies again as soon as its engine is back.
+     * An empty stored selection is a deliberate "nothing enabled" and stays empty.
+     */
     suspend fun filterVoicesByEnabled(
         voices: List<Text2SpeechVoice>,
         language: Text2SpeechLanguage
@@ -134,21 +125,27 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         if (!hasEnabledVoices(language)) return voices
 
         val enabledVoiceIds = getEnabledVoices(language)
-        return voices.filter { it.id in enabledVoiceIds }
+        val enabled = voices.filter { it.id in enabledVoiceIds }
+        if (enabled.isNotEmpty() || enabledVoiceIds.isEmpty()) return enabled
+
+        val defaultIds = selectDefaultVoiceIds(voices)
+        // An engine with only network voices offers no defaults; all of them beats silence.
+        return voices.filter { it.id in defaultIds }.ifEmpty { voices }
     }
 
-    /**
-     * The enabled voices to play [language] with. Reconciling here is what keeps playback working
-     * after an engine change: a selection stored for the previous engine matches none of the new
-     * engine's ids, so filtering alone would leave the language silent even though voices exist.
-     */
+    /** The ids [filterVoicesByEnabled] would play, for UI that renders per-voice toggles. */
+    suspend fun enabledVoiceIds(
+        voices: List<Text2SpeechVoice>,
+        language: Text2SpeechLanguage
+    ): Set<String> = filterVoicesByEnabled(voices, language).map { it.id }.toSet()
+
+    /** The enabled voices to play [language] with, seeding defaults on first use. */
     suspend fun loadEnabledVoices(
         speechPlayer: SpeechPlayer,
         language: Text2SpeechLanguage,
     ): List<Text2SpeechVoice> {
         val allVoices = speechPlayer.getVoicesForLanguage(language)
         initializeDefaultVoices(language, allVoices)
-        reconcileVoicesForEngineChange(language, allVoices)
         return filterVoicesByEnabled(allVoices, language)
     }
 
@@ -163,40 +160,13 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
 
     /**
      * Whether [language] has at least one voice the user would actually hear: any installed voice
-     * when no enabled-voice selection is stored, otherwise at least one still-enabled voice.
-     * Unlike [loadEnabledVoices] this never seeds or rewrites a selection, so it is safe to probe
-     * every language.
-     *
-     * A selection stored for a different engine counts as playable too: it matches none of the
-     * bound engine's ids, but the [loadEnabledVoices] on the next play reconciles it to that
-     * engine's defaults. Reporting it as unplayable would hide the row speakers right after an
-     * engine change, before playback ever gets the chance to repair the selection.
+     * when no enabled-voice selection is stored, otherwise at least one enabled voice as
+     * [filterVoicesByEnabled] resolves it. Unlike [loadEnabledVoices] this never seeds or rewrites a
+     * selection, so it is safe to probe every language.
      */
     suspend fun hasPlayableVoice(speechPlayer: SpeechPlayer, language: Text2SpeechLanguage): Boolean {
         val allVoices = speechPlayer.getVoicesForLanguage(language)
-        if (filterVoicesByEnabled(allVoices, language).isNotEmpty()) return true
-        return isSelectionFromUnboundEngine(language, allVoices)
-    }
-
-    /**
-     * Whether the stored selection for [language] can only have come from an engine other than the
-     * one that reported [allVoices]: it is non-empty, shares no id with them, and the current
-     * engine offers defaults to fall back to. An empty stored set is a deliberate "nothing enabled"
-     * choice, not a stale one.
-     */
-    private suspend fun isSelectionFromUnboundEngine(
-        language: Text2SpeechLanguage,
-        allVoices: List<Text2SpeechVoice>
-    ): Boolean {
-        if (allVoices.isEmpty()) return false
-
-        val stored = getEnabledVoices(language)
-        if (stored.isEmpty()) return false
-
-        val availableIds = allVoices.map { it.id }.toSet()
-        if (stored.any { it in availableIds }) return false
-
-        return selectDefaultVoiceIds(allVoices).isNotEmpty()
+        return filterVoicesByEnabled(allVoices, language).isNotEmpty()
     }
 
     private fun selectDefaultVoiceIds(voices: List<Text2SpeechVoice>): Set<String> {

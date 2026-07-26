@@ -263,7 +263,6 @@
 
     <string name="voice_no_voices_enabled">Keine Stimmen aktiviert</string>
     <string name="voice_unknown_name">Unbekannt</string>
-    <string name="voice_single_enabled">1 Stimme aktiviert</string>
     <string name="voice_many_enabled">%1$d Stimmen aktiviert</string>
     <string name="voice_no_voices_available">Keine Stimmen verfügbar</string>
     <string name="voice_download_more_title">Mehr Stimmen herunterladen</string>

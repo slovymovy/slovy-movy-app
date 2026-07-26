@@ -55,18 +55,9 @@ data class LanguageUiState(
     val isLoadingVoices: Boolean = false,
     /** True once the engine has answered for this language, so an empty [voices] means "none". */
     val voicesLoaded: Boolean = false,
+    /** Ids of the enabled voices, always a subset of [voices]; see `VoiceFilterHelper`. */
     val enabledVoiceIds: Set<String> = emptySet()
-) {
-    /**
-     * The enabled voices the bound engine actually offers. Voice ids are engine-specific and
-     * [enabledVoiceIds] is kept as stored — a selection made on another engine survives so it
-     * returns intact if the user switches back — so counting it directly would promise voices that
-     * cannot play, for instance an English selection left over from an engine that is no longer
-     * the default.
-     */
-    val enabledInstalledVoices: List<Text2SpeechVoice>
-        get() = voices.filter { it.id in enabledVoiceIds }
-}
+)
 
 data class SettingsUiState(
     // Languages I learn
@@ -676,7 +667,7 @@ class SettingsViewModel(
                     try {
                         val voices = ttsManager.getVoicesForLanguage(language)
                         voiceFilterHelper.initializeDefaultVoices(language, voices)
-                        val enabledIds = voiceFilterHelper.reconcileVoicesForEngineChange(language, voices)
+                        val enabledIds = voiceFilterHelper.enabledVoiceIds(voices, language)
                         updateLanguageState(language) {
                             it.copy(voices = voices, enabledVoiceIds = enabledIds, voicesLoaded = true)
                         }
@@ -715,7 +706,7 @@ class SettingsViewModel(
 
                 voiceFilterHelper.initializeDefaultVoices(language, voices)
 
-                val enabledIds = voiceFilterHelper.reconcileVoicesForEngineChange(language, voices)
+                val enabledIds = voiceFilterHelper.enabledVoiceIds(voices, language)
                 updateLanguageState(language) {
                     it.copy(
                         voices = voices,
@@ -774,16 +765,6 @@ class SettingsViewModel(
     fun openSystemSettings() {
         Analytics.logEvent(AnalyticsEvent.SETTINGS_OPEN_SYSTEM_SETTINGS_CLICK)
         ttsManager.openSettings()
-    }
-
-    /** Clears cached engine-specific ids before the resumed screen reloads its voice lists. */
-    fun refreshVoiceEngineState() {
-        state = state.copy(
-            languages = state.languages.mapValues { (_, langState) ->
-                langState.copy(voices = emptyList(), enabledVoiceIds = emptySet(), voicesLoaded = false)
-            }
-        )
-        loadLanguages()
     }
 
     fun exportAppData() {
@@ -1107,7 +1088,6 @@ fun SettingsScreen(
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.reloadSettings()
-        viewModel.refreshVoiceEngineState()
         onPauseOrDispose { }
     }
 

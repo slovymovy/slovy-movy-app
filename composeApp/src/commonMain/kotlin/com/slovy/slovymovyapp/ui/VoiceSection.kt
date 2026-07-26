@@ -56,7 +56,6 @@ import slovymovyapp.composeapp.generated.resources.voice_download_more_step_ios
 import slovymovyapp.composeapp.generated.resources.voice_download_more_step_other
 import slovymovyapp.composeapp.generated.resources.voice_download_more_step_two
 import slovymovyapp.composeapp.generated.resources.voice_download_more_title
-import slovymovyapp.composeapp.generated.resources.voice_step_two_android
 import slovymovyapp.composeapp.generated.resources.voice_enable_label
 import slovymovyapp.composeapp.generated.resources.voice_many_enabled
 import slovymovyapp.composeapp.generated.resources.voice_network_online
@@ -65,6 +64,7 @@ import slovymovyapp.composeapp.generated.resources.voice_no_voices_enabled
 import slovymovyapp.composeapp.generated.resources.voice_quality_good
 import slovymovyapp.composeapp.generated.resources.voice_quality_high
 import slovymovyapp.composeapp.generated.resources.voice_quality_medium
+import slovymovyapp.composeapp.generated.resources.voice_step_two_android
 import slovymovyapp.composeapp.generated.resources.voice_test_action
 import slovymovyapp.composeapp.generated.resources.voice_unknown_name
 
@@ -138,10 +138,9 @@ fun VoiceSectionItem(
                         text = language.language.selfName,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    // Counting only voices the engine reports keeps the summary honest when a
-                    // stored selection belongs to an engine that is no longer bound.
-                    val enabledVoices = languageState.enabledInstalledVoices
+                    val enabledVoices = languageState.voices.filter { it.id in languageState.enabledVoiceIds }
                     val voiceText = when {
+                        // The engine has answered for this language and speaks none of it.
                         languageState.voicesLoaded && languageState.voices.isEmpty() ->
                             stringResource(Res.string.voice_no_voices_available)
 

@@ -504,16 +504,14 @@ class WordDetailViewModel(
         }
     }
 
-    private fun loadVoices() {
+    /**
+     * Loads the voices this screen can play with; an empty result leaves the play button disabled.
+     * Also called on resume, to pick up voices or a TTS engine the user changed while away.
+     */
+    fun loadVoices() {
         viewModelScope.launch {
-            // Loaded once per screen; an empty result leaves the play button disabled.
             availableVoices = voiceSelector.loadVoices(dictionaryLanguage)
         }
-    }
-
-    /** Reloads voices installed or selected while this screen was paused. */
-    fun refreshVoicesOnResume() {
-        loadVoices()
     }
 
     fun dismissVoiceSetup() {
@@ -788,7 +786,7 @@ fun WordDetailScreen(
     }
 
     LifecycleResumeEffect(viewModel) {
-        viewModel.refreshVoicesOnResume()
+        viewModel.loadVoices()
         onPauseOrDispose { }
     }
 

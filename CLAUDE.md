@@ -108,22 +108,18 @@ Client database/list tests use `TestServerService` from `buildSrc`. It starts th
 `build/test-server.log`. It may terminate an old listener occupying its configured test port. Test DB/list fixtures
 default to `.test-db-files` and `.test-lists-files`.
 
-### Known local failures without a GitHub token
+### Local credentials for GitHub-backed tests
 
-The word-fetch cases in `DictionaryClientTest` drive the test server's `/word/{lang}/{word}` route, which reads base
-data from the `slovymovy/words` repository. Without `ACCESS_TO_GH_TOKEN` (or a local GitHub key file) the server
-answers `503 GitHub token not configured` and these five fail in both `:composeApp:testAndroidHostTest` and
-`:composeApp:desktopTest`:
+`DictionaryClientTest` exercises server routes that read the private test data through the GitHub API. Before running
+the Compose host or desktop suites, provide a token either in the environment:
 
-- `getWord_fetchesFromServer_whenOnlineOnlyWithoutTranslations`
-- `getWord_fetchesBothWordAndTranslations_whenOnlineOnlyWithTranslations`
-- `getWord_fetchesTranslations_whenWordExistsButTranslationsMissing`
-- `getWord_fetchesTranslations_ru_to_german`
-- `getWord_fetchesTranslations_ru_to_english_and_german`
+```text
+export ACCESS_TO_GH_TOKEN=<github-token>
+```
 
-Treat exactly this set, with exactly that 503, as an environment gap rather than a regression: note it and move on
-instead of investigating. Any other failing test, or one of these failing for a different reason, is a real failure.
-CI supplies the token, so they must pass there.
+or put the token alone (with an optional trailing newline) in `server/.github_key` or `.github_key`, relative to the
+repository root. Both files are ignored by Git and must remain local. The test server inherits the environment and
+runs from the repository root, so no additional Gradle property is required.
 
 Testing rules:
 

@@ -22,30 +22,52 @@ import kotlin.time.Duration.Companion.seconds
 // androidMain
 actual class TextToSpeechManager actual constructor(androidContext: Any?) : SpeechPlayer {
     private val context: Context = androidContext as Context
-    private lateinit var tts: TextToSpeech
 
     private val statusListeners = mutableMapOf<Any, (TTSStatus) -> Unit>()
+
+    private val progressListener = object : UtteranceProgressListener() {
+        override fun onStart(utteranceId: String?) {
+            notifyStatus(TTSStatus.SPEAKING)
+        }
+
+        override fun onDone(utteranceId: String?) {
+            notifyStatus(TTSStatus.IDLE)
+        }
+
+        @Suppress("OVERRIDE_DEPRECATION")
+        @Deprecated("Deprecated in Java")
+        override fun onError(utteranceId: String?) {
+            notifyStatus(TTSStatus.IDLE)
+        }
+
+        override fun onError(utteranceId: String?, errorCode: Int) {
+            notifyStatus(TTSStatus.IDLE)
+        }
+    }
 
     /** Completed with the engine connection result; replaced on every rebind. */
     private var engineReady = CompletableDeferred<Boolean>()
 
-    /** Set once the user actually reaches system settings, where the default engine can change. */
-    private var settingsVisited = false
+    private var tts: TextToSpeech = bindEngine()
 
-    init {
-        initializeTTS()
-    }
+    /**
+     * Engine package [tts] is bound to. `TextToSpeech` picks the system default when it connects and
+     * keeps that engine for its whole life, so this is what a later default change is compared to.
+     */
+    private var boundEngine: String? = tts.defaultEngine
 
-    private fun initializeTTS() {
-        val pending = engineReady
-        tts = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                setupUtteranceProgressListener()
-            } else {
+    private fun bindEngine(): TextToSpeech {
+        val pending = CompletableDeferred<Boolean>()
+        engineReady = pending
+        val engine = TextToSpeech(context) { status ->
+            if (status != TextToSpeech.SUCCESS) {
                 AppLogger.warn(TAG, "TTS engine failed to initialize with status $status", null)
             }
             pending.complete(status == TextToSpeech.SUCCESS)
         }
+        // Only stores the listener, so it does not have to wait for the connection.
+        engine.setOnUtteranceProgressListener(progressListener)
+        return engine
     }
 
     /**
@@ -60,27 +82,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         return ready == true
     }
 
-    private fun setupUtteranceProgressListener() {
-        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) {
-                statusListeners.values.toList().forEach { it(TTSStatus.SPEAKING) }
-            }
-
-            override fun onDone(utteranceId: String?) {
-                statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
-            }
-
-            @Suppress("OVERRIDE_DEPRECATION")
-            @Deprecated("Deprecated in Java")
-            override fun onError(utteranceId: String?) {
-                statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
-            }
-
-            override fun onError(utteranceId: String?, errorCode: Int) {
-                statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
-            }
-
-        })
+    private fun notifyStatus(status: TTSStatus) {
+        statusListeners.values.toList().forEach { it(status) }
     }
 
     actual override fun speak(text: String) {
@@ -90,7 +93,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         }
         val result = tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, id)
         if (result == TextToSpeech.ERROR) {
-            statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+            notifyStatus(TTSStatus.IDLE)
         }
     }
 
@@ -100,7 +103,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
     }
 
     actual override suspend fun getAvailableLanguages(): List<Text2SpeechLanguage> = withContext(Dispatchers.IO) {
-        rebindEngineIfNeeded()
+        rebindIfDefaultEngineChanged()
         if (!awaitEngineReady()) return@withContext emptyList()
 
         val languages = mutableListOf<Text2SpeechLanguage>()
@@ -130,7 +133,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     actual override suspend fun getVoicesForLanguage(language: Text2SpeechLanguage): List<Text2SpeechVoice> =
         withContext(Dispatchers.IO) {
-            rebindEngineIfNeeded()
+            rebindIfDefaultEngineChanged()
             if (!awaitEngineReady()) return@withContext emptyList()
 
             val locale = toLocale(language.language)
@@ -173,7 +176,6 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
                 val intent = Intent(action)
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
-                settingsVisited = true
                 return
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to open TTS settings via $action", e)
@@ -181,30 +183,30 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         }
     }
 
-    /** Refreshes the binding before any voice query, keeping engine lifecycle out of UI callers. */
-    @Synchronized
-    private fun rebindEngineIfNeeded() {
-        if (!settingsVisited) return
-        rebindEngine()
-        // Clear only after the replacement binding has been created. If that throws, the next
-        // query retries instead of silently considering the settings visit handled.
-        settingsVisited = false
-    }
-
     /**
-     * The binding is made once and survives a default-engine change made in system settings, so it
-     * is dropped and remade rather than requiring a restart.
+     * A [TextToSpeech] keeps the engine it connected to, so a default-engine change in system
+     * settings would otherwise be ignored until the app restarts. Comparing the current default
+     * against [boundEngine] before every voice query keeps that entirely inside this class: callers
+     * just query voices, and a change made anywhere — our settings link, the Settings app, another
+     * app — is picked up the same way.
      */
-    private fun rebindEngine() {
+    @Synchronized
+    private fun rebindIfDefaultEngineChanged() {
+        val defaultEngine = tts.defaultEngine ?: return
+        if (defaultEngine == boundEngine) return
+
+        AppLogger.info(TAG, "Default TTS engine changed from $boundEngine to $defaultEngine", null)
+        val previous = tts
+        // Bind the replacement first, so no concurrent query can reach a shut-down engine.
+        tts = bindEngine()
+        boundEngine = defaultEngine
         try {
-            tts.stop()
-            tts.shutdown()
+            previous.stop()
+            previous.shutdown()
         } catch (e: Exception) {
             AppLogger.warn(TAG, "Unable to shut down the previous TTS engine", e)
         }
-        statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
-        engineReady = CompletableDeferred()
-        initializeTTS()
+        notifyStatus(TTSStatus.IDLE)
     }
 
     private fun toLocale(lang: Language): Locale {
@@ -214,7 +216,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     actual override fun stop() {
         tts.stop()
-        statusListeners.values.toList().forEach { it(TTSStatus.IDLE) }
+        notifyStatus(TTSStatus.IDLE)
     }
 
     actual override fun addOnStatusChangeListener(key: Any, listener: (TTSStatus) -> Unit) {

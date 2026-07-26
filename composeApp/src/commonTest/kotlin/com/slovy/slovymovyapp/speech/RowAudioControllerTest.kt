@@ -392,58 +392,25 @@ open class RowAudioControllerTest : BaseTest() {
     }
 
     @Test
-    fun returningFromVoiceSettingsRebindsTheEngineOnce() = runBlocking {
-        val fake = fakeWithEnglishVoices(voice("v1", quality = VoiceQuality.MEDIUM))
+    fun resumeDuringSlowProbeReprobesAndPublishesTheNewVoices() = runBlocking {
+        val fake = FakeSpeechPlayer().apply { languages = listOf(ttsLanguage(Language.ENGLISH)) }
         withController(fake) { controller ->
-            controller.refreshAvailability()
-            awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
-            assertEquals(0, fake.rebindCount, "Nothing to rebind before the user leaves for settings")
-
-            controller.toggle(SENSE_A, LEMMA_A, Language.ENGLISH)
-            awaitUntil("voice setup sheet requested") { controller.uiState.voiceSetupLanguage != null }
-            controller.openVoiceSettings()
-
-            // The user changes the default engine and comes back to this screen.
-            controller.refreshAvailability()
-            awaitUntil("engine rebound on resume") { fake.rebindCount == 1 }
-
-            controller.refreshAvailability()
-            awaitUntil("second probe resolved") { controller.uiState.availableLanguages != null }
-            assertEquals(1, fake.rebindCount, "A later resume must not drop a working engine binding")
-        }
-    }
-
-    @Test
-    fun resumeDuringSlowProbeRebindsAndReprobesTheNewEngine() = runBlocking {
-        val fake = FakeSpeechPlayer().apply {
-            languages = listOf(ttsLanguage(Language.ENGLISH))
-        }
-        withController(fake) { controller ->
-            // The user leaves for system settings, then comes back before the resume probe of an
-            // earlier visit has finished loading voices from the old binding.
-            controller.openVoiceSettings()
+            // A resume probe stalls on the engine while the user is away in system settings.
             val gate = CompletableDeferred<Unit>()
             fake.voiceLoadGate = gate
             controller.refreshAvailability()
             awaitUntil("first probe reached the voice load") { fake.voiceLoadRequests == 1 }
-            assertEquals(1, fake.rebindCount, "The first resume consumes the pending settings visit")
 
-            // Second visit: a different default engine, whose voices only the rebind can see.
-            controller.openVoiceSettings()
+            // They come back with a different engine, whose voices the stalled probe never saw.
             fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("new-engine-v1")))
             controller.refreshAvailability()
-            awaitUntil("replacement probe consumed the engine change") { fake.rebindCount == 2 }
-            assertEquals(
-                2,
-                fake.rebindCount,
-                "An in-flight probe must not swallow the pending engine change"
-            )
+            awaitUntil("stale probe replaced") { fake.voiceLoadRequests == 2 }
 
             gate.complete(Unit)
             awaitUntil("re-probe published the new engine's voices") {
-                controller.uiState.availableLanguages != null && controller.uiState.isPlayable(Language.ENGLISH)
+                controller.uiState.isPlayable(Language.ENGLISH)
             }
-            assertEquals(2, fake.voiceLoadRequests, "The stale probe should be restarted, not left to finish")
+            assertEquals(2, fake.voiceLoadRequests, "The stale probe should be replaced, not repeated")
         }
     }
 

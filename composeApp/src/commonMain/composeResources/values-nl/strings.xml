@@ -263,7 +263,6 @@
 
     <string name="voice_no_voices_enabled">Geen stemmen ingeschakeld</string>
     <string name="voice_unknown_name">Onbekend</string>
-    <string name="voice_single_enabled">1 stem ingeschakeld</string>
     <string name="voice_many_enabled">%1$d stemmen ingeschakeld</string>
     <string name="voice_no_voices_available">Geen stemmen beschikbaar</string>
     <string name="voice_download_more_title">Download meer stemmen</string>
