@@ -47,7 +47,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -110,6 +109,7 @@ import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
 import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
@@ -386,7 +386,7 @@ private fun StudyLoadingIndicator() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CircularProgressIndicator(modifier = Modifier.size(32.dp))
+        SpinningProgressIndicator(modifier = Modifier.size(32.dp))
         Spacer(Modifier.height(AppSpacing.lg))
         Text(
             text = stringResource(Res.string.study_loading),
@@ -1390,7 +1390,7 @@ private fun ListeningFront(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     when {
-                        isPreparingAudio -> CircularProgressIndicator(
+                        isPreparingAudio -> SpinningProgressIndicator(
                             modifier = Modifier.size(48.dp),
                             strokeWidth = 3.dp,
                             color = MaterialTheme.colorScheme.primary,
@@ -1753,7 +1753,7 @@ private fun StudySpeakerButton(
     ) {
         Box(contentAlignment = Alignment.Center) {
             when {
-                isPreparingAudio -> CircularProgressIndicator(
+                isPreparingAudio -> SpinningProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

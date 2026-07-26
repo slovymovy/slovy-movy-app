@@ -673,6 +673,13 @@
     <string name="study_complete_milestone_subtitle_50">Padesát dní bez přerušení. Odhodlání a pravidelnost.</string>
     <string name="study_complete_milestone_subtitle_100">Sto dní bez přerušení. Neuvěřitelný milník.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d dní bez přerušení. Jen tak dál.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d plně naučené slovo!</item>
+        <item quantity="few">%1$d plně naučená slova!</item>
+        <item quantity="many">%1$d plně naučených slov!</item>
+        <item quantity="other">%1$d plně naučených slov!</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Slova, která opravdu použiješ.</string>
     <string name="study_action_done_for_now">Pro teď hotovo</string>
     <string name="study_progress_count">%1$d z %2$d</string>
     <string name="study_tap_to_flip">Klepni pro otočení</string>
@@ -746,20 +753,20 @@
     <string name="favorites_study_done_next_review_a11y">Další opakování za %1$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Čtení</string>
-    <string name="reader_title_with_lang">Slova · %1$s</string>
-    <string name="reader_error_analyzing">Text se nepodařilo analyzovat</string>
-    <string name="reader_text_too_long">Ten text je trochu dlouhý — zkus maximálně %1$d slov.</string>
+    <string name="reader_title">Rozbor textu</string>
+    <string name="reader_title_with_lang">Tvůj text · %1$s</string>
+    <string name="reader_error_analyzing">Text se nepodařilo analyzovat — klepni na kartu a zkus to znovu.</string>
+    <string name="reader_text_too_long">Ten text je moc dlouhý — vlož najednou nejvýše %1$d slov.</string>
     <string name="reader_paste_from_clipboard">Vložit text ze schránky</string>
     <string name="reader_analyzing">Analýza textu</string>
-    <string name="reader_tap_to_paste">Klepni pro vložení textu</string>
-    <string name="reader_paste_blurb">Zkopíruj pár slov a vlož je sem. Každé slovo si můžeš vyhledat a uložit významy, které si chceš zapamatovat.</string>
-    <string name="reader_clipboard_empty">Schránka je prázdná. Zkopíruj nějaký text a vlož ho sem.</string>
+    <string name="reader_tap_to_paste">Klepni a vlož</string>
+    <string name="reader_paste_blurb">Každé slovo v textu půjde rozkliknout — podívej se na jeho významy a ulož si ty, které si chceš zapamatovat.</string>
+    <string name="reader_clipboard_empty">Zatím není co vložit — zkopíruj text v jiné aplikaci a pak se sem vrať.</string>
     <string name="reader_look_up">Vyhledat</string>
-    <string name="reader_frequency_legend">Legenda frekvence</string>
-    <string name="reader_frequency">Frekvence</string>
+    <string name="reader_frequency_legend">Legenda frekvence slov</string>
+    <string name="reader_frequency">Frekvence slov</string>
     <string name="reader_a11y_saved">Uloženo, %1$s</string>
     <string name="search_add_words">Přidat slova</string>
-    <string name="search_add_words_row">Zkopíruj a vlož svůj text</string>
-    <string name="search_add_words_cd">Vlož svůj text</string>
+    <string name="search_add_words_row">Vlož text — vyhledej každé slovo</string>
+    <string name="search_add_words_cd">Vlož text a vyhledej každé slovo</string>
 </resources>

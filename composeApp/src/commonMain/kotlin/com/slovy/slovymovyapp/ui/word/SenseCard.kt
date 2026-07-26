@@ -41,6 +41,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.speech.LemmaAudioControl
 import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.ui.SpeakerVector
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
 import com.slovy.slovymovyapp.ui.components.appendWithMutedCenteredBullets
 import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
@@ -408,7 +409,7 @@ private fun LemmaWithSpeaker(
                     contentAlignment = Alignment.Center,
                 ) {
                     when {
-                        control.phase == RowAudioPhase.PREPARING -> CircularProgressIndicator(
+                        control.phase == RowAudioPhase.PREPARING -> SpinningProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp,
                             color = speakerTint,

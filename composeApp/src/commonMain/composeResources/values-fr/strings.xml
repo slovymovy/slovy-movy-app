@@ -673,6 +673,13 @@
     <string name="study_complete_milestone_subtitle_50">Cinquante jours sans interruption. Assidu et régulier.</string>
     <string name="study_complete_milestone_subtitle_100">Cent jours sans interruption. Un cap incroyable.</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d jours sans interruption. Continue sur ta lancée.</string>
+    <plurals name="study_complete_words_milestone_title">
+        <item quantity="one">%1$d mot entièrement appris !</item>
+        <item quantity="few">%1$d mots entièrement appris !</item>
+        <item quantity="many">%1$d mots entièrement appris !</item>
+        <item quantity="other">%1$d mots entièrement appris !</item>
+    </plurals>
+    <string name="study_complete_words_milestone_subtitle">Des mots que tu utiliseras vraiment.</string>
     <string name="study_action_done_for_now">Terminé pour l'instant</string>
     <string name="study_progress_count">%1$d sur %2$d</string>
     <string name="study_tap_to_flip">Touche pour retourner</string>
@@ -746,20 +753,20 @@
     <string name="favorites_study_done_next_review_a11y">Prochaine révision dans %1$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
-    <string name="reader_title">Lire</string>
-    <string name="reader_title_with_lang">Mots · %1$s</string>
-    <string name="reader_error_analyzing">Impossible d'analyser le texte</string>
-    <string name="reader_text_too_long">Ce texte est un peu long — essaie avec %1$d mots maximum.</string>
+    <string name="reader_title">Explorer un texte</string>
+    <string name="reader_title_with_lang">Ton texte · %1$s</string>
+    <string name="reader_error_analyzing">Impossible d'analyser le texte — touche la carte pour réessayer.</string>
+    <string name="reader_text_too_long">Ce texte est trop long — colle %1$d mots maximum à la fois.</string>
     <string name="reader_paste_from_clipboard">Coller le texte du presse-papiers</string>
     <string name="reader_analyzing">Analyse du texte</string>
-    <string name="reader_tap_to_paste">Touche pour coller du texte</string>
-    <string name="reader_paste_blurb">Copie quelques mots et colle-les ici. Tu pourras chercher chaque mot et enregistrer les sens que tu veux retenir.</string>
-    <string name="reader_clipboard_empty">Le presse-papiers est vide. Copie du texte et colle-le ici.</string>
+    <string name="reader_tap_to_paste">Touche pour coller</string>
+    <string name="reader_paste_blurb">Tu pourras toucher chaque mot de ton texte pour voir ses sens et enregistrer ceux que tu veux retenir.</string>
+    <string name="reader_clipboard_empty">Rien à coller pour l'instant — copie un texte dans une autre app, puis reviens ici.</string>
     <string name="reader_look_up">Chercher</string>
-    <string name="reader_frequency_legend">Légende de fréquence</string>
-    <string name="reader_frequency">Fréquence</string>
+    <string name="reader_frequency_legend">Légende de la fréquence des mots</string>
+    <string name="reader_frequency">Fréquence des mots</string>
     <string name="reader_a11y_saved">Enregistré, %1$s</string>
     <string name="search_add_words">Ajouter des mots</string>
-    <string name="search_add_words_row">Copie et colle ton texte</string>
-    <string name="search_add_words_cd">Colle ton texte</string>
+    <string name="search_add_words_row">Colle un texte — cherche chaque mot</string>
+    <string name="search_add_words_cd">Colle un texte et cherche chaque mot</string>
 </resources>

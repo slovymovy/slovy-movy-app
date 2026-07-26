@@ -53,6 +53,7 @@ import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -939,7 +940,7 @@ fun WordDetailScreenContent(
                                     modifier = Modifier.size(36.dp)
                                 ) {
                                     when {
-                                        isPreparing -> CircularProgressIndicator(
+                                        isPreparing -> SpinningProgressIndicator(
                                             modifier = Modifier.size(20.dp),
                                             strokeWidth = 2.dp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1140,7 +1141,7 @@ private fun WordDetailContent(
                         .size(36.dp)
                 ) {
                     when {
-                        isPreparing -> CircularProgressIndicator(
+                        isPreparing -> SpinningProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

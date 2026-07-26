@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -165,7 +166,7 @@ fun FeedbackDialog(
                     enabled = !isSending && commentValue.text.isNotBlank()
                 ) {
                     if (isSending) {
-                        CircularProgressIndicator(
+                        SpinningProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp
                         )

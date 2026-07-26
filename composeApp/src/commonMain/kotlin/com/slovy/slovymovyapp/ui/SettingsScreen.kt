@@ -28,6 +28,7 @@ import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.CancellationException
@@ -1262,7 +1263,7 @@ fun SettingsScreenContent(
                                         modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                        SpinningProgressIndicator(modifier = Modifier.size(24.dp))
                                     }
                                 }
                             } else {

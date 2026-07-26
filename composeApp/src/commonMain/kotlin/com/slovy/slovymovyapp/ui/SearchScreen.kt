@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.data.lists.WordListSense
+import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
@@ -524,7 +525,12 @@ fun SearchScreen(
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToSettings = onNavigateToSettings,
-        onNavigateToTextReader = { viewModel.state.selectedLanguage?.let { onNavigateToTextReader(it) } },
+        onNavigateToTextReader = {
+            viewModel.state.selectedLanguage?.let { language ->
+                Analytics.logEvent(AnalyticsEvent.READER_OPEN_CLICK, mapOf("lang" to language.code))
+                onNavigateToTextReader(language)
+            }
+        },
         hasFavoritesToReview = hasFavoritesToReview,
     )
 }
@@ -821,7 +827,7 @@ private fun EmptySearchState(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            SpinningProgressIndicator()
         }
         return
     }
@@ -992,16 +998,18 @@ private fun ReadSection(onClick: () -> Unit) {
             color = primary,
             modifier = Modifier.padding(top = 8.dp, bottom = 10.dp)
         )
+        // Min height + real vertical padding so the row grows when a localized label wraps
+        // to two lines (e.g. German) instead of crowding or clipping on a fixed height.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .heightIn(min = 56.dp)
                 .clip(shape)
                 .background(rowFill)
                 .clickable(onClickLabel = stringResource(Res.string.search_add_words_cd), role = Role.Button) { onClick() }
-                .padding(start = 12.dp, end = 14.dp),
+                .padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(13.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             Box(
                 modifier = Modifier
@@ -1022,10 +1030,13 @@ private fun ReadSection(onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
+                    lineHeight = 19.sp, // 1.25 × font size so wrapped lines don't sit too tight
                     letterSpacing = 0.1.sp
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
+                // Centers the first text line (19sp line height) on the 34dp icon tile, so the
+                // icon stays anchored to line one instead of floating mid-gap on two-line copy.
+                modifier = Modifier.weight(1f).padding(top = 7.dp)
             )
         }
     }
