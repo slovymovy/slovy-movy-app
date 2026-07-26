@@ -57,6 +57,7 @@ import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.LemmaAudioControl
 import com.slovy.slovymovyapp.speech.RowAudioActions
 import com.slovy.slovymovyapp.speech.RowAudioController
@@ -96,6 +97,9 @@ data class ListWordItem(
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
     override val loading: Boolean = false,
+    // A server translation repair is in flight for this row. The row keeps rendering its local
+    // content meanwhile; only the translation area shows a progress placeholder.
+    val translationLoading: Boolean = false,
     override val error: UiText? = null,
     val isFavorited: Boolean = false,
 ) : PrefetchableSenseItem
@@ -159,6 +163,24 @@ class ListDetailViewModel(
     // was opened with everything already favorited), "Remove all" removes all items.
     private var sessionBulkAddedSenseIds: Set<String> = emptySet()
 
+    // Default translation targets resolved at load(); used to detect senses that resolved
+    // locally but lack a requested translation language (gap in the downloaded translation DB).
+    private var translationTargets: List<Language> = emptyList()
+
+    // SenseIds already handed to translation repair this session, so a fetch that yields no
+    // translations (or fails) is not retried on every prefetch/expand of the same row.
+    // Parallelism is capped inside LemmaRecovery, shared across all recovery callers.
+    private val translationRecoveryAttempted = mutableSetOf<String>()
+
+    // Lemmas whose repair completed without filling the gap (fetch failed or the server has no
+    // translations for them): further senses of the same lemma skip the pointless refetch.
+    // Successful repairs need no lemma-level dedup — concurrent same-lemma fetches are shared
+    // by WordFetchManager, and once ingested the next repair resolves locally without a server
+    // round trip.
+    private val translationRepairFailedLemmas = mutableSetOf<String>()
+
+    private fun lemmaRepairKey(lemma: String) = lemma.trim().lowercase()
+
     init {
         load()
     }
@@ -183,6 +205,9 @@ class ListDetailViewModel(
                 return@launch
             }
             list = resolvedList
+            translationTargets = repository.defaultTranslationTargets(language)
+                .filter { it != language }
+                .distinctBy { it.code }
             val resolved = repository.getListSenses(language, resolvedList.senseIds)
                 .associateBy { it.senseId }
             val allFavorites = favoritesRepository.getAll().filter { it.language == language }
@@ -237,32 +262,90 @@ class ListDetailViewModel(
             // background; resolved items are already on screen, so this never blocks the UI.
             // Only senses with a usable lemma are fetchable.
             val missing = resolvedList.senses.filter { it.senseId !in resolved && it.lemma.isNotBlank() }
-            if (missing.isNotEmpty()) fetchMissingSenses(missing)
+            // Senses seeded from the cache may lack a translation language (an earlier repair
+            // failed or never ran); hand them to the same recovery pass so reopening the screen
+            // retries the fetch.
+            val translationGaps = items.mapNotNull { item ->
+                val sense = item.sense ?: return@mapNotNull null
+                if (senseMissingTranslations(sense) &&
+                    lemmaRepairKey(item.lemma) !in translationRepairFailedLemmas &&
+                    translationRecoveryAttempted.add(item.senseId)
+                ) {
+                    WordListSense(senseId = item.senseId, lemma = item.lemma, language = language)
+                } else null
+            }
+            if (missing.isNotEmpty() || translationGaps.isNotEmpty()) {
+                fetchMissingSenses(missing, translationGaps)
+            }
         }
     }
 
-    private suspend fun fetchMissingSenses(missing: List<WordListSense>) {
+    // True when the sense resolved locally but the downloaded/local translation DBs have no data
+    // for one of the requested target languages — the case the server fetch can repair.
+    private fun senseMissingTranslations(sense: LanguageCardResponseSense): Boolean =
+        translationTargets.any { it !in sense.translations && it !in sense.targetLangDefinitions }
+
+    private suspend fun fetchMissingSenses(
+        missing: List<WordListSense>,
+        translationGaps: List<WordListSense>,
+    ) {
         // Hand the missing senses to LemmaRecovery, which fetches (server stream + ingest, with
         // retry/backoff, parallelism cap and cancellation) and resolves each one, calling back as
         // results arrive. WordListSense is itself a RecoverableSense, so no mapping is needed; the
         // screen only maps each outcome to its per-item UI state.
-        lemmaRecovery.recoverSenses(missing) { recovered ->
+        val gapLemmaKeysBySenseId = translationGaps.associate { it.senseId to lemmaRepairKey(it.lemma) }
+        // Show progress on the rows being repaired. Both call sites route through here, so the
+        // flag is set once the fetch is actually enqueued and cleared per sense as results land.
+        gapLemmaKeysBySenseId.keys.forEach { senseId ->
+            updateItem(senseId) { it.copy(translationLoading = true) }
+        }
+        lemmaRecovery.recoverSenses(missing + translationGaps) { recovered ->
             val lookup = recovered.result
             val senseWithPos = lookup?.sense
-            val error = when {
-                senseWithPos != null -> null
-                lookup?.missingReason != null -> lookup.missingReason.toFavoriteSenseLoadError(language)
-                else -> recovered.error?.message?.let(UiText::Plain)
-                    ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
-            }
-            updateItem(recovered.senseId) {
-                it.copy(
-                    sense = senseWithPos?.sense,
-                    relatedWords = senseWithPos?.relatedWords ?: it.relatedWords,
-                    pos = senseWithPos?.pos,
-                    loading = false,
-                    error = error,
-                )
+            val gapLemmaKey = gapLemmaKeysBySenseId[recovered.senseId]
+            if (gapLemmaKey != null) {
+                // Translation repair: the row already renders a locally resolved sense, so a
+                // failed or still-translation-less fetch keeps the current content instead of
+                // surfacing an error. A repair that didn't fill the gap marks the lemma so
+                // other senses of the same word don't refetch what the server cannot provide.
+                if (senseWithPos == null || senseMissingTranslations(senseWithPos.sense)) {
+                    translationRepairFailedLemmas += gapLemmaKey
+                    // The row silently keeps its untranslated content, so this log is the only
+                    // trace that a repair ran and could not fill the gap.
+                    AppLogger.debug(TAG, recovered.error) {
+                        "Translation repair did not fill the gap for '$gapLemmaKey' " +
+                            "(${language.code}, sense=${recovered.senseId}); " +
+                            "further senses of this lemma will not refetch"
+                    }
+                }
+                updateItem(recovered.senseId) {
+                    if (senseWithPos == null) {
+                        it.copy(translationLoading = false)
+                    } else {
+                        it.copy(
+                            sense = senseWithPos.sense,
+                            relatedWords = senseWithPos.relatedWords.ifEmpty { it.relatedWords },
+                            pos = senseWithPos.pos,
+                            translationLoading = false,
+                        )
+                    }
+                }
+            } else {
+                val error = when {
+                    senseWithPos != null -> null
+                    lookup?.missingReason != null -> lookup.missingReason.toFavoriteSenseLoadError(language)
+                    else -> recovered.error?.message?.let(UiText::Plain)
+                        ?: UiText.Resource(Res.string.favorites_error_meaning_not_found)
+                }
+                updateItem(recovered.senseId) {
+                    it.copy(
+                        sense = senseWithPos?.sense,
+                        relatedWords = senseWithPos?.relatedWords ?: it.relatedWords,
+                        pos = senseWithPos?.pos,
+                        loading = false,
+                        error = error,
+                    )
+                }
             }
         }
     }
@@ -305,6 +388,21 @@ class ListDetailViewModel(
                     pos = senseWithPos?.pos,
                     loading = false,
                     error = error,
+                )
+            }
+            // The row is already rendering the local sense; if a requested translation language
+            // is absent from the local DBs, fetch it from the server (same path the word-detail
+            // screen uses) and swap the row content in when it arrives.
+            if (senseWithPos != null &&
+                senseMissingTranslations(senseWithPos.sense) &&
+                lemmaRepairKey(item.lemma) !in translationRepairFailedLemmas &&
+                translationRecoveryAttempted.add(item.senseId)
+            ) {
+                fetchMissingSenses(
+                    missing = emptyList(),
+                    translationGaps = listOf(
+                        WordListSense(senseId = item.senseId, lemma = item.lemma, language = language)
+                    ),
                 )
             }
         } catch (e: CancellationException) {
@@ -393,6 +491,10 @@ class ListDetailViewModel(
             items = state.items.map { it.copy(isFavorited = it.senseId in favoritedIds) },
             favoriteLemmas = favoriteLemmas,
         )
+    }
+
+    private companion object {
+        private const val TAG = "ListDetailViewModel"
     }
 }
 
@@ -645,6 +747,7 @@ private fun ListWordSenseCard(
             sense = item.sense,
             pos = item.pos,
             loading = item.loading,
+            translationLoading = item.translationLoading,
             error = item.error?.resolve(),
         ),
         state = SenseUiState(
@@ -861,6 +964,42 @@ private fun ListDetailPreviewContent(
                         lemma = "gezellig",
                         expanded = true,
                         loading = true,
+                    ),
+                ),
+                isLoading = false,
+                favoriteLemmas = setOf("huis"),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ListDetailPreviewTranslationRepair(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            language = Language.DUTCH,
+            state = ListDetailUiState(
+                items = listOf(
+                    // Row 1 is having its missing translation fetched from the server: it keeps
+                    // rendering its local content and shows a translation progress placeholder.
+                    ListWordItem(
+                        senseId = "1",
+                        lemma = "huis",
+                        definition = "a building where people live",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.HIGH,
+                        translationLoading = true,
+                    ),
+                    ListWordItem(
+                        senseId = "2",
+                        lemma = "fiets",
+                        definition = "a vehicle with two wheels that you ride by pushing pedals",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.MIDDLE,
                     ),
                 ),
                 isLoading = false,
