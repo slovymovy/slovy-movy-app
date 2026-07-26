@@ -55,6 +55,7 @@ import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
@@ -326,6 +327,7 @@ class WordDetailViewModel(
     }
 
     private val voiceSelector = RotatingVoiceSelector(ttsManager, voiceFilterHelper)
+    private var playJob: Job? = null
     private var hasScrolledToTarget = false
     private var requestedTranslationLanguages: List<Language> =
         translationLanguages?.distinctBy { it.code } ?: emptyList()
@@ -522,7 +524,7 @@ class WordDetailViewModel(
 
     fun dismissVoiceSetupAndPlay() {
         dismissVoiceSetup()
-        viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup = false) }
+        launchPlay(gateOnVoiceSetup = false)
     }
 
     fun openVoiceSettings() {
@@ -692,7 +694,17 @@ class WordDetailViewModel(
         )
         if (availableVoices.isEmpty()) return
 
-        viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup = true) }
+        launchPlay(gateOnVoiceSetup = true)
+    }
+
+    /**
+     * Starts one play attempt. Taps while an attempt is still resolving voices are ignored rather
+     * than queued: on a freshly bound engine that read can take a moment, and a second utterance
+     * would only flush the first.
+     */
+    private fun launchPlay(gateOnVoiceSetup: Boolean) {
+        if (playJob?.isActive == true) return
+        playJob = viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup) }
     }
 
     /**
