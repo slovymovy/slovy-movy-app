@@ -197,6 +197,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
         AppLogger.info(TAG, "Default TTS engine changed from $boundEngine to $defaultEngine", null)
         val previous = tts
+        // An utterance dying with the old engine gets no callback, so it has to be reported. Nothing
+        // speaking means nothing to report: the rebind runs inside a voice query, and a caller that
+        // is resolving voices for a play it has not started yet must not be told one just finished.
+        val interruptedSpeech = previous.isSpeaking
         // Bind the replacement first, so no concurrent query can reach a shut-down engine.
         tts = bindEngine()
         boundEngine = defaultEngine
@@ -206,7 +210,7 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         } catch (e: Exception) {
             AppLogger.warn(TAG, "Unable to shut down the previous TTS engine", e)
         }
-        notifyStatus(TTSStatus.IDLE)
+        if (interruptedSpeech) notifyStatus(TTSStatus.IDLE)
     }
 
     private fun toLocale(lang: Language): Locale {
