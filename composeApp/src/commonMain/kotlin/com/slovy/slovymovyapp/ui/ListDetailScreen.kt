@@ -57,6 +57,7 @@ import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.LemmaAudioControl
 import com.slovy.slovymovyapp.speech.RowAudioActions
 import com.slovy.slovymovyapp.speech.RowAudioController
@@ -301,6 +302,13 @@ class ListDetailViewModel(
                 // other senses of the same word don't refetch what the server cannot provide.
                 if (senseWithPos == null || senseMissingTranslations(senseWithPos.sense)) {
                     translationRepairFailedLemmas += gapLemmaKey
+                    // The row silently keeps its untranslated content, so this log is the only
+                    // trace that a repair ran and could not fill the gap.
+                    AppLogger.debug(TAG, recovered.error) {
+                        "Translation repair did not fill the gap for '$gapLemmaKey' " +
+                            "(${language.code}, sense=${recovered.senseId}); " +
+                            "further senses of this lemma will not refetch"
+                    }
                 }
                 if (senseWithPos != null) {
                     updateItem(recovered.senseId) {
@@ -472,6 +480,10 @@ class ListDetailViewModel(
             items = state.items.map { it.copy(isFavorited = it.senseId in favoritedIds) },
             favoriteLemmas = favoriteLemmas,
         )
+    }
+
+    private companion object {
+        private const val TAG = "ListDetailViewModel"
     }
 }
 

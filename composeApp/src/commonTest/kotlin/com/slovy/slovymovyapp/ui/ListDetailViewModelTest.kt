@@ -13,6 +13,8 @@ import com.slovy.slovymovyapp.data.remote.LemmaRecovery
 import com.slovy.slovymovyapp.data.remote.ListsClient
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.speech.FakeSpeechPlayer
+import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.TestContext
@@ -215,6 +217,8 @@ class ListDetailViewModelTest : BaseTest() {
             favoritesRepository = FavoritesRepository(testAppDatabaseHolder().database),
             listsService = listsService,
             lemmaRecovery = recovery,
+            speechPlayer = FakeSpeechPlayer(),
+            voiceFilterHelper = VoiceFilterHelper(SettingsRepository(testAppDatabaseHolder().database)),
             onFavoriteChanged = {},
         )
         viewModelStore.put("test", vm)
