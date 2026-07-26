@@ -53,6 +53,9 @@ data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
     val isExpanded: Boolean = false,
     val isLoadingVoices: Boolean = false,
+    /** True once the engine has answered for this language, so an empty [voices] means "none". */
+    val voicesLoaded: Boolean = false,
+    /** Ids of the enabled voices, always a subset of [voices]; see `VoiceFilterHelper`. */
     val enabledVoiceIds: Set<String> = emptySet()
 )
 
@@ -662,10 +665,7 @@ class SettingsViewModel(
 
                 filteredLanguages.forEach { language ->
                     try {
-                        val voices = ttsManager.getVoicesForLanguage(language)
-                        voiceFilterHelper.initializeDefaultVoices(language, voices)
-                        val enabledIds = voiceFilterHelper.getEnabledVoices(language)
-                        updateLanguageState(language) { it.copy(voices = voices, enabledVoiceIds = enabledIds) }
+                        refreshVoices(language)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -685,11 +685,22 @@ class SettingsViewModel(
 
     fun toggleLanguageExpansion(language: Text2SpeechLanguage) {
         val s = state.languages[language] ?: return
-        if (!s.isExpanded && s.voices.isEmpty()) {
+        if (!s.isExpanded && !s.voicesLoaded) {
             loadVoicesForLanguage(language)
         }
 
         updateLanguageState(language) { it.copy(isExpanded = !it.isExpanded) }
+    }
+
+    /** Reads [language]'s voices from the bound engine into its row and returns them. */
+    private suspend fun refreshVoices(language: Text2SpeechLanguage): List<Text2SpeechVoice> {
+        val voices = ttsManager.getVoicesForLanguage(language)
+        voiceFilterHelper.initializeDefaultVoices(language, voices)
+        val enabledIds = voiceFilterHelper.enabledVoiceIds(voices, language)
+        updateLanguageState(language) {
+            it.copy(voices = voices, enabledVoiceIds = enabledIds, voicesLoaded = true)
+        }
+        return voices
     }
 
     private fun loadVoicesForLanguage(language: Text2SpeechLanguage) {
@@ -697,14 +708,8 @@ class SettingsViewModel(
             updateLanguageState(language) { it.copy(isLoadingVoices = true) }
 
             try {
-                val voices = ttsManager.getVoicesForLanguage(language)
-
-                voiceFilterHelper.initializeDefaultVoices(language, voices)
-
-                val enabledIds = voiceFilterHelper.getEnabledVoices(language)
-                updateLanguageState(language) {
-                    it.copy(voices = voices, enabledVoiceIds = enabledIds, isLoadingVoices = false)
-                }
+                refreshVoices(language)
+                updateLanguageState(language) { it.copy(isLoadingVoices = false) }
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
@@ -741,14 +746,11 @@ class SettingsViewModel(
             ttsManager.setVoice(voice)
             ttsManager.speak(text)
         } catch (e: Exception) {
+            // Only reachable when the engine does not have this id, which means the row predates a
+            // default-engine change. Reload the rows instead of reporting an id the user never saw.
             AppLogger.warn(TAG, "Unable to test voice ${voice.id} for ${voice.language.code}", e)
-            state = state.copy(
-                testingVoice = null,
-                errorMessage = UiText.Resource(
-                    Res.string.settings_error_test_voice_with_reason,
-                    listOf(messageOrUnknown(e))
-                )
-            )
+            state = state.copy(testingVoice = null)
+            loadLanguages()
         }
     }
 
@@ -1533,11 +1535,12 @@ private fun SettingsScreenPreviewWithLanguages(
                         isAvailable = true,
                         missingData = false
                     ) to LanguageUiState(),
+                    // The bound engine reports no voices for this language.
                     Text2SpeechLanguage(
                         language = Language.ENGLISH,
                         isAvailable = true,
                         missingData = false
-                    ) to LanguageUiState()
+                    ) to LanguageUiState(voicesLoaded = true)
                 )
             )
         )
@@ -1576,6 +1579,8 @@ private fun SettingsScreenPreviewWithExpandedVoice(
                         missingData = false
                     ) to LanguageUiState(
                         isExpanded = true,
+                        voicesLoaded = true,
+                        enabledVoiceIds = setOf("en-us-x-sfg#female_1-local", "en-us-x-sfg#male_1-local"),
                         voices = listOf(
                             Text2SpeechVoice(
                                 id = "en-us-x-sfg#female_1-local",

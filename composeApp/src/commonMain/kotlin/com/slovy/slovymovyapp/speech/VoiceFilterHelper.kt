@@ -109,6 +109,15 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         repo.insert(Setting(Setting.Name.VOICE_SETUP_SHOWN, JsonArray(currentCodes.map { JsonPrimitive(it) })))
     }
 
+    /**
+     * The voices among [voices] the user enabled for [language].
+     *
+     * Voice ids belong to the engine that reported them, so a stored selection can match nothing in
+     * [voices] — the user switched the default TTS engine, or uninstalled the voices they had
+     * picked. Such a selection is ignored in favour of this engine's defaults rather than rewritten,
+     * so audio keeps working and the original choice applies again as soon as its engine is back.
+     * An empty stored selection is a deliberate "nothing enabled" and stays empty.
+     */
     suspend fun filterVoicesByEnabled(
         voices: List<Text2SpeechVoice>,
         language: Text2SpeechLanguage
@@ -116,9 +125,21 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
         if (!hasEnabledVoices(language)) return voices
 
         val enabledVoiceIds = getEnabledVoices(language)
-        return voices.filter { it.id in enabledVoiceIds }
+        val enabled = voices.filter { it.id in enabledVoiceIds }
+        if (enabled.isNotEmpty() || enabledVoiceIds.isEmpty()) return enabled
+
+        val defaultIds = selectDefaultVoiceIds(voices)
+        // An engine with only network voices offers no defaults; all of them beats silence.
+        return voices.filter { it.id in defaultIds }.ifEmpty { voices }
     }
 
+    /** The ids [filterVoicesByEnabled] would play, for UI that renders per-voice toggles. */
+    suspend fun enabledVoiceIds(
+        voices: List<Text2SpeechVoice>,
+        language: Text2SpeechLanguage
+    ): Set<String> = filterVoicesByEnabled(voices, language).map { it.id }.toSet()
+
+    /** The enabled voices to play [language] with, seeding defaults on first use. */
     suspend fun loadEnabledVoices(
         speechPlayer: SpeechPlayer,
         language: Text2SpeechLanguage,
@@ -139,9 +160,9 @@ class VoiceFilterHelper(private val settingsRepo: SettingsRepository?) {
 
     /**
      * Whether [language] has at least one voice the user would actually hear: any installed voice
-     * when no enabled-voice selection is stored, otherwise at least one still-enabled voice.
-     * Unlike [loadEnabledVoices] this never seeds a default selection, so it is safe to probe
-     * every language.
+     * when no enabled-voice selection is stored, otherwise at least one enabled voice as
+     * [filterVoicesByEnabled] resolves it. Unlike [loadEnabledVoices] this never seeds or rewrites a
+     * selection, so it is safe to probe every language.
      */
     suspend fun hasPlayableVoice(speechPlayer: SpeechPlayer, language: Text2SpeechLanguage): Boolean {
         val allVoices = speechPlayer.getVoicesForLanguage(language)

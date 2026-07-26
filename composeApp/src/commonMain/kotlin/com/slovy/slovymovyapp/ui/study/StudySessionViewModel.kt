@@ -97,7 +97,17 @@ class StudySessionViewModel(
         start()
     }
 
-    private fun loadVoices() {
+    /**
+     * Loads the voices this session plays with. Also called on resume: the ids are only valid for
+     * the engine that reported them, and the user may have changed voices or the default TTS engine
+     * while away, which the cached list would otherwise outlive for the rest of the session.
+     *
+     * The cache is dropped before the load, not replaced after it: binding a newly chosen engine
+     * takes long enough for the user to tap play first, and [playAudio] resolves voices itself when
+     * it finds none rather than handing the previous engine's ids to the new one.
+     */
+    fun loadVoices() {
+        availableVoices = emptyList()
         viewModelScope.launch {
             try {
                 loadVoicesSync()

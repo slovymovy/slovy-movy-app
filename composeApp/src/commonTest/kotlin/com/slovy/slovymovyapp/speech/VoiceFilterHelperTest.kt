@@ -396,6 +396,127 @@ open class VoiceFilterHelperTest : BaseTest() {
     }
 
     @Test
+    fun filterVoicesByEnabled_falls_back_to_defaults_when_stored_ids_are_from_another_engine() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("rhvoice-anna", "rhvoice-elena"))
+
+        val result = helper.filterVoicesByEnabled(testVoices, testLanguage)
+
+        assertEquals(
+            listOf("voice1", "voice3"),
+            result.map { it.id },
+            "A selection no bound voice matches should play the current engine's defaults"
+        )
+        assertEquals(
+            setOf("rhvoice-anna", "rhvoice-elena"),
+            helper.getEnabledVoices(testLanguage),
+            "The stored selection must survive, so it applies again once its engine is back"
+        )
+    }
+
+    @Test
+    fun filterVoicesByEnabled_keeps_deliberate_selection_that_the_engine_offers() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("voice3"))
+
+        val result = helper.filterVoicesByEnabled(testVoices, testLanguage)
+
+        assertEquals(
+            listOf("voice3"),
+            result.map { it.id },
+            "A single-voice choice on the bound engine must not be widened to the defaults"
+        )
+    }
+
+    @Test
+    fun filterVoicesByEnabled_falls_back_to_network_voices_when_the_engine_has_only_those() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("rhvoice-anna"))
+        val networkOnly = testVoices.filter { it.networkConnectionRequired }
+
+        val result = helper.filterVoicesByEnabled(networkOnly, testLanguage)
+
+        assertEquals(
+            listOf("voice2"),
+            result.map { it.id },
+            "An engine offering no default-eligible voice must still be usable"
+        )
+    }
+
+    @Test
+    fun filterVoicesByEnabled_returns_empty_when_the_user_disabled_every_voice() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, emptySet())
+
+        val result = helper.filterVoicesByEnabled(testVoices, testLanguage)
+
+        assertTrue(
+            result.isEmpty(),
+            "An empty selection is a deliberate choice, not a leftover from another engine"
+        )
+    }
+
+    @Test
+    fun enabledVoiceIds_reports_only_ids_the_engine_offers() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("voice1", "rhvoice-anna"))
+
+        assertEquals(
+            setOf("voice1"),
+            helper.enabledVoiceIds(testVoices, testLanguage),
+            "A voice id the bound engine does not report must not be counted as enabled"
+        )
+    }
+
+    @Test
+    fun hasPlayableVoice_reports_playable_when_selection_belongs_to_another_engine() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("rhvoice-anna", "rhvoice-elena"))
+        val player = FakeSpeechPlayer().apply {
+            languages = listOf(testLanguage)
+            voicesByLanguage = mapOf(Language.ENGLISH to testVoices)
+        }
+
+        assertTrue(
+            helper.hasPlayableVoice(player, testLanguage),
+            "The row speaker must stay visible after an engine change; the defaults are playable"
+        )
+    }
+
+    @Test
+    fun hasPlayableVoice_reports_unplayable_when_engine_has_no_voices() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("voice1"))
+        val player = FakeSpeechPlayer().apply {
+            languages = listOf(testLanguage)
+            voicesByLanguage = mapOf(Language.ENGLISH to emptyList())
+        }
+
+        assertFalse(
+            helper.hasPlayableVoice(player, testLanguage),
+            "A language the bound engine has no voices for cannot produce sound"
+        )
+    }
+
+    @Test
+    fun loadEnabledVoices_replaces_selection_left_by_another_engine() = runBlocking {
+        val helper = VoiceFilterHelper(settingsRepository())
+        helper.setEnabledVoices(testLanguage, setOf("rhvoice-anna", "rhvoice-elena"))
+        val player = FakeSpeechPlayer().apply {
+            languages = listOf(testLanguage)
+            voicesByLanguage = mapOf(Language.ENGLISH to testVoices)
+        }
+
+        val result = helper.loadEnabledVoices(player, testLanguage)
+
+        assertEquals(
+            listOf("voice1", "voice3"),
+            result.map { it.id },
+            "Playback must fall back to the bound engine's defaults instead of going silent"
+        )
+    }
+
+    @Test
     fun isVoiceSetupShown_returns_false_when_no_setting() = runBlocking {
         val helper = VoiceFilterHelper(settingsRepository())
 

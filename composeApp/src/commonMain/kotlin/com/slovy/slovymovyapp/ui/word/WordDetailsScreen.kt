@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
@@ -54,6 +55,7 @@ import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
@@ -325,6 +327,7 @@ class WordDetailViewModel(
     }
 
     private val voiceSelector = RotatingVoiceSelector(ttsManager, voiceFilterHelper)
+    private var playJob: Job? = null
     private var hasScrolledToTarget = false
     private var requestedTranslationLanguages: List<Language> =
         translationLanguages?.distinctBy { it.code } ?: emptyList()
@@ -503,9 +506,13 @@ class WordDetailViewModel(
         }
     }
 
-    private fun loadVoices() {
+    /**
+     * Loads the voices this screen can play with; an empty result leaves the play button disabled.
+     * Also called on resume, to pick up voices or a TTS engine the user changed while away. This
+     * list is the button's signal only — [playWord] resolves the voice it speaks with itself.
+     */
+    fun loadVoices() {
         viewModelScope.launch {
-            // Loaded once per screen; an empty result leaves the play button disabled.
             availableVoices = voiceSelector.loadVoices(dictionaryLanguage)
         }
     }
@@ -517,7 +524,7 @@ class WordDetailViewModel(
 
     fun dismissVoiceSetupAndPlay() {
         dismissVoiceSetup()
-        doPlayWord()
+        launchPlay(gateOnVoiceSetup = false)
     }
 
     fun openVoiceSettings() {
@@ -687,18 +694,38 @@ class WordDetailViewModel(
         )
         if (availableVoices.isEmpty()) return
 
-        viewModelScope.launch {
-            if (voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, availableVoices)) {
-                showVoiceSetupSheet = true
-                return@launch
-            }
-            doPlayWord()
-        }
+        launchPlay(gateOnVoiceSetup = true)
     }
 
-    private fun doPlayWord() {
+    /**
+     * Starts one play attempt. Taps while an attempt is still resolving voices are ignored rather
+     * than queued: on a freshly bound engine that read can take a moment, and a second utterance
+     * would only flush the first.
+     */
+    private fun launchPlay(gateOnVoiceSetup: Boolean) {
+        if (playJob?.isActive == true) return
+        playJob = viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup) }
+    }
+
+    /**
+     * Resolves the voices to speak with and plays. Voices are re-read on every play, like row audio
+     * does: ids only work on the engine that reported them, so a list cached before the user changed
+     * voices or the default TTS engine cannot be handed to the engine.
+     */
+    private suspend fun prepareAndPlay(gateOnVoiceSetup: Boolean) {
+        val voices = voiceSelector.loadVoices(dictionaryLanguage)
+        availableVoices = voices
+        if (voices.isEmpty()) return
+        if (gateOnVoiceSetup && voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, voices)) {
+            showVoiceSetupSheet = true
+            return
+        }
+        doPlayWord(voices)
+    }
+
+    private fun doPlayWord(voices: List<Text2SpeechVoice>) {
         try {
-            val selectedVoice = voiceSelector.nextVoice(dictionaryLanguage, availableVoices)
+            val selectedVoice = voiceSelector.nextVoice(dictionaryLanguage, voices)
             isPreparing = true
             ttsManager.setVoice(selectedVoice)
             ttsManager.speak(lemma)
@@ -779,6 +806,11 @@ fun WordDetailScreen(
                 "has_target_sense" to (viewModel.targetSenseId != null).toString(),
             ),
         )
+    }
+
+    LifecycleResumeEffect(viewModel) {
+        viewModel.loadVoices()
+        onPauseOrDispose { }
     }
 
     // Restore scroll position after process death

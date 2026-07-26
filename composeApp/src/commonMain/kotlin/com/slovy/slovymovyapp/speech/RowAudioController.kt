@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -81,13 +82,16 @@ class RowAudioController(
     /**
      * Re-probes which languages are speakable. Call when a host screen becomes visible or resumes
      * (not at controller construction, so the shared TTS engine isn't initialised at app start for
-     * the app-lifetime Favorites controller). Refreshing on every resume picks up voices the user
-     * installed or disabled while away in Settings; only one probe runs at a time. A language
-     * counts as playable only when the engine supports it AND at least one enabled voice remains,
-     * so rows never show a speaker that cannot produce sound.
+     * the app-lifetime Favorites controller). Refreshing on every resume picks up whatever the user
+     * changed while away in Settings — voices installed or disabled, or a different TTS engine,
+     * which [SpeechPlayer] handles behind its voice queries. A language counts as playable only when
+     * the engine supports it AND at least one enabled voice remains, so rows never show a speaker
+     * that cannot produce sound.
      */
     fun refreshAvailability() {
-        if (availabilityLoadJob?.isActive == true) return
+        // A newer refresh supersedes the running probe: a slow one must not outlive the state it
+        // was probing, nor publish over the result of the refresh that replaced it.
+        availabilityLoadJob?.cancel()
         availabilityLoadJob = scope.launch {
             val languages = try {
                 speechPlayer.getAvailableLanguages()
@@ -101,6 +105,7 @@ class RowAudioController(
                 AppLogger.warn(TAG, "Unable to load TTS language availability", e)
                 emptySet()
             }
+            if (!isActive) return@launch
             uiState = uiState.copy(availableLanguages = languages)
         }
     }

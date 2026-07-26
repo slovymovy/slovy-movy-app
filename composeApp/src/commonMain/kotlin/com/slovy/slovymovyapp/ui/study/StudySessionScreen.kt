@@ -37,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -174,6 +175,11 @@ fun StudySessionScreen(
     onCancel: () -> Unit,
     onEnd: () -> Unit,
 ) {
+    LifecycleResumeEffect(viewModel) {
+        viewModel.loadVoices()
+        onPauseOrDispose { }
+    }
+
     StudySessionScreenContent(
         state = viewModel.state,
         completeScrollState = viewModel.completeScrollState,

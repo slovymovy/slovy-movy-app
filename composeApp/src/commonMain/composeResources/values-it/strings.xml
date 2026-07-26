@@ -256,21 +256,21 @@
 
     <string name="voice_setup_title">Migliora la pronuncia</string>
     <string name="voice_setup_description">La voce predefinita può sembrare robotica. Ecco come ottenerne una migliore:</string>
-    <string name="voice_setup_step_android">Apri le impostazioni di sintesi vocale del telefono e scarica una voce di alta qualità per %1$s.</string>
+    <string name="voice_setup_step_android">Apri le impostazioni di sintesi vocale del telefono. Scegli l'app vocale che preferisci e scarica voci di qualità per %1$s.</string>
     <string name="voice_setup_step_ios">Vai su Impostazioni iPhone - Accessibilità - Vista - Leggi e parla - Voci, seleziona una lingua e scarica le voci che ti servono.</string>
     <string name="voice_setup_step_other">Scarica una voce di alta qualità per %1$s dalle impostazioni di sistema.</string>
-    <string name="voice_setup_step_two">Torna alle Impostazioni di Open Words - Voci e attiva la nuova voce.</string>
+    <string name="voice_setup_step_two">Torna alle Impostazioni di OpenWords - Voci e attiva la nuova voce.</string>
 
     <string name="voice_no_voices_enabled">Nessuna voce attiva</string>
     <string name="voice_unknown_name">Sconosciuta</string>
-    <string name="voice_single_enabled">1 voce attiva</string>
     <string name="voice_many_enabled">%1$d voci attive</string>
     <string name="voice_no_voices_available">Nessuna voce disponibile</string>
     <string name="voice_download_more_title">Scarica altre voci</string>
-    <string name="voice_download_more_step_android">Apri le impostazioni di sintesi vocale del telefono e scarica una voce di alta qualità.</string>
+    <string name="voice_download_more_step_android">Apri le impostazioni di sintesi vocale del telefono. Scegli l'app vocale che preferisci e scarica voci di qualità.</string>
     <string name="voice_download_more_step_ios">Vai su Impostazioni iPhone - Accessibilità - Vista - Leggi e parla - Voci, seleziona una lingua e scarica le voci che ti servono.</string>
     <string name="voice_download_more_step_other">Scarica una voce di alta qualità dalle impostazioni di sistema.</string>
-    <string name="voice_download_more_step_two">Torna alle Impostazioni di Open Words - Voce e attiva la nuova voce.</string>
+    <string name="voice_download_more_step_two">Torna alle Impostazioni di OpenWords - Voce e attiva la nuova voce.</string>
+    <string name="voice_step_two_android">Torna alle Impostazioni di OpenWords → Voce: le nuove voci compaiono lì automaticamente. Attiva quelle che ti piacciono.</string>
     <string name="voice_quality_high">Alta</string>
     <string name="voice_quality_good">Buona</string>
     <string name="voice_quality_medium">Media</string>
@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Impossibile scaricare il dizionario: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Impossibile scaricare la traduzione: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Impossibile caricare le voci: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Impossibile provare la voce: %1$s</string>
     <string name="settings_export_success">%1$s esportato in %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Impossibile aprire la finestra di condivisione: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Impossibile esportare i dati dell'app: %1$s</string>

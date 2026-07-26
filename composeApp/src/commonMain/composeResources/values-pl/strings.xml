@@ -255,21 +255,21 @@
 
     <string name="voice_setup_title">Lepsza wymowa</string>
     <string name="voice_setup_description">Domyślny głos może brzmieć mechanicznie. Oto jak to zmienić:</string>
-    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos dla języka %1$s.</string>
+    <string name="voice_setup_step_android">Otwórz ustawienia syntezy mowy w telefonie. Wybierz aplikację głosową, którą wolisz, i pobierz głosy dobrej jakości dla języka %1$s.</string>
     <string name="voice_setup_step_ios">Przejdź do: Ustawienia > Dostępność > Wzrok > Czytaj i mów > Głosy, wybierz język i pobierz potrzebne głosy.</string>
     <string name="voice_setup_step_other">Pobierz wysokiej jakości głos dla języka %1$s w ustawieniach systemowych.</string>
-    <string name="voice_setup_step_two">Wróć do: Ustawienia Open Words > Głosy i włącz nowy głos.</string>
+    <string name="voice_setup_step_two">Wróć do: Ustawienia OpenWords > Głosy i włącz nowy głos.</string>
 
     <string name="voice_no_voices_enabled">Brak włączonych głosów</string>
     <string name="voice_unknown_name">Nieznany</string>
-    <string name="voice_single_enabled">1 aktywny głos</string>
     <string name="voice_many_enabled">%1$d aktywnych głosów</string>
     <string name="voice_no_voices_available">Brak dostępnych głosów</string>
     <string name="voice_download_more_title">Pobierz więcej głosów</string>
-    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie i pobierz wysokiej jakości głos.</string>
+    <string name="voice_download_more_step_android">Otwórz ustawienia syntezy mowy w telefonie. Wybierz aplikację głosową, którą wolisz, i pobierz głosy dobrej jakości.</string>
     <string name="voice_download_more_step_ios">Przejdź do: Ustawienia > Dostępność > Wzrok > Czytaj i mów > Głosy, wybierz język i pobierz potrzebne głosy.</string>
     <string name="voice_download_more_step_other">Pobierz wysokiej jakości głos w ustawieniach systemowych.</string>
-    <string name="voice_download_more_step_two">Wróć do: Ustawienia Open Words > Głos i włącz nowy głos.</string>
+    <string name="voice_download_more_step_two">Wróć do: Ustawienia OpenWords > Głos i włącz nowy głos.</string>
+    <string name="voice_step_two_android">Wróć do: Ustawienia OpenWords → Głos — nowe głosy pojawią się tam automatycznie. Włącz te, które ci się podobają.</string>
     <string name="voice_quality_high">Wysoka</string>
     <string name="voice_quality_good">Dobra</string>
     <string name="voice_quality_medium">Średnia</string>
@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Nie udało się pobrać słownika: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Nie udało się pobrać tłumaczenia: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Nie udało się załadować głosów: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Nie udało się przetestować głosu: %1$s</string>
     <string name="settings_export_success">Wyeksportowano %1$s do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Nie udało się otworzyć okna udostępniania: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s

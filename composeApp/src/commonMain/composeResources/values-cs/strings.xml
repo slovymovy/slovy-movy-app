@@ -256,21 +256,21 @@
 
     <string name="voice_setup_title">Získej lepší výslovnost</string>
     <string name="voice_setup_description">Výchozí hlas může znít roboticky. Takhle získáš lepší:</string>
-    <string name="voice_setup_step_android">Otevři nastavení převodu textu na řeč v telefonu a stáhni kvalitní hlas pro %1$s.</string>
+    <string name="voice_setup_step_android">Otevři nastavení převodu textu na řeč v telefonu. Vyber si hlasovou aplikaci, která ti vyhovuje, a stáhni kvalitní hlasy pro %1$s.</string>
     <string name="voice_setup_step_ios">Přejdi do Nastavení iPhonu - Zpřístupnění - Zrak - Předčítání obsahu - Hlasy, vyber jazyk a stáhni hlasy, které potřebuješ.</string>
     <string name="voice_setup_step_other">Stáhni kvalitní hlas pro %1$s v nastavení systému.</string>
-    <string name="voice_setup_step_two">Vrať se do nastavení Open Words - Hlasy a nový hlas zapni.</string>
+    <string name="voice_setup_step_two">Vrať se do nastavení OpenWords - Hlasy a nový hlas zapni.</string>
 
     <string name="voice_no_voices_enabled">Žádné zapnuté hlasy</string>
     <string name="voice_unknown_name">Neznámý</string>
-    <string name="voice_single_enabled">1 hlas zapnutý</string>
     <string name="voice_many_enabled">Zapnutých hlasů: %1$d</string>
     <string name="voice_no_voices_available">Žádné dostupné hlasy</string>
     <string name="voice_download_more_title">Stáhnout další hlasy</string>
-    <string name="voice_download_more_step_android">Otevři nastavení převodu textu na řeč v telefonu a stáhni kvalitní hlas.</string>
+    <string name="voice_download_more_step_android">Otevři nastavení převodu textu na řeč v telefonu. Vyber si hlasovou aplikaci, která ti vyhovuje, a stáhni kvalitní hlasy.</string>
     <string name="voice_download_more_step_ios">Přejdi do Nastavení iPhonu - Zpřístupnění - Zrak - Předčítání obsahu - Hlasy, vyber jazyk a stáhni hlasy, které potřebuješ.</string>
     <string name="voice_download_more_step_other">Stáhni kvalitní hlas v nastavení systému.</string>
-    <string name="voice_download_more_step_two">Vrať se do nastavení Open Words - Hlas a nový hlas zapni.</string>
+    <string name="voice_download_more_step_two">Vrať se do nastavení OpenWords - Hlas a nový hlas zapni.</string>
+    <string name="voice_step_two_android">Vrať se do nastavení OpenWords → Hlas — nové hlasy se tam objeví automaticky. Zapni ty, které se ti líbí.</string>
     <string name="voice_quality_high">Vysoká</string>
     <string name="voice_quality_good">Dobrá</string>
     <string name="voice_quality_medium">Střední</string>
@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Stažení slovníku se nezdařilo: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Stažení překladu se nezdařilo: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Načtení hlasů se nezdařilo: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Test hlasu se nezdařil: %1$s</string>
     <string name="settings_export_success">%1$s exportováno do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Otevření dialogu sdílení se nezdařilo: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Export dat aplikace se nezdařil: %1$s</string>

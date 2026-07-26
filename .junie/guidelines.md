@@ -108,6 +108,19 @@ Client database/list tests use `TestServerService` from `buildSrc`. It starts th
 `build/test-server.log`. It may terminate an old listener occupying its configured test port. Test DB/list fixtures
 default to `.test-db-files` and `.test-lists-files`.
 
+### Local credentials for GitHub-backed tests
+
+`DictionaryClientTest` exercises server routes that read the private test data through the GitHub API. Before running
+the Compose host or desktop suites, provide a token either in the environment:
+
+```text
+export ACCESS_TO_GH_TOKEN=<github-token>
+```
+
+or put the token alone (with an optional trailing newline) in `server/.github_key` or `.github_key`, relative to the
+repository root. Both files are ignored by Git and must remain local. The test server inherits the environment and
+runs from the repository root, so no additional Gradle property is required.
+
 Testing rules:
 
 - Do not leave `println` calls in tests. Use descriptive assertion messages.

@@ -256,21 +256,21 @@
 
     <string name="voice_setup_title">Daha iyi telaffuz elde et</string>
     <string name="voice_setup_description">Varsayılan ses robotik gelebilir. Daha iyisini şöyle edinebilirsin:</string>
-    <string name="voice_setup_step_android">Telefonunun metin okuma ayarlarını aç ve %1$s için yüksek kaliteli bir ses indir.</string>
+    <string name="voice_setup_step_android">Telefonunun metin okuma ayarlarını aç. İstediğin ses uygulamasını seç ve %1$s için kaliteli sesler indir.</string>
     <string name="voice_setup_step_ios">iPhone Ayarlar - Erişilebilirlik - Görme - Seslendirilen İçerik - Sesler'e git, bir dil seç ve ihtiyacın olan sesleri indir.</string>
     <string name="voice_setup_step_other">Sistem ayarlarından %1$s için yüksek kaliteli bir ses indir.</string>
-    <string name="voice_setup_step_two">Open Words Ayarlar - Sesler'e geri dön ve yeni sesi etkinleştir.</string>
+    <string name="voice_setup_step_two">OpenWords Ayarlar - Sesler'e geri dön ve yeni sesi etkinleştir.</string>
 
     <string name="voice_no_voices_enabled">Etkin ses yok</string>
     <string name="voice_unknown_name">Bilinmiyor</string>
-    <string name="voice_single_enabled">1 ses etkin</string>
     <string name="voice_many_enabled">%1$d ses etkin</string>
     <string name="voice_no_voices_available">Kullanılabilir ses yok</string>
     <string name="voice_download_more_title">Daha fazla ses indir</string>
-    <string name="voice_download_more_step_android">Telefonunun metin okuma ayarlarını aç ve yüksek kaliteli bir ses indir.</string>
+    <string name="voice_download_more_step_android">Telefonunun metin okuma ayarlarını aç. İstediğin ses uygulamasını seç ve kaliteli sesler indir.</string>
     <string name="voice_download_more_step_ios">iPhone Ayarlar - Erişilebilirlik - Görme - Seslendirilen İçerik - Sesler'e git, bir dil seç ve ihtiyacın olan sesleri indir.</string>
     <string name="voice_download_more_step_other">Sistem ayarlarından yüksek kaliteli bir ses indir.</string>
-    <string name="voice_download_more_step_two">Open Words Ayarlar - Ses'e geri dön ve yeni sesi etkinleştir.</string>
+    <string name="voice_download_more_step_two">OpenWords Ayarlar - Ses'e geri dön ve yeni sesi etkinleştir.</string>
+    <string name="voice_step_two_android">OpenWords Ayarlar → Ses bölümüne geri dön — yeni sesler orada otomatik olarak görünür. Beğendiklerini etkinleştir.</string>
     <string name="voice_quality_high">Yüksek</string>
     <string name="voice_quality_good">İyi</string>
     <string name="voice_quality_medium">Orta</string>
@@ -422,7 +422,6 @@
     <string name="settings_error_download_dictionary_with_reason">Sözlük indirilemedi: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Çeviri indirilemedi: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Sesler yüklenemedi: %1$s</string>
-    <string name="settings_error_test_voice_with_reason">Ses denenemedi: %1$s</string>
     <string name="settings_export_success">%1$s şuraya aktarıldı: %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Paylaşım penceresi açılamadı: %1$s</string>
     <string name="settings_error_export_app_data_with_reason">Uygulama verileri dışa aktarılamadı: %1$s</string>

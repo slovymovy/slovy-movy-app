@@ -42,6 +42,7 @@ import slovymovyapp.composeapp.generated.resources.voice_setup_step_ios
 import slovymovyapp.composeapp.generated.resources.voice_setup_step_other
 import slovymovyapp.composeapp.generated.resources.voice_setup_step_two
 import slovymovyapp.composeapp.generated.resources.voice_setup_title
+import slovymovyapp.composeapp.generated.resources.voice_step_two_android
 
 /**
  * Renders the first-run voice setup sheet whenever row audio requests it. Shared by every screen
@@ -91,6 +92,12 @@ fun VoiceSetupBottomSheetContent(
         else -> stringResource(Res.string.voice_setup_step_other, language.selfName)
     }
 
+    val step2Instruction = if (isAndroid) {
+        stringResource(Res.string.voice_step_two_android)
+    } else {
+        stringResource(Res.string.voice_setup_step_two)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,7 +131,7 @@ fun VoiceSetupBottomSheetContent(
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 
         StepRow(number = 1, text = step1Instruction)
-        StepRow(number = 2, text = stringResource(Res.string.voice_setup_step_two))
+        StepRow(number = 2, text = step2Instruction)
 
         Spacer(modifier = Modifier.height(AppSpacing.sm))
 

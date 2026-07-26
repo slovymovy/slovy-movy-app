@@ -64,7 +64,7 @@ import slovymovyapp.composeapp.generated.resources.voice_no_voices_enabled
 import slovymovyapp.composeapp.generated.resources.voice_quality_good
 import slovymovyapp.composeapp.generated.resources.voice_quality_high
 import slovymovyapp.composeapp.generated.resources.voice_quality_medium
-import slovymovyapp.composeapp.generated.resources.voice_single_enabled
+import slovymovyapp.composeapp.generated.resources.voice_step_two_android
 import slovymovyapp.composeapp.generated.resources.voice_test_action
 import slovymovyapp.composeapp.generated.resources.voice_unknown_name
 
@@ -138,16 +138,19 @@ fun VoiceSectionItem(
                         text = language.language.selfName,
                         style = MaterialTheme.typography.titleMedium
                     )
-                    val enabledVoicesCount = languageState.enabledVoiceIds.size
+                    val enabledVoices = languageState.voices.filter { it.id in languageState.enabledVoiceIds }
                     val voiceText = when {
-                        enabledVoicesCount == 0 -> noVoicesEnabled
-                        enabledVoicesCount == 1 -> {
-                            languageState.voices.find { it.id in languageState.enabledVoiceIds }?.let {
-                                "${it.name ?: unknownVoice} (${it.language.code.uppercase()})"
-                            } ?: stringResource(Res.string.voice_single_enabled)
+                        // The engine has answered for this language and speaks none of it.
+                        languageState.voicesLoaded && languageState.voices.isEmpty() ->
+                            stringResource(Res.string.voice_no_voices_available)
+
+                        enabledVoices.isEmpty() -> noVoicesEnabled
+
+                        enabledVoices.size == 1 -> enabledVoices.single().let {
+                            "${it.name ?: unknownVoice} (${it.language.code.uppercase()})"
                         }
 
-                        else -> stringResource(Res.string.voice_many_enabled, enabledVoicesCount)
+                        else -> stringResource(Res.string.voice_many_enabled, enabledVoices.size)
                     }
                     Text(
                         text = voiceText,
@@ -226,6 +229,12 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
         else -> stringResource(Res.string.voice_download_more_step_other)
     }
 
+    val step2Instruction = if (isAndroid) {
+        stringResource(Res.string.voice_step_two_android)
+    } else {
+        stringResource(Res.string.voice_download_more_step_two)
+    }
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
@@ -255,7 +264,7 @@ fun DownloadMoreVoicesCard(onOpenSettings: () -> Unit) {
             }
 
             StepRow(number = 1, text = step1Instruction)
-            StepRow(number = 2, text = stringResource(Res.string.voice_download_more_step_two))
+            StepRow(number = 2, text = step2Instruction)
 
             if (isAndroid || isIos) {
                 FilledTonalButton(
