@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.Engine.ACTION_CHECK_TTS_DATA
 import android.speech.tts.TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA
+import android.speech.tts.TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice.QUALITY_HIGH
 import android.speech.tts.Voice.QUALITY_VERY_HIGH
@@ -41,6 +42,13 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         }
 
         override fun onError(utteranceId: String?, errorCode: Int) {
+            // The engine reports a refused utterance only here, so the failing voice has to be named
+            // for a report like "this voice is silent" to be actionable.
+            AppLogger.warn(
+                TAG,
+                "TTS utterance failed with error $errorCode on voice ${currentVoiceName()}",
+                null
+            )
             notifyStatus(TTSStatus.IDLE)
         }
     }
@@ -137,10 +145,25 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
             if (!awaitEngineReady()) return@withContext emptyList()
 
             val locale = toLocale(language.language)
-            val voices = tts.voices?.filter { voice ->
+            val matching = tts.voices?.filter { voice ->
                 voice.locale.language == locale.language &&
                         (locale.country.isEmpty() || voice.locale.country == locale.country)
             } ?: emptyList()
+
+            // Engines advertise voices whose data was never downloaded (Google lists a large set of
+            // `<locale>-x-<variant>-local` names this way). They can be selected, but every utterance
+            // fails with ERROR_NOT_INSTALLED_YET and the user just hears silence, so they are not
+            // offered. Dropping them all would leave a language mute; an engine that flags its whole
+            // set is not trusted and everything is kept.
+            val installed = matching.filterNot { it.features?.contains(KEY_FEATURE_NOT_INSTALLED) == true }
+            val voices = if (installed.isEmpty()) matching else installed
+            if (voices.size != matching.size) {
+                AppLogger.info(
+                    TAG,
+                    "Hiding ${matching.size - voices.size} not-installed ${language.language.code} voices",
+                    null
+                )
+            }
 
             voices.map { voice ->
                 Text2SpeechVoice(
@@ -164,8 +187,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         if (tssVoice == null) {
             throw IllegalStateException("Voice with id ${voice.id} not found")
         }
-        tts.voice = tssVoice
+        // Rejected here the engine keeps the previous voice, which would silently play the wrong one.
+        if (tts.setVoice(tssVoice) == TextToSpeech.ERROR) {
+            throw IllegalStateException("Engine rejected voice ${voice.id}")
+        }
     }
+
+    private fun currentVoiceName(): String =
+        runCatching { tts.voice?.name }.getOrNull() ?: "unknown"
 
     actual override fun openSettings() {
         // The engine picker comes first: the install/check actions only open an engine's
