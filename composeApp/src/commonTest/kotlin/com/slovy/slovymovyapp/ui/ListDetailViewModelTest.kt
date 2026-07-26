@@ -19,6 +19,7 @@ import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.TestContext
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -271,6 +272,59 @@ class ListDetailViewModelTest : BaseTest() {
             listOf(FetchCall(LANGUAGE, LEMMA, listOf(TARGET))),
             fetches,
             "Exactly one repair fetch must go out, for the list's lemma with the configured target",
+        )
+    }
+
+    @Test
+    fun repairInFlight_marksRowTranslationLoading() = runBlocking {
+        val senseRef = stageListWithTranslationGap(LEMMA, senseCount = 1).single()
+        val repo = dictionaryRepository()
+        // Holds the fetch open so the in-flight state is observable rather than a race.
+        val releaseFetch = CompletableDeferred<Unit>()
+        val recovery = lemmaRecovery(repo) { _, _, _ ->
+            releaseFetch.await()
+            insertLocalTranslation(senseRef, word = "одновременно")
+            repo.invalidateSenses(setOf(senseRef.senseId.toString()))
+        }
+
+        val vm = createViewModel(repo, recovery)
+
+        awaitCondition("Row must report translationLoading while the repair fetch is in flight") {
+            vm.state.items.singleOrNull()?.translationLoading == true
+        }
+        assertNull(
+            singleItem(vm).error,
+            "An in-flight repair must not surface an error on the row",
+        )
+        releaseFetch.complete(Unit)
+
+        awaitCondition("translationLoading must clear once the repaired translation arrives") {
+            val item = vm.state.items.singleOrNull()
+            item?.translationLoading == false &&
+                item.sense?.translations?.get(TARGET)?.isNotEmpty() == true
+        }
+    }
+
+    @Test
+    fun failedRepair_clearsTranslationLoading() = runBlocking {
+        stageListWithTranslationGap(LEMMA, senseCount = 1)
+        val repo = dictionaryRepository()
+        val recovery = lemmaRecovery(repo) { _, _, _ ->
+            throw RuntimeException("simulated server failure")
+        }
+
+        val vm = createViewModel(repo, recovery)
+
+        awaitCondition("A failed repair must still clear the row's translationLoading flag") {
+            val item = vm.state.items.singleOrNull()
+            item?.sense != null && item.translationLoading == false
+        }
+        // Give a late/stuck flag a chance to appear before asserting it stays clear.
+        delay(300.milliseconds)
+        assertEquals(
+            false,
+            singleItem(vm).translationLoading,
+            "translationLoading must not remain set after the repair failed",
         )
     }
 

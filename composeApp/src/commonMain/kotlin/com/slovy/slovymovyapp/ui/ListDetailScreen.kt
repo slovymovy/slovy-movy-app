@@ -97,6 +97,9 @@ data class ListWordItem(
     val pos: PartOfSpeech? = null,
     val expanded: Boolean = false,
     override val loading: Boolean = false,
+    // A server translation repair is in flight for this row. The row keeps rendering its local
+    // content meanwhile; only the translation area shows a progress placeholder.
+    val translationLoading: Boolean = false,
     override val error: UiText? = null,
     val isFavorited: Boolean = false,
 ) : PrefetchableSenseItem
@@ -291,6 +294,11 @@ class ListDetailViewModel(
         // results arrive. WordListSense is itself a RecoverableSense, so no mapping is needed; the
         // screen only maps each outcome to its per-item UI state.
         val gapLemmaKeysBySenseId = translationGaps.associate { it.senseId to lemmaRepairKey(it.lemma) }
+        // Show progress on the rows being repaired. Both call sites route through here, so the
+        // flag is set once the fetch is actually enqueued and cleared per sense as results land.
+        gapLemmaKeysBySenseId.keys.forEach { senseId ->
+            updateItem(senseId) { it.copy(translationLoading = true) }
+        }
         lemmaRecovery.recoverSenses(missing + translationGaps) { recovered ->
             val lookup = recovered.result
             val senseWithPos = lookup?.sense
@@ -310,12 +318,15 @@ class ListDetailViewModel(
                             "further senses of this lemma will not refetch"
                     }
                 }
-                if (senseWithPos != null) {
-                    updateItem(recovered.senseId) {
+                updateItem(recovered.senseId) {
+                    if (senseWithPos == null) {
+                        it.copy(translationLoading = false)
+                    } else {
                         it.copy(
                             sense = senseWithPos.sense,
                             relatedWords = senseWithPos.relatedWords.ifEmpty { it.relatedWords },
                             pos = senseWithPos.pos,
+                            translationLoading = false,
                         )
                     }
                 }
@@ -736,6 +747,7 @@ private fun ListWordSenseCard(
             sense = item.sense,
             pos = item.pos,
             loading = item.loading,
+            translationLoading = item.translationLoading,
             error = item.error?.resolve(),
         ),
         state = SenseUiState(
@@ -952,6 +964,42 @@ private fun ListDetailPreviewContent(
                         lemma = "gezellig",
                         expanded = true,
                         loading = true,
+                    ),
+                ),
+                isLoading = false,
+                favoriteLemmas = setOf("huis"),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ListDetailPreviewTranslationRepair(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        ListDetailContent(
+            list = previewWordList(),
+            language = Language.DUTCH,
+            state = ListDetailUiState(
+                items = listOf(
+                    // Row 1 is having its missing translation fetched from the server: it keeps
+                    // rendering its local content and shows a translation progress placeholder.
+                    ListWordItem(
+                        senseId = "1",
+                        lemma = "huis",
+                        definition = "a building where people live",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.HIGH,
+                        translationLoading = true,
+                    ),
+                    ListWordItem(
+                        senseId = "2",
+                        lemma = "fiets",
+                        definition = "a vehicle with two wheels that you ride by pushing pedals",
+                        learnerLevel = LearnerLevel.A1,
+                        frequency = SenseFrequency.MIDDLE,
                     ),
                 ),
                 isLoading = false,
