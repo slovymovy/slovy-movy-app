@@ -34,7 +34,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: verify localization keys
         run: ./gradlew :composeApp:verifyLocalizationKeys
@@ -84,7 +84,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: run compose desktop JVM tests
         env:
@@ -122,7 +122,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: run server tests
         env:
@@ -189,7 +189,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: AVD cache
         uses: actions/cache@v6
@@ -267,7 +267,7 @@ jobs:
           java-version: 21
 
       - name: setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: run iOS simulator arm64 tests
         env:
