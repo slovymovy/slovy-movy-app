@@ -28,13 +28,20 @@ enum class Language(
     CHINESE("zh-Hans", "简体中文", "🇨🇳", "Simplified Chinese");
 
     companion object {
-        fun fromCode(code: String): Language {
-            return entries.find { it.code == code }
-                ?: throw IllegalArgumentException("Unknown language code: $code")
+        /**
+         * Matches case-insensitively because [code] is not only stored verbatim: it is also a
+         * `dictionary_{lang}.db` / `translation_{src}_{tgt}.db` filename segment, and those names are
+         * built lowercased. A code carrying a script subtag (`zh-Hans`) therefore comes back out of a
+         * filename as `zh-hans`, and an exact match would drop the pair with no error anywhere -
+         * the file would simply never be offered for download or listed as installed.
+         */
+        fun fromCodeOrNull(code: String): Language? {
+            return entries.find { it.code.equals(code, ignoreCase = true) }
         }
 
-        fun fromCodeOrNull(code: String): Language? {
-            return entries.find { it.code == code }
+        fun fromCode(code: String): Language {
+            return fromCodeOrNull(code)
+                ?: throw IllegalArgumentException("Unknown language code: $code")
         }
     }
 }
