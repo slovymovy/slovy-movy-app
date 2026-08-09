@@ -485,7 +485,7 @@ class DataDbManager(
             when {
                 fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
                     val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
-                    val language = Language.fromCodeOrNull(langCode)
+                    val language = Language.fromFileNameSegment(langCode)
                     if (language != null) {
                         dictionaries[language] = size
                     }
@@ -494,8 +494,8 @@ class DataDbManager(
                 fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
                     val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
                     if (parts.size == 2) {
-                        val srcLang = Language.fromCodeOrNull(parts[0])
-                        val tgtLang = Language.fromCodeOrNull(parts[1])
+                        val srcLang = Language.fromFileNameSegment(parts[0])
+                        val tgtLang = Language.fromFileNameSegment(parts[1])
                         if (srcLang != null && tgtLang != null) {
                             translations.getOrPut(srcLang) { mutableListOf() }
                                 .add(AvailableTranslationInfo(tgtLang, size))
@@ -528,15 +528,15 @@ class DataDbManager(
             when {
                 fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
                     val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
-                    val language = Language.fromCodeOrNull(langCode) ?: return@mapNotNull null
+                    val language = Language.fromFileNameSegment(langCode) ?: return@mapNotNull null
                     DatabaseFileInfo.Dictionary(language, size)
                 }
 
                 fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
                     val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
                     if (parts.size != 2) return@mapNotNull null
-                    val srcLang = Language.fromCodeOrNull(parts[0]) ?: return@mapNotNull null
-                    val tgtLang = Language.fromCodeOrNull(parts[1]) ?: return@mapNotNull null
+                    val srcLang = Language.fromFileNameSegment(parts[0]) ?: return@mapNotNull null
+                    val tgtLang = Language.fromFileNameSegment(parts[1]) ?: return@mapNotNull null
                     DatabaseFileInfo.Translation(srcLang, tgtLang, size)
                 }
 
