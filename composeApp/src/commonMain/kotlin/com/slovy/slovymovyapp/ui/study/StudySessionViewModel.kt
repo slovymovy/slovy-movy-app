@@ -80,13 +80,9 @@ class StudySessionViewModel(
     var exitRequested by mutableStateOf(false)
         private set
 
-    /**
-     * True when the reward screen is showing for a session the user backed out of rather than
-     * finished. The screen routes its Done action to cancel in that case, so one session still
-     * produces exactly one end event.
-     */
-    var completedByCancel by mutableStateOf(false)
-        private set
+    /** How the session ended, recorded at the point of truth rather than derived later. */
+    private var completionArm: String? = null
+    private var sessionEndLogged: Boolean = false
 
     val completeScrollState = ScrollState(0)
     val snackbarHostState = SnackbarHostState()
@@ -479,7 +475,11 @@ class StudySessionViewModel(
             isAlreadyComplete = state is StudySessionUiState.Complete,
         )
         isExitingSession = true
+        completionArm = if (showReward) COMPLETION_CANCEL_REWARDED else COMPLETION_CANCEL
         cardLoadJob?.cancel()
+        // Logged here, not when the reward screen is dismissed: the session is over at the tap,
+        // and a reward left via the system back button would otherwise report nothing.
+        logSessionEnd()
         if (!showReward) {
             exitRequested = true
             return
@@ -505,7 +505,6 @@ class StudySessionViewModel(
             // absorbs its own failures into a heroless summary, so there is no error path that
             // could strand the user here.
             val reward = buildCompleteState()
-            completedByCancel = true
             currentState = StudySessionUiState.Complete(reward)
         }
     }
@@ -696,6 +695,12 @@ class StudySessionViewModel(
                                     } else {
                                         StudySessionUiState.Complete(buildCompleteState())
                                     }
+                                    // The queue running out ends the session, whether or not the
+                                    // reward screen is ever dismissed.
+                                    if (completedCount > 0) {
+                                        completionArm = COMPLETION_FINISHED
+                                        logSessionEnd()
+                                    }
                                 }
 
                                 SessionCardLoadState.LOADING -> {
@@ -867,17 +872,32 @@ class StudySessionViewModel(
     }
 
     /**
+     * Reports how the session ended, exactly once, at the moment it ends rather than when the
+     * user happens to leave the screen. Tying it to a dismissal would lose every session closed
+     * with the system back button, which is also why [onCleared] is a backstop.
+     *
      * `completion` arms: `finished` (queue ran out), `cancel_rewarded` (backed out with enough
-     * work behind it to earn the summary), `cancel` (backed out before that). Exactly one end
-     * event fires per session, so the finished-vs-cancel split stays comparable to past data.
+     * work behind it to earn the summary), `cancel` (backed out before that). One event per
+     * session, so the finished-vs-cancel split stays comparable to past data.
      */
-    fun buildSessionEndParams(): Map<String, Any> = mapOf(
+    private fun logSessionEnd() {
+        if (sessionEndLogged) return
+        sessionEndLogged = true
+        // No recorded arm means the session was left without the close button — system back.
+        val completion = completionArm ?: COMPLETION_CANCEL
+        Analytics.logEvent(
+            if (completion == COMPLETION_FINISHED) {
+                AnalyticsEvent.STUDY_END_SESSION
+            } else {
+                AnalyticsEvent.STUDY_CANCEL_SESSION
+            },
+            buildSessionEndParams(completion),
+        )
+    }
+
+    private fun buildSessionEndParams(completion: String): Map<String, Any> = mapOf(
         "lang" to langCode,
-        "completion" to when {
-            completedByCancel -> "cancel_rewarded"
-            state is StudySessionUiState.Complete -> "finished"
-            else -> "cancel"
-        },
+        "completion" to completion,
         "cards_reviewed" to reviewedCount.toLong(),
         "again_count" to (gradeCounts[StudyRating.AGAIN] ?: 0).toLong(),
         "hard_count" to (gradeCounts[StudyRating.HARD] ?: 0).toLong(),
@@ -888,6 +908,10 @@ class StudySessionViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        // Backstop for every exit that never goes through the close button — chiefly the system
+        // back button, which pops the destination directly. No-ops when the end was already
+        // reported. Process death is still unreported, as before.
+        logSessionEnd()
         ttsManager.removeOnStatusChangeListener(this)
         ttsManager.stop()
     }
@@ -895,6 +919,11 @@ class StudySessionViewModel(
     companion object {
         private const val TAG = "StudySessionViewModel"
         private const val LOADING_DEBOUNCE_MS = 150L
+
+        // `completion` arms on the session-end events.
+        private const val COMPLETION_FINISHED = "finished"
+        private const val COMPLETION_CANCEL = "cancel"
+        private const val COMPLETION_CANCEL_REWARDED = "cancel_rewarded"
 
         /**
          * Reviews needed before closing the session shows the reward screen instead of leaving

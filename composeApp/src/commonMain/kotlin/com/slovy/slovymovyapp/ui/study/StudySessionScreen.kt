@@ -191,9 +191,7 @@ fun StudySessionScreen(
         completeScrollState = viewModel.completeScrollState,
         snackbarHostState = viewModel.snackbarHostState,
         onCancel = viewModel::requestExit,
-        // A reward screen reached by backing out is still a cancel, so its Done action reports as
-        // one. Without this the session would log both a cancel and a finish.
-        onEnd = if (viewModel.completedByCancel) onCancel else onEnd,
+        onEnd = onEnd,
         onReveal = viewModel::reveal,
         onRevealFirstLetterHint = viewModel::revealFirstLetterHint,
         onRevealTranslationHint = viewModel::revealTranslationHint,
