@@ -50,6 +50,51 @@ class StudySessionMapperTest {
     }
 
     @Test
+    fun bilingualBackShowsStudiedWordUnderTranslation() {
+        val otherSenseId = "00000000-0000-0000-0000-000000000102"
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code),
+            studiedSenseIds = setOf(PrimarySenseId, otherSenseId),
+            extraSenses = listOf(
+                buildSense(
+                    senseId = otherSenseId,
+                    definition = "convivial gathering",
+                    translation = "sociable evening",
+                    exampleText = "Een <w>gezellig</w> avondje.",
+                    exampleTranslation = "A cosy evening.",
+                ),
+            ),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
+
+        // The headline stays the answer; the word the learner was asked about sits below it so the
+        // back can be read without flipping back. No speaker here — the front already voices it.
+        assertEquals("cosy, sociable", mapped.back.headline)
+        assertEquals("gezellig", mapped.back.sourceWord)
+        assertNull(mapped.back.audioText, "The front of this card already carries the speaker")
+        mapped.senses.forEach { senseUi ->
+            assertEquals(
+                "gezellig",
+                senseUi.back.sourceWord,
+                "Every swipeable sense back must repeat the studied word",
+            )
+        }
+    }
+
+    @Test
+    fun lemmaHeadlineBackOmitsSourceWord() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Recognition>(sessionCard.toStudyCardUiState(emptySet()))
+
+        assertEquals("gezellig", mapped.back.headline)
+        assertNull(mapped.back.sourceWord, "The word is already the headline; it must not repeat")
+    }
+
+    @Test
     fun bilingualRecognitionFiltersSensesToStudiedOnly() {
         val studiedSenseId = "00000000-0000-0000-0000-000000000101"
         val otherSenseId = "00000000-0000-0000-0000-000000000102"

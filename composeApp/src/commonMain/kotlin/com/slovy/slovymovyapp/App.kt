@@ -1021,13 +1021,13 @@ fun App(
                     StudySessionScreen(
                         viewModel = viewModel,
                         onCancel = {
-                            logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION, viewModel.buildSessionEndParams("cancel"))
+                            logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION, viewModel.buildSessionEndParams())
                             if (!navController.popBackStack()) {
                                 navController.navigate(AppDestination.Favorites)
                             }
                         },
                         onEnd = {
-                            logEvent(AnalyticsEvent.STUDY_END_SESSION, viewModel.buildSessionEndParams("finished"))
+                            logEvent(AnalyticsEvent.STUDY_END_SESSION, viewModel.buildSessionEndParams())
                             if (!navController.popBackStack()) {
                                 navController.navigate(AppDestination.Favorites)
                             }

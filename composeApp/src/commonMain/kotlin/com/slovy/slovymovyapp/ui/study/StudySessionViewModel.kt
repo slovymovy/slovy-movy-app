@@ -34,6 +34,7 @@ import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -60,8 +61,33 @@ class StudySessionViewModel(
     private val onFavoriteChanged: (Language) -> Unit,
 ) : ViewModel() {
 
-    var state by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
+    private var currentState by mutableStateOf<StudySessionUiState>(StudySessionUiState.Loading())
+
+    /**
+     * Once the session is closing, UI state is frozen. Work already in flight — a review
+     * submission, a removal, a suspend, a card load — must not hand the user back an active
+     * session, and must not raise an error screen behind the exit. Only the exit path itself
+     * writes [currentState] directly.
+     */
+    var state: StudySessionUiState
+        get() = currentState
+        private set(value) {
+            if (isExitingSession) return
+            currentState = value
+        }
+
+    /** Set when leaving the session must not stop at the reward screen. Observed by the screen. */
+    var exitRequested by mutableStateOf(false)
         private set
+
+    /**
+     * True when the reward screen is showing for a session the user backed out of rather than
+     * finished. The screen routes its Done action to cancel in that case, so one session still
+     * produces exactly one end event.
+     */
+    var completedByCancel by mutableStateOf(false)
+        private set
+
     val completeScrollState = ScrollState(0)
     val snackbarHostState = SnackbarHostState()
 
@@ -83,6 +109,15 @@ class StudySessionViewModel(
     private var pendingRemovalFavorite: Favorite? = null
     private var isPreparingRemoval: Boolean = false
     private var postponeListeningCardsForSession: Boolean = false
+
+    /**
+     * Set once the session is closing. The session keeps its card on screen while the reward
+     * snapshot loads, so work already in flight — a submitted review, a card load, a reveal —
+     * must not write state behind the exit and hand the user back an active session.
+     */
+    private var isExitingSession: Boolean = false
+    private var cardLoadJob: Job? = null
+    private var reviewJob: Job? = null
     private val snackbarMutex = Mutex()
 
     init {
@@ -175,6 +210,10 @@ class StudySessionViewModel(
     fun openOverflowMenu() {
         val active = state as? StudySessionUiState.Active ?: return
         if (active.isSubmittingReview) return
+        Analytics.logEvent(
+            AnalyticsEvent.STUDY_ACTIONS_MENU_OPEN,
+            mapOf("lang" to langCode),
+        )
         state = active.copy(isOverflowMenuOpen = true, removeConfirmation = null)
     }
 
@@ -187,6 +226,10 @@ class StudySessionViewModel(
         val active = state as? StudySessionUiState.Active ?: return
         if (active.isSubmittingReview) return
         autoplayEnabled = !autoplayEnabled
+        Analytics.logEvent(
+            AnalyticsEvent.STUDY_AUTOPLAY_TOGGLED,
+            mapOf("lang" to langCode, "enabled" to autoplayEnabled.toString()),
+        )
         state = active.copy(
             isAutoplayEnabled = autoplayEnabled,
         )
@@ -219,6 +262,15 @@ class StudySessionViewModel(
                 )
                 return@launch
             }
+            Analytics.logEvent(
+                AnalyticsEvent.STUDY_WORD_SUSPENDED,
+                mapOf(
+                    "lang" to langCode,
+                    "family" to card.card.family.name.lowercase(),
+                    "variant" to card.variant.kind.name.lowercase(),
+                    "days" to WORD_SUSPEND_DURATION.inWholeDays,
+                ),
+            )
             skippedCount += 1
             loadNextCard()
             val result = showStudySnackbar(
@@ -253,6 +305,10 @@ class StudySessionViewModel(
         if (active.isSubmittingReview) return
         if (active.card !is StudyCardUiState.Listening) return
         currentCard ?: return
+        Analytics.logEvent(
+            AnalyticsEvent.STUDY_LISTENING_POSTPONED,
+            mapOf("lang" to langCode),
+        )
         postponeListeningCardsForSession = true
         skippedCount += 1
         currentCard = null
@@ -387,6 +443,7 @@ class StudySessionViewModel(
     }
 
     fun retry() {
+        if (isExitingSession) return
         val failedCard = currentCard
         if (failedCard == null) {
             if (sessionPrepared) {
@@ -402,7 +459,59 @@ class StudySessionViewModel(
         }
     }
 
+    /**
+     * Handles the close (cross) action. A session with real work behind it earns its summary
+     * before leaving: the reward hero is a diff between the session's start and end pipeline, so
+     * a milestone crossed on card 60 of 90 is exactly as real as one crossed on the last card, and
+     * today it is discarded. Below [REWARD_ON_CANCEL_MIN_CARDS] the tap exits straight away — a
+     * cross means "get me out", and a summary of a handful of cards is noise.
+     */
+    fun requestExit() {
+        // Close is never disabled, so it must never be a no-op: a second tap while the reward is
+        // still being built means leave now. Without this, any state reached after the exit began
+        // would have a dead close button.
+        if (isExitingSession) {
+            exitRequested = true
+            return
+        }
+        val showReward = shouldRewardOnExit(
+            reviewedCount = reviewedCount,
+            isAlreadyComplete = state is StudySessionUiState.Complete,
+        )
+        isExitingSession = true
+        cardLoadJob?.cancel()
+        if (!showReward) {
+            exitRequested = true
+            return
+        }
+        // Freeze the card that stays on screen while the snapshot loads. Rating is the only
+        // control not already gated on isSubmittingReview, and an open sheet or confirmation
+        // would outlive the session it belongs to.
+        (state as? StudySessionUiState.Active)?.let { active ->
+            pendingRemovalFavorite = null
+            currentState = active.copy(
+                isSubmittingReview = true,
+                isOverflowMenuOpen = false,
+                removeConfirmation = null,
+            )
+        }
+        viewModelScope.launch {
+            ttsManager.stop()
+            // Let a review submitted just before the tap finish first, so the summary counts it
+            // and its failure path cannot land behind the reward. It is bounded work: the
+            // continuation only writes counters and calls loadNextCard, which exits early now.
+            reviewJob?.join()
+            // The current card stays put rather than flashing a spinner; buildCompleteState
+            // absorbs its own failures into a heroless summary, so there is no error path that
+            // could strand the user here.
+            val reward = buildCompleteState()
+            completedByCancel = true
+            currentState = StudySessionUiState.Complete(reward)
+        }
+    }
+
     fun reveal() {
+        if (isExitingSession) return
         val active = state as? StudySessionUiState.Active ?: return
         if (active.side == StudyCardSide.BACK) return
 
@@ -484,7 +593,7 @@ class StudySessionViewModel(
 
         val durationMs = (clock.now() - cardShownAt).inWholeMilliseconds
         state = active.copy(isSubmittingReview = true)
-        viewModelScope.launch {
+        reviewJob = viewModelScope.launch {
             runCatching {
                 sessionService.submitReview(
                     card = card,
@@ -555,8 +664,12 @@ class StudySessionViewModel(
     }
 
     private fun loadNextCard() {
+        // Catches work that outlived the exit — most importantly a review submitted just before
+        // close, whose success path loads the next card.
+        if (isExitingSession) return
         ttsManager.stop()
-        viewModelScope.launch {
+        cardLoadJob?.cancel()
+        cardLoadJob = viewModelScope.launch {
             PerformanceMonitoring.startTrace("study_card_load").useWithResult {
                 putAttributes(
                     mapOf(
@@ -581,7 +694,7 @@ class StudySessionViewModel(
                                     state = if (completedCount == 0) {
                                         StudySessionUiState.Empty
                                     } else {
-                                        StudySessionUiState.Complete(buildCompleteState(completedCount))
+                                        StudySessionUiState.Complete(buildCompleteState())
                                     }
                                 }
 
@@ -679,7 +792,7 @@ class StudySessionViewModel(
             excludedFamilies = excludedCardFamiliesForSession(),
         )
 
-    private suspend fun buildCompleteState(completedCount: Int): StudySessionCompleteUiState {
+    private suspend fun buildCompleteState(): StudySessionCompleteUiState {
         val snapshot = try {
             rewardSnapshot()
         } catch (e: CancellationException) {
@@ -689,8 +802,10 @@ class StudySessionViewModel(
             null
         }
         val streakDays = snapshot?.streakDays ?: 0
+        // Counted after the snapshot resolves: work finishing during that query still belongs in
+        // the summary.
         return StudySessionCompleteUiState(
-            cardsReviewed = completedCount,
+            cardsReviewed = reviewedCount + skippedCount,
             minutes = (clock.now() - sessionStartedAt).inWholeMinutes.toInt().coerceAtLeast(1),
             streakDays = streakDays,
             message = randomCompletionMessage(language),
@@ -751,9 +866,18 @@ class StudySessionViewModel(
         )
     }
 
-    fun buildSessionEndParams(completion: String): Map<String, Any> = mapOf(
+    /**
+     * `completion` arms: `finished` (queue ran out), `cancel_rewarded` (backed out with enough
+     * work behind it to earn the summary), `cancel` (backed out before that). Exactly one end
+     * event fires per session, so the finished-vs-cancel split stays comparable to past data.
+     */
+    fun buildSessionEndParams(): Map<String, Any> = mapOf(
         "lang" to langCode,
-        "completion" to completion,
+        "completion" to when {
+            completedByCancel -> "cancel_rewarded"
+            state is StudySessionUiState.Complete -> "finished"
+            else -> "cancel"
+        },
         "cards_reviewed" to reviewedCount.toLong(),
         "again_count" to (gradeCounts[StudyRating.AGAIN] ?: 0).toLong(),
         "hard_count" to (gradeCounts[StudyRating.HARD] ?: 0).toLong(),
@@ -771,6 +895,19 @@ class StudySessionViewModel(
     companion object {
         private const val TAG = "StudySessionViewModel"
         private const val LOADING_DEBOUNCE_MS = 150L
+
+        /**
+         * Reviews needed before closing the session shows the reward screen instead of leaving
+         * immediately. Roughly five to ten minutes of focused work.
+         */
+        private const val REWARD_ON_CANCEL_MIN_CARDS = 50
         private val WORD_SUSPEND_DURATION = 30.days
+
+        /**
+         * Whether closing the session should stop at the reward screen. Skipped and suspended
+         * cards do not count — only reviews are work.
+         */
+        internal fun shouldRewardOnExit(reviewedCount: Int, isAlreadyComplete: Boolean): Boolean =
+            !isAlreadyComplete && reviewedCount >= REWARD_ON_CANCEL_MIN_CARDS
     }
 }

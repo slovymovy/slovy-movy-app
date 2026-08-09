@@ -180,12 +180,20 @@ fun StudySessionScreen(
         onPauseOrDispose { }
     }
 
+    // The close action goes through the ViewModel, which may answer it with the reward screen
+    // instead of an immediate exit; this leaves once it decides the session really is over.
+    LaunchedEffect(viewModel.exitRequested) {
+        if (viewModel.exitRequested) onCancel()
+    }
+
     StudySessionScreenContent(
         state = viewModel.state,
         completeScrollState = viewModel.completeScrollState,
         snackbarHostState = viewModel.snackbarHostState,
-        onCancel = onCancel,
-        onEnd = onEnd,
+        onCancel = viewModel::requestExit,
+        // A reward screen reached by backing out is still a cancel, so its Done action reports as
+        // one. Without this the session would log both a cancel and a finish.
+        onEnd = if (viewModel.completedByCancel) onCancel else onEnd,
         onReveal = viewModel::reveal,
         onRevealFirstLetterHint = viewModel::revealFirstLetterHint,
         onRevealTranslationHint = viewModel::revealTranslationHint,
@@ -1533,42 +1541,57 @@ private fun StudyCardBackContent(
         }
 
         val headlineIsLemma = back.isLemmaHeadline
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-            verticalAlignment = Alignment.Top,
-        ) {
-            val headlineTypography = if (back.isMultiLanguageHeadline) {
-                MaterialTheme.typography.headlineMedium
-            } else {
-                MaterialTheme.typography.headlineLarge
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                verticalAlignment = Alignment.Top,
+            ) {
+                val headlineTypography = if (back.isMultiLanguageHeadline) {
+                    MaterialTheme.typography.headlineMedium
+                } else {
+                    MaterialTheme.typography.headlineLarge
+                }
+                val emphasizeHeadline = headlineEmphasized && !back.isMultiLanguageHeadline
+                StudyTaggedText(
+                    text = back.headline,
+                    style = headlineTypography.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                        fontSize = if (emphasizeHeadline) 30.sp else headlineTypography.fontSize,
+                        lineHeight = if (emphasizeHeadline) 33.sp else headlineTypography.lineHeight,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Start,
+                    maxLines = if (headlineIsLemma) 1 else Int.MAX_VALUE,
+                    autoSize = if (headlineIsLemma) TextAutoSize.StepBased(
+                        minFontSize = 14.sp,
+                        maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                        stepSize = 1.sp,
+                    ) else null,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                back.audioText?.let { audioText ->
+                    StudySpeakerButton(
+                        audioText = audioText,
+                        playContentDescription = stringResource(Res.string.study_play_word_audio),
+                        stopContentDescription = stringResource(Res.string.study_stop_audio),
+                        isPlayingAudio = isPlayingAudio,
+                        isPreparingAudio = isPreparingAudio,
+                        onPlayAudio = onPlayAudio,
+                        onStopAudio = onStopAudio,
+                    )
+                }
             }
-            val emphasizeHeadline = headlineEmphasized && !back.isMultiLanguageHeadline
-            StudyTaggedText(
-                text = back.headline,
-                style = headlineTypography.copy(
-                    fontFamily = MaterialTheme.serifFontFamily,
-                    fontSize = if (emphasizeHeadline) 30.sp else headlineTypography.fontSize,
-                    lineHeight = if (emphasizeHeadline) 33.sp else headlineTypography.lineHeight,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start,
-                maxLines = if (headlineIsLemma) 1 else Int.MAX_VALUE,
-                autoSize = if (headlineIsLemma) TextAutoSize.StepBased(
-                    minFontSize = 14.sp,
-                    maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                    stepSize = 1.sp,
-                ) else null,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            back.audioText?.let { audioText ->
-                StudySpeakerButton(
-                    audioText = audioText,
-                    playContentDescription = stringResource(Res.string.study_play_word_audio),
-                    stopContentDescription = stringResource(Res.string.study_stop_audio),
-                    isPlayingAudio = isPlayingAudio,
-                    isPreparingAudio = isPreparingAudio,
-                    onPlayAudio = onPlayAudio,
-                    onStopAudio = onStopAudio,
+            // Same slot as `translations` on a lemma-headline back — the other-language line
+            // directly under the headline — so it carries that slot's size. Serif because it is
+            // studied-language text, onSurfaceVariant because the headline above it is the answer.
+            back.sourceWord?.let { sourceWord ->
+                StudyTaggedText(
+                    text = sourceWord,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Start,
                 )
             }
         }
@@ -2294,6 +2317,7 @@ private fun recognitionCard() = StudyCardUiState.Recognition(
     mode = StudyRecognitionMode.BILINGUAL,
     back = StudyCardBackUiState(
         headline = "cosy, sociable",
+        sourceWord = "gezellig",
         definition = "a feeling of warmth, comfort, and conviviality from being together with others",
         examples = listOf(
             StudyExampleUiState(
@@ -2321,6 +2345,7 @@ private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
             num = 1,
             back = StudyCardBackUiState(
                 headline = "to put, place",
+                sourceWord = "zetten",
                 definition = "place something somewhere with intent.",
                 examples = listOf(
                     StudyExampleUiState(
@@ -2336,6 +2361,7 @@ private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
             num = 2,
             back = StudyCardBackUiState(
                 headline = "to set",
+                sourceWord = "zetten",
                 definition = "adjust something to a particular position or value.",
                 examples = listOf(
                     StudyExampleUiState(
@@ -2351,6 +2377,7 @@ private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
             num = 3,
             back = StudyCardBackUiState(
                 headline = "to turn on",
+                sourceWord = "zetten",
                 definition = "start a device or source of light.",
                 examples = listOf(
                     StudyExampleUiState(
@@ -2365,6 +2392,7 @@ private fun multiSenseRecognitionCard() = StudyCardUiState.Recognition(
     activeSenseId = "sense-1",
     back = StudyCardBackUiState(
         headline = "to put, place",
+        sourceWord = "zetten",
         definition = "place something somewhere with intent.",
         examples = listOf(
             StudyExampleUiState(
@@ -2486,9 +2514,12 @@ private fun multiSenseListeningCard() = StudyCardUiState.Listening(
     promptAudioText = "zetten",
     senses = multiSenseRecognitionCard().senses.map { sense ->
         sense.copy(
+            // A listening back is a lemma-headline back: the word is the headline and carries the
+            // speaker, so the separate source-word line the bilingual backs use is cleared here.
             back = sense.back.copy(
                 headline = "zetten",
                 isLemmaHeadline = true,
+                sourceWord = null,
                 translations = sense.back.headline,
                 audioText = "zetten",
             ),
