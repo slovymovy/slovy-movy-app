@@ -690,16 +690,17 @@ class StudySessionViewModel(
                                     showLoadingJob.cancel()
                                     val completedCount = reviewedCount + skippedCount
                                     markResult(if (completedCount == 0) "empty" else "complete")
-                                    state = if (completedCount == 0) {
-                                        StudySessionUiState.Empty
+                                    if (completedCount == 0) {
+                                        state = StudySessionUiState.Empty
                                     } else {
-                                        StudySessionUiState.Complete(buildCompleteState())
-                                    }
-                                    // The queue running out ends the session, whether or not the
-                                    // reward screen is ever dismissed.
-                                    if (completedCount > 0) {
+                                        // The queue running out ends the session. Report it
+                                        // before awaiting the reward snapshot: that query
+                                        // suspends, and a back press during it would otherwise
+                                        // reach onCleared with no arm set and count a finished
+                                        // session as a cancel.
                                         completionArm = COMPLETION_FINISHED
                                         logSessionEnd()
+                                        state = StudySessionUiState.Complete(buildCompleteState())
                                     }
                                 }
 
