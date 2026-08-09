@@ -726,8 +726,6 @@ fun SearchScreenContent(
             title = stringResource(Res.string.search_suggest_list_dialog_title),
             commentPlaceholder = stringResource(Res.string.search_suggest_list_placeholder),
             commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-            successCopy = null,
-            allowDismissWhileSending = false,
             comment = state.listSuggestionComment,
             email = state.listSuggestionEmail,
             isSending = state.listSuggestionSubmitting,

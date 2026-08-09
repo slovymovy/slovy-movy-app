@@ -65,8 +65,8 @@ data class LanguageSetupUiState(
     val noTranslationSelected: Boolean = false,
     val errorMessage: String? = null,
     val languageRequestDialogVisible: Boolean = false,
-    val languageRequestComment: String = "",
-    val languageRequestEmail: String = "",
+    val languageRequestLearnLanguage: String = "",
+    val languageRequestTranslateLanguage: String = "",
     val languageRequestSubmitting: Boolean = false,
     val languageRequestError: UiText? = null,
     val languageRequestDiscussionUrl: String? = null
@@ -155,8 +155,8 @@ class LanguageSetupViewModel(
         cancelLanguageRequestJob()
         state = state.copy(
             languageRequestDialogVisible = true,
-            languageRequestComment = "",
-            languageRequestEmail = "",
+            languageRequestLearnLanguage = "",
+            languageRequestTranslateLanguage = "",
             languageRequestSubmitting = false,
             languageRequestError = null,
             languageRequestDiscussionUrl = null
@@ -167,46 +167,54 @@ class LanguageSetupViewModel(
         cancelLanguageRequestJob()
         state = state.copy(
             languageRequestDialogVisible = false,
-            languageRequestComment = "",
-            languageRequestEmail = "",
+            languageRequestLearnLanguage = "",
+            languageRequestTranslateLanguage = "",
             languageRequestSubmitting = false,
             languageRequestError = null,
             languageRequestDiscussionUrl = null
         )
     }
 
-    fun updateLanguageRequestComment(comment: String) {
-        state = state.copy(languageRequestComment = comment, languageRequestError = null)
+    fun updateLanguageRequestLearnLanguage(language: String) {
+        state = state.copy(languageRequestLearnLanguage = language, languageRequestError = null)
     }
 
-    fun updateLanguageRequestEmail(email: String) {
-        state = state.copy(languageRequestEmail = email)
+    fun updateLanguageRequestTranslateLanguage(language: String) {
+        state = state.copy(languageRequestTranslateLanguage = language, languageRequestError = null)
     }
 
     fun submitLanguageRequest() {
         if (state.languageRequestSubmitting) return
 
-        val comment = state.languageRequestComment.trim()
-        if (comment.isEmpty()) {
-            state = state.copy(languageRequestError = UiText.Resource(Res.string.settings_feedback_comment_required))
+        val learn = state.languageRequestLearnLanguage.trim()
+        val translate = state.languageRequestTranslateLanguage.trim()
+        if (learn.isEmpty() && translate.isEmpty()) {
+            state = state.copy(
+                languageRequestError = UiText.Resource(Res.string.language_setup_request_language_required)
+            )
             return
         }
 
-        val email = state.languageRequestEmail.trim().takeIf { it.isNotBlank() }
+        val comment = buildLanguageRequestComment(learn = learn, translate = translate)
         state = state.copy(languageRequestSubmitting = true, languageRequestError = null)
         cancelLanguageRequestJob()
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             try {
-                val response = dictionaryClient.sendGeneralFeedback(
-                    comment = "$LANGUAGE_REQUEST_PREFIX $comment",
-                    email = email
-                )
-                if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
-                    state = state.copy(
-                        languageRequestSubmitting = false,
-                        languageRequestError = null,
-                        languageRequestDiscussionUrl = response.discussionUrl
+                val response = dictionaryClient.sendGeneralFeedback(comment = comment)
+                if (isCurrentLanguageRequestJob()) {
+                    // Only which slots were filled, never what the user typed: the language names
+                    // themselves are free text and already reach maintainers via the discussion.
+                    Analytics.logEvent(
+                        AnalyticsEvent.LANGUAGE_REQUEST_SENT,
+                        mapOf("slots" to languageRequestSlots(learn = learn, translate = translate))
                     )
+                    if (state.languageRequestDialogVisible) {
+                        state = state.copy(
+                            languageRequestSubmitting = false,
+                            languageRequestError = null,
+                            languageRequestDiscussionUrl = response.discussionUrl
+                        )
+                    }
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -238,10 +246,40 @@ class LanguageSetupViewModel(
         loadAvailableLanguages()
     }
 
+    /**
+     * Builds the maintainer-facing feedback body. The labels stay in English on purpose: the
+     * discussion is read by maintainers, not by the requester, so a fixed shape keeps requests
+     * greppable no matter which UI locale produced them. Blank slots are omitted rather than
+     * sent as empty lines.
+     */
+    private fun languageRequestSlots(learn: String, translate: String): String = when {
+        learn.isNotEmpty() && translate.isNotEmpty() -> "both"
+        learn.isNotEmpty() -> "learn"
+        else -> "translate"
+    }
+
+    private fun buildLanguageRequestComment(learn: String, translate: String): String {
+        return buildString {
+            append(LANGUAGE_REQUEST_PREFIX)
+            if (learn.isNotEmpty()) {
+                append("\n")
+                append(LEARN_LABEL)
+                append(learn)
+            }
+            if (translate.isNotEmpty()) {
+                append("\n")
+                append(TRANSLATE_LABEL)
+                append(translate)
+            }
+        }
+    }
+
     private companion object {
         // Language requests share the generic /feedback endpoint; the prefix is what lets
         // maintainers tell them apart from general feedback in the GitHub Feedback category.
         const val LANGUAGE_REQUEST_PREFIX = "[Language request]"
+        const val LEARN_LABEL = "Language to learn: "
+        const val TRANSLATE_LABEL = "Language to translate into: "
     }
 }
 
@@ -258,8 +296,8 @@ fun LanguageSetupScreen(
         onNoTranslationChanged = viewModel::setNoTranslationSelected,
         onOpenLanguageRequest = viewModel::openLanguageRequestDialog,
         onDismissLanguageRequest = viewModel::dismissLanguageRequestDialog,
-        onLanguageRequestCommentChange = viewModel::updateLanguageRequestComment,
-        onLanguageRequestEmailChange = viewModel::updateLanguageRequestEmail,
+        onLanguageRequestLearnChange = viewModel::updateLanguageRequestLearnLanguage,
+        onLanguageRequestTranslateChange = viewModel::updateLanguageRequestTranslateLanguage,
         onSubmitLanguageRequest = viewModel::submitLanguageRequest,
         onNext = {
             val learning = viewModel.state.learningLanguage
@@ -294,8 +332,8 @@ fun LanguageSetupScreenContent(
     onNoTranslationChanged: (Boolean) -> Unit = {},
     onOpenLanguageRequest: () -> Unit = {},
     onDismissLanguageRequest: () -> Unit = {},
-    onLanguageRequestCommentChange: (String) -> Unit = {},
-    onLanguageRequestEmailChange: (String) -> Unit = {},
+    onLanguageRequestLearnChange: (String) -> Unit = {},
+    onLanguageRequestTranslateChange: (String) -> Unit = {},
     onSubmitLanguageRequest: () -> Unit = {},
     onNext: () -> Unit = {},
     onRetry: () -> Unit = {}
@@ -437,24 +475,14 @@ fun LanguageSetupScreenContent(
         }
 
         if (state.languageRequestDialogVisible) {
-            val sentTitle = stringResource(Res.string.language_setup_request_language_sent_title)
-            val sentMessage = stringResource(Res.string.language_setup_request_language_sent_message)
-            val languageRequestSuccessCopy = remember(sentTitle, sentMessage) {
-                FeedbackSuccessCopy(title = sentTitle, message = sentMessage)
-            }
-            FeedbackDialog(
-                title = stringResource(Res.string.language_setup_request_language_title),
-                commentPlaceholder = stringResource(Res.string.language_setup_request_language_placeholder),
-                commentLabel = null,
-                successCopy = languageRequestSuccessCopy,
-                allowDismissWhileSending = true,
-                comment = state.languageRequestComment,
-                email = state.languageRequestEmail,
+            LanguageRequestDialog(
+                learnLanguage = state.languageRequestLearnLanguage,
+                translateLanguage = state.languageRequestTranslateLanguage,
                 isSending = state.languageRequestSubmitting,
                 error = state.languageRequestError?.resolve(),
-                resultUrl = state.languageRequestDiscussionUrl,
-                onCommentChange = onLanguageRequestCommentChange,
-                onEmailChange = onLanguageRequestEmailChange,
+                discussionUrl = state.languageRequestDiscussionUrl,
+                onLearnLanguageChange = onLanguageRequestLearnChange,
+                onTranslateLanguageChange = onLanguageRequestTranslateChange,
                 onDismiss = onDismissLanguageRequest,
                 onSend = onSubmitLanguageRequest
             )

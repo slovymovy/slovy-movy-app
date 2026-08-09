@@ -182,7 +182,11 @@
     <string name="language_setup_request_language_link">Let us know</string>
     <string name="language_setup_request_language_after">&#32;so we can add it.</string>
     <string name="language_setup_request_language_title">Request a language</string>
-    <string name="language_setup_request_language_placeholder">Which language would you like to add?</string>
+    <string name="language_setup_request_language_roadmap">See which languages we're adding next on the %1$s.</string>
+    <string name="language_setup_request_language_roadmap_link">roadmap</string>
+    <string name="language_setup_request_language_learn_label">Language to learn</string>
+    <string name="language_setup_request_language_translate_label">Language to translate into</string>
+    <string name="language_setup_request_language_required">Enter at least one language</string>
     <string name="language_setup_request_language_sent_title">Request sent</string>
     <string name="language_setup_request_language_sent_message">Thank you! We have received your language request. You can follow its progress on GitHub.</string>
 
