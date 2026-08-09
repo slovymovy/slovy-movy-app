@@ -242,10 +242,10 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         if (interruptedSpeech) notifyStatus(TTSStatus.IDLE)
     }
 
-    private fun toLocale(lang: Language): Locale {
-        val builder = Locale.Builder()
-        return builder.setLanguage(lang.code).build()
-    }
+    // Parses the full tag rather than seeding a builder with it: Locale.Builder.setLanguage rejects
+    // anything beyond a bare language subtag, so a code carrying a script (zh-Hans) would throw here
+    // and abort the Language.entries loop in getAvailableLanguages, leaving every language voiceless.
+    private fun toLocale(lang: Language): Locale = Locale.forLanguageTag(lang.code)
 
     actual override fun stop() {
         tts.stop()
