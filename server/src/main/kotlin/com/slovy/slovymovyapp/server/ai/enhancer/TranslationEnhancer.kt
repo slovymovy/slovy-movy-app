@@ -17,6 +17,8 @@ class TranslationEnhancer {
      * @param request The translation request
      * @param provider The AI provider to use
      * @param targetLanguageName The name of the target language (e.g., "Russian", "Polish")
+     * @param targetLanguageNotes Language.translationPromptNotes for the target language; empty for
+     *   every language whose extracted translations need no explaining, which is why it defaults
      * @param systemPrompt The system prompt (use EnhancerPrompts.TRANSLATION_SYSTEM_PROMPT as default)
      * @param temperature Temperature for sampling
      * @param reasoningBudget Reasoning budget for models that support it
@@ -32,6 +34,7 @@ class TranslationEnhancer {
         request: TranslationRequest,
         provider: AIProvider,
         targetLanguageName: String,
+        targetLanguageNotes: String = "",
         systemPrompt: String = EnhancerPrompts.TRANSLATION_SYSTEM_PROMPT,
         temperature: Float = 0f,
         reasoningBudget: Int = 2000,
@@ -43,7 +46,10 @@ class TranslationEnhancer {
         cache: AICache = NoOpAICache,
         retryStrategy: RetryStrategy = NoRetryStrategy
     ): TranslationResponse {
-        val processedSystemPrompt = systemPrompt.replace("\$TARGET_LANG", targetLanguageName)
+        // Notes first, so they may themselves use $TARGET_LANG.
+        val processedSystemPrompt = systemPrompt
+            .replace("\$INPUT_NOTES", targetLanguageNotes)
+            .replace("\$TARGET_LANG", targetLanguageName)
         val schema = buildTranslationSchema(request)
         val inputJson = Json.encodeToString(TranslationRequest.serializer(), request)
 

@@ -7,7 +7,18 @@ enum class Language(
     val code: String,
     val selfName: String,
     val flag: String,
-    val englishName: String
+    val englishName: String,
+    /**
+     * Extra guidance appended to the AI base-processing prompt for this language, substituted for
+     * its `$INPUT_NOTES` placeholder. Describes what the Wiktextract input for this language can
+     * actually look like, where that differs from what the generic prompt assumes.
+     *
+     * Empty means the generic prompt is enough, which is the case for every language whose extract
+     * is uniform. The default carries that meaning for all of them.
+     */
+    val basePromptNotes: String = "",
+    /** The same, for the AI translation prompt. See [basePromptNotes]. */
+    val translationPromptNotes: String = ""
 ) {
     ENGLISH("en", "English", "🇬🇧", "English"),
     RUSSIAN("ru", "Русский", "🇷🇺", "Russian"),
@@ -21,45 +32,53 @@ enum class Language(
     SPANISH("es", "Español", "🇪🇸", "Spanish"),
 
     /**
-     * Simplified Chinese only. [englishName] is the sole input to the AI translation prompt's
-     * `$TARGET_LANG` placeholder, so it is what keeps the generated corpus in 简体 rather than 繁體.
-     * Traditional would join as a separate `zh-Hant` entry; it is not a variant of this one.
+     * Simplified only, matching the `zh-extract.jsonl` source and CLDR's own reading of a bare `zh`.
+     * Traditional would join as a separate `zh-Hant` entry rather than a variant of this one.
+     *
+     * [englishName] is the sole input to the AI translation prompt's `$TARGET_LANG` placeholder and
+     * is never shown in the UI, so it is what holds the generated corpus to 简体 even though the
+     * extract itself is 繁體. Shortening it to "Chinese" would silently change what gets generated.
      */
-    CHINESE("zh-Hans", "简体中文", "🇨🇳", "Simplified Chinese");
+    CHINESE(
+        "zh",
+        "简体中文",
+        "🇨🇳",
+        "Simplified Chinese",
+        basePromptNotes = """
+            The source extract comes from the Chinese Wiktionary, which lemmatises entries at the
+            Traditional spelling and is written largely in Traditional characters; the Simplified
+            spelling is usually present only as a tagged form of the headword. Expect Traditional
+            input throughout, including in definitions and examples, and expect entries for other
+            Sinitic lects (Cantonese, Hokkien, Hakka, Wu, Min) alongside the Mandarin ones.
+
+            Write all output in Mandarin using Simplified characters, converting the input where
+            needed. Describe the Mandarin reading of the word, not that of another lect.
+        """.trimIndent(),
+        translationPromptNotes = """
+            The extracted translations are not uniform Mandarin in Simplified characters. Expect any
+            of the following in the input:
+            - Traditional characters (電腦), which is the prevailing script of the source data.
+            - A dual-script pair inside one string, Traditional before the slash and Simplified
+              after it: "詞典 /词典". Where the two spellings coincide there is no slash.
+            - Rows belonging to a Sinitic lect other than Mandarin - Cantonese, Hokkien, Hakka, Wu,
+              Min - usually carrying a tag or lect name that says so.
+            - Dungan rows written in Cyrillic (хуадян).
+
+            Produce Mandarin in Simplified characters only: take the Simplified side of a
+            dual-script pair, convert Traditional spellings, and skip entries from other lects and
+            from non-Han scripts unless the sense has no usable Mandarin entry at all. This applies
+            equally to the definitions and example translations you write yourself.
+        """.trimIndent()
+    );
 
     companion object {
-        /**
-         * Exact match on purpose. Callers that merely validate a code and then keep using their own
-         * input string rely on it: the `/word` route checks the requested translation codes here but
-         * carries the raw strings on into existing-language checks, db-extract filtering, and the
-         * merged translation map keys, none of which ignore case. A lenient match would let `RU`
-         * past validation and then miss the existing `ru` data, regenerating it and storing a
-         * duplicate `RU` entry the client can never read.
-         *
-         * Filename segments are the one place that legitimately needs leniency; they have
-         * [fromFileNameSegment] instead.
-         */
-        fun fromCodeOrNull(code: String): Language? {
-            return entries.find { it.code == code }
-        }
-
         fun fromCode(code: String): Language {
-            return fromCodeOrNull(code)
+            return entries.find { it.code == code }
                 ?: throw IllegalArgumentException("Unknown language code: $code")
         }
 
-        /**
-         * Resolves a language from a downloaded-DB filename segment, which
-         * [com.slovy.slovymovyapp.data.remote.DataDbManager] builds lowercased. A code carrying a
-         * script subtag (`zh-Hans`) comes back out as `zh-hans`, so an exact match would drop the
-         * pair with no error anywhere - the file would simply never be offered for download nor
-         * reported as installed.
-         *
-         * Kept separate from [fromCodeOrNull] so this leniency stays confined to filename parsing
-         * and never widens what a network or storage boundary accepts.
-         */
-        fun fromFileNameSegment(segment: String): Language? {
-            return entries.find { it.code.equals(segment, ignoreCase = true) }
+        fun fromCodeOrNull(code: String): Language? {
+            return entries.find { it.code == code }
         }
     }
 }
