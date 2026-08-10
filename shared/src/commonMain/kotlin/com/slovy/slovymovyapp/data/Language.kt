@@ -77,9 +77,10 @@ enum class Language(
               一根香蕉.
             - Where the sense is carried by structure alone - a bare duration complement (住了十年),
               了, 的, word order - write the natural sentence and leave it untagged. An untagged
-              example translation is a correct answer; a filler inserted only so that something can
-              be tagged is not (锻炼对你的健康<w>为</w>（有益）, 住了<w>持续</w>十年). Do not fall back
-              to tagging the duration itself, since 十年 is the span rather than the preposition.
+              example translation is a correct answer, and takes precedence over the later
+              instruction to tag the word in every example; a filler inserted only so that something
+              can be tagged is not (锻炼对你的健康<w>为</w>（有益）, 住了<w>持续</w>十年). Do not fall
+              back to tagging the duration itself, since 十年 is the span rather than the preposition.
             - At least one example per sense must still come out with a tagged translation. When the
               rule above would leave every example of a sense untagged, shape one of them so that a
               real word carries the meaning.
