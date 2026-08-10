@@ -26,13 +26,11 @@ Important namespaces and entry points:
 - Versions: `gradle/libs.versions.toml`. The root build derives `versionCode` from the git commit count and
   `versionName` as `1.3.<commit-count>`.
 
-Supported languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, ES, and ZH-HANS; see
+Supported languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, ES, and ZH; see
 `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`. Offline Wiktextract source mappings currently
 exist only for EN, RU, NL, and PL, so only those can be learning languages; the rest are translation targets.
-
-`Language.code` is not just a display key: it is the `translation_{src}_{tgt}.db` filename segment, the `/word` route's
-`translations` value, the `lang_code`/`target_lang_code` column value, and the Android TTS locale tag. Chinese is the
-first code carrying a script subtag, so treat it as the case that breaks naive assumptions there.
+`Language.code` is the `translation_{src}_{tgt}.db` filename segment, the `/word` route's `translations` value, the
+`lang_code`/`target_lang_code` column value, and the TTS locale tag, so every code stays a bare lowercase subtag.
 
 ## Environment and Gradle commands
 

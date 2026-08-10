@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.server.ai.enhancer
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import com.slovy.slovymovyapp.server.ai.*
 import kotlinx.serialization.json.Json
@@ -13,6 +14,9 @@ class LanguageCardEnhancer {
 
     /**
      * Sends the request using the AIProvider abstraction and returns the enhanced response.
+     *
+     * The language name and notes are resolved from the request's own `langCode` rather than passed
+     * in, so they cannot disagree with the data being enhanced.
      *
      * @param request The language card request to enhance
      * @param provider The AI provider to use
@@ -41,12 +45,18 @@ class LanguageCardEnhancer {
         cache: AICache = NoOpAICache,
         retryStrategy: RetryStrategy = NoRetryStrategy
     ): LanguageCardResponse {
+        // Notes first, so they may themselves use $LANG. Both are no-ops on a prompt whose
+        // placeholders a caller already substituted itself.
+        val language = Language.fromCode(request.langCode)
+        val processedSystemPrompt = systemPrompt
+            .replace("\$INPUT_NOTES", language.basePromptNotes)
+            .replace("\$LANG", language.englishName)
         val schema = buildSchema(request)
         val inputJson = Json.encodeToString(LanguageCardRequest.serializer(), request)
 
         // Calculate effective max output tokens
         val effectiveMaxTokens = maxOutputTokens ?: run {
-            val inputTokens = provider.countTokens(inputJson + systemPrompt + schema , model)
+            val inputTokens = provider.countTokens(inputJson + processedSystemPrompt + schema , model)
             calculateMaxOutputTokens(inputTokens)
         }
 
@@ -63,7 +73,7 @@ class LanguageCardEnhancer {
             reasoningBudget = reasoningBudget,
             model = model,
             schema = schema,
-            systemPrompt = systemPrompt,
+            systemPrompt = processedSystemPrompt,
             maxOutputTokens = effectiveMaxTokens,
             topP = topP,
             verbosity = verbosity?.let { Verbosity.valueOf(it.uppercase()) }

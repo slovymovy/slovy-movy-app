@@ -812,6 +812,7 @@ private suspend fun enhanceWithTranslations(
                 )
 
                 val targetLangName = targetLanguageName(targetLangCode)
+                val targetLangNotes = DbExtractEnhancerUtils.targetLanguageNotes(targetLangCode)
 
                 raceWithFallback(
                     primaryAvailable = geminiProvider.isAvailable(),
@@ -821,6 +822,7 @@ private suspend fun enhanceWithTranslations(
                             request = translationRequest,
                             provider = geminiProvider,
                             targetLanguageName = targetLangName,
+                            targetLanguageNotes = targetLangNotes,
                             model = GEMINI_3_1_FLASH_LITE,
                             reasoningBudget = 1
                         )
@@ -830,6 +832,7 @@ private suspend fun enhanceWithTranslations(
                             request = translationRequest,
                             provider = openAIProvider,
                             targetLanguageName = targetLangName,
+                            targetLanguageNotes = targetLangNotes,
                             model = ChatModel.GPT_5_4.asString(),
                             reasoningBudget = 900
                         )
