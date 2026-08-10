@@ -68,6 +68,34 @@ enum class Language(
             dual-script pair, convert Traditional spellings, and skip entries from other lects and
             from non-Han scripts unless the sense has no usable Mandarin entry at all. This applies
             equally to the definitions and example translations you write yourself.
+
+            Mandarin has no lexical counterpart for many English function words, and what you write
+            has to be natural Chinese rather than a word-for-word mirror of the English:
+            - Prefer wording in which a real Mandarin word carries the sense, and tag that word in
+              the slot Chinese grammar gives it rather than the slot the English word held. Usually
+              this is a coverb: 我<w>给</w>妈妈买了礼物, 锻炼<w>对</w>你的健康很有益, 他用苹果<w>换</w>了
+              一根香蕉.
+            - Where the sense is carried by structure alone - a bare duration complement (住了十年),
+              了, 的, word order - write the natural sentence and leave it untagged. An untagged
+              example translation is a correct answer, and takes precedence over the later
+              instruction to tag the word in every example; a filler inserted only so that something
+              can be tagged is not (锻炼对你的健康<w>为</w>（有益）, 住了<w>持续</w>十年). Do not fall
+              back to tagging the duration itself, since 十年 is the span rather than the preposition.
+            - At least one example per sense must still come out with a tagged translation. When the
+              rule above would leave every example of a sense untagged, shape one of them so that a
+              real word carries the meaning.
+            - A translation written with …… is a pattern, not a string: fill the slot (对……来说 ->
+              对他来说), split the tag around the argument when the parts separate, and agree with the
+              person of the sentence you are writing.
+            - Tag the declared translation exactly. Do not pull an added verb inside the tag
+              (<w>去健身房</w> where the word is 健身房), and do not leave part of it outside
+              (<w>体育</w>课 where the word is 体育课).
+            - Do not repeat a morpheme the surrounding words already supply: 正则表达式, 生理盐水 and
+              母乳 each already contain the head, so choose wording that fits what is around it.
+            - Keep parenthetical glosses out of the example sentences; that belongs in the sense
+              clarification.
+            - Transliterate foreign names so that they still read as foreign; 韦 is an ordinary
+              Chinese surname and cannot stand in for an English one.
         """.trimIndent()
     );
 
