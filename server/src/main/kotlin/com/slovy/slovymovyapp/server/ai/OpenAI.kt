@@ -254,6 +254,31 @@ class OpenAIProvider : AIProvider {
                 reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
             ),
             ModelInfo(
+                ChatModel.GPT_5_6_LUNA.asString(),
+                "OpenAI gpt-5.6 luna",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_5_6_SOL.asString(),
+                "OpenAI gpt-5.6 sol",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_5_6_TERRA.asString(),
+                "OpenAI gpt-5.6 terra",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+
+            ),
+            ModelInfo(
                 ChatModel.GPT_5_1.asString(),
                 "OpenAI gpt-5.1",
                 AIProviderType.OPENAI,
