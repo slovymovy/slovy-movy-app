@@ -886,11 +886,15 @@ private fun EffortRow(
                 .padding(start = 4.dp),
         )
         Text(
-            // Shares the unit labels' style so the separator sits on their metrics rather than its
-            // own. At its former 14sp/18sp it was the only element in this centred row with a taller
-            // line box, which pushed the dot off the optical centre of the CJK text either side.
+            // Matches the unit labels' metrics, but deliberately not their font: they use the serif
+            // family, and U+00B7 taken from a Latin face sits at Latin mid-height, which reads low
+            // beside full-height Han. Left on FontFamily.Default so the platform resolves the dot
+            // from the same face as the CJK text around it.
             text = "·",
-            style = effortUnitTextStyle(),
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.5.sp,
+                lineHeight = 16.sp,
+            ),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
             textAlign = TextAlign.Center,
             modifier = Modifier.width(24.dp),
