@@ -16,7 +16,7 @@
     <string name="welcome_selling_point_practice_description">间隔重复加多种练习模式，帮你真正记住学过的内容。</string>
     <string name="welcome_cta_explore_now">开始使用</string>
 
-    <string name="search_placeholder">搜索单词……</string>
+    <string name="search_placeholder">搜索单词…</string>
     <string name="search_open_item">打开 %1$s</string>
     <string name="search_content_desc_favorite">收藏</string>
     <string name="search_content_desc_not_downloaded">未下载</string>
@@ -27,7 +27,7 @@
     <string name="search_empty_start_typing">输入即可搜索</string>
     <string name="search_suggest_list_button">建议添加词单</string>
     <string name="search_suggest_list_dialog_title">建议添加词单</string>
-    <string name="search_suggest_list_placeholder">说说你希望在这里看到什么样的词单……</string>
+    <string name="search_suggest_list_placeholder">说说你希望在这里看到什么样的词单…</string>
     <string name="search_no_dictionary_title">尚未下载词典</string>
     <string name="search_no_dictionary_description">下载一本词典即可开始搜索单词</string>
     <string name="search_go_to_settings">前往设置</string>
@@ -88,7 +88,7 @@
     <string name="stats_stage_middle">回忆中</string>
     <string name="stats_stage_strong">牢固</string>
     <string name="stats_stage_learned">已掌握</string>
-    <string name="stats_caption_learned">复习中记得越稳，释义就越往下走；忘记了又会退回上面。%1$s 表示这张卡片已经学会，不再进入日常轮换。</string>
+    <string name="stats_caption_learned">复习中记得越稳，释义就越往下走；忘记了又会退回上面。%1$s表示这张卡片已经学会，不再进入日常轮换。</string>
     <string name="stats_month_january">1月</string>
     <string name="stats_month_february">2月</string>
     <string name="stats_month_march">3月</string>
@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">正在准备你的词库</string>
     <string name="download_action_download_size">下载 %1$s</string>
+    <string name="download_item_dictionary_name">%1$s 词典</string>
     <string name="download_title_ready">可以开始下载</string>
     <string name="download_subtitle_ready">需要这些词典才能开始使用。</string>
     <string name="download_title_failed">下载失败</string>
@@ -137,23 +138,23 @@
     <string name="download_content_desc_loading_info">正在加载下载信息</string>
     <string name="download_content_desc_preparing">正在准备下载</string>
     <string name="download_finalizing_recovering_progress">正在刷新我的单词（%1$d/%2$d）</string>
-    <string name="download_finalizing_updating_lists">正在更新词单……</string>
+    <string name="download_finalizing_updating_lists">正在更新词单…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
         <item quantity="few">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
         <item quantity="many">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
         <item quantity="other">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
     </plurals>
-    <string name="download_preparing">正在准备……</string>
+    <string name="download_preparing">正在准备…</string>
     <string name="download_item_accessibility">%1$s，%2$s</string>
     <string name="download_progress_with_percent">正在下载，已完成 %1$d%%</string>
-    <string name="download_running_status">%1$s…… %2$s</string>
+    <string name="download_running_status">%1$s… %2$s</string>
     <string name="download_state_cancelled">下载已取消</string>
     <string name="download_state_completed">下载完成</string>
 
     <string name="favorites_title">我的单词</string>
-    <string name="favorites_loading">加载中……</string>
-    <string name="favorites_search_placeholder">输入单词……</string>
+    <string name="favorites_loading">加载中…</string>
+    <string name="favorites_search_placeholder">输入单词…</string>
     <string name="favorites_empty_title">你的单词本从这里开始。</string>
     <string name="favorites_empty_description_before_heart_icon">搜索任意单词，点击&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;就能保存到这里，留着以后学。</string>
@@ -171,7 +172,7 @@
 
     <string name="language_setup_title">选择语言</string>
     <string name="language_setup_subtitle">选择你在学的语言，以及想翻译成的语言。</string>
-    <string name="language_setup_learning_label">我在学……</string>
+    <string name="language_setup_learning_label">我在学…</string>
     <string name="language_setup_translate_into">翻译成：</string>
     <string name="language_setup_choose_learning_first">请先选择学习语言</string>
     <string name="language_setup_step_completed">第 %1$d 步已完成</string>
@@ -197,7 +198,7 @@
     <string name="settings_section_about">关于</string>
 
     <string name="feedback_dialog_title">应用反馈</string>
-    <string name="feedback_dialog_placeholder">说说你的想法……</string>
+    <string name="feedback_dialog_placeholder">说说你的想法…</string>
 
     <string name="app_data_version_mismatch_title">你的词典需要更新一下</string>
     <string name="app_data_version_mismatch_body">我们改进了词典格式。重新下载即可获得最新版本——在 Wi-Fi 下只要几分钟。你保存的单词和学习进度都不会丢失。</string>
@@ -215,8 +216,8 @@
     <string name="word_details_hide_forms">隐藏词形</string>
     <string name="word_details_show_forms">显示词形</string>
     <string name="word_details_forms">词形</string>
-    <string name="word_details_loading_meaning">正在加载释义……</string>
-    <string name="word_details_preparing_translation">正在准备翻译……</string>
+    <string name="word_details_loading_meaning">正在加载释义…</string>
+    <string name="word_details_preparing_translation">正在准备翻译…</string>
     <string name="word_details_meaning_load_when_expanded">展开后加载释义</string>
     <string name="word_details_collapse_sense">收起释义</string>
     <string name="word_details_expand_sense">展开释义</string>
@@ -239,7 +240,7 @@
     <string name="common_action_cancel_download">取消下载</string>
     <string name="common_status_downloading">正在下载</string>
     <string name="common_status_downloading_percent">正在下载 %1$d%%</string>
-    <string name="common_status_downloading_ellipsis">正在下载……</string>
+    <string name="common_status_downloading_ellipsis">正在下载…</string>
     <string name="common_status_downloaded">已下载</string>
     <string name="common_status_downloaded_with_size">已下载 %1$s</string>
     <string name="common_status_available">可下载</string>
@@ -252,7 +253,7 @@
     <string name="feedback_dialog_comment_label">内容</string>
     <string name="feedback_dialog_email_label">邮箱（可选）</string>
     <string name="feedback_dialog_email_supporting">可能会公开显示在 GitHub 上</string>
-    <string name="feedback_dialog_sending">正在发送……</string>
+    <string name="feedback_dialog_sending">正在发送…</string>
     <string name="feedback_dialog_send">发送</string>
 
     <string name="voice_setup_title">让发音更好听</string>
@@ -322,10 +323,10 @@
     <string name="developer_stats_lemmas_header">词条</string>
     <string name="developer_stats_future_label">已排到将来</string>
     <string name="developer_stats_suppressed_label">被 available_after 抑制</string>
-    <string name="developer_stats_loading">正在加载统计……</string>
+    <string name="developer_stats_loading">正在加载统计…</string>
     <string name="developer_stats_error">统计不可用：%1$s</string>
     <string name="developer_tables_title">数据表</string>
-    <string name="developer_tables_loading">正在加载卡片表……</string>
+    <string name="developer_tables_loading">正在加载卡片表…</string>
     <string name="developer_tables_empty">没有卡片记录。</string>
     <string name="developer_tables_error">卡片表不可用：%1$s</string>
     <string name="developer_tables_page_status">第 %1$d-%2$d 行，共 %3$d 行</string>
@@ -346,7 +347,7 @@
     <string name="developer_card_table_col_available_after">available_after</string>
     <string name="developer_card_table_col_answer_key">answer_key</string>
     <string name="developer_card_table_col_suspended">suspended</string>
-    <string name="developer_working_status">处理中……</string>
+    <string name="developer_working_status">处理中…</string>
     <string name="acknowledgements_title">致谢</string>
     <string name="acknowledgements_vocab_data_title">词汇数据</string>
     <string name="acknowledgements_vocab_data_body">我们的单词数据来自 Wiktionary——由全球志愿者共同建设的自由多语言
@@ -369,7 +370,7 @@
 
     <string name="app_data_backup_title">备份你保存的单词</string>
     <string name="app_data_backup_description">把你保存的单词和应用设置导出为一个压缩包。适合留个副本，或者换新设备时使用。</string>
-    <string name="app_data_exporting">正在导出……</string>
+    <string name="app_data_exporting">正在导出…</string>
     <string name="app_data_export_now">立即导出</string>
 
     <string name="settings_dictionary_size_with_colon">词典：%1$s</string>
@@ -432,7 +433,7 @@
     <string name="settings_download_cancelled">下载已取消</string>
     <string name="common_search">搜索</string>
     <string name="common_clear">清除</string>
-    <string name="common_search_placeholder">搜索……</string>
+    <string name="common_search_placeholder">搜索…</string>
     <string name="common_unknown_error">未知错误</string>
     <string name="common_list_separator">，</string>
     <plurals name="part_of_speech_with_sense_count">
@@ -441,7 +442,7 @@
         <item quantity="many">%1$s - %2$d 个释义</item>
         <item quantity="other">%1$s - %2$d 个释义</item>
     </plurals>
-    <string name="part_of_speech_generating_definitions_examples">正在生成释义和例句……</string>
+    <string name="part_of_speech_generating_definitions_examples">正在生成释义和例句…</string>
     <string name="sense_frequency_high">高频</string>
     <string name="sense_frequency_middle">中频</string>
     <string name="sense_frequency_low">低频</string>
@@ -626,7 +627,7 @@
     <string name="study_remove_confirm">移除</string>
     <string name="study_remove_removed_message">已移除“%1$s”的一个释义</string>
     <string name="study_remove_undo">撤销</string>
-    <string name="study_loading">正在准备你的复习……</string>
+    <string name="study_loading">正在准备你的复习…</string>
     <string name="study_empty_title">现在没有要复习的内容</string>
     <string name="study_empty_description">保存的单词到了复习时间就会出现在这里。</string>
     <string name="study_error_title">无法加载这张卡片</string>
@@ -732,7 +733,7 @@
     <string name="favorites_study_due_subtitle">大约 %1$d 分钟</string>
     <string name="favorites_study_due_action">开始学习</string>
     <string name="favorites_study_done_title">全部完成</string>
-    <string name="favorites_study_done_until_next_review">后进行下次复习</string>
+    <string name="favorites_study_done_until_next_review">下次复习</string>
     <string name="favorites_study_done_review_more">再多复习一点</string>
     <string name="favorites_study_done_study_new">学习新单词</string>
     <string name="favorites_study_done_region">复习已完成</string>
