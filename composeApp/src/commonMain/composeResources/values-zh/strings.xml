@@ -284,8 +284,8 @@
     <string name="about_send_feedback_subtitle">说说你希望 OpenWords 怎样变得更好</string>
     <string name="about_acknowledgements_title">致谢</string>
     <string name="about_acknowledgements_subtitle">数据来源与鸣谢</string>
-    <string name="about_review_google_play_title">在 Google Play 上给我们评价</string>
-    <string name="about_review_app_store_title">在 App Store 上给我们评价</string>
+    <string name="about_review_google_play_title">在 Google Play 上给我们评分</string>
+    <string name="about_review_app_store_title">在 App Store 上给我们评分</string>
     <string name="about_review_subtitle">觉得 OpenWords 有帮助？给我们打个分吧！</string>
     <string name="about_version_title">版本</string>
     <string name="settings_developer_mode_enabled">已启用开发者模式</string>

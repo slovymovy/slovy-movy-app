@@ -886,11 +886,11 @@ private fun EffortRow(
                 .padding(start = 4.dp),
         )
         Text(
+            // Shares the unit labels' style so the separator sits on their metrics rather than its
+            // own. At its former 14sp/18sp it was the only element in this centred row with a taller
+            // line box, which pushed the dot off the optical centre of the CJK text either side.
             text = "·",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
-            ),
+            style = effortUnitTextStyle(),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
             textAlign = TextAlign.Center,
             modifier = Modifier.width(24.dp),
