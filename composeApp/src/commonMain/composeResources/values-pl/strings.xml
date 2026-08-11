@@ -100,6 +100,7 @@
     <string name="stats_month_october">Październik</string>
     <string name="stats_month_november">Listopad</string>
     <string name="stats_month_december">Grudzień</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">P</string>
     <string name="stats_weekday_initial_tuesday">W</string>
     <string name="stats_weekday_initial_wednesday">Ś</string>
@@ -120,6 +121,7 @@
 
     <string name="download_description_setting_up_library">Konfigurowanie Twojej biblioteki</string>
     <string name="download_action_download_size">Pobierz %1$s</string>
+    <string name="download_item_dictionary_name">Słownik %1$s</string>
     <string name="download_title_ready">Gotowe do pobrania</string>
     <string name="download_subtitle_ready">Pobierz te słowniki, aby zacząć.</string>
     <string name="download_title_failed">Pobieranie nieudane</string>
@@ -347,25 +349,16 @@
     <string name="developer_working_status">Pracuję...</string>
     <string name="acknowledgements_title">Podziękowania</string>
     <string name="acknowledgements_vocab_data_title">Dane słownikowe</string>
-    <string name="acknowledgements_vocab_data_body">Dane o słowach pochodzą z Wiktionary – wolnego, wielojęzycznego
-        słownika tworzonego przez wolontariuszy z całego świata.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Dane o słowach pochodzą z Wiktionary – wolnego, wielojęzycznego słownika tworzonego przez wolontariuszy z całego świata.</string>
     <string name="acknowledgements_dictionary_extracts_title">Przetwarzanie danych</string>
-    <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org,
-        wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org, wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.</string>
     <string name="acknowledgements_application_code_title">Kod źródłowy</string>
     <string name="acknowledgements_application_code_body">Kod źródłowy aplikacji jest dostępny na licencji BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Algorytm powtórek FSRS</string>
-    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT.
-        FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT. FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Źródła danych</string>
-    <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.
-    </string>
-    <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych
-        danych.
-    </string>
+    <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.</string>
+    <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych danych.</string>
 
     <string name="app_data_backup_title">Kopia zapasowa Twoich słów</string>
     <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby zachować kopię lub przenieść dane na nowe urządzenie.</string>
@@ -424,10 +417,8 @@
     <string name="settings_error_load_voices_with_reason">Nie udało się załadować głosów: %1$s</string>
     <string name="settings_export_success">Wyeksportowano %1$s do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Nie udało się otworzyć okna udostępniania: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s
-    </string>
-    <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s
-    </string>
+    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s</string>
+    <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s</string>
     <string name="settings_feedback_sent">Opinia została wysłana</string>
     <string name="settings_feedback_view">Pokaż</string>
     <string name="settings_feedback_comment_required">Komentarz jest wymagany</string>
@@ -436,6 +427,7 @@
     <string name="common_clear">Wyczyść</string>
     <string name="common_search_placeholder">Szukaj...</string>
     <string name="common_unknown_error">Nieznany błąd</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s • %2$d znaczenie</item>
         <item quantity="few">%1$s • %2$d znaczenia</item>

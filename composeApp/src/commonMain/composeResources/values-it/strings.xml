@@ -101,6 +101,7 @@
     <string name="stats_month_october">ottobre</string>
     <string name="stats_month_november">novembre</string>
     <string name="stats_month_december">dicembre</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">L</string>
     <string name="stats_weekday_initial_tuesday">M</string>
     <string name="stats_weekday_initial_wednesday">M</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Stiamo preparando la tua libreria</string>
     <string name="download_action_download_size">Scarica %1$s</string>
+    <string name="download_item_dictionary_name">Dizionario %1$s</string>
     <string name="download_title_ready">Pronto per il download</string>
     <string name="download_subtitle_ready">Ti servono questi dizionari per completare la configurazione.</string>
     <string name="download_title_failed">Download non riuscito</string>
@@ -348,24 +350,16 @@
     <string name="developer_working_status">Elaborazione...</string>
     <string name="acknowledgements_title">Ringraziamenti</string>
     <string name="acknowledgements_vocab_data_title">Dati del vocabolario</string>
-    <string name="acknowledgements_vocab_data_body">I nostri dati sulle parole provengono da Wiktionary, il dizionario
-        multilingue libero costruito da volontari di tutto il mondo.
-    </string>
+    <string name="acknowledgements_vocab_data_body">I nostri dati sulle parole provengono da Wiktionary, il dizionario multilingue libero costruito da volontari di tutto il mondo.</string>
     <string name="acknowledgements_dictionary_extracts_title">Estratti del dizionario</string>
-    <string name="acknowledgements_dictionary_extracts_body">Usiamo dati di dizionario pre-elaborati da Kaikki.org,
-        estratti da Wiktionary con lo strumento open source wiktextract di Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Usiamo dati di dizionario pre-elaborati da Kaikki.org, estratti da Wiktionary con lo strumento open source wiktextract di Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Codice dell'applicazione</string>
     <string name="acknowledgements_application_code_body">Il codice sorgente dell'applicazione è disponibile sotto licenza BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Algoritmo di pianificazione FSRS</string>
-    <string name="acknowledgements_fsrs_body">Usiamo un port in Kotlin di FSRS-Kotlin, fornito sotto licenza MIT. FSRS
-        è stato sviluppato originariamente da Jarrett Ye insieme alla comunità Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Usiamo un port in Kotlin di FSRS-Kotlin, fornito sotto licenza MIT. FSRS è stato sviluppato originariamente da Jarrett Ye insieme alla comunità Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Fonti delle parole</string>
     <string name="acknowledgements_words_sources_body">Tutti i dati sulle parole sono disponibili sotto licenza CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Siamo grati alla comunità di Wiktionary e a Tatu Ylonen per aver reso
-        questi dati liberamente disponibili.
-    </string>
+    <string name="acknowledgements_thanks">Siamo grati alla comunità di Wiktionary e a Tatu Ylonen per aver reso questi dati liberamente disponibili.</string>
 
     <string name="app_data_backup_title">Esegui il backup delle parole salvate</string>
     <string name="app_data_backup_description">Esporta le tue parole salvate e le impostazioni dell'app in un archivio. Utile per conservare una copia o passare a un nuovo dispositivo.</string>
@@ -434,6 +428,7 @@
     <string name="common_clear">Cancella</string>
     <string name="common_search_placeholder">Cerca...</string>
     <string name="common_unknown_error">Errore sconosciuto</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d significato</item>
         <item quantity="few">%1$s - %2$d significati</item>
