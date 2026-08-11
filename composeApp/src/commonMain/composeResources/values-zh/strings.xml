@@ -13,7 +13,7 @@
     <string name="welcome_selling_point_collection_title">建立你的专属单词本</string>
     <string name="welcome_selling_point_collection_description">随手保存遇到的单词。你的单词本只留在你的设备上。</string>
     <string name="welcome_selling_point_practice_title">练到真正记住为止</string>
-    <string name="welcome_selling_point_practice_description">间隔重复加多种练习模式，帮你真正记住学过的内容。</string>
+    <string name="welcome_selling_point_practice_description">结合间隔重复与多种练习模式，帮你真正记住学过的内容。</string>
     <string name="welcome_cta_explore_now">开始使用</string>
 
     <string name="search_placeholder">搜索单词…</string>
@@ -124,7 +124,7 @@
     <string name="download_action_download_size">下载 %1$s</string>
     <string name="download_item_dictionary_name">%1$s 词典</string>
     <string name="download_title_ready">可以开始下载</string>
-    <string name="download_subtitle_ready">需要这些词典才能开始使用。</string>
+    <string name="download_subtitle_ready">使用前需要下载以下词典。</string>
     <string name="download_title_failed">下载失败</string>
     <string name="download_subtitle_failed">出了点问题，请重试。</string>
     <string name="download_title_cancelled">下载已取消</string>
@@ -171,7 +171,7 @@
     <string name="favorites_error_load_meaning_failed">释义加载失败</string>
 
     <string name="language_setup_title">选择语言</string>
-    <string name="language_setup_subtitle">选择你在学的语言，以及想翻译成的语言。</string>
+    <string name="language_setup_subtitle">选择你在学的语言和翻译语言。</string>
     <string name="language_setup_learning_label">我在学…</string>
     <string name="language_setup_translate_into">翻译成：</string>
     <string name="language_setup_choose_learning_first">请先选择学习语言</string>
