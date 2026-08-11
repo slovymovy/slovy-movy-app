@@ -349,25 +349,16 @@
     <string name="developer_working_status">Pracuję...</string>
     <string name="acknowledgements_title">Podziękowania</string>
     <string name="acknowledgements_vocab_data_title">Dane słownikowe</string>
-    <string name="acknowledgements_vocab_data_body">Dane o słowach pochodzą z Wiktionary – wolnego, wielojęzycznego
-        słownika tworzonego przez wolontariuszy z całego świata.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Dane o słowach pochodzą z Wiktionary – wolnego, wielojęzycznego słownika tworzonego przez wolontariuszy z całego świata.</string>
     <string name="acknowledgements_dictionary_extracts_title">Przetwarzanie danych</string>
-    <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org,
-        wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Korzystamy z przetworzonych danych z serwisu Kaikki.org, wyodrębnionych z Wiktionary za pomocą otwartoźródłowego narzędzia wiktextract autorstwa Tatu Ylonena.</string>
     <string name="acknowledgements_application_code_title">Kod źródłowy</string>
     <string name="acknowledgements_application_code_body">Kod źródłowy aplikacji jest dostępny na licencji BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Algorytm powtórek FSRS</string>
-    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT.
-        FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Korzystamy z portu FSRS-Kotlin dla Kotlina, dostępnego na licencji MIT. FSRS został pierwotnie opracowany przez Jarretta Ye wraz ze społecznością Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Źródła danych</string>
-    <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.
-    </string>
-    <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych
-        danych.
-    </string>
+    <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.</string>
+    <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych danych.</string>
 
     <string name="app_data_backup_title">Kopia zapasowa Twoich słów</string>
     <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby zachować kopię lub przenieść dane na nowe urządzenie.</string>
@@ -426,10 +417,8 @@
     <string name="settings_error_load_voices_with_reason">Nie udało się załadować głosów: %1$s</string>
     <string name="settings_export_success">Wyeksportowano %1$s do %2$s</string>
     <string name="settings_error_open_share_dialog_with_reason">Nie udało się otworzyć okna udostępniania: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s
-    </string>
-    <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s
-    </string>
+    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s</string>
+    <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s</string>
     <string name="settings_feedback_sent">Opinia została wysłana</string>
     <string name="settings_feedback_view">Pokaż</string>
     <string name="settings_feedback_comment_required">Komentarz jest wymagany</string>

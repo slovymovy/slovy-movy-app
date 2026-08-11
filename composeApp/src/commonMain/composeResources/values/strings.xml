@@ -350,24 +350,16 @@
     <string name="developer_working_status">Working...</string>
     <string name="acknowledgements_title">Acknowledgements</string>
     <string name="acknowledgements_vocab_data_title">Vocabulary data</string>
-    <string name="acknowledgements_vocab_data_body">Our word data is sourced from Wiktionary, the free multilingual
-        dictionary built by volunteers worldwide.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Our word data is sourced from Wiktionary, the free multilingual dictionary built by volunteers worldwide.</string>
     <string name="acknowledgements_dictionary_extracts_title">Dictionary extracts</string>
-    <string name="acknowledgements_dictionary_extracts_body">We use pre-processed dictionary data from Kaikki.org,
-        extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">We use pre-processed dictionary data from Kaikki.org, extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Application code</string>
     <string name="acknowledgements_application_code_body">Application source code is available under BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">FSRS scheduling algorithm</string>
-    <string name="acknowledgements_fsrs_body">We use a Kotlin port of FSRS-Kotlin, provided under the MIT License. FSRS
-        was originally developed by Jarrett Ye with the Open Spaced Repetition community.
-    </string>
+    <string name="acknowledgements_fsrs_body">We use a Kotlin port of FSRS-Kotlin, provided under the MIT License. FSRS was originally developed by Jarrett Ye with the Open Spaced Repetition community.</string>
     <string name="acknowledgements_words_sources_title">Words sources</string>
     <string name="acknowledgements_words_sources_body">All words data is available under CC-BY-SA-4.0 license.</string>
-    <string name="acknowledgements_thanks">We are grateful to the Wiktionary community and to Tatu Ylonen for making
-        this data freely available.
-    </string>
+    <string name="acknowledgements_thanks">We are grateful to the Wiktionary community and to Tatu Ylonen for making this data freely available.</string>
 
     <string name="app_data_backup_title">Back up your saved words</string>
     <string name="app_data_backup_description">Exports your saved words and app settings to an archive. Useful for keeping a copy or moving to a new device.</string>

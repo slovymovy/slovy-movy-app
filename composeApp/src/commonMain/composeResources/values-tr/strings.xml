@@ -350,24 +350,16 @@
     <string name="developer_working_status">Çalışıyor...</string>
     <string name="acknowledgements_title">Teşekkürler</string>
     <string name="acknowledgements_vocab_data_title">Kelime verileri</string>
-    <string name="acknowledgements_vocab_data_body">Kelime verilerimiz, dünya çapında gönüllülerin oluşturduğu özgür çok
-        dilli sözlük Wiktionary'den alınmıştır.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Kelime verilerimiz, dünya çapında gönüllülerin oluşturduğu özgür çok dilli sözlük Wiktionary'den alınmıştır.</string>
     <string name="acknowledgements_dictionary_extracts_title">Sözlük çıkarımları</string>
-    <string name="acknowledgements_dictionary_extracts_body">Tatu Ylonen'in açık kaynaklı wiktextract aracıyla
-        Wiktionary'den çıkarılan, Kaikki.org'un ön işlenmiş sözlük verilerini kullanıyoruz.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Tatu Ylonen'in açık kaynaklı wiktextract aracıyla Wiktionary'den çıkarılan, Kaikki.org'un ön işlenmiş sözlük verilerini kullanıyoruz.</string>
     <string name="acknowledgements_application_code_title">Uygulama kodu</string>
     <string name="acknowledgements_application_code_body">Uygulama kaynak kodu BUSL-1.1 lisansıyla sunulmaktadır.</string>
     <string name="acknowledgements_fsrs_title">FSRS zamanlama algoritması</string>
-    <string name="acknowledgements_fsrs_body">MIT Lisansı ile sağlanan FSRS-Kotlin'in bir Kotlin portunu kullanıyoruz.
-        FSRS, Jarrett Ye tarafından Open Spaced Repetition topluluğuyla birlikte geliştirilmiştir.
-    </string>
+    <string name="acknowledgements_fsrs_body">MIT Lisansı ile sağlanan FSRS-Kotlin'in bir Kotlin portunu kullanıyoruz. FSRS, Jarrett Ye tarafından Open Spaced Repetition topluluğuyla birlikte geliştirilmiştir.</string>
     <string name="acknowledgements_words_sources_title">Kelime kaynakları</string>
     <string name="acknowledgements_words_sources_body">Tüm kelime verileri CC-BY-SA-4.0 lisansıyla sunulmaktadır.</string>
-    <string name="acknowledgements_thanks">Bu verileri özgürce erişilebilir kıldıkları için Wiktionary topluluğuna ve
-        Tatu Ylonen'e minnettarız.
-    </string>
+    <string name="acknowledgements_thanks">Bu verileri özgürce erişilebilir kıldıkları için Wiktionary topluluğuna ve Tatu Ylonen'e minnettarız.</string>
 
     <string name="app_data_backup_title">Kayıtlı kelimelerini yedekle</string>
     <string name="app_data_backup_description">Kayıtlı kelimelerini ve uygulama ayarlarını bir arşive aktarır. Kopya tutmak veya yeni cihaza geçmek için kullanışlıdır.</string>

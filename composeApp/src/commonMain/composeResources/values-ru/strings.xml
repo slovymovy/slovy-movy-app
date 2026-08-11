@@ -350,24 +350,16 @@
     <string name="developer_working_status">Выполняется...</string>
     <string name="acknowledgements_title">Благодарности</string>
     <string name="acknowledgements_vocab_data_title">Словарные данные</string>
-    <string name="acknowledgements_vocab_data_body">Наши данные взяты из Викисловаря (Wiktionary) — свободного
-        многоязычного словаря, который создают волонтёры со всего мира.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Наши данные взяты из Викисловаря (Wiktionary) — свободного многоязычного словаря, который создают волонтёры со всего мира.</string>
     <string name="acknowledgements_dictionary_extracts_title">Обработка данных</string>
-    <string name="acknowledgements_dictionary_extracts_body">Мы используем данные проекта Kaikki.org, извлечённые из
-        Викисловаря с помощью инструмента wiktextract (автор — Тату Илонен).
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Мы используем данные проекта Kaikki.org, извлечённые из Викисловаря с помощью инструмента wiktextract (автор — Тату Илонен).</string>
     <string name="acknowledgements_application_code_title">Исходный код</string>
     <string name="acknowledgements_application_code_body">Исходный код приложения доступен по лицензии BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Алгоритм повторения FSRS</string>
-    <string name="acknowledgements_fsrs_body">Мы используем Kotlin-порт FSRS-Kotlin, распространяемый по лицензии MIT.
-        FSRS изначально разработал Джарретт Йе совместно с сообществом Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Мы используем Kotlin-порт FSRS-Kotlin, распространяемый по лицензии MIT. FSRS изначально разработал Джарретт Йе совместно с сообществом Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Источники данных</string>
     <string name="acknowledgements_words_sources_body">Все материалы доступны по лицензии CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим
-        данным.
-    </string>
+    <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим данным.</string>
 
     <string name="app_data_backup_title">Резервная копия</string>
     <string name="app_data_backup_description">Создаёт архив с вашими словами и настройками. Пригодится, чтобы сохранить данные или перенести их на новое устройство.</string>

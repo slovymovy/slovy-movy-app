@@ -350,24 +350,16 @@
     <string name="developer_working_status">Elaborazione...</string>
     <string name="acknowledgements_title">Ringraziamenti</string>
     <string name="acknowledgements_vocab_data_title">Dati del vocabolario</string>
-    <string name="acknowledgements_vocab_data_body">I nostri dati sulle parole provengono da Wiktionary, il dizionario
-        multilingue libero costruito da volontari di tutto il mondo.
-    </string>
+    <string name="acknowledgements_vocab_data_body">I nostri dati sulle parole provengono da Wiktionary, il dizionario multilingue libero costruito da volontari di tutto il mondo.</string>
     <string name="acknowledgements_dictionary_extracts_title">Estratti del dizionario</string>
-    <string name="acknowledgements_dictionary_extracts_body">Usiamo dati di dizionario pre-elaborati da Kaikki.org,
-        estratti da Wiktionary con lo strumento open source wiktextract di Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Usiamo dati di dizionario pre-elaborati da Kaikki.org, estratti da Wiktionary con lo strumento open source wiktextract di Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Codice dell'applicazione</string>
     <string name="acknowledgements_application_code_body">Il codice sorgente dell'applicazione è disponibile sotto licenza BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Algoritmo di pianificazione FSRS</string>
-    <string name="acknowledgements_fsrs_body">Usiamo un port in Kotlin di FSRS-Kotlin, fornito sotto licenza MIT. FSRS
-        è stato sviluppato originariamente da Jarrett Ye insieme alla comunità Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Usiamo un port in Kotlin di FSRS-Kotlin, fornito sotto licenza MIT. FSRS è stato sviluppato originariamente da Jarrett Ye insieme alla comunità Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Fonti delle parole</string>
     <string name="acknowledgements_words_sources_body">Tutti i dati sulle parole sono disponibili sotto licenza CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Siamo grati alla comunità di Wiktionary e a Tatu Ylonen per aver reso
-        questi dati liberamente disponibili.
-    </string>
+    <string name="acknowledgements_thanks">Siamo grati alla comunità di Wiktionary e a Tatu Ylonen per aver reso questi dati liberamente disponibili.</string>
 
     <string name="app_data_backup_title">Esegui il backup delle parole salvate</string>
     <string name="app_data_backup_description">Esporta le tue parole salvate e le impostazioni dell'app in un archivio. Utile per conservare una copia o passare a un nuovo dispositivo.</string>

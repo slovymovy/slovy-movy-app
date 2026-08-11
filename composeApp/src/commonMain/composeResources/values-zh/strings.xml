@@ -350,23 +350,16 @@
     <string name="developer_working_status">处理中…</string>
     <string name="acknowledgements_title">致谢</string>
     <string name="acknowledgements_vocab_data_title">词汇数据</string>
-    <string name="acknowledgements_vocab_data_body">我们的单词数据来自 Wiktionary——由全球志愿者共同建设的自由多语言
-        词典。
-    </string>
+    <string name="acknowledgements_vocab_data_body">我们的单词数据来自 Wiktionary——由全球志愿者共同建设的自由多语言词典。</string>
     <string name="acknowledgements_dictionary_extracts_title">词典抽取数据</string>
-    <string name="acknowledgements_dictionary_extracts_body">我们使用来自 Kaikki.org 的预处理词典数据，这些数据由 Tatu Ylonen
-        开发的开源工具 wiktextract 从 Wiktionary 中抽取。
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">我们使用来自 Kaikki.org 的预处理词典数据，这些数据由 Tatu Ylonen 开发的开源工具 wiktextract 从 Wiktionary 中抽取。</string>
     <string name="acknowledgements_application_code_title">应用代码</string>
     <string name="acknowledgements_application_code_body">应用源代码依据 BUSL-1.1 许可证提供。</string>
     <string name="acknowledgements_fsrs_title">FSRS 调度算法</string>
-    <string name="acknowledgements_fsrs_body">我们使用 FSRS-Kotlin 的 Kotlin 移植版本，依据 MIT 许可证提供。FSRS
-        最初由 Jarrett Ye 与 Open Spaced Repetition 社区共同开发。
-    </string>
+    <string name="acknowledgements_fsrs_body">我们使用 FSRS-Kotlin 的 Kotlin 移植版本，依据 MIT 许可证提供。FSRS 最初由 Jarrett Ye 与 Open Spaced Repetition 社区共同开发。</string>
     <string name="acknowledgements_words_sources_title">单词数据来源</string>
     <string name="acknowledgements_words_sources_body">所有单词数据依据 CC-BY-SA-4.0 许可证提供。</string>
-    <string name="acknowledgements_thanks">感谢 Wiktionary 社区，也感谢 Tatu Ylonen 让这些数据免费开放。
-    </string>
+    <string name="acknowledgements_thanks">感谢 Wiktionary 社区，也感谢 Tatu Ylonen 让这些数据免费开放。</string>
 
     <string name="app_data_backup_title">备份你保存的单词</string>
     <string name="app_data_backup_description">把你保存的单词和应用设置导出为一个压缩包。适合留个副本，或者换新设备时使用。</string>

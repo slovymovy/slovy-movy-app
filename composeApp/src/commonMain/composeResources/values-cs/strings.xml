@@ -350,24 +350,16 @@
     <string name="developer_working_status">Pracuji...</string>
     <string name="acknowledgements_title">Poděkování</string>
     <string name="acknowledgements_vocab_data_title">Slovníková data</string>
-    <string name="acknowledgements_vocab_data_body">Naše slovní data pocházejí z Wikislovníku, svobodného vícejazyčného
-        slovníku, který tvoří dobrovolníci z celého světa.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Naše slovní data pocházejí z Wikislovníku, svobodného vícejazyčného slovníku, který tvoří dobrovolníci z celého světa.</string>
     <string name="acknowledgements_dictionary_extracts_title">Slovníkové extrakty</string>
-    <string name="acknowledgements_dictionary_extracts_body">Používáme předzpracovaná slovníková data z Kaikki.org,
-        extrahovaná z Wikislovníku pomocí open source nástroje wiktextract od Tatu Ylonena.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Používáme předzpracovaná slovníková data z Kaikki.org, extrahovaná z Wikislovníku pomocí open source nástroje wiktextract od Tatu Ylonena.</string>
     <string name="acknowledgements_application_code_title">Kód aplikace</string>
     <string name="acknowledgements_application_code_body">Zdrojový kód aplikace je dostupný pod licencí BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Plánovací algoritmus FSRS</string>
-    <string name="acknowledgements_fsrs_body">Používáme kotlinový port FSRS-Kotlin, poskytovaný pod licencí MIT. FSRS
-        původně vyvinul Jarrett Ye s komunitou Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Používáme kotlinový port FSRS-Kotlin, poskytovaný pod licencí MIT. FSRS původně vyvinul Jarrett Ye s komunitou Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Zdroje slov</string>
     <string name="acknowledgements_words_sources_body">Všechna slovní data jsou dostupná pod licencí CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Děkujeme komunitě Wikislovníku a Tatu Ylonenovi za volné zpřístupnění těchto
-        dat.
-    </string>
+    <string name="acknowledgements_thanks">Děkujeme komunitě Wikislovníku a Tatu Ylonenovi za volné zpřístupnění těchto dat.</string>
 
     <string name="app_data_backup_title">Zálohuj si uložená slova</string>
     <string name="app_data_backup_description">Exportuje tvoje uložená slova a nastavení aplikace do archivu. Hodí se pro zálohu nebo přechod na nové zařízení.</string>

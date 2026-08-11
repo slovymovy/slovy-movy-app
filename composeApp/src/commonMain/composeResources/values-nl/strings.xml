@@ -350,23 +350,15 @@
     <string name="developer_working_status">Bezig...</string>
     <string name="acknowledgements_title">Met dank aan</string>
     <string name="acknowledgements_vocab_data_title">Woordenschatgegevens</string>
-    <string name="acknowledgements_vocab_data_body">Onze woordgegevens komen uit Wiktionary, het gratis meertalige
-        woordenboek dat wereldwijd door vrijwilligers wordt opgebouwd.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Onze woordgegevens komen uit Wiktionary, het gratis meertalige woordenboek dat wereldwijd door vrijwilligers wordt opgebouwd.</string>
     <string name="acknowledgements_dictionary_extracts_title">Woordenboekextractie</string>
-    <string name="acknowledgements_dictionary_extracts_body">We gebruiken voorbewerkte woordenboekgegevens van
-        Kaikki.org, geëxtraheerd uit Wiktionary met de open-source tool wiktextract van Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">We gebruiken voorbewerkte woordenboekgegevens van Kaikki.org, geëxtraheerd uit Wiktionary met de open-source tool wiktextract van Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Applicatiecode</string>
     <string name="acknowledgements_application_code_body">De broncode van de applicatie is beschikbaar onder BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">FSRS-herhalingsalgoritme</string>
-    <string name="acknowledgements_fsrs_body">We gebruiken een Kotlin-port van FSRS-Kotlin, beschikbaar onder de
-        MIT-licentie. FSRS is oorspronkelijk ontwikkeld door Jarrett Ye met de Open Spaced Repetition-community.
-    </string>
+    <string name="acknowledgements_fsrs_body">We gebruiken een Kotlin-port van FSRS-Kotlin, beschikbaar onder de MIT-licentie. FSRS is oorspronkelijk ontwikkeld door Jarrett Ye met de Open Spaced Repetition-community.</string>
     <string name="acknowledgements_words_sources_title">Woordbronnen</string>
-    <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de
-        CC-BY-SA-4.0-licentie.
-    </string>
+    <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de CC-BY-SA-4.0-licentie.</string>
     <string name="acknowledgements_thanks">Onze dank gaat uit naar de Wiktionary-community en Tatu Ylonen voor het gratis beschikbaar stellen van deze gegevens.</string>
 
     <string name="app_data_backup_title">Maak een back-up van je opgeslagen woorden</string>
@@ -630,8 +622,7 @@
     <string name="study_remove_undo">Ongedaan maken</string>
     <string name="study_loading">Je herhaling wordt voorbereid…</string>
     <string name="study_empty_title">Nu niets te herhalen</string>
-    <string name="study_empty_description">Opgeslagen woorden verschijnen hier wanneer ze klaar zijn voor herhaling.
-    </string>
+    <string name="study_empty_description">Opgeslagen woorden verschijnen hier wanneer ze klaar zijn voor herhaling.</string>
     <string name="study_error_title">Deze kaart kon niet worden geladen</string>
     <string name="study_error_prepare_failed">Studiesessie kon niet worden voorbereid.</string>
     <string name="study_error_next_card_failed">Volgende kaart kon niet worden geladen.</string>
