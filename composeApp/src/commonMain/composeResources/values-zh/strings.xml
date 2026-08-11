@@ -7,11 +7,11 @@
     <string name="nav_stats">进度</string>
     <string name="nav_settings">设置</string>
 
-    <string name="welcome_tagline">记住那些你明天就会忘掉的单词。</string>
-    <string name="welcome_selling_point_translations_title">查询任何单词</string>
-    <string name="welcome_selling_point_translations_description">例句、词形、短语、同义词——它的一切都在同一个地方。</string>
-    <string name="welcome_selling_point_collection_title">建立你的专属词库</string>
-    <string name="welcome_selling_point_collection_description">随手保存遇到的单词。你的词库只留在你的设备上。</string>
+    <string name="welcome_tagline">记住那些你总是第二天就忘的单词。</string>
+    <string name="welcome_selling_point_translations_title">什么词都查得到</string>
+    <string name="welcome_selling_point_translations_description">例句、词形、短语、同义词——关于这个词的一切，都在一页里。</string>
+    <string name="welcome_selling_point_collection_title">建立你的专属单词本</string>
+    <string name="welcome_selling_point_collection_description">随手保存遇到的单词。你的单词本只留在你的设备上。</string>
     <string name="welcome_selling_point_practice_title">练到真正记住为止</string>
     <string name="welcome_selling_point_practice_description">间隔重复加多种练习模式，帮你真正记住学过的内容。</string>
     <string name="welcome_cta_explore_now">开始使用</string>
@@ -24,9 +24,9 @@
     <string name="search_pull_to_refresh_hint">下拉换一批新词</string>
     <string name="search_section_recently_saved">最近保存</string>
     <string name="search_section_lists_for_you">可以开始学</string>
-    <string name="search_empty_start_typing">开始输入以搜索</string>
-    <string name="search_suggest_list_button">推荐词单</string>
-    <string name="search_suggest_list_dialog_title">推荐词单</string>
+    <string name="search_empty_start_typing">输入即可搜索</string>
+    <string name="search_suggest_list_button">建议添加词单</string>
+    <string name="search_suggest_list_dialog_title">建议添加词单</string>
     <string name="search_suggest_list_placeholder">说说你希望在这里看到什么样的词单……</string>
     <string name="search_no_dictionary_title">尚未下载词典</string>
     <string name="search_no_dictionary_description">下载一本词典即可开始搜索单词</string>
@@ -47,7 +47,7 @@
     <string name="stats_legend_practiced">已练习</string>
     <string name="stats_legend_missed">未练习</string>
     <string name="stats_active_days_all_time">累计活跃天数</string>
-    <string name="stats_effort_section">本周活动</string>
+    <string name="stats_effort_section">本周学习情况</string>
     <plurals name="stats_cards_unit">
         <item quantity="one">张卡片</item>
         <item quantity="few">张卡片</item>
@@ -121,7 +121,7 @@
 
     <string name="download_description_setting_up_library">正在准备你的词库</string>
     <string name="download_action_download_size">下载 %1$s</string>
-    <string name="download_title_ready">准备下载</string>
+    <string name="download_title_ready">可以开始下载</string>
     <string name="download_subtitle_ready">需要这些词典才能开始使用。</string>
     <string name="download_title_failed">下载失败</string>
     <string name="download_subtitle_failed">出了点问题，请重试。</string>
@@ -131,17 +131,17 @@
     <string name="download_subtitle_done">你的词库已经准备好了。</string>
     <string name="download_title_downloading">正在下载</string>
     <string name="download_subtitle_downloading">正在准备你的词库。\n可能需要一点时间。</string>
-    <string name="download_title_setting_up">正在设置</string>
-    <string name="download_subtitle_setting_up">正在准备你的词库。\n马上就好。</string>
+    <string name="download_title_setting_up">正在安装</string>
+    <string name="download_subtitle_setting_up">正在准备你的词库。\n需要一点时间。</string>
     <string name="download_content_desc_loading_info">正在加载下载信息</string>
     <string name="download_content_desc_preparing">正在准备下载</string>
-    <string name="download_finalizing_recovering_progress">正在刷新收藏（%1$d/%2$d）</string>
+    <string name="download_finalizing_recovering_progress">正在刷新我的单词（%1$d/%2$d）</string>
     <string name="download_finalizing_updating_lists">正在更新词单……</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">正在刷新收藏（%1$d/%2$d，%3$d 个失败）</item>
-        <item quantity="few">正在刷新收藏（%1$d/%2$d，%3$d 个失败）</item>
-        <item quantity="many">正在刷新收藏（%1$d/%2$d，%3$d 个失败）</item>
-        <item quantity="other">正在刷新收藏（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="one">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="few">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="many">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="other">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
     </plurals>
     <string name="download_preparing">正在准备……</string>
     <string name="download_item_accessibility">%1$s，%2$s</string>
@@ -153,11 +153,11 @@
     <string name="favorites_title">我的单词</string>
     <string name="favorites_loading">加载中……</string>
     <string name="favorites_search_placeholder">输入单词……</string>
-    <string name="favorites_empty_title">你的学习清单从这里开始。</string>
+    <string name="favorites_empty_title">你的单词本从这里开始。</string>
     <string name="favorites_empty_description_before_heart_icon">搜索任意单词，点击&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;就能保存到这里，留着以后学。</string>
     <string name="favorites_empty_action_start_searching">开始搜索</string>
-    <string name="favorites_no_results_title">没有匹配“%1$s”的已保存单词</string>
+    <string name="favorites_no_results_title">单词本里没有匹配“%1$s”的词</string>
     <string name="favorites_no_results_description">换一种拼写，或者直接去词典里搜</string>
     <string name="favorites_no_results_action_search_dictionary">搜索词典</string>
     <string name="favorites_stats">%1$d 个释义 · %2$d 个单词</string>
@@ -169,22 +169,22 @@
     <string name="favorites_error_load_meaning_failed">释义加载失败</string>
 
     <string name="language_setup_title">选择语言</string>
-    <string name="language_setup_subtitle">选择你正在学的语言和翻译偏好。</string>
+    <string name="language_setup_subtitle">选择你在学的语言，以及想翻译成的语言。</string>
     <string name="language_setup_learning_label">我在学……</string>
     <string name="language_setup_translate_into">翻译成：</string>
     <string name="language_setup_choose_learning_first">请先选择学习语言</string>
     <string name="language_setup_step_completed">第 %1$d 步已完成</string>
     <string name="language_setup_update_anytime">随时可以在设置中修改</string>
     <string name="language_setup_no_translation_title">不需要翻译</string>
-    <string name="language_setup_no_translation_subtitle">全部保持我正在学的语言</string>
-    <string name="language_setup_no_translation_accessibility">不需要翻译。全部保持我正在学的语言。选择此项会清除已选的翻译语言。</string>
+    <string name="language_setup_no_translation_subtitle">所有内容都用我在学的语言</string>
+    <string name="language_setup_no_translation_accessibility">不需要翻译。所有内容都用我在学的语言。选择此项会清除已选的翻译语言。</string>
     <string name="language_setup_request_language_before">找不到你的语言？</string>
     <string name="language_setup_request_language_link">告诉我们</string>
     <string name="language_setup_request_language_after">，我们会把它加进来。</string>
-    <string name="language_setup_request_language_title">申请添加语言</string>
+    <string name="language_setup_request_language_title">建议添加语言</string>
     <string name="language_setup_request_language_placeholder">你希望我们添加哪种语言？</string>
-    <string name="language_setup_request_language_sent_title">申请已发送</string>
-    <string name="language_setup_request_language_sent_message">谢谢！我们已经收到你的语言申请。你可以在 GitHub 上跟进进展。</string>
+    <string name="language_setup_request_language_sent_title">建议已发送</string>
+    <string name="language_setup_request_language_sent_message">谢谢！我们已经收到你的语言建议。你可以在 GitHub 上关注进展。</string>
 
     <string name="settings_title">设置</string>
     <string name="settings_section_languages_i_learn">我学习的语言</string>
@@ -219,7 +219,7 @@
     <string name="word_details_meaning_load_when_expanded">展开后加载释义</string>
     <string name="word_details_collapse_sense">收起释义</string>
     <string name="word_details_expand_sense">展开释义</string>
-    <string name="word_details_definition">释义</string>
+    <string name="word_details_definition">定义</string>
     <string name="word_details_examples">例句</string>
     <string name="word_details_common_phrases">常用搭配</string>
     <string name="word_details_synonyms">同义词</string>
@@ -246,9 +246,9 @@
     <string name="common_status_online_only">仅在线</string>
 
     <string name="feedback_dialog_sent_title">反馈已发送</string>
-    <string name="feedback_dialog_sent_message">谢谢！我们已经收到你的反馈。你可以在 GitHub 上跟进进展。</string>
-    <string name="feedback_dialog_track_on_github">在 GitHub 上跟进</string>
-    <string name="feedback_dialog_comment_label">意见</string>
+    <string name="feedback_dialog_sent_message">谢谢！我们已经收到你的反馈。你可以在 GitHub 上关注进展。</string>
+    <string name="feedback_dialog_track_on_github">在 GitHub 上查看</string>
+    <string name="feedback_dialog_comment_label">内容</string>
     <string name="feedback_dialog_email_label">邮箱（可选）</string>
     <string name="feedback_dialog_email_supporting">可能会公开显示在 GitHub 上</string>
     <string name="feedback_dialog_sending">正在发送……</string>
@@ -298,7 +298,7 @@
     <string name="developer_time_machine_title">时间机器</string>
     <string name="developer_time_machine_description">把所有学习时间戳往回拨，用来模拟时间流逝。</string>
     <string name="developer_intake_title">新词导入</string>
-    <string name="developer_intake_description">为每种已安装的学习语言激活待学的收藏单词。</string>
+    <string name="developer_intake_description">为每种已安装的学习语言激活“我的单词”中待学的词条。</string>
     <string name="developer_intake_daily">每日</string>
     <string name="developer_intake_continue_now">立即继续</string>
     <string name="developer_caches_title">缓存</string>
@@ -400,7 +400,7 @@
         <item quantity="many">已选择 %1$d 种语言</item>
         <item quantity="other">已选择 %1$d 种语言</item>
     </plurals>
-    <string name="settings_languages_more">还有 %1$d 种</string>
+    <string name="settings_languages_more">+%1$d 种</string>
     <string name="settings_toggle_translation_for_language">切换 %1$s 翻译</string>
     <string name="settings_remove_language_confirm_title">移除 %1$s？</string>
     <string name="settings_remove_language_confirm_message">该词典及其全部翻译都会被删除。你随时可以重新下载。</string>
@@ -427,7 +427,7 @@
     <string name="settings_error_update_voice_selection_with_reason">更新语音选择失败：%1$s</string>
     <string name="settings_feedback_sent">反馈已发送</string>
     <string name="settings_feedback_view">查看</string>
-    <string name="settings_feedback_comment_required">请填写意见</string>
+    <string name="settings_feedback_comment_required">请填写内容</string>
     <string name="settings_download_cancelled">下载已取消</string>
     <string name="common_search">搜索</string>
     <string name="common_clear">清除</string>
@@ -608,10 +608,10 @@
     <string name="scheme_label_passive_adjectival_participle">被动形动词</string>
     <string name="scheme_label_contemporary_adverbial_participle">现在副动词</string>
     <string name="scheme_label_verbal_noun">动名词</string>
-    <string name="study_action_close">关闭学习</string>
+    <string name="study_action_close">退出学习</string>
     <string name="study_action_retry">重试</string>
     <string name="study_actions_menu">学习操作</string>
-    <string name="study_actions_autoplay">自动播放发音</string>
+    <string name="study_actions_autoplay">自动播放</string>
     <string name="study_actions_autoplay_description">自动播放单词发音</string>
     <string name="study_actions_autoplay_on">已开启自动播放</string>
     <string name="study_actions_suspend">暂停这个单词</string>
@@ -629,7 +629,7 @@
     <string name="study_empty_title">现在没有要复习的内容</string>
     <string name="study_empty_description">保存的单词到了复习时间就会出现在这里。</string>
     <string name="study_error_title">无法加载这张卡片</string>
-    <string name="study_error_prepare_failed">无法准备学习。</string>
+    <string name="study_error_prepare_failed">无法准备本次学习。</string>
     <string name="study_error_next_card_failed">无法加载下一张卡片。</string>
     <string name="study_error_review_save_failed">无法保存复习记录。</string>
     <string name="study_error_card_data_missing">这张卡片缺少学习数据。</string>
@@ -640,7 +640,7 @@
         <item quantity="other">已完成 %1$d 张卡片。</item>
     </plurals>
     <string name="study_complete_supporting">单词就是这样记住的。</string>
-    <string name="study_complete_shift_title">你的单词走到哪一步了</string>
+    <string name="study_complete_shift_title">你的单词去哪了</string>
     <plurals name="study_complete_micro_cards_reviewed">
         <item quantity="one">%1$d 张卡片</item>
         <item quantity="few">%1$d 张卡片</item>
@@ -672,16 +672,16 @@
     <string name="study_complete_milestone_subtitle_100">一百天没断过，了不起的里程碑。</string>
     <string name="study_complete_milestone_subtitle_generic">%1$d 天没断过，继续保持。</string>
     <plurals name="study_complete_words_milestone_title">
-        <item quantity="one">已经彻底学会 %1$d 个单词！</item>
-        <item quantity="few">已经彻底学会 %1$d 个单词！</item>
-        <item quantity="many">已经彻底学会 %1$d 个单词！</item>
-        <item quantity="other">已经彻底学会 %1$d 个单词！</item>
+        <item quantity="one">已完全掌握 %1$d 个单词！</item>
+        <item quantity="few">已完全掌握 %1$d 个单词！</item>
+        <item quantity="many">已完全掌握 %1$d 个单词！</item>
+        <item quantity="other">已完全掌握 %1$d 个单词！</item>
     </plurals>
     <string name="study_complete_words_milestone_subtitle">这些词你真的用得上。</string>
     <string name="study_action_done_for_now">先到这里</string>
     <string name="study_progress_count">%1$d / %2$d</string>
     <string name="study_tap_to_flip">点击翻面</string>
-    <string name="study_tap_to_check">点击查看</string>
+    <string name="study_tap_to_check">点击核对</string>
     <plurals name="study_multi_sense_front_hint">
         <item quantity="one">这个词你在学 %1$d 个释义。</item>
         <item quantity="few">这个词你在学 %1$d 个释义。</item>
@@ -694,10 +694,10 @@
         <item quantity="many">向左滑动查看另外 %1$d 个释义。</item>
         <item quantity="other">向左滑动查看另外 %1$d 个释义。</item>
     </plurals>
-    <string name="study_swipe_back_to_rate">滑回第一张卡片来评分。</string>
+    <string name="study_swipe_back_to_rate">滑回第一张卡片即可评分。</string>
     <string name="study_chip_source_only">仅 %1$s</string>
     <string name="study_chip_fill_in">填空</string>
-    <string name="study_chip_listen">听音</string>
+    <string name="study_chip_listen">听力</string>
     <string name="study_prompt_recall_word">回忆这个词</string>
     <string name="study_chip_recall">回忆 %1$s</string>
     <string name="study_prompt_translate_to">翻译成 %1$s</string>
@@ -758,7 +758,7 @@
     <string name="reader_paste_from_clipboard">从剪贴板粘贴文本</string>
     <string name="reader_analyzing">正在分析文本</string>
     <string name="reader_tap_to_paste">点击粘贴</string>
-    <string name="reader_paste_blurb">文本里的每个词都可以点击——查看它的释义，并保存你想记住的那些。</string>
+    <string name="reader_paste_blurb">文本里的每个词都可以点击——查看它的释义，把想记住的词保存下来。</string>
     <string name="reader_clipboard_empty">还没有可粘贴的内容——先在别的应用里复制一段文本，再回到这里。</string>
     <string name="reader_look_up">查询</string>
     <string name="reader_frequency_legend">词频图例</string>
