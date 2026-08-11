@@ -26,7 +26,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +45,7 @@ import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import com.slovy.slovymovyapp.ui.word.colorsForFrequency
@@ -422,7 +422,7 @@ private fun InputView(
                     style = TextStyle(
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontSize = 14.5.sp,
-                        fontStyle = FontStyle.Italic,
+                        fontStyle = MaterialTheme.uiItalic,
                         lineHeight = 22.5.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     ),

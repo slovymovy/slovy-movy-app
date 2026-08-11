@@ -47,6 +47,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.NumberFormatter
 import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -453,7 +454,7 @@ private fun StreakCard(
                         text = pluralStringResource(Res.plurals.stats_day_streak, state.streakDays),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
-                            fontStyle = FontStyle.Italic,
+                            fontStyle = MaterialTheme.uiItalic,
                             fontSize = 12.5.sp,
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -478,7 +479,7 @@ private fun StreakCard(
                         text = stringResource(Res.string.stats_active_days_all_time),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
-                            fontStyle = FontStyle.Italic,
+                            fontStyle = MaterialTheme.uiItalic,
                             fontSize = 12.5.sp,
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -778,7 +779,7 @@ private fun SectionHeader(text: String) {
         text = text,
         style = MaterialTheme.typography.bodySmall.copy(
             fontFamily = MaterialTheme.serifFontFamily,
-            fontStyle = FontStyle.Italic,
+            fontStyle = MaterialTheme.uiItalic,
             fontWeight = FontWeight.Medium,
             fontSize = 13.sp,
             letterSpacing = 0.1.sp,
@@ -856,7 +857,7 @@ private fun EffortRow(
             text = label,
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 fontSize = 13.5.sp,
                 lineHeight = 18.sp,
             ),
@@ -968,7 +969,7 @@ private fun effortNumberTextStyle(): TextStyle =
 private fun effortUnitTextStyle(): TextStyle =
     MaterialTheme.typography.bodySmall.copy(
         fontFamily = MaterialTheme.serifFontFamily,
-        fontStyle = FontStyle.Italic,
+        fontStyle = MaterialTheme.uiItalic,
         fontSize = 12.5.sp,
         lineHeight = 16.sp,
     )
@@ -984,7 +985,7 @@ private fun DurationText(
     val parts = durationParts(minutes, isLoading)
     val unitStyle = SpanStyle(
         fontFamily = MaterialTheme.serifFontFamily,
-        fontStyle = FontStyle.Italic,
+        fontStyle = MaterialTheme.uiItalic,
         fontSize = 12.5.sp,
         color = unitColor,
     )
@@ -1099,7 +1100,7 @@ private fun LibraryMetric(
             text = label,
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 fontSize = 13.sp,
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1288,7 +1289,7 @@ private fun PipelineCaption() {
         text = caption,
         style = MaterialTheme.typography.bodySmall.copy(
             fontFamily = MaterialTheme.serifFontFamily,
-            fontStyle = FontStyle.Italic,
+            fontStyle = MaterialTheme.uiItalic,
             fontSize = 12.sp,
             lineHeight = 17.sp,
         ),

@@ -27,12 +27,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -408,7 +408,7 @@ fun LanguageSetupScreenContent(
                     text = stringResource(Res.string.language_setup_update_anytime),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
-                        fontStyle = FontStyle.Italic
+                        fontStyle = MaterialTheme.uiItalic
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -550,7 +550,7 @@ private fun LanguageSetupSection(
                     text = lockedHint,
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
-                        fontStyle = FontStyle.Italic
+                        fontStyle = MaterialTheme.uiItalic
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.End
@@ -763,7 +763,7 @@ private fun LanguageSetupOptionRow(
                             text = subtitle,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontFamily = MaterialTheme.serifFontFamily,
-                                fontStyle = FontStyle.Italic
+                                fontStyle = MaterialTheme.uiItalic
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -812,7 +812,7 @@ private fun LanguageRequestLink(onClick: () -> Unit) {
         style = MaterialTheme.typography.bodyMedium.copy(
             color = textColor,
             fontFamily = MaterialTheme.serifFontFamily,
-            fontStyle = FontStyle.Italic,
+            fontStyle = MaterialTheme.uiItalic,
             textAlign = TextAlign.Center
         )
     )
