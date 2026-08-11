@@ -71,6 +71,20 @@ enum class Language(
         """.trimIndent()
     );
 
+    /**
+     * Separator for enumerating words written in this language, such as the translation glosses
+     * that make up a sense title.
+     *
+     * Chinese enumerates with the ideographic comma and no trailing space; a Latin `", "` there
+     * reads as foreign punctuation next to the corpus text, which already uses `、` inside its own
+     * definitions. Every other supported language enumerates the Latin/Cyrillic way.
+     */
+    val wordSeparator: String
+        get() = when (this) {
+            CHINESE -> "、"
+            else -> ", "
+        }
+
     companion object {
         fun fromCode(code: String): Language {
             return entries.find { it.code == code }

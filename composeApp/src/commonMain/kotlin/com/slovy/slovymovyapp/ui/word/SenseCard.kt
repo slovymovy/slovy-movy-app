@@ -611,9 +611,15 @@ internal fun TranslationHeader(
     val bulletInlineContent = remember(bulletColor, clarificationColor) {
         centeredBulletInlineContent(color = bulletColor, mutedColor = clarificationColor)
     }
-    entries.forEach { (_, langTranslations) ->
+    entries.forEach { (language, langTranslations) ->
         Text(
-            text = buildClarificationRow(langTranslations, ambiguous, multiLang, clarificationColor),
+            text = buildClarificationRow(
+                langTranslations,
+                language,
+                ambiguous,
+                multiLang,
+                clarificationColor,
+            ),
             style = style,
             inlineContent = bulletInlineContent,
         )
@@ -622,13 +628,14 @@ internal fun TranslationHeader(
 
 internal fun buildClarificationRow(
     langTranslations: List<LanguageCardTranslation>,
+    language: Language,
     ambiguous: Set<String>,
     multiLang: Boolean,
     clarificationColor: Color = Color.Unspecified
 ) = buildAnnotatedString {
     if (multiLang) appendWithCenteredBullets(this, "$bullet ")
     langTranslations.orderedByIdx().forEachIndexed { index, translation ->
-        if (index > 0) append(", ")
+        if (index > 0) append(language.wordSeparator)
         val word = translation.targetLangWord
         append(word)
         val clarification = translation.targetLangSenseClarification
@@ -650,8 +657,8 @@ internal fun LanguageCardResponseSense.translationsHeader(): String? {
 // One cleaned line per requested language that actually has content: words are blank-filtered
 // and de-duplicated, languages ordered stably by enum order.
 internal fun LanguageCardResponseSense.translationLines(languages: Set<Language>): List<String> =
-    cleanedTranslationEntries(languages).map { (_, entries) ->
-        entries.map { it.targetLangWord }.distinct().joinToString(separator = ", ")
+    cleanedTranslationEntries(languages).map { (language, entries) ->
+        entries.map { it.targetLangWord }.distinct().joinToString(separator = language.wordSeparator)
     }
 
 // Per-language translation entries with renderable content: blank words dropped, exact duplicate

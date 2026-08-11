@@ -434,6 +434,7 @@
     <string name="common_clear">Clear</string>
     <string name="common_search_placeholder">Search...</string>
     <string name="common_unknown_error">Unknown error</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d meaning</item>
         <item quantity="few">%1$s - %2$d meanings</item>
