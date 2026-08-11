@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Stiamo preparando la tua libreria</string>
     <string name="download_action_download_size">Scarica %1$s</string>
+    <string name="download_item_dictionary_name">Dizionario %1$s</string>
     <string name="download_title_ready">Pronto per il download</string>
     <string name="download_subtitle_ready">Ti servono questi dizionari per completare la configurazione.</string>
     <string name="download_title_failed">Download non riuscito</string>

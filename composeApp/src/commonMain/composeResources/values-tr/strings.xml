@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Kitaplığın hazırlanıyor</string>
     <string name="download_action_download_size">%1$s indir</string>
+    <string name="download_item_dictionary_name">%1$s sözlüğü</string>
     <string name="download_title_ready">İndirmeye hazır</string>
     <string name="download_subtitle_ready">Her şeyin hazır olması için bu sözlükler gerekli.</string>
     <string name="download_title_failed">İndirme başarısız</string>

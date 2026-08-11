@@ -121,6 +121,7 @@
 
     <string name="download_description_setting_up_library">Konfigurowanie Twojej biblioteki</string>
     <string name="download_action_download_size">Pobierz %1$s</string>
+    <string name="download_item_dictionary_name">Słownik %1$s</string>
     <string name="download_title_ready">Gotowe do pobrania</string>
     <string name="download_subtitle_ready">Pobierz te słowniki, aby zacząć.</string>
     <string name="download_title_failed">Pobieranie nieudane</string>

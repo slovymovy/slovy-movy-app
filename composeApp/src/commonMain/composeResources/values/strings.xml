@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Setting up your library</string>
     <string name="download_action_download_size">Download %1$s</string>
+    <string name="download_item_dictionary_name">%1$s Dictionary</string>
     <string name="download_title_ready">Ready to Download</string>
     <string name="download_subtitle_ready">You need these dictionaries to get all set.</string>
     <string name="download_title_failed">Download Failed</string>
