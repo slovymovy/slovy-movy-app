@@ -549,21 +549,25 @@ private fun MonthStepper(
     }
 }
 
+// Month and year go through a format resource rather than string interpolation: Chinese writes the
+// year first (2026年8月), so the order has to be the locale's to decide, not the call site's.
 @Composable
 private fun statsMonthLabels(year: Int): List<String> = listOf(
-    "${stringResource(Res.string.stats_month_january)} $year",
-    "${stringResource(Res.string.stats_month_february)} $year",
-    "${stringResource(Res.string.stats_month_march)} $year",
-    "${stringResource(Res.string.stats_month_april)} $year",
-    "${stringResource(Res.string.stats_month_may)} $year",
-    "${stringResource(Res.string.stats_month_june)} $year",
-    "${stringResource(Res.string.stats_month_july)} $year",
-    "${stringResource(Res.string.stats_month_august)} $year",
-    "${stringResource(Res.string.stats_month_september)} $year",
-    "${stringResource(Res.string.stats_month_october)} $year",
-    "${stringResource(Res.string.stats_month_november)} $year",
-    "${stringResource(Res.string.stats_month_december)} $year",
-)
+    Res.string.stats_month_january,
+    Res.string.stats_month_february,
+    Res.string.stats_month_march,
+    Res.string.stats_month_april,
+    Res.string.stats_month_may,
+    Res.string.stats_month_june,
+    Res.string.stats_month_july,
+    Res.string.stats_month_august,
+    Res.string.stats_month_september,
+    Res.string.stats_month_october,
+    Res.string.stats_month_november,
+    Res.string.stats_month_december,
+).map { month ->
+    stringResource(Res.string.stats_month_year, stringResource(month), year)
+}
 
 @Composable
 private fun rememberMonthLabelWidth(labels: List<String>, style: TextStyle): Dp {

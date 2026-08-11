@@ -100,6 +100,7 @@
     <string name="stats_month_october">Październik</string>
     <string name="stats_month_november">Listopad</string>
     <string name="stats_month_december">Grudzień</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">P</string>
     <string name="stats_weekday_initial_tuesday">W</string>
     <string name="stats_weekday_initial_wednesday">Ś</string>

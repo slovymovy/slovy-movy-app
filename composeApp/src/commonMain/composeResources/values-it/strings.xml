@@ -101,6 +101,7 @@
     <string name="stats_month_october">ottobre</string>
     <string name="stats_month_november">novembre</string>
     <string name="stats_month_december">dicembre</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">L</string>
     <string name="stats_weekday_initial_tuesday">M</string>
     <string name="stats_weekday_initial_wednesday">M</string>
