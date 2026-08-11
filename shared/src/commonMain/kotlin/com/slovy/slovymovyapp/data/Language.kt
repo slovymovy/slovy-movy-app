@@ -101,6 +101,10 @@ enum class Language(
               measure word outside it: 两首优美的<w>曲子</w>, 一篇关于医学研究的<w>文章</w>,
               带着<w>枪</w>. Never tag the noun when the declared translations are measure words -
               blanking 建议 asks the learner for "advice" rather than for the word being taught.
+            - Declare a measure word on its own - 串, 滴, 杯, 群 - and tag it on its own. 一 is the
+              numeral "one", not part of the word, so 一串 as a declared translation makes the tag
+              either swallow the numeral (一<w>杯</w>糖 is right, <w>一杯</w>糖 is not) or fall
+              outside what was declared. The numeral belongs in the sentence, never in the entry.
             - Do not repeat a morpheme the surrounding words already supply: 正则表达式, 生理盐水 and
               母乳 each already contain the head, so choose wording that fits what is around it.
             - Keep parenthetical glosses out of the example sentences; that belongs in the sense
