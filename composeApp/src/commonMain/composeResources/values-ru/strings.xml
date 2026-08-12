@@ -184,7 +184,11 @@
     <string name="language_setup_request_language_link">Напишите нам</string>
     <string name="language_setup_request_language_after">, и мы его добавим.</string>
     <string name="language_setup_request_language_title">Запросить язык</string>
-    <string name="language_setup_request_language_placeholder">Какой язык вы хотите добавить?</string>
+    <string name="language_setup_request_language_roadmap">Посмотрите в %1$s, какие языки мы добавим дальше.</string>
+    <string name="language_setup_request_language_roadmap_link">планах</string>
+    <string name="language_setup_request_language_learn_label">Язык для изучения</string>
+    <string name="language_setup_request_language_translate_label">Язык перевода</string>
+    <string name="language_setup_request_language_required">Укажите хотя бы один язык</string>
     <string name="language_setup_request_language_sent_title">Запрос отправлен</string>
     <string name="language_setup_request_language_sent_message">Спасибо! Мы получили ваш запрос на добавление языка. За прогрессом можно следить на GitHub.</string>
 

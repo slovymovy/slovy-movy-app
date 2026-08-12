@@ -279,6 +279,36 @@ class GitHubClientTest {
     }
 
     @Test
+    fun feedbackDiscussionTitle_languageRequest() {
+        val title = GitHubClient.feedbackDiscussionTitle(
+            "[Language request]\nLanguage to learn: Ukrainian"
+        )
+        assertEquals("Language request", title)
+    }
+
+    @Test
+    fun feedbackDiscussionTitle_languageRequestWithLeadingWhitespace() {
+        val title = GitHubClient.feedbackDiscussionTitle("  [Language request]\nLanguage to learn: Greek")
+        assertEquals("Language request", title)
+    }
+
+    @Test
+    fun feedbackDiscussionTitle_generalFeedback() {
+        val title = GitHubClient.feedbackDiscussionTitle("The study screen scrolls oddly")
+        assertEquals("App feedback", title)
+    }
+
+    @Test
+    fun feedbackDiscussionTitle_prefixNotAtStart() {
+        val title = GitHubClient.feedbackDiscussionTitle("I typed [Language request] into the box")
+        assertEquals(
+            "App feedback",
+            title,
+            "Only a leading marker should retitle the discussion"
+        )
+    }
+
+    @Test
     @Ignore("prevent repo pollution")
     fun createFeedbackDiscussion_createsAndReturns() {
         if (!GitHubClient.isAvailable()) return

@@ -184,7 +184,11 @@
     <string name="language_setup_request_language_link">Bize bildir</string>
     <string name="language_setup_request_language_after">&#32;biz de ekleyelim.</string>
     <string name="language_setup_request_language_title">Dil iste</string>
-    <string name="language_setup_request_language_placeholder">Hangi dili eklemek istersin?</string>
+    <string name="language_setup_request_language_roadmap">Sırada hangi dillerin olduğunu %1$s bak.</string>
+    <string name="language_setup_request_language_roadmap_link">yol haritasına</string>
+    <string name="language_setup_request_language_learn_label">Öğrenilecek dil</string>
+    <string name="language_setup_request_language_translate_label">Çeviri dili</string>
+    <string name="language_setup_request_language_required">En az bir dil gir</string>
     <string name="language_setup_request_language_sent_title">İstek gönderildi</string>
     <string name="language_setup_request_language_sent_message">Teşekkürler! Dil isteğini aldık. Durumunu GitHub'da takip edebilirsin.</string>
 

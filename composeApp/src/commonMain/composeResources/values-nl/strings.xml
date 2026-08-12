@@ -184,7 +184,11 @@
     <string name="language_setup_request_language_link">Laat het ons weten</string>
     <string name="language_setup_request_language_after">, dan voegen we deze toe.</string>
     <string name="language_setup_request_language_title">Taal aanvragen</string>
-    <string name="language_setup_request_language_placeholder">Welke taal wil je toevoegen?</string>
+    <string name="language_setup_request_language_roadmap">Bekijk op de %1$s welke talen we hierna toevoegen.</string>
+    <string name="language_setup_request_language_roadmap_link">roadmap</string>
+    <string name="language_setup_request_language_learn_label">Taal om te leren</string>
+    <string name="language_setup_request_language_translate_label">Taal om naar te vertalen</string>
+    <string name="language_setup_request_language_required">Vul minstens één taal in</string>
     <string name="language_setup_request_language_sent_title">Verzoek verzonden</string>
     <string name="language_setup_request_language_sent_message">Bedankt! We hebben je taalverzoek ontvangen. Je kunt de voortgang op GitHub volgen.</string>
 
