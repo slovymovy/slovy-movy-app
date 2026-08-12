@@ -1,0 +1,17 @@
+<included>
+    <!--
+      Selected by logback.xml when GCLOUD=true, which is set on the Cloud Run service. The appender
+      writes structured JSON to stdout instead of calling the Logging API, and Cloud Run ingests
+      that into Cloud Logging with the per-entry severity this format carries.
+    -->
+    <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <redirectToStdout>true</redirectToStdout>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CLOUD"/>
+    </root>
+</included>

@@ -1,27 +1,13 @@
 <configuration>
-    <if condition='System.getenv("GCLOUD") != null'>
-        <then>
-            <appender name="CLOUD" class="com.google.cloud.logging.logback.LoggingAppender">
-                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                    <level>INFO</level>
-                </filter>
-                <redirectToStdout>true</redirectToStdout>
-            </appender>
+    <!--
+      Appender selection goes through an <include> rather than <if condition="...">: logback 1.6.1
+      treats that attribute as deprecated and then processes neither <then> nor <else>, so the
+      conditional config it replaces attached no appender at all and the server logged nothing -
+      locally and in Cloud Logging alike. Property substitution in the include's resource name has
+      no such problem, and it keeps the unselected appender from being instantiated at all.
 
-            <root level="info">
-                <appender-ref ref="CLOUD"/>
-            </root>
-        </then>
-        <else>
-            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-                <encoder>
-                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-                </encoder>
-            </appender>
-
-            <root level="INFO">
-                <appender-ref ref="CONSOLE"/>
-            </root>
-        </else>
-    </if>
+      GCLOUD is "true" on Cloud Run and unset everywhere else, so the profile is the value itself.
+    -->
+    <property name="LOG_PROFILE" value="${GCLOUD:-local}"/>
+    <include resource="logback-profile-${LOG_PROFILE}.xml"/>
 </configuration>

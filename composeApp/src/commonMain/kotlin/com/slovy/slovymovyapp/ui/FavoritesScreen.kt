@@ -39,7 +39,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,6 +75,7 @@ import com.slovy.slovymovyapp.ui.icons.NoFavsImage
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseCardData
@@ -1220,7 +1220,7 @@ private fun FavoritesEmptyState(
             text = descriptionText,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 lineHeight = 24.sp,
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1384,7 +1384,7 @@ private fun StudyDoneCard(
                             text = stringResource(Res.string.favorites_study_done_until_next_review),
                             fontFamily = MaterialTheme.serifFontFamily,
                             fontSize = 13.sp,
-                            fontStyle = FontStyle.Italic,
+                            fontStyle = MaterialTheme.uiItalic,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.alignByBaseline(),
                         )
@@ -1431,7 +1431,7 @@ private fun StudyDoneCard(
                         text = continueLabel,
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontSize = 13.5.sp,
-                        fontStyle = FontStyle.Italic,
+                        fontStyle = MaterialTheme.uiItalic,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
@@ -1499,7 +1499,7 @@ private fun StudyDueCard(
                         text = stringResource(Res.string.favorites_study_due_subtitle, study.estimatedMinutes),
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontSize = 13.sp,
-                        fontStyle = FontStyle.Italic,
+                        fontStyle = MaterialTheme.uiItalic,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
                         modifier = Modifier.alignByBaseline(),
                     )

@@ -17,7 +17,6 @@ application {
 dependencies {
     api(projects.shared)
     implementation(libs.logback)
-    implementation(libs.janino)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverCallLogging)

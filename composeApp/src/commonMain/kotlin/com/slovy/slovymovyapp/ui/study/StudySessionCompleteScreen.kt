@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +43,7 @@ import com.slovy.slovymovyapp.ui.icons.OtterPipelineStreakC
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -219,7 +219,7 @@ private fun CompletionSubtext(
         text = parts.joinToString(separator = " · "),
         style = MaterialTheme.typography.titleMedium,
         fontFamily = MaterialTheme.serifFontFamily,
-        fontStyle = FontStyle.Italic,
+        fontStyle = MaterialTheme.uiItalic,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
         modifier = modifier,

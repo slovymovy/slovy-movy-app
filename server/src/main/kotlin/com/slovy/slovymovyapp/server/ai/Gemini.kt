@@ -2,7 +2,7 @@ package com.slovy.slovymovyapp.server.ai
 
 import com.google.genai.Client
 import com.google.genai.types.*
-import io.ktor.util.logging.KtorSimpleLogger
+import io.ktor.util.logging.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -148,13 +148,6 @@ class GeminiProvider : AIProvider {
 
     override fun getAvailableModels(): List<ModelInfo> {
         return listOf(
-
-            ModelInfo(
-                GEMINI_FLASH_LATEST, "Gemini 3.0 Flash Latest", AIProviderType.GEMINI,
-                supportsTemperature = true,
-                supportsVerbosity = false,
-                reasoningType = ReasoningType.HIGH_LOW,
-            ),
             ModelInfo(
                 GEMINI_3_1_PRO_PREVIEW, "Gemini 3.1 Pro Preview", AIProviderType.GEMINI,
                 supportsTemperature = true,
@@ -163,6 +156,24 @@ class GeminiProvider : AIProvider {
             ),
             ModelInfo(
                 GEMINI_3_1_FLASH_LITE, "Gemini 3.1 Flash Light", AIProviderType.GEMINI,
+                supportsTemperature = true,
+                supportsVerbosity = false,
+                reasoningType = ReasoningType.TOKENS
+            ),
+            ModelInfo(
+                GEMINI_3_1_FLASH_LITE, "Gemini 3.1 Flash Light", AIProviderType.GEMINI,
+                supportsTemperature = true,
+                supportsVerbosity = false,
+                reasoningType = ReasoningType.TOKENS
+            ),
+            ModelInfo(
+                GEMINI_3_5_FLASH_LITE, "Gemini 3.5 Flash Light", AIProviderType.GEMINI,
+                supportsTemperature = true,
+                supportsVerbosity = false,
+                reasoningType = ReasoningType.TOKENS
+            ),
+            ModelInfo(
+                GEMINI_3_6_FLASH, "Gemini 3.6 Flash", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,
                 reasoningType = ReasoningType.TOKENS
@@ -193,6 +204,7 @@ class GeminiProvider : AIProvider {
     }
 }
 
-const val GEMINI_FLASH_LATEST = "gemini-flash-latest"
 const val GEMINI_3_1_PRO_PREVIEW = "gemini-3.1-pro-preview"
-const val GEMINI_3_1_FLASH_LITE = "gemini-3.1-flash-lite-preview"
+const val GEMINI_3_1_FLASH_LITE = "gemini-3.1-flash-lite"
+const val GEMINI_3_5_FLASH_LITE = "gemini-3.5-flash-lite"
+const val GEMINI_3_6_FLASH = "gemini-3.6-flash"
