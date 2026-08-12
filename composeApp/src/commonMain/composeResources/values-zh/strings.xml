@@ -184,7 +184,11 @@
     <string name="language_setup_request_language_link">告诉我们</string>
     <string name="language_setup_request_language_after">，我们会把它加进来。</string>
     <string name="language_setup_request_language_title">建议添加语言</string>
-    <string name="language_setup_request_language_placeholder">你希望我们添加哪种语言？</string>
+    <string name="language_setup_request_language_roadmap">在%1$s上查看我们接下来会添加哪些语言。</string>
+    <string name="language_setup_request_language_roadmap_link">路线图</string>
+    <string name="language_setup_request_language_learn_label">想学的语言</string>
+    <string name="language_setup_request_language_translate_label">想翻译成的语言</string>
+    <string name="language_setup_request_language_required">请至少填写一种语言</string>
     <string name="language_setup_request_language_sent_title">建议已发送</string>
     <string name="language_setup_request_language_sent_message">谢谢！我们已经收到你的语言建议。你可以在 GitHub 上关注进展。</string>
 
