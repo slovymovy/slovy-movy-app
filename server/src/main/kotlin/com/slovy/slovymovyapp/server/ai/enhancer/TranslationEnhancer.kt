@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.server.ai.enhancer
 
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import com.slovy.slovymovyapp.server.ai.*
+import io.ktor.util.logging.*
 import kotlinx.serialization.json.Json
 
 /**
@@ -10,6 +11,8 @@ import kotlinx.serialization.json.Json
  * For creating requests from extracted data, see the main project's TranslationEnhancer.
  */
 class TranslationEnhancer {
+
+    private val logger = KtorSimpleLogger("TranslationEnhancer")
 
     /**
      * Enhances a language card with translation data using AIProvider abstraction.
@@ -85,6 +88,7 @@ class TranslationEnhancer {
         )
         val decodedResponse = Json.decodeFromString<TranslationResponse>(response)
         validateSenseIds(request, decodedResponse)
+        validateExampleCoverage(request, decodedResponse)
         return decodedResponse
     }
 
@@ -182,9 +186,20 @@ class TranslationEnhancer {
                 val updatedExamples = sense.examples.map { example ->
                     // Normalize example text for lookup
                     val normalizedExampleText = normalizeTextForMatching(example.text)
-                    val exampleTranslation = exampleTranslationsMap[normalizedExampleText]
-                        ?: findBestMatchingTranslation(normalizedExampleText, translationResponse.exampleTranslations)
-                        ?: throw IllegalArgumentException("Missing translation for example: ${example.text} (normalized: '$normalizedExampleText')")
+                    val exampleTranslation = resolveExampleTranslation(
+                        normalizedExampleText = normalizedExampleText,
+                        exampleTranslationsMap = exampleTranslationsMap,
+                        exampleTranslations = translationResponse.exampleTranslations
+                    )
+                    if (exampleTranslation == null) {
+                        // enhanceWithTranslations rejects a response with unresolvable examples, so
+                        // reaching this means the caller merged a response it never validated. Keep
+                        // the sense-level translations rather than discarding the whole language.
+                        logger.warn(
+                            "No $targetLangCode translation for example '${example.text}'; leaving it untranslated"
+                        )
+                        return@map example
+                    }
                     val updatedTranslations =
                         example.targetLangTranslations + (targetLangCode to exampleTranslation.targetLangTranslation)
                     example.copy(targetLangTranslations = updatedTranslations)
@@ -214,6 +229,56 @@ class TranslationEnhancer {
         }
 
         return originalCard.copy(entries = updatedPos)
+    }
+
+    /**
+     * Resolves the translation for one example, exactly as [mergeTranslationData] does: an exact
+     * match on the normalized text first, then the fuzzy fallback.
+     *
+     * [validateExampleCoverage] resolves through this same function so a response it accepts can
+     * never fail to merge.
+     */
+    private fun resolveExampleTranslation(
+        normalizedExampleText: String,
+        exampleTranslationsMap: Map<String, ExampleTranslationData>,
+        exampleTranslations: List<ExampleTranslationData>
+    ): ExampleTranslationData? {
+        return exampleTranslationsMap[normalizedExampleText]
+            ?: findBestMatchingTranslation(normalizedExampleText, exampleTranslations)
+    }
+
+    /**
+     * Rejects a response that leaves any example of the source card untranslated.
+     *
+     * Models do drop examples: `gemini-3.1-flash-lite` returns 24 of the 26 examples of `en/star`
+     * for Simplified Chinese, deterministically. Failing here rather than at merge time makes that
+     * a provider failure, which is what lets the caller's provider fallback produce the complete
+     * response instead of losing the whole target language.
+     */
+    private fun validateExampleCoverage(
+        request: TranslationRequest,
+        response: TranslationResponse
+    ) {
+        val exampleTranslationsMap = response.exampleTranslations.associateBy {
+            normalizeTextForMatching(it.originalText)
+        }
+        val untranslated = request.languageCardData.entries
+            .flatMap { it.senses }
+            .flatMap { it.examples }
+            .filter { example ->
+                resolveExampleTranslation(
+                    normalizedExampleText = normalizeTextForMatching(example.text),
+                    exampleTranslationsMap = exampleTranslationsMap,
+                    exampleTranslations = response.exampleTranslations
+                ) == null
+            }
+            .map { it.text }
+        if (untranslated.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "LLM left ${untranslated.size} example(s) untranslated in translation enhancement " +
+                        "to ${request.targetLangCode}: $untranslated"
+            )
+        }
     }
 
     private fun validateSenseIds(
