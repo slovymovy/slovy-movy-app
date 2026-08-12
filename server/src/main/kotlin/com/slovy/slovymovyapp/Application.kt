@@ -534,11 +534,11 @@ fun Application.module() {
                     call.application.environment.log.warn("Conflict detected for $lang/$word, will retry")
                     call.respond(HttpStatusCode.Conflict, "Concurrent modification detected, please retry")
                 } else {
-                    call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}")
+                    call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}", e)
                     call.respond(HttpStatusCode.InternalServerError, "GitHub API error: ${e.message}")
                 }
             } catch (e: Exception) {
-                call.application.environment.log.error("Failed to update $lang/$word: ${e.message}")
+                call.application.environment.log.error("Failed to update $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to update: ${e.message}")
             }
         }
@@ -780,9 +780,12 @@ private suspend fun addMissingTranslations(
     val missingLangCodes = targetLangCodes.filter { it !in existingLanguages }
     if (missingLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
+    // The two bail-outs below look exactly like a successful "nothing to translate" from the
+    // client's side - base chunk, no translated chunk - so each has to say why it gave up.
     val geminiProvider = GeminiProvider()
     val openAIProvider = OpenAIProvider()
     if (!geminiProvider.isAvailable() && !openAIProvider.isAvailable()) {
+        logger.error("No AI provider configured; cannot translate $lang/$word into $missingLangCodes")
         return TranslationResult(response, updated = false)
     }
 
@@ -790,6 +793,7 @@ private suspend fun addMissingTranslations(
         val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
         json.decodeFromString(ExtractedWordData.serializer(), content)
     } catch (_: GHFileNotFoundException) {
+        logger.warn("No db-extract for $lang/$word; cannot translate it into $missingLangCodes")
         return TranslationResult(response, updated = false)
     }
 
