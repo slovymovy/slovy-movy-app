@@ -69,10 +69,11 @@ enum class Language(
             from non-Han scripts unless the sense has no usable Mandarin entry at all. This applies
             equally to the definitions and example translations you write yourself.
 
-            Mandarin has no lexical counterpart for many English function words, and what you write
-            has to be natural Chinese rather than a word-for-word mirror of the English:
+            Mandarin has no lexical counterpart for many of the function words the source language
+            uses, and what you write has to be natural Chinese rather than a word-for-word mirror of
+            the source sentence:
             - Prefer wording in which a real Mandarin word carries the sense, and tag that word in
-              the slot Chinese grammar gives it rather than the slot the English word held. Usually
+              the slot Chinese grammar gives it rather than the slot the source word held. Usually
               this is a coverb: 我<w>给</w>妈妈买了礼物, 锻炼<w>对</w>你的健康很有益, 他用苹果<w>换</w>了
               一根香蕉.
             - Where the sense is carried by structure alone - a bare duration complement (住了十年),
@@ -96,17 +97,18 @@ enum class Language(
               (<w>体育</w>课 where the word is 体育课).
             - Chinese counts nouns with a measure word, and which of the two carries the tag is
               decided by the sense's own declared translations. Where those are measure words
-              (块, 条, 件), the English word is the counter, so tag the measure word: 一<w>块</w>派,
+              (块, 条, 件), the source word is the counter, so tag the measure word: 一<w>块</w>派,
               一<w>条</w>有用的建议. Where they are nouns (曲子, 文章, 枪), tag the noun and leave the
               measure word outside it: 两首优美的<w>曲子</w>, 一篇关于医学研究的<w>文章</w>,
               带着<w>枪</w>. Never tag the noun when the declared translations are measure words -
-              blanking 建议 asks the learner for "advice" rather than for the word being taught.
+              blanking 建议 asks the learner for the thing being counted rather than for the word
+              being taught.
             - Do not repeat a morpheme the surrounding words already supply: 正则表达式, 生理盐水 and
               母乳 each already contain the head, so choose wording that fits what is around it.
             - Keep parenthetical glosses out of the example sentences; that belongs in the sense
               clarification.
             - Transliterate foreign names so that they still read as foreign; 韦 is an ordinary
-              Chinese surname and cannot stand in for an English one.
+              Chinese surname and cannot stand in for a foreign one.
         """.trimIndent()
     );
 
