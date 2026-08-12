@@ -24,7 +24,8 @@ object CloudTasksAuthVerifier {
     fun verify(authorizationHeader: String?): Boolean {
         if (authorizationHeader == null) return false
         if (!authorizationHeader.startsWith("Bearer ", ignoreCase = true)) {
-            logger.warn("Authorization header does not start with Bearer: $authorizationHeader")
+            // Never log the header itself: whatever scheme it carries, the value is a credential.
+            logger.warn("Authorization header does not start with Bearer")
             return false
         }
 

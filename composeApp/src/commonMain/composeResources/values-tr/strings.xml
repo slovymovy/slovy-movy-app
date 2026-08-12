@@ -101,6 +101,7 @@
     <string name="stats_month_october">Ekim</string>
     <string name="stats_month_november">Kasım</string>
     <string name="stats_month_december">Aralık</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">P</string>
     <string name="stats_weekday_initial_tuesday">S</string>
     <string name="stats_weekday_initial_wednesday">Ç</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Kitaplığın hazırlanıyor</string>
     <string name="download_action_download_size">%1$s indir</string>
+    <string name="download_item_dictionary_name">%1$s sözlüğü</string>
     <string name="download_title_ready">İndirmeye hazır</string>
     <string name="download_subtitle_ready">Her şeyin hazır olması için bu sözlükler gerekli.</string>
     <string name="download_title_failed">İndirme başarısız</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Bize bildir</string>
     <string name="language_setup_request_language_after">&#32;biz de ekleyelim.</string>
     <string name="language_setup_request_language_title">Dil iste</string>
-    <string name="language_setup_request_language_placeholder">Hangi dili eklemek istersin?</string>
+    <string name="language_setup_request_language_roadmap">Sırada hangi dillerin olduğunu %1$s bak.</string>
+    <string name="language_setup_request_language_roadmap_link">yol haritasına</string>
+    <string name="language_setup_request_language_learn_label">Öğrenilecek dil</string>
+    <string name="language_setup_request_language_translate_label">Çeviri dili</string>
+    <string name="language_setup_request_language_required">En az bir dil gir</string>
     <string name="language_setup_request_language_sent_title">İstek gönderildi</string>
     <string name="language_setup_request_language_sent_message">Teşekkürler! Dil isteğini aldık. Durumunu GitHub'da takip edebilirsin.</string>
 
@@ -348,24 +354,16 @@
     <string name="developer_working_status">Çalışıyor...</string>
     <string name="acknowledgements_title">Teşekkürler</string>
     <string name="acknowledgements_vocab_data_title">Kelime verileri</string>
-    <string name="acknowledgements_vocab_data_body">Kelime verilerimiz, dünya çapında gönüllülerin oluşturduğu özgür çok
-        dilli sözlük Wiktionary'den alınmıştır.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Kelime verilerimiz, dünya çapında gönüllülerin oluşturduğu özgür çok dilli sözlük Wiktionary'den alınmıştır.</string>
     <string name="acknowledgements_dictionary_extracts_title">Sözlük çıkarımları</string>
-    <string name="acknowledgements_dictionary_extracts_body">Tatu Ylonen'in açık kaynaklı wiktextract aracıyla
-        Wiktionary'den çıkarılan, Kaikki.org'un ön işlenmiş sözlük verilerini kullanıyoruz.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Tatu Ylonen'in açık kaynaklı wiktextract aracıyla Wiktionary'den çıkarılan, Kaikki.org'un ön işlenmiş sözlük verilerini kullanıyoruz.</string>
     <string name="acknowledgements_application_code_title">Uygulama kodu</string>
     <string name="acknowledgements_application_code_body">Uygulama kaynak kodu BUSL-1.1 lisansıyla sunulmaktadır.</string>
     <string name="acknowledgements_fsrs_title">FSRS zamanlama algoritması</string>
-    <string name="acknowledgements_fsrs_body">MIT Lisansı ile sağlanan FSRS-Kotlin'in bir Kotlin portunu kullanıyoruz.
-        FSRS, Jarrett Ye tarafından Open Spaced Repetition topluluğuyla birlikte geliştirilmiştir.
-    </string>
+    <string name="acknowledgements_fsrs_body">MIT Lisansı ile sağlanan FSRS-Kotlin'in bir Kotlin portunu kullanıyoruz. FSRS, Jarrett Ye tarafından Open Spaced Repetition topluluğuyla birlikte geliştirilmiştir.</string>
     <string name="acknowledgements_words_sources_title">Kelime kaynakları</string>
     <string name="acknowledgements_words_sources_body">Tüm kelime verileri CC-BY-SA-4.0 lisansıyla sunulmaktadır.</string>
-    <string name="acknowledgements_thanks">Bu verileri özgürce erişilebilir kıldıkları için Wiktionary topluluğuna ve
-        Tatu Ylonen'e minnettarız.
-    </string>
+    <string name="acknowledgements_thanks">Bu verileri özgürce erişilebilir kıldıkları için Wiktionary topluluğuna ve Tatu Ylonen'e minnettarız.</string>
 
     <string name="app_data_backup_title">Kayıtlı kelimelerini yedekle</string>
     <string name="app_data_backup_description">Kayıtlı kelimelerini ve uygulama ayarlarını bir arşive aktarır. Kopya tutmak veya yeni cihaza geçmek için kullanışlıdır.</string>
@@ -434,6 +432,7 @@
     <string name="common_clear">Temizle</string>
     <string name="common_search_placeholder">Ara...</string>
     <string name="common_unknown_error">Bilinmeyen hata</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d anlam</item>
         <item quantity="few">%1$s - %2$d anlam</item>

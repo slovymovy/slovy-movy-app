@@ -47,6 +47,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.NumberFormatter
 import com.slovy.slovymovyapp.i18n.ShortDuration
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -453,7 +454,7 @@ private fun StreakCard(
                         text = pluralStringResource(Res.plurals.stats_day_streak, state.streakDays),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
-                            fontStyle = FontStyle.Italic,
+                            fontStyle = MaterialTheme.uiItalic,
                             fontSize = 12.5.sp,
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -478,7 +479,7 @@ private fun StreakCard(
                         text = stringResource(Res.string.stats_active_days_all_time),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = MaterialTheme.serifFontFamily,
-                            fontStyle = FontStyle.Italic,
+                            fontStyle = MaterialTheme.uiItalic,
                             fontSize = 12.5.sp,
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -549,21 +550,25 @@ private fun MonthStepper(
     }
 }
 
+// Month and year go through a format resource rather than string interpolation: Chinese writes the
+// year first (2026年8月), so the order has to be the locale's to decide, not the call site's.
 @Composable
 private fun statsMonthLabels(year: Int): List<String> = listOf(
-    "${stringResource(Res.string.stats_month_january)} $year",
-    "${stringResource(Res.string.stats_month_february)} $year",
-    "${stringResource(Res.string.stats_month_march)} $year",
-    "${stringResource(Res.string.stats_month_april)} $year",
-    "${stringResource(Res.string.stats_month_may)} $year",
-    "${stringResource(Res.string.stats_month_june)} $year",
-    "${stringResource(Res.string.stats_month_july)} $year",
-    "${stringResource(Res.string.stats_month_august)} $year",
-    "${stringResource(Res.string.stats_month_september)} $year",
-    "${stringResource(Res.string.stats_month_october)} $year",
-    "${stringResource(Res.string.stats_month_november)} $year",
-    "${stringResource(Res.string.stats_month_december)} $year",
-)
+    Res.string.stats_month_january,
+    Res.string.stats_month_february,
+    Res.string.stats_month_march,
+    Res.string.stats_month_april,
+    Res.string.stats_month_may,
+    Res.string.stats_month_june,
+    Res.string.stats_month_july,
+    Res.string.stats_month_august,
+    Res.string.stats_month_september,
+    Res.string.stats_month_october,
+    Res.string.stats_month_november,
+    Res.string.stats_month_december,
+).map { month ->
+    stringResource(Res.string.stats_month_year, stringResource(month), year)
+}
 
 @Composable
 private fun rememberMonthLabelWidth(labels: List<String>, style: TextStyle): Dp {
@@ -774,7 +779,7 @@ private fun SectionHeader(text: String) {
         text = text,
         style = MaterialTheme.typography.bodySmall.copy(
             fontFamily = MaterialTheme.serifFontFamily,
-            fontStyle = FontStyle.Italic,
+            fontStyle = MaterialTheme.uiItalic,
             fontWeight = FontWeight.Medium,
             fontSize = 13.sp,
             letterSpacing = 0.1.sp,
@@ -852,7 +857,7 @@ private fun EffortRow(
             text = label,
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 fontSize = 13.5.sp,
                 lineHeight = 18.sp,
             ),
@@ -881,10 +886,14 @@ private fun EffortRow(
                 .padding(start = 4.dp),
         )
         Text(
+            // Matches the unit labels' metrics, but deliberately not their font: they use the serif
+            // family, and U+00B7 taken from a Latin face sits at Latin mid-height, which reads low
+            // beside full-height Han. Left on FontFamily.Default so the platform resolves the dot
+            // from the same face as the CJK text around it.
             text = "·",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
-                lineHeight = 18.sp,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.5.sp,
+                lineHeight = 16.sp,
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
             textAlign = TextAlign.Center,
@@ -964,7 +973,7 @@ private fun effortNumberTextStyle(): TextStyle =
 private fun effortUnitTextStyle(): TextStyle =
     MaterialTheme.typography.bodySmall.copy(
         fontFamily = MaterialTheme.serifFontFamily,
-        fontStyle = FontStyle.Italic,
+        fontStyle = MaterialTheme.uiItalic,
         fontSize = 12.5.sp,
         lineHeight = 16.sp,
     )
@@ -980,7 +989,7 @@ private fun DurationText(
     val parts = durationParts(minutes, isLoading)
     val unitStyle = SpanStyle(
         fontFamily = MaterialTheme.serifFontFamily,
-        fontStyle = FontStyle.Italic,
+        fontStyle = MaterialTheme.uiItalic,
         fontSize = 12.5.sp,
         color = unitColor,
     )
@@ -1095,7 +1104,7 @@ private fun LibraryMetric(
             text = label,
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 fontSize = 13.sp,
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1284,7 +1293,7 @@ private fun PipelineCaption() {
         text = caption,
         style = MaterialTheme.typography.bodySmall.copy(
             fontFamily = MaterialTheme.serifFontFamily,
-            fontStyle = FontStyle.Italic,
+            fontStyle = MaterialTheme.uiItalic,
             fontSize = 12.sp,
             lineHeight = 17.sp,
         ),

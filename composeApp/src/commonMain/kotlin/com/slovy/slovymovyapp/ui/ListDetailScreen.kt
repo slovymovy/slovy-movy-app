@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.common_list_separator
 import slovymovyapp.composeapp.generated.resources.common_retry
 import slovymovyapp.composeapp.generated.resources.favorites_error_meaning_not_found
 import slovymovyapp.composeapp.generated.resources.list_detail_add_all
@@ -840,10 +841,13 @@ private fun ListDetailHeader(
                     )
                 }
                 val inMyWordsText = stringResource(Res.string.list_detail_in_my_words_count, inMyWordsCount)
+                // The two counts are separate resources because only the second one's number is
+                // bolded, so the joiner has to be localized on its own.
+                val listSeparator = stringResource(Res.string.common_list_separator)
                 Text(
                     text = buildAnnotatedString {
                         append(pluralStringResource(Res.plurals.search_list_word_count, wordCount, wordCount))
-                        append(", ")
+                        append(listSeparator)
                         // Bold only the number inside the localized "%1$d in My words" segment.
                         val number = inMyWordsCount.toString()
                         val numberStart = inMyWordsText.indexOf(number)

@@ -101,6 +101,7 @@
     <string name="stats_month_october">Oktober</string>
     <string name="stats_month_november">November</string>
     <string name="stats_month_december">Dezember</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">M</string>
     <string name="stats_weekday_initial_tuesday">D</string>
     <string name="stats_weekday_initial_wednesday">M</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Deine Bibliothek wird eingerichtet</string>
     <string name="download_action_download_size">%1$s herunterladen</string>
+    <string name="download_item_dictionary_name">Wörterbuch %1$s</string>
     <string name="download_title_ready">Bereit zum Herunterladen</string>
     <string name="download_subtitle_ready">Du brauchst diese Wörterbücher, um alles einzurichten.</string>
     <string name="download_title_failed">Download fehlgeschlagen</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Sag uns Bescheid</string>
     <string name="language_setup_request_language_after">&#32;damit wir sie hinzufügen können.</string>
     <string name="language_setup_request_language_title">Eine Sprache anfragen</string>
-    <string name="language_setup_request_language_placeholder">Welche Sprache möchtest du hinzufügen?</string>
+    <string name="language_setup_request_language_roadmap">Sieh auf der %1$s, welche Sprachen als Nächstes dazukommen.</string>
+    <string name="language_setup_request_language_roadmap_link">Roadmap</string>
+    <string name="language_setup_request_language_learn_label">Sprache zum Lernen</string>
+    <string name="language_setup_request_language_translate_label">Sprache für Übersetzungen</string>
+    <string name="language_setup_request_language_required">Gib mindestens eine Sprache ein</string>
     <string name="language_setup_request_language_sent_title">Anfrage gesendet</string>
     <string name="language_setup_request_language_sent_message">Danke! Wir haben deine Sprachanfrage erhalten. Du kannst ihren Fortschritt auf GitHub verfolgen.</string>
 
@@ -348,24 +354,16 @@
     <string name="developer_working_status">Wird ausgeführt...</string>
     <string name="acknowledgements_title">Danksagungen</string>
     <string name="acknowledgements_vocab_data_title">Vokabeldaten</string>
-    <string name="acknowledgements_vocab_data_body">Unsere Wortdaten stammen aus Wiktionary, dem freien mehrsprachigen
-        Wörterbuch, das von Freiwilligen weltweit erstellt wird.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Unsere Wortdaten stammen aus Wiktionary, dem freien mehrsprachigen Wörterbuch, das von Freiwilligen weltweit erstellt wird.</string>
     <string name="acknowledgements_dictionary_extracts_title">Wörterbuch-Extrakte</string>
-    <string name="acknowledgements_dictionary_extracts_body">Wir verwenden vorverarbeitete Wörterbuchdaten von Kaikki.org,
-        die mit dem Open-Source-Tool wiktextract von Tatu Ylonen aus Wiktionary extrahiert wurden.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Wir verwenden vorverarbeitete Wörterbuchdaten von Kaikki.org, die mit dem Open-Source-Tool wiktextract von Tatu Ylonen aus Wiktionary extrahiert wurden.</string>
     <string name="acknowledgements_application_code_title">Anwendungscode</string>
     <string name="acknowledgements_application_code_body">Der Quellcode der Anwendung ist unter BUSL-1.1 verfügbar.</string>
     <string name="acknowledgements_fsrs_title">FSRS-Planungsalgorithmus</string>
-    <string name="acknowledgements_fsrs_body">Wir verwenden eine Kotlin-Portierung von FSRS-Kotlin, bereitgestellt unter der MIT-Lizenz. FSRS
-        wurde ursprünglich von Jarrett Ye gemeinsam mit der Open-Spaced-Repetition-Community entwickelt.
-    </string>
+    <string name="acknowledgements_fsrs_body">Wir verwenden eine Kotlin-Portierung von FSRS-Kotlin, bereitgestellt unter der MIT-Lizenz. FSRS wurde ursprünglich von Jarrett Ye gemeinsam mit der Open-Spaced-Repetition-Community entwickelt.</string>
     <string name="acknowledgements_words_sources_title">Wortquellen</string>
     <string name="acknowledgements_words_sources_body">Alle Wortdaten sind unter der Lizenz CC-BY-SA-4.0 verfügbar.</string>
-    <string name="acknowledgements_thanks">Wir danken der Wiktionary-Community und Tatu Ylonen dafür, dass sie diese Daten
-        frei zugänglich machen.
-    </string>
+    <string name="acknowledgements_thanks">Wir danken der Wiktionary-Community und Tatu Ylonen dafür, dass sie diese Daten frei zugänglich machen.</string>
 
     <string name="app_data_backup_title">Sichere deine gespeicherten Wörter</string>
     <string name="app_data_backup_description">Exportiert deine gespeicherten Wörter und App-Einstellungen in ein Archiv. Praktisch, um eine Kopie zu behalten oder auf ein neues Gerät umzuziehen.</string>
@@ -434,6 +432,7 @@
     <string name="common_clear">Löschen</string>
     <string name="common_search_placeholder">Suchen...</string>
     <string name="common_unknown_error">Unbekannter Fehler</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d Bedeutung</item>
         <item quantity="few">%1$s - %2$d Bedeutungen</item>

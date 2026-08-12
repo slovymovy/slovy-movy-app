@@ -101,6 +101,7 @@
     <string name="stats_month_october">Октябрь</string>
     <string name="stats_month_november">Ноябрь</string>
     <string name="stats_month_december">Декабрь</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">П</string>
     <string name="stats_weekday_initial_tuesday">В</string>
     <string name="stats_weekday_initial_wednesday">С</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Настраиваем вашу библиотеку</string>
     <string name="download_action_download_size">Скачать %1$s</string>
+    <string name="download_item_dictionary_name">Словарь %1$s</string>
     <string name="download_title_ready">Словари готовы к скачиванию</string>
     <string name="download_subtitle_ready">Чтобы начать, нужно скачать эти словари.</string>
     <string name="download_title_failed">Ошибка скачивания</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Напишите нам</string>
     <string name="language_setup_request_language_after">, и мы его добавим.</string>
     <string name="language_setup_request_language_title">Запросить язык</string>
-    <string name="language_setup_request_language_placeholder">Какой язык вы хотите добавить?</string>
+    <string name="language_setup_request_language_roadmap">Посмотрите в %1$s, какие языки мы добавим дальше.</string>
+    <string name="language_setup_request_language_roadmap_link">планах</string>
+    <string name="language_setup_request_language_learn_label">Язык для изучения</string>
+    <string name="language_setup_request_language_translate_label">Язык перевода</string>
+    <string name="language_setup_request_language_required">Укажите хотя бы один язык</string>
     <string name="language_setup_request_language_sent_title">Запрос отправлен</string>
     <string name="language_setup_request_language_sent_message">Спасибо! Мы получили ваш запрос на добавление языка. За прогрессом можно следить на GitHub.</string>
 
@@ -348,24 +354,16 @@
     <string name="developer_working_status">Выполняется...</string>
     <string name="acknowledgements_title">Благодарности</string>
     <string name="acknowledgements_vocab_data_title">Словарные данные</string>
-    <string name="acknowledgements_vocab_data_body">Наши данные взяты из Викисловаря (Wiktionary) — свободного
-        многоязычного словаря, который создают волонтёры со всего мира.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Наши данные взяты из Викисловаря (Wiktionary) — свободного многоязычного словаря, который создают волонтёры со всего мира.</string>
     <string name="acknowledgements_dictionary_extracts_title">Обработка данных</string>
-    <string name="acknowledgements_dictionary_extracts_body">Мы используем данные проекта Kaikki.org, извлечённые из
-        Викисловаря с помощью инструмента wiktextract (автор — Тату Илонен).
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Мы используем данные проекта Kaikki.org, извлечённые из Викисловаря с помощью инструмента wiktextract (автор — Тату Илонен).</string>
     <string name="acknowledgements_application_code_title">Исходный код</string>
     <string name="acknowledgements_application_code_body">Исходный код приложения доступен по лицензии BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Алгоритм повторения FSRS</string>
-    <string name="acknowledgements_fsrs_body">Мы используем Kotlin-порт FSRS-Kotlin, распространяемый по лицензии MIT.
-        FSRS изначально разработал Джарретт Йе совместно с сообществом Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Мы используем Kotlin-порт FSRS-Kotlin, распространяемый по лицензии MIT. FSRS изначально разработал Джарретт Йе совместно с сообществом Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Источники данных</string>
     <string name="acknowledgements_words_sources_body">Все материалы доступны по лицензии CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим
-        данным.
-    </string>
+    <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим данным.</string>
 
     <string name="app_data_backup_title">Резервная копия</string>
     <string name="app_data_backup_description">Создаёт архив с вашими словами и настройками. Пригодится, чтобы сохранить данные или перенести их на новое устройство.</string>
@@ -434,6 +432,7 @@
     <string name="common_clear">Очистить</string>
     <string name="common_search_placeholder">Найти...</string>
     <string name="common_unknown_error">Неизвестная ошибка</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d значение</item>
         <item quantity="few">%1$s - %2$d значения</item>

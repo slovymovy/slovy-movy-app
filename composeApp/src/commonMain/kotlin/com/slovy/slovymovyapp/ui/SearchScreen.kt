@@ -75,6 +75,7 @@ import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import com.slovy.slovymovyapp.ui.word.Badge
 import com.slovy.slovymovyapp.ui.word.colorForLemma
 import kotlinx.coroutines.CancellationException
@@ -726,8 +727,6 @@ fun SearchScreenContent(
             title = stringResource(Res.string.search_suggest_list_dialog_title),
             commentPlaceholder = stringResource(Res.string.search_suggest_list_placeholder),
             commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-            successCopy = null,
-            allowDismissWhileSending = false,
             comment = state.listSuggestionComment,
             email = state.listSuggestionEmail,
             isSending = state.listSuggestionSubmitting,
@@ -1291,7 +1290,7 @@ private fun NoDictionaryState(
                 text = stringResource(Res.string.search_no_dictionary_description),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
-                    fontStyle = FontStyle.Italic,
+                    fontStyle = MaterialTheme.uiItalic,
                     lineHeight = 24.sp,
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

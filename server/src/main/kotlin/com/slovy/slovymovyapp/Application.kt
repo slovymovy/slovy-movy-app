@@ -224,53 +224,67 @@ fun Application.module() {
                 val baseResult = loadBaseWordData(lang, word, json, logger = call.application.environment.log)
 
                 // Step 2: Stream results as NDJSON (base, then translated if available)
+                //
+                // respondTextWriter swallows whatever this block throws: the writer runs outside the
+                // handler's try/catch, so the client just sees the stream stop at whatever chunk was
+                // already flushed and nothing reaches the logs. Everything in here has to report its
+                // own failures, or a broken translation stage is invisible in production.
                 call.respondTextWriter(contentType = ContentType.parse("application/x-ndjson")) {
-                    // Parse requested language codes for filtering.
-                    // If no translations parameter provided, return empty list (no translations in response).
-                    val requestedLangCodes = parseTranslationCodes(translationsParam)
+                    val streamLogger = call.application.environment.log
+                    try {
+                        // Parse requested language codes for filtering.
+                        // If no translations parameter provided, return empty list (no translations in response).
+                        val requestedLangCodes = parseTranslationCodes(translationsParam)
 
-                    // Send filtered base response to client (always filter based on requested codes)
-                    val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
-                    val baseChunk = WordStreamChunk(WordStreamStage.BASE, baseResponseToClient)
-                    write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
-                    write("\n")
-                    flush()
+                        // Send filtered base response to client (always filter based on requested codes)
+                        val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
+                        val baseChunk = WordStreamChunk(WordStreamStage.BASE, baseResponseToClient)
+                        write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
+                        write("\n")
+                        flush()
 
-                    // Track full response for repo updates (unfiltered)
-                    var fullResponse = baseResult.response
-                    var wasProcessed = baseResult.wasProcessed
+                        // Track full response for repo updates (unfiltered)
+                        var fullResponse = baseResult.response
+                        var wasProcessed = baseResult.wasProcessed
 
-                    if (requestedLangCodes.isNotEmpty()) {
-                        val translationResult = addMissingTranslations(
-                            response = fullResponse,
-                            lang = lang,
-                            word = word,
-                            requestedLangCodes = requestedLangCodes,
-                            json = json,
-                            logger = call.application.environment.log
-                        )
+                        if (requestedLangCodes.isNotEmpty()) {
+                            val translationResult = addMissingTranslations(
+                                response = fullResponse,
+                                lang = lang,
+                                word = word,
+                                requestedLangCodes = requestedLangCodes,
+                                json = json,
+                                logger = streamLogger
+                            )
 
-                        if (translationResult.updated) {
-                            fullResponse = translationResult.response
-                            wasProcessed = true
-                            // Send filtered translated response to client
-                            val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
-                            val translatedChunk =
-                                WordStreamChunk(WordStreamStage.TRANSLATED, translatedResponseToClient)
-                            write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
-                            write("\n")
-                            flush()
+                            if (translationResult.updated) {
+                                fullResponse = translationResult.response
+                                wasProcessed = true
+                                // Send filtered translated response to client
+                                val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
+                                val translatedChunk =
+                                    WordStreamChunk(WordStreamStage.TRANSLATED, translatedResponseToClient)
+                                write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
+                                write("\n")
+                                flush()
+                            }
                         }
-                    }
 
-                    // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
-                    // IMPORTANT: Use fullResponse (unfiltered) to ensure nothing is lost in repo
-                    if (!push.isNullOrBlank() && wasProcessed) {
-                        val responseJson = json.encodeToString(
-                            LanguageCardResponse.serializer(),
-                            fullResponse
-                        )
-                        RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
+                        // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
+                        // IMPORTANT: Use fullResponse (unfiltered) to ensure nothing is lost in repo
+                        if (!push.isNullOrBlank() && wasProcessed) {
+                            val responseJson = json.encodeToString(
+                                LanguageCardResponse.serializer(),
+                                fullResponse
+                            )
+                            RepoUpdateTaskClient.queueRepoUpdate(lang, word, responseJson)
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Throwable) {
+                        // The status line is already sent, so this cannot become an error response;
+                        // logging it here is the only record that the stream ended early.
+                        streamLogger.error("Failed to stream $lang/$word: ${e.message}", e)
                     }
                 }
             } catch (e: GHFileNotFoundException) {
@@ -520,11 +534,11 @@ fun Application.module() {
                     call.application.environment.log.warn("Conflict detected for $lang/$word, will retry")
                     call.respond(HttpStatusCode.Conflict, "Concurrent modification detected, please retry")
                 } else {
-                    call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}")
+                    call.application.environment.log.error("GitHub API error for $lang/$word: ${e.message}", e)
                     call.respond(HttpStatusCode.InternalServerError, "GitHub API error: ${e.message}")
                 }
             } catch (e: Exception) {
-                call.application.environment.log.error("Failed to update $lang/$word: ${e.message}")
+                call.application.environment.log.error("Failed to update $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to update: ${e.message}")
             }
         }
@@ -691,6 +705,16 @@ private data class TranslationResult(
     val updated: Boolean
 )
 
+/**
+ * [response] with [mergedLangCodes] merged into it. A requested language is absent from
+ * [mergedLangCodes] when every provider failed to translate it, which leaves [response] carrying
+ * whatever the other languages produced.
+ */
+private data class EnhancedTranslations(
+    val response: LanguageCardResponse,
+    val mergedLangCodes: List<String>
+)
+
 private suspend fun loadBaseWordData(lang: String, word: String, json: Json, logger: Logger): WordProcessResult {
     var wasProcessed = false
     val response = try {
@@ -756,9 +780,12 @@ private suspend fun addMissingTranslations(
     val missingLangCodes = targetLangCodes.filter { it !in existingLanguages }
     if (missingLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
+    // The two bail-outs below look exactly like a successful "nothing to translate" from the
+    // client's side - base chunk, no translated chunk - so each has to say why it gave up.
     val geminiProvider = GeminiProvider()
     val openAIProvider = OpenAIProvider()
     if (!geminiProvider.isAvailable() && !openAIProvider.isAvailable()) {
+        logger.error("No AI provider configured; cannot translate $lang/$word into $missingLangCodes")
         return TranslationResult(response, updated = false)
     }
 
@@ -766,10 +793,11 @@ private suspend fun addMissingTranslations(
         val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
         json.decodeFromString(ExtractedWordData.serializer(), content)
     } catch (_: GHFileNotFoundException) {
+        logger.warn("No db-extract for $lang/$word; cannot translate it into $missingLangCodes")
         return TranslationResult(response, updated = false)
     }
 
-    val updatedResponse = enhanceWithTranslations(
+    val enhanced = enhanceWithTranslations(
         response = response,
         extractedData = extractedData,
         word = word,
@@ -779,7 +807,9 @@ private suspend fun addMissingTranslations(
         openAIProvider = openAIProvider,
         logger = logger
     )
-    return TranslationResult(updatedResponse, updated = true)
+    // A language that produced nothing must not be reported as an update: that would stream a
+    // translated chunk identical to the base one and queue a repo update with no new content.
+    return TranslationResult(enhanced.response, updated = enhanced.mergedLangCodes.isNotEmpty())
 }
 
 private suspend fun enhanceWithTranslations(
@@ -791,67 +821,105 @@ private suspend fun enhanceWithTranslations(
     geminiProvider: GeminiProvider,
     openAIProvider: OpenAIProvider,
     logger: Logger
-): LanguageCardResponse {
+): EnhancedTranslations {
     val translationEnhancer = TranslationEnhancer()
     var updatedResponse = response
 
-    val translationResults: List<Pair<String, TranslationResponse>> = coroutineScope {
+    // supervisorScope, and a catch per language, so one target language that both providers fail
+    // to translate is logged and dropped instead of cancelling its siblings.
+    val translationResults: List<Pair<String, TranslationResponse>> = supervisorScope {
         targetLangCodes.map { targetLangCode ->
             async {
-                val targetTranslations = extractedData.sourceFileToEntries.values
-                    .flatten()
-                    .flatMap { it.translations }
-                    .filter { it.targetLangCode == targetLangCode }
-
-                val translationRequest = TranslationRequest(
-                    word = word,
-                    langCode = lang,
-                    targetLangCode = targetLangCode,
-                    languageCardData = updatedResponse,
-                    translations = targetTranslations
-                )
-
-                val targetLangName = targetLanguageName(targetLangCode)
-
-                raceWithFallback(
-                    primaryAvailable = geminiProvider.isAvailable(),
-                    fallbackAvailable = openAIProvider.isAvailable(),
-                    primary = {
-                        translationEnhancer.enhanceWithTranslations(
-                            request = translationRequest,
-                            provider = geminiProvider,
-                            targetLanguageName = targetLangName,
-                            model = GEMINI_3_1_FLASH_LITE,
-                            reasoningBudget = 1
-                        )
-                    },
-                    fallback = {
-                        translationEnhancer.enhanceWithTranslations(
-                            request = translationRequest,
-                            provider = openAIProvider,
-                            targetLanguageName = targetLangName,
-                            model = ChatModel.GPT_5_4.asString(),
-                            reasoningBudget = 900
-                        )
-                    },
-                    onPrimaryError = { e ->
-                        logger.error("Gemini translation failed for $lang/$word -> $targetLangCode: ${e.message}", e)
-                    },
-                    onPrimaryTimeout = {
-                        logger.warn("Gemini translation timed out for $lang/$word -> $targetLangCode after ${AI_FALLBACK_TIMEOUT_MS}ms")
-                    }
-                ).let { targetLangCode to it }
+                try {
+                    translateInto(
+                        targetLangCode = targetLangCode,
+                        extractedData = extractedData,
+                        card = updatedResponse,
+                        word = word,
+                        lang = lang,
+                        translationEnhancer = translationEnhancer,
+                        geminiProvider = geminiProvider,
+                        openAIProvider = openAIProvider,
+                        logger = logger
+                    ).let { targetLangCode to it }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Throwable) {
+                    logger.error("Translation of $lang/$word -> $targetLangCode failed: ${e.message}", e)
+                    null
+                }
             }
-        }.awaitAll()
+        }.awaitAll().filterNotNull()
     }
 
+    val mergedLangCodes = mutableListOf<String>()
     for ((targetLangCode, translationResponse) in translationResults) {
         updatedResponse = translationEnhancer.mergeTranslationData(
             originalCard = updatedResponse,
             translationResponse = translationResponse,
             targetLangCode = targetLangCode
         )
+        mergedLangCodes += targetLangCode
     }
 
-    return updatedResponse
+    return EnhancedTranslations(response = updatedResponse, mergedLangCodes = mergedLangCodes)
+}
+
+private suspend fun translateInto(
+    targetLangCode: String,
+    extractedData: ExtractedWordData,
+    card: LanguageCardResponse,
+    word: String,
+    lang: String,
+    translationEnhancer: TranslationEnhancer,
+    geminiProvider: GeminiProvider,
+    openAIProvider: OpenAIProvider,
+    logger: Logger
+): TranslationResponse {
+    val targetTranslations = extractedData.sourceFileToEntries.values
+        .flatten()
+        .flatMap { it.translations }
+        .filter { it.targetLangCode == targetLangCode }
+
+    val translationRequest = TranslationRequest(
+        word = word,
+        langCode = lang,
+        targetLangCode = targetLangCode,
+        languageCardData = card,
+        translations = targetTranslations
+    )
+
+    val targetLangName = targetLanguageName(targetLangCode)
+    val targetLangNotes = DbExtractEnhancerUtils.targetLanguageNotes(targetLangCode)
+
+    return raceWithFallback(
+        primaryAvailable = geminiProvider.isAvailable(),
+        fallbackAvailable = openAIProvider.isAvailable(),
+        primary = {
+            translationEnhancer.enhanceWithTranslations(
+                request = translationRequest,
+                provider = geminiProvider,
+                targetLanguageName = targetLangName,
+                targetLanguageNotes = targetLangNotes,
+                model = GEMINI_3_1_FLASH_LITE,
+                reasoningBudget = 1
+            )
+        },
+        fallback = {
+            translationEnhancer.enhanceWithTranslations(
+                request = translationRequest,
+                provider = openAIProvider,
+                targetLanguageName = targetLangName,
+                targetLanguageNotes = targetLangNotes,
+                model = ChatModel.GPT_5_4.asString(),
+                reasoningBudget = 900
+            )
+        },
+        onPrimaryError = { e ->
+            logger.error("Gemini translation failed for $lang/$word -> $targetLangCode: ${e.message}", e)
+        },
+        onPrimaryTimeout = {
+            logger.warn("Gemini translation timed out for $lang/$word -> $targetLangCode after ${AI_FALLBACK_TIMEOUT_MS}ms")
+        }
+    )
 }

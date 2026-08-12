@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 
 @Composable
 fun OnboardingHeader(
@@ -46,7 +46,7 @@ fun OnboardingHeader(
             modifier = Modifier.widthIn(max = 300.dp),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 lineHeight = 22.sp
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
