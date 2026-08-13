@@ -76,6 +76,11 @@ enum class Language(
               the slot Chinese grammar gives it rather than the slot the source word held. Usually
               this is a coverb: 我<w>给</w>妈妈买了礼物, 锻炼<w>对</w>你的健康很有益, 他用苹果<w>换</w>了
               一根香蕉.
+            - Before choosing what to tag, look at the sentence you have just written and check
+              whether a word already in it carries the sense. Usually one does, and it is the word
+              to tag - it does not have to be string-identical to a declared translation, a
+              contextual synonym is correct. Tag a different word only when nothing already present
+              carries the sense.
             - Where the sense is carried by structure alone - a bare duration complement (住了十年),
               了, 的, word order - write the natural sentence and leave it untagged. An untagged
               example translation is a correct answer, and takes precedence over the later
@@ -95,6 +100,15 @@ enum class Language(
             - Tag the declared translation exactly. Do not pull an added verb inside the tag
               (<w>去健身房</w> where the word is 健身房), and do not leave part of it outside
               (<w>体育</w>课 where the word is 体育课).
+            - The tagged span must be able to serve as the same part of speech as pos. If pos is
+              noun, the span must be a noun or noun phrase - never a verb, a verb-object compound,
+              or a measure word standing in for a noun that is itself declared. Where the declared
+              translations are themselves measure words, the measure word is the taught word and
+              takes the tag. Before you finalise an example, name the part of speech of the span
+              you tagged and confirm it matches pos. These are all one error, a noun sense with a
+              verb tagged: 我需要给老师<w>写</w>一封电子邮件 (email - tag 电子邮件),
+              她赢得了第一<w>名</w> (prize - 名 is rank), 我们决定<w>开车</w>去度假 (car - 开车 is a
+              verb phrase).
             - Chinese counts nouns with a measure word, and which of the two carries the tag is
               decided by the sense's own declared translations. Where those are measure words
               (块, 条, 件), the source word is the counter, so tag the measure word: 一<w>块</w>派,
