@@ -337,8 +337,8 @@ fun App(
             wordFetchManager = wordFetchManager,
         )
     }
-    val lemmaRecoveryController = remember(lemmaRecovery, platform) {
-        LemmaRecoveryController(lemmaRecovery, platform)
+    val lemmaRecoveryController = remember(lemmaRecovery, platform, settingsRepository) {
+        LemmaRecoveryController(lemmaRecovery, platform, settingsRepository)
     }
     DisposableEffect(lemmaRecoveryController) {
         onDispose { lemmaRecoveryController.close() }
@@ -537,7 +537,13 @@ fun App(
                 } catch (_: Exception) {
                     emptyList()
                 }
-                val needsDownload = !dataManager.hasDictionary(dictionary) ||
+                // A translation language added since the last run leaves saved words without
+                // data for it; only lemma recovery re-fetches them. The download flow's
+                // finalize step is what runs recovery with progress, so route through it even
+                // when every DB is already present — it starts immediately with no items.
+                val pendingRecovery = settingsRepository.isPendingLemmaRecovery()
+                val needsDownload = pendingRecovery ||
+                        !dataManager.hasDictionary(dictionary) ||
                         downloadableTargets.any { !dataManager.hasTranslation(dictionary, it) }
                 return if (needsDownload) {
                     AppDestination.DownloadSetup

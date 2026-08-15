@@ -32,4 +32,27 @@ open class SettingsRepositoryTest : BaseTest() {
         val foundAfterDelete = repo.getById(Setting.Name.TEST_PROPERTY)
         assertEquals(null, foundAfterDelete)
     }
+
+    /**
+     * The pending-recovery marker is written in settings and read back at startup to decide
+     * whether to route through the download/finalize flow, so the two sides must agree on the
+     * stored shape — an unset marker in particular must read as "not pending".
+     */
+    @Test
+    fun pendingLemmaRecovery_roundTrips_andDefaultsToFalse() = runBlocking {
+        val repo = SettingsRepository(testAppDatabaseHolder().database)
+        repo.clearPendingLemmaRecovery()
+
+        assertEquals(false, repo.isPendingLemmaRecovery(), "Unset marker must not request recovery")
+
+        repo.setPendingLemmaRecovery()
+        assertEquals(true, repo.isPendingLemmaRecovery(), "Marker must survive a write/read round trip")
+
+        repo.clearPendingLemmaRecovery()
+        assertEquals(
+            false,
+            repo.isPendingLemmaRecovery(),
+            "Clearing after a recovery run must stop the next startup from routing through it",
+        )
+    }
 }

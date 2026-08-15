@@ -22,6 +22,14 @@ data class Setting(
         FAVORITES_LANGUAGE,
         STATS_LANGUAGE,
         DEVELOPER_MODE,
-        LEGACY_VOICE_MIGRATION_DONE
+        LEGACY_VOICE_MIGRATION_DONE,
+
+        /**
+         * Set when a translation language is added, cleared once lemma recovery has run. Saved
+         * words already in the local DBs have no data for the new language, and only a recovery
+         * pass re-fetches them; the next startup routes through the download/finalize flow, which
+         * runs that pass with progress.
+         */
+        PENDING_LEMMA_RECOVERY
     }
 }

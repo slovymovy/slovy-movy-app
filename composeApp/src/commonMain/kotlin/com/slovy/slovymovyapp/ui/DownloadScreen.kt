@@ -75,6 +75,7 @@ class DownloadViewModel(
 
     private var terminalHandled = false
     private var failedDuringLoadItems = false
+    private var hadNothingToDownload = false
     private var downloadStartedAtMs: Long = 0L
 
     // Held for the lifetime of one download attempt — from beginDownload() until the terminal
@@ -99,6 +100,7 @@ class DownloadViewModel(
             try {
                 val items = loadItems!!.invoke()
                 if (items.isEmpty()) {
+                    hadNothingToDownload = true
                     startDownload()
                     return@launch
                 }
@@ -185,9 +187,13 @@ class DownloadViewModel(
                             try {
                                 state = DownloadUiState.Finalizing()
                                 finalize(::updateRecoveryProgress, ::updateWordListsSyncing)
-                                for (i in 3 downTo 1) {
-                                    state = DownloadUiState.Done(countdown = i)
-                                    delay(1_000.milliseconds)
+                                // Nothing was downloaded (this run only existed to finalize, e.g.
+                                // a pending lemma recovery), so there is no result to show off.
+                                if (!hadNothingToDownload) {
+                                    for (i in 3 downTo 1) {
+                                        state = DownloadUiState.Done(countdown = i)
+                                        delay(1_000.milliseconds)
+                                    }
                                 }
                                 onSuccess()
                             } catch (e: CancellationException) {

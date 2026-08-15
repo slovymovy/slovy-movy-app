@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">切换 %1$s 翻译</string>
     <string name="settings_remove_language_confirm_title">移除 %1$s？</string>
     <string name="settings_remove_language_confirm_message">该词典及其全部翻译都会被删除。你随时可以重新下载。</string>
+    <string name="settings_translation_added_restart_title">重启以更新翻译</string>
+    <string name="settings_translation_added_restart_message">要添加新的翻译语言，已保存的单词需要重新获取。重启应用后，它会在启动时更新这些单词。</string>
+    <string name="settings_translation_added_restart_confirm">知道了</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">这还会一并移除 %1$d 种翻译。</item>
         <item quantity="few">这还会一并移除 %1$d 种翻译。</item>

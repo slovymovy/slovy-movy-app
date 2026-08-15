@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -25,7 +26,7 @@ class LemmaRecoveryControllerTest : BaseTest() {
         val releaseFetch = CompletableDeferred<Unit>()
         var recoveryRuns = 0
         val keepAlive = CountingKeepAliveFactory()
-        val controller = LemmaRecoveryController(
+        val controller = controller(
             recovery = recovery(
                 onItemsLoaded = { recoveryRuns++ },
                 onFetch = {
@@ -33,7 +34,7 @@ class LemmaRecoveryControllerTest : BaseTest() {
                     releaseFetch.await()
                 },
             ),
-            acquireKeepAlive = keepAlive::acquire,
+            keepAlive = keepAlive,
         )
 
         val firstJob = controller.ensureStarted()
@@ -52,9 +53,9 @@ class LemmaRecoveryControllerTest : BaseTest() {
     fun ensureStarted_starts_new_job_after_previous_completes() = runBlocking {
         var recoveryRuns = 0
         val keepAlive = CountingKeepAliveFactory()
-        val controller = LemmaRecoveryController(
+        val controller = controller(
             recovery = recovery(onItemsLoaded = { recoveryRuns++ }),
-            acquireKeepAlive = keepAlive::acquire,
+            keepAlive = keepAlive,
         )
 
         val firstJob = controller.ensureStarted()
@@ -73,14 +74,14 @@ class LemmaRecoveryControllerTest : BaseTest() {
         val started = CompletableDeferred<Unit>()
         val releaseFetch = CompletableDeferred<Unit>()
         val keepAlive = CountingKeepAliveFactory()
-        val controller = LemmaRecoveryController(
+        val controller = controller(
             recovery = recovery(
                 onFetch = {
                     started.complete(Unit)
                     releaseFetch.await()
                 },
             ),
-            acquireKeepAlive = keepAlive::acquire,
+            keepAlive = keepAlive,
         )
         val callerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         val controllerJobDeferred = CompletableDeferred<kotlinx.coroutines.Job>()
@@ -106,14 +107,14 @@ class LemmaRecoveryControllerTest : BaseTest() {
         val started = CompletableDeferred<Unit>()
         val releaseFetch = CompletableDeferred<Unit>()
         val keepAlive = CountingKeepAliveFactory()
-        val controller = LemmaRecoveryController(
+        val controller = controller(
             recovery = recovery(
                 onFetch = {
                     started.complete(Unit)
                     releaseFetch.await()
                 },
             ),
-            acquireKeepAlive = keepAlive::acquire,
+            keepAlive = keepAlive,
         )
 
         val controllerJob = controller.ensureStarted()
@@ -124,6 +125,77 @@ class LemmaRecoveryControllerTest : BaseTest() {
         assertTrue(controllerJob.isCancelled, "Closing the controller should cancel in-flight recovery")
         assertEquals(1, keepAlive.acquired)
         assertEquals(1, keepAlive.released)
+    }
+
+    @Test
+    fun pending_marker_is_cleared_when_the_pass_recovers_everything() = runBlocking {
+        val marker = FakePendingMarker(pending = true)
+        val controller = controller(
+            recovery = recovery(),
+            keepAlive = CountingKeepAliveFactory(),
+            marker = marker,
+        )
+
+        withTimeout(1.seconds.inWholeMilliseconds) { controller.ensureStarted().join() }
+
+        assertEquals(1, marker.cleared, "A complete pass must retire the marker it ran for")
+        assertFalse(marker.pending)
+    }
+
+    @Test
+    fun pending_marker_survives_a_pass_that_started_before_it_was_set() = runBlocking {
+        val started = CompletableDeferred<Unit>()
+        val releaseFetch = CompletableDeferred<Unit>()
+        val marker = FakePendingMarker(pending = false)
+        val controller = controller(
+            recovery = recovery(
+                onFetch = {
+                    started.complete(Unit)
+                    releaseFetch.await()
+                },
+            ),
+            keepAlive = CountingKeepAliveFactory(),
+            marker = marker,
+        )
+
+        val job = controller.ensureStarted()
+        withTimeout(1.seconds.inWholeMilliseconds) { started.await() }
+        // The user adds a translation language while the pass is already grouping lemmas for the
+        // previous targets, so this pass cannot have covered the new language.
+        marker.pending = true
+        releaseFetch.complete(Unit)
+        withTimeout(1.seconds.inWholeMilliseconds) { job.join() }
+
+        assertEquals(0, marker.cleared, "A pass that predates the marker must leave it for the next run")
+        assertTrue(marker.pending)
+    }
+
+    @Test
+    fun pending_marker_survives_a_failed_lemma() = runBlocking {
+        val marker = FakePendingMarker(pending = true)
+        val controller = controller(
+            recovery = recovery(onFetch = { throw RuntimeException("offline") }),
+            keepAlive = CountingKeepAliveFactory(),
+            marker = marker,
+        )
+
+        withTimeout(1.seconds.inWholeMilliseconds) { controller.ensureStarted().join() }
+
+        assertEquals(0, marker.cleared, "An incomplete pass must keep the marker for the next start")
+        assertTrue(marker.pending)
+    }
+
+    private fun controller(
+        recovery: LemmaRecovery,
+        keepAlive: CountingKeepAliveFactory,
+        marker: FakePendingMarker = FakePendingMarker(),
+    ): LemmaRecoveryController {
+        return LemmaRecoveryController(
+            recovery = recovery,
+            acquireKeepAlive = keepAlive::acquire,
+            isRecoveryPending = { marker.pending },
+            clearRecoveryPending = { marker.clear() },
+        )
     }
 
     private fun recovery(
@@ -149,6 +221,17 @@ class LemmaRecoveryControllerTest : BaseTest() {
         override val lemma: String,
         override val senseId: String,
     ) : RecoverableSense
+
+    /** Stands in for the `PENDING_LEMMA_RECOVERY` setting the controller reads and retires. */
+    private class FakePendingMarker(var pending: Boolean = false) {
+        var cleared = 0
+            private set
+
+        fun clear() {
+            pending = false
+            cleared++
+        }
+    }
 
     private class CountingKeepAliveFactory {
         var acquired = 0

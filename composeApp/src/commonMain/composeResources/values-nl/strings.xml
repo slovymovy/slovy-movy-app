@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">Schakel %1$s-vertaling in of uit</string>
     <string name="settings_remove_language_confirm_title">%1$s verwijderen?</string>
     <string name="settings_remove_language_confirm_message">Het woordenboek en alle vertalingen worden verwijderd. Je kunt ze altijd opnieuw downloaden.</string>
+    <string name="settings_translation_added_restart_title">Herstart om vertalingen bij te werken</string>
+    <string name="settings_translation_added_restart_message">Opgeslagen woorden moeten opnieuw worden opgehaald om de nieuwe vertaaltaal toe te voegen. Herstart de app; ze worden bij het opstarten bijgewerkt.</string>
+    <string name="settings_translation_added_restart_confirm">Begrepen</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Hierdoor wordt ook %1$d vertaling verwijderd.</item>
         <item quantity="few">Hierdoor worden ook %1$d vertalingen verwijderd.</item>

@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">%1$s-Übersetzung umschalten</string>
     <string name="settings_remove_language_confirm_title">%1$s entfernen?</string>
     <string name="settings_remove_language_confirm_message">Das Wörterbuch und alle seine Übersetzungen werden gelöscht. Du kannst sie jederzeit erneut herunterladen.</string>
+    <string name="settings_translation_added_restart_title">Zum Aktualisieren neu starten</string>
+    <string name="settings_translation_added_restart_message">Gespeicherte Wörter müssen erneut geladen werden, um die neue Übersetzungssprache hinzuzufügen. Starte die App neu, dann werden sie beim Start aktualisiert.</string>
+    <string name="settings_translation_added_restart_confirm">Verstanden</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Dadurch wird auch %1$d Übersetzung entfernt.</item>
         <item quantity="few">Dadurch werden auch %1$d Übersetzungen entfernt.</item>

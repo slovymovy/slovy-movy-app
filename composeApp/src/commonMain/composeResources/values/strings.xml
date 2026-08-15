@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">Toggle %1$s translation</string>
     <string name="settings_remove_language_confirm_title">Remove %1$s?</string>
     <string name="settings_remove_language_confirm_message">The dictionary and all its translations will be deleted. You can download them again anytime.</string>
+    <string name="settings_translation_added_restart_title">Restart to update translations</string>
+    <string name="settings_translation_added_restart_message">Saved words need to be fetched again to add the new translation language. Restart the app and it will update them on startup.</string>
+    <string name="settings_translation_added_restart_confirm">Got it</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">This will also remove %1$d translation.</item>
         <item quantity="few">This will also remove %1$d translations.</item>

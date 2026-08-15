@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">Přepnout překlad %1$s</string>
     <string name="settings_remove_language_confirm_title">Odebrat %1$s?</string>
     <string name="settings_remove_language_confirm_message">Slovník a všechny jeho překlady budou smazány. Kdykoli si je můžeš stáhnout znovu.</string>
+    <string name="settings_translation_added_restart_title">Restartujte pro aktualizaci překladů</string>
+    <string name="settings_translation_added_restart_message">Uložená slova je potřeba stáhnout znovu, aby se přidal nový jazyk překladu. Restartujte aplikaci a při spuštění je aktualizuje.</string>
+    <string name="settings_translation_added_restart_confirm">Rozumím</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Tím se odebere i %1$d překlad.</item>
         <item quantity="few">Tím se odeberou i %1$d překlady.</item>

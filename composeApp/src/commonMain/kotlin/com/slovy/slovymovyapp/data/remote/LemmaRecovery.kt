@@ -77,8 +77,8 @@ class LemmaRecovery internal constructor(
 
     suspend fun recoverAllInstalled(
         onProgress: (LemmaRecoveryProgress) -> Unit = {},
-    ) {
-        PerformanceMonitoring.startTrace("lemma_recovery").useWithResult {
+    ): LemmaRecoveryOutcome {
+        return PerformanceMonitoring.startTrace("lemma_recovery").useWithResult {
             try {
                 val items = itemsProvider()
                 putMetric("items", items.size.toLong())
@@ -88,16 +88,25 @@ class LemmaRecovery internal constructor(
                 putMetric("groups_completed", summary.completed.toLong())
                 putMetric("groups_failed", summary.failed.toLong())
                 markResult(when {
+                    summary.checksFailed -> "check_failed"
                     summary.total == 0 -> "nothing_to_recover"
                     summary.failed > 0 -> "partial_failure"
                     else -> "success"
                 })
+                LemmaRecoveryOutcome(
+                    total = summary.total,
+                    failed = summary.failed,
+                    // A swallowed pre-flight check means whole languages were never inspected, so
+                    // an empty group list proves nothing about what is still missing.
+                    fullyRecovered = summary.failed == 0 && !summary.checksFailed,
+                )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 markResult("failed")
                 AppLogger.warn(TAG, "Unable to load items for recovery", e)
                 // Recovery must never block a completed database download.
+                LemmaRecoveryOutcome(total = 0, failed = 0, fullyRecovered = false)
             }
         }
     }
@@ -112,7 +121,8 @@ class LemmaRecovery internal constructor(
                 if (lemma.isBlank()) null else LemmaGroupKey(item.language, lemma.lowercase()) to item
             }
             .groupBy({ it.first }, { it.second })
-        val groupsToRecover = groupsByDownloadedLemmaStatus(groups)
+        val targets = groupsByDownloadedLemmaStatus(groups)
+        val groupsToRecover = targets.groups
         val total = groupsToRecover.size
         val progressMutex = Mutex()
         var completed = 0
@@ -156,18 +166,30 @@ class LemmaRecovery internal constructor(
             }
         }.awaitAll()
 
-        RecoverySummary(total, completed, failed)
+        RecoverySummary(total, completed, failed, targets.checksFailed)
     }
 
+    /**
+     * Narrows [groups] to the ones whose lemma or translations are missing from the downloaded DBs.
+     *
+     * A check that throws (unreadable or closed DB) is swallowed so recovery can still repair the
+     * languages that are readable, but it is reported through [RecoveryTargets.checksFailed]: the
+     * unchecked languages may still have gaps, so the pass must not claim it recovered everything.
+     */
     private suspend fun groupsByDownloadedLemmaStatus(
         groups: Map<LemmaGroupKey, List<RecoverableSense>>,
-    ): Map<LemmaGroupKey, List<RecoverableSense>> {
+    ): RecoveryTargets {
+        var checksFailed = false
         val byLanguage = groups.entries.groupBy({ it.key.language }) { it.key to it.value }
         val recoverableByLanguage: Map<Language, Set<String>> = byLanguage.mapValues { (language, entries) ->
             if (!hasDownloadedDictionary(language)) return@mapValues emptySet()
 
             val normalizedLemmas = entries.map { it.first.normalizedLemma }.toSet()
             val lemmasMissingDictionary = downloadedLemmasNeedingRecoverySafe(language, normalizedLemmas)
+                ?: run {
+                    checksFailed = true
+                    emptySet()
+                }
 
             val remainingForTranslationCheck = normalizedLemmas - lemmasMissingDictionary
             val senseIdsByLemma = entries
@@ -182,13 +204,20 @@ class LemmaRecovery internal constructor(
                 emptySet()
             } else {
                 downloadedSensesNeedingTranslationRecoverySafe(language, senseIdsByLemma, translationTargets)
+                    ?: run {
+                        checksFailed = true
+                        emptySet()
+                    }
             }
             lemmasMissingDictionary + lemmasMissingTranslations
         }
 
-        return groups.filterKeys { key ->
-            key.normalizedLemma in recoverableByLanguage[key.language].orEmpty()
-        }
+        return RecoveryTargets(
+            groups = groups.filterKeys { key ->
+                key.normalizedLemma in recoverableByLanguage[key.language].orEmpty()
+            },
+            checksFailed = checksFailed,
+        )
     }
 
     /**
@@ -291,10 +320,11 @@ class LemmaRecovery internal constructor(
         }
     }
 
+    /** Returns null when the check itself failed, which is different from "nothing is missing". */
     private suspend fun downloadedLemmasNeedingRecoverySafe(
         language: Language,
         normalizedLemmas: Set<String>,
-    ): Set<String> {
+    ): Set<String>? {
         return try {
             downloadedLemmasNeedingRecovery(language, normalizedLemmas)
         } catch (e: CancellationException) {
@@ -305,15 +335,16 @@ class LemmaRecovery internal constructor(
                 "Unable to check lemmas (${language.code})",
                 e,
             )
-            emptySet()
+            null
         }
     }
 
+    /** Returns null when the check itself failed, which is different from "nothing is missing". */
     private suspend fun downloadedSensesNeedingTranslationRecoverySafe(
         language: Language,
         senseIdsByLemma: Map<String, Set<String>>,
         translationTargets: List<Language>,
-    ): Set<String> {
+    ): Set<String>? {
         return try {
             downloadedSensesNeedingTranslationRecovery(language, senseIdsByLemma, translationTargets)
         } catch (e: CancellationException) {
@@ -324,10 +355,26 @@ class LemmaRecovery internal constructor(
                 "Unable to check translations (${language.code})",
                 e,
             )
-            emptySet()
+            null
         }
     }
 }
+
+/**
+ * Result of a [LemmaRecovery.recoverAllInstalled] pass.
+ *
+ * Per-lemma failures are counted rather than thrown — a broken word must never block a completed
+ * download — so the pass returns normally even when nothing could be fetched. [fullyRecovered] is
+ * false when any lemma group failed, when a pre-flight "is it already installed?" check failed (the
+ * pass then never learned what was missing, so [total] can be 0 while gaps remain), or when the pass
+ * could not run at all. Callers that gate work on recovery having happened (such as the
+ * pending-recovery marker) must keep it pending in that case.
+ */
+data class LemmaRecoveryOutcome(
+    val total: Int,
+    val failed: Int,
+    val fullyRecovered: Boolean,
+)
 
 data class LemmaRecoveryProgress(
     val currentLemma: String?,
@@ -357,6 +404,17 @@ private data class RecoverySummary(
     val total: Int,
     val completed: Int,
     val failed: Int,
+    val checksFailed: Boolean,
+)
+
+/**
+ * The lemma groups that still need fetching, plus whether any "is it already installed?" check
+ * failed while narrowing them down. [checksFailed] means the group list is incomplete by unknown
+ * amount, not that everything is present.
+ */
+private data class RecoveryTargets(
+    val groups: Map<LemmaGroupKey, List<RecoverableSense>>,
+    val checksFailed: Boolean,
 )
 
 private const val TAG = "LemmaRecovery"

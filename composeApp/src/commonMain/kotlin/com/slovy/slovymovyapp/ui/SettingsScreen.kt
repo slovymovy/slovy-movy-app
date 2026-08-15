@@ -84,6 +84,10 @@ data class SettingsUiState(
     // Delete confirmation
     val deleteConfirmation: DeleteConfirmationState? = null,
 
+    // Shown after a translation language is added: every saved word has to be fetched again,
+    // which is slow and invisible in the background, so the next startup does it with progress.
+    val restartForRecoveryVisible: Boolean = false,
+
     // Data export
     val isAppDataExportSupported: Boolean = false,
     val isExportingAppData: Boolean = false,
@@ -401,6 +405,13 @@ class SettingsViewModel(
                 onDictionaryDataChanged(false)
                 loadLearningLanguages()
                 if (language !in previous) {
+                    // Downloading the translation DB only covers senses that live in the
+                    // downloaded dictionary. Every word already fetched into the local DBs has to
+                    // be fetched again for the new language, which is far too slow to run
+                    // unannounced in the background, so mark it pending and ask for a restart:
+                    // startup runs the same pass with visible progress.
+                    settingsRepository.setPendingLemmaRecovery()
+                    state = state.copy(restartForRecoveryVisible = true)
                     downloadMissingTranslationsForInstalledLearningLanguages(current)
                 }
             } catch (e: CancellationException) {
@@ -435,6 +446,10 @@ class SettingsViewModel(
 
     fun dismissDeleteConfirmation() {
         state = state.copy(deleteConfirmation = null)
+    }
+
+    fun dismissRestartForRecovery() {
+        state = state.copy(restartForRecoveryVisible = false)
     }
 
     fun confirmDelete() {
@@ -538,9 +553,12 @@ class SettingsViewModel(
             },
             onTerminal = { keepAlive.release() }
         ) {
-            onDictionaryDataChanged(true)
+            onDictionaryDataChanged(false)
             reloadSettings()
+            // Recovery waits for the translation DBs this kicks off: it reads a missing
+            // translation file as "every saved sense needs fetching".
             downloadMissingTranslationsForLearningLanguage(language)
+            recoverLemmasIfTranslationDataComplete()
         }
     }
 
@@ -641,6 +659,55 @@ class SettingsViewModel(
         ) {
             onDictionaryDataChanged(false)
             loadLearningLanguages()
+            recoverLemmasIfTranslationDataComplete()
+        }
+    }
+
+    /**
+     * Starts lemma recovery after a download, but only once every downloadable translation DB for
+     * the installed learning languages is actually installed.
+     *
+     * Recovery treats a missing translation file as "every saved sense needs this target", so
+     * running it while a translation DB is still downloading would re-fetch the user's whole
+     * saved-word set from the server. Each download's terminal handler calls this again, so the
+     * pass starts as soon as the last one lands.
+     *
+     * A pending marker means the user was already asked to restart for a full re-fetch. That pass
+     * belongs to startup, where it has visible progress, so it is not duplicated here.
+     */
+    private suspend fun recoverLemmasIfTranslationDataComplete() {
+        if (isPendingRecoveryOrUnknown()) return
+
+        val translationLanguages = try {
+            loadTranslationLanguages().toList()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to check translation data before lemma recovery", e)
+            return
+        }
+        val installedLearningLanguages = dataDbManager.listDownloadedDatabases()
+            .filterIsInstance<DatabaseFileInfo.Dictionary>()
+            .map { it.language }
+
+        val allInstalled = installedLearningLanguages.all { language ->
+            loadDownloadableTranslationTargets(language, translationLanguages)
+                .all { target -> dataDbManager.hasTranslation(language, target) }
+        }
+        if (allInstalled) {
+            onDictionaryDataChanged(true)
+        }
+    }
+
+    /** Unreadable settings count as pending: the startup pass is the safe place for the work. */
+    private suspend fun isPendingRecoveryOrUnknown(): Boolean {
+        return try {
+            settingsRepository.isPendingLemmaRecovery()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn(TAG, "Unable to read the pending recovery marker", e)
+            true
         }
     }
 
@@ -1111,6 +1178,7 @@ fun SettingsScreen(
         onDismissError = { viewModel.dismissError() },
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
+        onDismissRestartForRecovery = { viewModel.dismissRestartForRecovery() },
         onAcknowledgements = { viewModel.openAcknowledgements() },
         onDismissAcknowledgements = { viewModel.dismissAcknowledgements() },
         onSendFeedback = { viewModel.openFeedbackDialog() },
@@ -1149,6 +1217,7 @@ fun SettingsScreenContent(
     onDismissError: () -> Unit = {},
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
+    onDismissRestartForRecovery: () -> Unit = {},
     onAcknowledgements: () -> Unit = {},
     onDismissAcknowledgements: () -> Unit = {},
     onSendFeedback: () -> Unit = {},
@@ -1415,6 +1484,19 @@ fun SettingsScreenContent(
                 warning = confirmation.warning?.resolve(),
                 onConfirm = onConfirmDelete,
                 onDismiss = onDismissDeleteConfirmation
+            )
+        }
+
+        if (state.restartForRecoveryVisible) {
+            AlertDialog(
+                onDismissRequest = onDismissRestartForRecovery,
+                title = { Text(stringResource(Res.string.settings_translation_added_restart_title)) },
+                text = { Text(stringResource(Res.string.settings_translation_added_restart_message)) },
+                confirmButton = {
+                    TextButton(onClick = onDismissRestartForRecovery) {
+                        Text(stringResource(Res.string.settings_translation_added_restart_confirm))
+                    }
+                }
             )
         }
 

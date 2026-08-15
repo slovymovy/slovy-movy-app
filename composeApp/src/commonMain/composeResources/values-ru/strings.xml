@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">Переключить перевод %1$s</string>
     <string name="settings_remove_language_confirm_title">Удалить %1$s?</string>
     <string name="settings_remove_language_confirm_message">Словарь и все его переводы будут удалены. Вы сможете скачать их снова в любое время.</string>
+    <string name="settings_translation_added_restart_title">Перезапустите для обновления переводов</string>
+    <string name="settings_translation_added_restart_message">Сохранённые слова нужно загрузить заново, чтобы добавить новый язык перевода. Перезапустите приложение — оно обновит их при запуске.</string>
+    <string name="settings_translation_added_restart_confirm">Понятно</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Это также удалит %1$d перевод.</item>
         <item quantity="few">Это также удалит %1$d перевода.</item>

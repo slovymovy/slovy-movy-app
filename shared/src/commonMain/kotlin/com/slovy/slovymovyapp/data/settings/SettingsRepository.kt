@@ -61,4 +61,15 @@ class SettingsRepository(private val db: AppDatabase) {
     suspend fun setLegacyVoiceMigrationDone() {
         insert(Setting(Setting.Name.LEGACY_VOICE_MIGRATION_DONE, JsonPrimitive(true)))
     }
+
+    suspend fun isPendingLemmaRecovery(): Boolean =
+        getById(Setting.Name.PENDING_LEMMA_RECOVERY)?.value?.jsonPrimitive?.booleanOrNull ?: false
+
+    suspend fun setPendingLemmaRecovery() {
+        insert(Setting(Setting.Name.PENDING_LEMMA_RECOVERY, JsonPrimitive(true)))
+    }
+
+    suspend fun clearPendingLemmaRecovery() {
+        deleteById(Setting.Name.PENDING_LEMMA_RECOVERY)
+    }
 }

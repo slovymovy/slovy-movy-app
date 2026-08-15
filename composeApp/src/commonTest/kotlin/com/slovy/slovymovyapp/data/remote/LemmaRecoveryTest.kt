@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
@@ -129,7 +130,7 @@ class LemmaRecoveryTest : BaseTest() {
             failLemma = "alpha",
         )
 
-        recovery.recoverAllInstalled()
+        val outcome = recovery.recoverAllInstalled()
 
         assertEquals(
             listOf(LemmaCheck(Language.ENGLISH, setOf("alpha", "beta"))),
@@ -138,6 +139,52 @@ class LemmaRecoveryTest : BaseTest() {
         assertEquals(
             listOf(FetchCall(Language.ENGLISH, "beta", listOf(Language.RUSSIAN))),
             fetches,
+        )
+        // Failures are counted rather than thrown, so the outcome is the only signal callers that
+        // must retry later — the pending-recovery marker — can act on.
+        assertEquals(1, outcome.failed, "The failed lemma must be reported in the outcome")
+        assertFalse(
+            outcome.fullyRecovered,
+            "A pass with a failed lemma must not report itself as fully recovered",
+        )
+    }
+
+    @Test
+    fun recoverAllInstalled_reports_fully_recovered_when_every_lemma_succeeds() = runBlocking {
+        val recovery = recovery(
+            items = listOf(
+                TestRecoverableSense(Language.ENGLISH, "alpha", sense1),
+                TestRecoverableSense(Language.ENGLISH, "beta", sense2),
+            ),
+            installedDictionaries = setOf(Language.ENGLISH),
+            lemmasNeedingRecovery = setOf("alpha", "beta"),
+            fetches = mutableListOf(),
+        )
+
+        val outcome = recovery.recoverAllInstalled()
+
+        assertEquals(0, outcome.failed)
+        assertEquals(2, outcome.total)
+        assertTrue(outcome.fullyRecovered, "A clean pass must report itself as fully recovered")
+    }
+
+    @Test
+    fun recoverAllInstalled_reports_not_fully_recovered_when_items_cannot_be_loaded() = runBlocking {
+        val recovery = LemmaRecovery(
+            itemsProvider = { throw RuntimeException("db unavailable") },
+            hasDownloadedDictionary = { true },
+            downloadedLemmasNeedingRecovery = { _, lemmas -> lemmas },
+            downloadedSensesNeedingTranslationRecovery = { _, _, _ -> emptySet() },
+            translationTargetsProvider = { listOf(Language.RUSSIAN) },
+            fetchLemma = { _, _, _ -> },
+            resolveSenses = { _, _, _ -> emptyMap() },
+        )
+
+        val outcome = recovery.recoverAllInstalled()
+
+        assertFalse(
+            outcome.fullyRecovered,
+            "A pass that could not run at all must not retire the caller's pending marker",
         )
     }
 
@@ -241,12 +288,39 @@ class LemmaRecoveryTest : BaseTest() {
             fetches = fetches,
         )
 
-        recovery.recoverAllInstalled()
+        val outcome = recovery.recoverAllInstalled()
 
-        // Dictionary recovery still fetches "alpha"; translation failure is swallowed.
+        // Dictionary recovery still fetches "alpha"; the translation failure does not abort the pass.
         assertEquals(
             listOf(FetchCall(Language.ENGLISH, "alpha", listOf(Language.RUSSIAN))),
             fetches,
+        )
+        assertFalse(
+            outcome.fullyRecovered,
+            "A swallowed translation check leaves unknown gaps, so the pass is not fully recovered",
+        )
+    }
+
+    @Test
+    fun recoverAllInstalled_reports_not_fully_recovered_when_lemma_check_throws() = runBlocking {
+        val fetches = mutableListOf<FetchCall>()
+        val recovery = recovery(
+            items = listOf(TestRecoverableSense(Language.ENGLISH, "alpha", sense1)),
+            installedDictionaries = setOf(Language.ENGLISH),
+            lemmasNeedingRecovery = emptySet(),
+            lemmaCheckThrows = true,
+            fetches = fetches,
+        )
+
+        val outcome = recovery.recoverAllInstalled()
+
+        // Nothing was fetched because nothing could be checked - that must not read as success.
+        assertEquals(emptyList(), fetches)
+        assertEquals(0, outcome.total)
+        assertEquals(0, outcome.failed)
+        assertFalse(
+            outcome.fullyRecovered,
+            "A failed lemma check must keep the caller's pending marker so the next start retries",
         )
     }
 
@@ -487,6 +561,7 @@ class LemmaRecoveryTest : BaseTest() {
         lemmaChecks: MutableList<LemmaCheck> = mutableListOf(),
         translationChecks: MutableList<TranslationCheck> = mutableListOf(),
         translationsMissingFor: Set<String> = emptySet(),
+        lemmaCheckThrows: Boolean = false,
         translationCheckThrows: Boolean = false,
         failLemma: String? = null,
     ): LemmaRecovery {
@@ -495,6 +570,7 @@ class LemmaRecoveryTest : BaseTest() {
             hasDownloadedDictionary = { language -> language in installedDictionaries },
             downloadedLemmasNeedingRecovery = { language, lemmas ->
                 lemmaChecks += LemmaCheck(language, lemmas)
+                if (lemmaCheckThrows) throw RuntimeException("Lemma check failed")
                 lemmas.intersect(lemmasNeedingRecovery)
             },
             downloadedSensesNeedingTranslationRecovery = { language, senseIdsByLemma, targets ->

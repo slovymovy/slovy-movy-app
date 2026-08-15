@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">Activer/désactiver la traduction %1$s</string>
     <string name="settings_remove_language_confirm_title">Supprimer %1$s ?</string>
     <string name="settings_remove_language_confirm_message">Le dictionnaire et toutes ses traductions seront supprimés. Tu peux les retélécharger à tout moment.</string>
+    <string name="settings_translation_added_restart_title">Redémarrez pour mettre à jour les traductions</string>
+    <string name="settings_translation_added_restart_message">Les mots enregistrés doivent être téléchargés à nouveau pour ajouter la nouvelle langue de traduction. Redémarrez l'application : ils seront mis à jour au démarrage.</string>
+    <string name="settings_translation_added_restart_confirm">Compris</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Cela supprimera aussi %1$d traduction.</item>
         <item quantity="few">Cela supprimera aussi %1$d traductions.</item>

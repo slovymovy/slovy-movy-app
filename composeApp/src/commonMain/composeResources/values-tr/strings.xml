@@ -403,6 +403,9 @@
     <string name="settings_toggle_translation_for_language">%1$s çevirisini aç/kapat</string>
     <string name="settings_remove_language_confirm_title">%1$s kaldırılsın mı?</string>
     <string name="settings_remove_language_confirm_message">Sözlük ve tüm çevirileri silinecek. İstediğin zaman yeniden indirebilirsin.</string>
+    <string name="settings_translation_added_restart_title">Çevirileri güncellemek için yeniden başlatın</string>
+    <string name="settings_translation_added_restart_message">Yeni çeviri dilini eklemek için kaydedilen kelimelerin yeniden indirilmesi gerekiyor. Uygulamayı yeniden başlatın, açılışta güncellenecekler.</string>
+    <string name="settings_translation_added_restart_confirm">Anladım</string>
     <plurals name="settings_remove_language_warning">
         <item quantity="one">Bu, %1$d çeviriyi de kaldıracak.</item>
         <item quantity="few">Bu, %1$d çeviriyi de kaldıracak.</item>

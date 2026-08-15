@@ -70,6 +70,28 @@ sealed class DictionaryClientException(message: String, cause: Throwable? = null
     /** Operation was cancelled */
     class CancelledException(message: String = "Operation cancelled") :
         DictionaryClientException(message)
+
+    /**
+     * The server closed the stream before delivering everything the request asked for: no chunk at
+     * all, or a base chunk without the requested translations. The server bails out that way when
+     * no AI provider is configured or db-extract data is missing, and that looks exactly like a
+     * successful base-only response on the wire. Without turning it into an error the last emission
+     * would keep its loading flags set forever, because the flow simply closes afterwards.
+     */
+    class IncompleteStreamException(
+        val lemma: String,
+        val language: Language,
+        val pendingTranslations: List<Language>,
+    ) : DictionaryClientException(
+        buildString {
+            append("Server stream for '$lemma' (${language.code}) ended early")
+            if (pendingTranslations.isNotEmpty()) {
+                append(": translations for ")
+                append(pendingTranslations.joinToString(", ") { it.code })
+                append(" never arrived")
+            }
+        }
+    )
 }
 
 /**
@@ -357,6 +379,7 @@ class DictionaryClient(
                 ),
             )
             var chunkCount = 0L
+            var translationsPending: List<Language> = emptyList()
             try {
                 val url = buildUrl(language, lemma, targets, push)
                 val response = httpClient.get(url)
@@ -378,13 +401,18 @@ class DictionaryClient(
                     chunkCount += 1
                     val isBaseStage = chunk.stage == WordStreamStage.BASE
 
-                    val haveRequiredTranslations = chunk.payload.entries.any {
-                        it.senses.any { s ->
-                            s.translations.keys.containsAll(targets.map { k -> k.code })
-                        }
-                    }
+                    // Union across senses, the same rule the server applies when deciding whether
+                    // anything is still left to translate. Demanding that a single sense carry
+                    // every target would mark a word whose targets are spread over several senses
+                    // as unfinished, and the translated chunk that would clear it never comes.
+                    val deliveredTranslations = chunk.payload.entries
+                        .flatMap { it.senses }
+                        .flatMap { sense -> sense.translations.keys + sense.targetLangDefinitions.keys }
+                        .toSet()
+                    val missingTranslations = targets.filter { it.code !in deliveredTranslations }
                     // After base, we expect translated if translations were requested
-                    val hasMoreChunks = isBaseStage && !haveRequiredTranslations
+                    val hasMoreChunks = isBaseStage && missingTranslations.isNotEmpty()
+                    translationsPending = if (hasMoreChunks) missingTranslations else emptyList()
 
                     processChunk(
                         collector = collector,
@@ -395,6 +423,19 @@ class DictionaryClient(
                         hasMoreChunks = hasMoreChunks,
                         frequency = frequency,
                         localIsOnlineOnly = localIsOnlineOnly
+                    )
+                }
+
+                // The stream is over, so nothing will clear the loading flags of the last emission
+                // any more. An empty stream, or a base chunk whose promised translated chunk never
+                // arrived, has to surface as an error - otherwise every collector waiting for a
+                // settled result (lemma recovery) waits forever and the UI keeps spinning.
+                if (chunkCount == 0L || translationsPending.isNotEmpty()) {
+                    markResult("incomplete_stream")
+                    throw DictionaryClientException.IncompleteStreamException(
+                        lemma = lemma,
+                        language = language,
+                        pendingTranslations = translationsPending,
                     )
                 }
             } finally {
