@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.material3.*
-import androidx.compose.material3.ExposedDropdownMenuAnchorType.Companion.PrimaryEditable
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -70,6 +69,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
+import com.slovy.slovymovyapp.ui.components.LanguageFilterDropdown
 import com.slovy.slovymovyapp.ui.icons.NoDictionaryIcon
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
@@ -597,64 +597,14 @@ fun SearchScreenContent(
                     )
 
                     // Language filter dropdown
-                    if (state.availableLanguages.isNotEmpty() && state.availableLanguages.size > 1) {
-                        val currentLanguage = state.selectedLanguage ?: state.availableLanguages.firstOrNull()
-
-                        ExposedDropdownMenuBox(
+                    if (state.availableLanguages.size > 1) {
+                        LanguageFilterDropdown(
+                            languages = state.availableLanguages,
+                            selectedLanguage = state.selectedLanguage,
                             expanded = state.isLanguageDropdownExpanded,
-                            onExpandedChange = onSetLanguageDropdownExpanded
-                        ) {
-                            Surface(
-                                modifier = Modifier
-                                    .menuAnchor(PrimaryEditable)
-                                    .height(56.dp)
-                                    .widthIn(min = 56.dp),
-                                shape = MaterialTheme.shapes.extraLarge,
-                                tonalElevation = 1.dp,
-                                shadowElevation = 1.dp,
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(start = 16.dp, end = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = currentLanguage?.flag ?: "",
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = state.isLanguageDropdownExpanded
-                                    )
-                                }
-                            }
-                            ExposedDropdownMenu(
-                                expanded = state.isLanguageDropdownExpanded,
-                                onDismissRequest = { onSetLanguageDropdownExpanded(false) },
-                                modifier = Modifier.width(200.dp),
-                                shape = MaterialTheme.shapes.small,
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                shadowElevation = 2.dp
-                            ) {
-                                state.availableLanguages.forEach { language ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(language.flag)
-                                                Text(language.selfName)
-                                            }
-                                        },
-                                        onClick = {
-                                            onLanguageSelected(language)
-                                            onSetLanguageDropdownExpanded(false)
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                                    )
-                                }
-                            }
-                        }
+                            onExpandedChange = onSetLanguageDropdownExpanded,
+                            onLanguageSelected = onLanguageSelected,
+                        )
                     }
                 }
 

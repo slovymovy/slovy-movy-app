@@ -46,6 +46,7 @@ import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.NumberFormatter
 import com.slovy.slovymovyapp.i18n.ShortDuration
+import com.slovy.slovymovyapp.ui.components.LanguageFilterDropdown
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
 import kotlinx.coroutines.Dispatchers
@@ -321,7 +322,6 @@ fun StatsScreenContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StatsHeader(
     state: StatsUiState,
@@ -348,77 +348,13 @@ private fun StatsHeader(
             modifier = Modifier.weight(1f),
         )
         if (state.showLanguagePicker) {
-            StatsLanguageDropdown(
+            LanguageFilterDropdown(
                 languages = state.learningLanguages,
                 selectedLanguage = state.selectedLanguage,
                 expanded = state.languageDropdownExpanded,
                 onExpandedChange = onLanguageDropdownExpandedChange,
-                onSelectedLanguageChange = onSelectedLanguageChange,
+                onLanguageSelected = onSelectedLanguageChange,
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun StatsLanguageDropdown(
-    languages: List<Language>,
-    selectedLanguage: Language,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onSelectedLanguageChange: (Language) -> Unit,
-) {
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = onExpandedChange,
-    ) {
-        Surface(
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                .height(56.dp)
-                .widthIn(min = 56.dp),
-            shape = MaterialTheme.shapes.extraLarge,
-            tonalElevation = 1.dp,
-            shadowElevation = 1.dp,
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        ) {
-            Row(
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = selectedLanguage.flag,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            }
-        }
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) },
-            modifier = Modifier.width(200.dp),
-            shape = MaterialTheme.shapes.small,
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            shadowElevation = 2.dp,
-        ) {
-            languages.forEach { language ->
-                DropdownMenuItem(
-                    text = {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(language.flag)
-                            Text(language.selfName)
-                        }
-                    },
-                    onClick = {
-                        onSelectedLanguageChange(language)
-                        onExpandedChange(false)
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                )
-            }
         }
     }
 }
