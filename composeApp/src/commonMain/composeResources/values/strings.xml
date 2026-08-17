@@ -122,7 +122,7 @@
 
     <string name="download_description_setting_up_library">Setting up your library</string>
     <string name="download_action_download_size">Download %1$s</string>
-    <string name="download_action_skip_recovery">Skip</string>
+    <string name="download_action_skip_recovery">Continue in background</string>
     <string name="download_item_dictionary_name">%1$s Dictionary</string>
     <string name="download_title_ready">Ready to Download</string>
     <string name="download_subtitle_ready">You need these dictionaries to get all set.</string>
@@ -138,13 +138,13 @@
     <string name="download_subtitle_setting_up">Getting your library ready.\nWill take a moment.</string>
     <string name="download_content_desc_loading_info">Loading download information</string>
     <string name="download_content_desc_preparing">Preparing download</string>
-    <string name="download_finalizing_recovering_progress">Refreshing favorites (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Syncing saved words...</string>
     <string name="download_finalizing_updating_lists">Updating word lists…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
-        <item quantity="few">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
-        <item quantity="many">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
-        <item quantity="other">Refreshing favorites (%1$d/%2$d, %3$d failed)</item>
+        <item quantity="one">Syncing saved words... (%1$d/%2$d, %3$d failed)</item>
+        <item quantity="few">Syncing saved words... (%1$d/%2$d, %3$d failed)</item>
+        <item quantity="many">Syncing saved words... (%1$d/%2$d, %3$d failed)</item>
+        <item quantity="other">Syncing saved words... (%1$d/%2$d, %3$d failed)</item>
     </plurals>
     <string name="download_preparing">Preparing...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

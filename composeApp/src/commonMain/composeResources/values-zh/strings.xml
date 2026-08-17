@@ -122,7 +122,7 @@
 
     <string name="download_description_setting_up_library">正在准备你的词库</string>
     <string name="download_action_download_size">下载 %1$s</string>
-    <string name="download_action_skip_recovery">跳过</string>
+    <string name="download_action_skip_recovery">在后台继续</string>
     <string name="download_item_dictionary_name">%1$s 词典</string>
     <string name="download_title_ready">可以开始下载</string>
     <string name="download_subtitle_ready">使用前需要下载以下词典。</string>
@@ -138,13 +138,13 @@
     <string name="download_subtitle_setting_up">正在准备你的词库。\n需要一点时间。</string>
     <string name="download_content_desc_loading_info">正在加载下载信息</string>
     <string name="download_content_desc_preparing">正在准备下载</string>
-    <string name="download_finalizing_recovering_progress">正在刷新我的单词（%1$d/%2$d）</string>
+    <string name="download_finalizing_recovering_progress">正在同步已保存的单词…</string>
     <string name="download_finalizing_updating_lists">正在更新词单…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
-        <item quantity="few">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
-        <item quantity="many">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
-        <item quantity="other">正在刷新我的单词（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="one">正在同步已保存的单词…（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="few">正在同步已保存的单词…（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="many">正在同步已保存的单词…（%1$d/%2$d，%3$d 个失败）</item>
+        <item quantity="other">正在同步已保存的单词…（%1$d/%2$d，%3$d 个失败）</item>
     </plurals>
     <string name="download_preparing">正在准备…</string>
     <string name="download_item_accessibility">%1$s，%2$s</string>

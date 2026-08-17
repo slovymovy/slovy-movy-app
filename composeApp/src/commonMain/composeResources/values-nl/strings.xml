@@ -122,7 +122,7 @@
 
     <string name="download_description_setting_up_library">Je bibliotheek wordt ingesteld</string>
     <string name="download_action_download_size">Download %1$s</string>
-    <string name="download_action_skip_recovery">Overslaan</string>
+    <string name="download_action_skip_recovery">Doorgaan op de achtergrond</string>
     <string name="download_item_dictionary_name">Woordenboek %1$s</string>
     <string name="download_title_ready">Klaar om te downloaden</string>
     <string name="download_subtitle_ready">Je hebt deze woordenboeken nodig om te starten.</string>
@@ -138,13 +138,13 @@
     <string name="download_subtitle_setting_up">Je bibliotheek wordt voorbereid.\nDit duurt even.</string>
     <string name="download_content_desc_loading_info">Downloadinformatie laden</string>
     <string name="download_content_desc_preparing">Download voorbereiden</string>
-    <string name="download_finalizing_recovering_progress">Favorieten bijwerken (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Opgeslagen woorden synchroniseren...</string>
     <string name="download_finalizing_updating_lists">Woordenlijsten bijwerken…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
-        <item quantity="few">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
-        <item quantity="many">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
-        <item quantity="other">Favorieten bijwerken (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="one">Opgeslagen woorden synchroniseren... (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="few">Opgeslagen woorden synchroniseren... (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="many">Opgeslagen woorden synchroniseren... (%1$d/%2$d, %3$d mislukt)</item>
+        <item quantity="other">Opgeslagen woorden synchroniseren... (%1$d/%2$d, %3$d mislukt)</item>
     </plurals>
     <string name="download_preparing">Voorbereiden...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

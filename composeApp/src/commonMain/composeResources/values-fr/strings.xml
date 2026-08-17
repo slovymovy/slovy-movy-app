@@ -122,7 +122,7 @@
 
     <string name="download_description_setting_up_library">Préparation de ta bibliothèque</string>
     <string name="download_action_download_size">Télécharger %1$s</string>
-    <string name="download_action_skip_recovery">Ignorer</string>
+    <string name="download_action_skip_recovery">Continuer en arrière-plan</string>
     <string name="download_item_dictionary_name">Dictionnaire %1$s</string>
     <string name="download_title_ready">Prêt à télécharger</string>
     <string name="download_subtitle_ready">Ces dictionnaires sont nécessaires pour tout mettre en place.</string>
@@ -138,13 +138,13 @@
     <string name="download_subtitle_setting_up">Préparation de ta bibliothèque.\nCela prendra un moment.</string>
     <string name="download_content_desc_loading_info">Chargement des informations de téléchargement</string>
     <string name="download_content_desc_preparing">Préparation du téléchargement</string>
-    <string name="download_finalizing_recovering_progress">Actualisation des favoris (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Synchronisation des mots enregistrés...</string>
     <string name="download_finalizing_updating_lists">Mise à jour des listes de mots…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Actualisation des favoris (%1$d/%2$d, %3$d échec)</item>
-        <item quantity="few">Actualisation des favoris (%1$d/%2$d, %3$d échecs)</item>
-        <item quantity="many">Actualisation des favoris (%1$d/%2$d, %3$d échecs)</item>
-        <item quantity="other">Actualisation des favoris (%1$d/%2$d, %3$d échecs)</item>
+        <item quantity="one">Synchronisation des mots enregistrés... (%1$d/%2$d, %3$d échec)</item>
+        <item quantity="few">Synchronisation des mots enregistrés... (%1$d/%2$d, %3$d échecs)</item>
+        <item quantity="many">Synchronisation des mots enregistrés... (%1$d/%2$d, %3$d échecs)</item>
+        <item quantity="other">Synchronisation des mots enregistrés... (%1$d/%2$d, %3$d échecs)</item>
     </plurals>
     <string name="download_preparing">Préparation...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

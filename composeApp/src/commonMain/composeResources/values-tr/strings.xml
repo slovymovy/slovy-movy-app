@@ -122,7 +122,7 @@
 
     <string name="download_description_setting_up_library">Kitaplığın hazırlanıyor</string>
     <string name="download_action_download_size">%1$s indir</string>
-    <string name="download_action_skip_recovery">Atla</string>
+    <string name="download_action_skip_recovery">Arka planda devam et</string>
     <string name="download_item_dictionary_name">%1$s sözlüğü</string>
     <string name="download_title_ready">İndirmeye hazır</string>
     <string name="download_subtitle_ready">Her şeyin hazır olması için bu sözlükler gerekli.</string>
@@ -138,13 +138,13 @@
     <string name="download_subtitle_setting_up">Kitaplığın hazırlanıyor.\nBiraz zaman alacak.</string>
     <string name="download_content_desc_loading_info">İndirme bilgileri yükleniyor</string>
     <string name="download_content_desc_preparing">İndirme hazırlanıyor</string>
-    <string name="download_finalizing_recovering_progress">Favoriler yenileniyor (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Kaydedilen kelimeler eşitleniyor...</string>
     <string name="download_finalizing_updating_lists">Kelime listeleri güncelleniyor…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Favoriler yenileniyor (%1$d/%2$d, %3$d başarısız)</item>
-        <item quantity="few">Favoriler yenileniyor (%1$d/%2$d, %3$d başarısız)</item>
-        <item quantity="many">Favoriler yenileniyor (%1$d/%2$d, %3$d başarısız)</item>
-        <item quantity="other">Favoriler yenileniyor (%1$d/%2$d, %3$d başarısız)</item>
+        <item quantity="one">Kaydedilen kelimeler eşitleniyor... (%1$d/%2$d, %3$d başarısız)</item>
+        <item quantity="few">Kaydedilen kelimeler eşitleniyor... (%1$d/%2$d, %3$d başarısız)</item>
+        <item quantity="many">Kaydedilen kelimeler eşitleniyor... (%1$d/%2$d, %3$d başarısız)</item>
+        <item quantity="other">Kaydedilen kelimeler eşitleniyor... (%1$d/%2$d, %3$d başarısız)</item>
     </plurals>
     <string name="download_preparing">Hazırlanıyor...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

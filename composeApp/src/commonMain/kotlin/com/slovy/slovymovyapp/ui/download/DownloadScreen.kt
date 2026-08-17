@@ -334,11 +334,7 @@ fun DownloadScreenContent(
                                 recovery.failed,
                             )
                         } else {
-                            stringResource(
-                                Res.string.download_finalizing_recovering_progress,
-                                recovery.completed,
-                                recovery.total,
-                            )
+                            stringResource(Res.string.download_finalizing_recovering_progress)
                         }
                         Text(
                             text = recoveryProgressText,
