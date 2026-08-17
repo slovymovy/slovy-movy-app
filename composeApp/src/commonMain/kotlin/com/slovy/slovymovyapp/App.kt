@@ -429,13 +429,17 @@ fun App(
                                 download = plan::download,
                                 finalize = { onRecoveryProgress, onWordListsSync ->
                                     try {
-                                        // The preference is stored only once the databases are in
-                                        // place, so leaving this screen early — Later, cancel, a
-                                        // failure or system back — keeps the language unselected.
-                                        // It has to land before recovery, which reads the stored
+                                        // The preference is stored only once every translation pair
+                                        // the run needed is in place, so leaving this screen early
+                                        // — Later, cancel, a failed pair or system back — keeps the
+                                        // language unselected. A run with no pair to fetch still
+                                        // gets here and selects it. Recovery cannot undo the write:
+                                        // it runs after, and its failures do not propagate. The
+                                        // write has to land before recovery, which reads the stored
                                         // targets to decide what to fetch.
                                         if (addedTranslation != null) {
                                             settingsRepository.addTranslationLanguage(addedTranslation)
+                                            settingsViewModel.onTranslationLanguageAdded(addedTranslation)
                                         }
                                         favoritesReviewCoordinator.invalidateAllIntakeCache()
                                         container.dictionaryRepository.clearSenseCache()

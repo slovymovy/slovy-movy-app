@@ -371,6 +371,15 @@ class SettingsViewModel(
     }
 
     /**
+     * Mirrors a translation language the download flow has just stored. Without it this
+     * app-scoped state — and the translation targets `App` builds word routes from — would keep
+     * the old selection until the next reload finishes.
+     */
+    fun onTranslationLanguageAdded(language: Language) {
+        state = state.copy(translationLanguages = state.translationLanguages + language)
+    }
+
+    /**
      * Drops [language] from the translation preferences. Selecting a new one is not handled here:
      * it goes through the download flow, which stores the preference only once the databases for
      * the new target are in place.
