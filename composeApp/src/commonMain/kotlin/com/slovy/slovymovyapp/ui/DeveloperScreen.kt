@@ -297,6 +297,8 @@ class DeveloperViewModel(
                 AppLogger.info(TAG, "Action finished: $result", null)
                 message = result
                 duration = SnackbarDuration.Long
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 val error = "$actionName failed: ${describe(e)}"
                 AppLogger.warn(TAG, error, e)
@@ -374,6 +376,8 @@ class DeveloperViewModel(
                     isStatsLoading = false,
                     statsErrorLabel = null,
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Card schedule stats failed", e)
                 state = state.copy(

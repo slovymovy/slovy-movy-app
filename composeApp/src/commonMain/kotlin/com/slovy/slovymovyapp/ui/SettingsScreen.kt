@@ -472,6 +472,8 @@ class SettingsViewModel(
 
                 reloadSettings()
                 showSnackbar(toastMessage)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     errorMessage = UiText.Resource(
@@ -501,6 +503,8 @@ class SettingsViewModel(
                     onDictionaryDataChanged(false)
                     loadLearningLanguages()
                     showSnackbar(toastMsg)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     state = state.copy(
                         errorMessage = UiText.Resource(
@@ -710,6 +714,8 @@ class SettingsViewModel(
             try {
                 refreshVoices(language)
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to load voices for ${language.language.code}", e)
                 updateLanguageState(language) { it.copy(isLoadingVoices = false) }
@@ -824,6 +830,8 @@ class SettingsViewModel(
 
                 voiceFilterHelper.setEnabledVoices(language, newEnabled)
                 updateLanguageState(language) { it.copy(enabledVoiceIds = newEnabled) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     errorMessage = UiText.Resource(
@@ -949,6 +957,8 @@ class SettingsViewModel(
                     feedbackError = null,
                     feedbackDiscussionUrl = response.discussionUrl
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 state = state.copy(
                     feedbackSubmitting = false,
