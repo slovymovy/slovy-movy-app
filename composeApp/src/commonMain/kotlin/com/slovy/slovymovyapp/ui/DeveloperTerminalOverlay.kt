@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.ui.theme.AppElevation
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -150,6 +151,8 @@ fun DeveloperTerminalOverlay(
                         try {
                             onShiftLearningTime(option.duration)
                             AppLogger.info(TAG, "Action finished: Shifted learning time ${option.label}", null)
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
                             AppLogger.warn(TAG, "Shift ${option.label} failed: ${e.toLogLabel()}", e)
                         } finally {
