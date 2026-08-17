@@ -677,6 +677,8 @@ class WordDetailViewModel(
                         feedbackIssueUrl = feedbackResponse.issueUrl
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 val latest = state as? WordDetailUiState.Content ?: return@launch
                 state = latest.copy(
