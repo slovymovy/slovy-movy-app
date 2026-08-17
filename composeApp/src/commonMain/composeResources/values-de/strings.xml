@@ -138,7 +138,7 @@
     <string name="download_subtitle_setting_up">Deine Bibliothek wird vorbereitet.\nDauert nur einen Moment.</string>
     <string name="download_content_desc_loading_info">Download-Informationen werden geladen</string>
     <string name="download_content_desc_preparing">Download wird vorbereitet</string>
-    <string name="download_finalizing_recovering_progress">Gespeicherte Wörter werden synchronisiert...</string>
+    <string name="download_finalizing_recovering_progress">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Wortlisten werden aktualisiert…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d, %3$d fehlgeschlagen)</item>

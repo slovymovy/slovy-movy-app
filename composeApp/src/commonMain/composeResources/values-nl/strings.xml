@@ -138,7 +138,7 @@
     <string name="download_subtitle_setting_up">Je bibliotheek wordt voorbereid.\nDit duurt even.</string>
     <string name="download_content_desc_loading_info">Downloadinformatie laden</string>
     <string name="download_content_desc_preparing">Download voorbereiden</string>
-    <string name="download_finalizing_recovering_progress">Opgeslagen woorden synchroniseren...</string>
+    <string name="download_finalizing_recovering_progress">Opgeslagen woorden synchroniseren... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Woordenlijsten bijwerken…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Opgeslagen woorden synchroniseren... (%1$d/%2$d, %3$d mislukt)</item>

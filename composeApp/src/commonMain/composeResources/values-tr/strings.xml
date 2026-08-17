@@ -138,7 +138,7 @@
     <string name="download_subtitle_setting_up">Kitaplığın hazırlanıyor.\nBiraz zaman alacak.</string>
     <string name="download_content_desc_loading_info">İndirme bilgileri yükleniyor</string>
     <string name="download_content_desc_preparing">İndirme hazırlanıyor</string>
-    <string name="download_finalizing_recovering_progress">Kaydedilen kelimeler eşitleniyor...</string>
+    <string name="download_finalizing_recovering_progress">Kaydedilen kelimeler eşitleniyor... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Kelime listeleri güncelleniyor…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
         <item quantity="one">Kaydedilen kelimeler eşitleniyor... (%1$d/%2$d, %3$d başarısız)</item>
