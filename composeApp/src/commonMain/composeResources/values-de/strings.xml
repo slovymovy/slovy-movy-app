@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Stimmenauswahl konnte nicht aktualisiert werden: %1$s</string>
     <string name="settings_feedback_sent">Feedback gesendet</string>
     <string name="settings_feedback_view">Anzeigen</string>
-    <string name="settings_feedback_comment_required">Kommentar ist erforderlich</string>
+    <string name="feedback_dialog_comment_required">Kommentar ist erforderlich</string>
     <string name="settings_download_cancelled">Download abgebrochen</string>
     <string name="common_search">Suchen</string>
     <string name="common_clear">Löschen</string>

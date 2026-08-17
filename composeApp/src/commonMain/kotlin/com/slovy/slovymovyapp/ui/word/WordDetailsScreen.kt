@@ -50,7 +50,10 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.AppNavigationBar
+import com.slovy.slovymovyapp.ui.FeedbackFormState
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
@@ -84,12 +87,7 @@ sealed interface WordDetailUiState {
         val cardError: String? = null,
         val translationLoading: Boolean = false,
         val translationError: String? = null,
-        val feedbackDialogVisible: Boolean = false,
-        val feedbackComment: String = "",
-        val feedbackEmail: String = "",
-        val feedbackSubmitting: Boolean = false,
-        val feedbackError: String? = null,
-        val feedbackIssueUrl: String? = null,
+        val feedback: FeedbackFormState = FeedbackFormState(),
         val isRefreshing: Boolean = false
     ) : WordDetailUiState
 }
@@ -400,12 +398,7 @@ class WordDetailViewModel(
                 cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
                 translationLoading = result.isTranslationLoading,
                 translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null,
-                feedbackDialogVisible = current?.feedbackDialogVisible ?: false,
-                feedbackComment = current?.feedbackComment ?: "",
-                feedbackEmail = current?.feedbackEmail ?: "",
-                feedbackSubmitting = current?.feedbackSubmitting ?: false,
-                feedbackError = current?.feedbackError,
-                feedbackIssueUrl = current?.feedbackIssueUrl
+                feedback = current?.feedback ?: FeedbackFormState()
             )
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
@@ -604,27 +597,14 @@ class WordDetailViewModel(
 
     fun openFeedbackDialog() {
         val current = state as? WordDetailUiState.Content ?: return
-        state = current.copy(
-            feedbackDialogVisible = true,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackSubmitting = false,
-            feedbackError = null,
-            feedbackIssueUrl = null
-        )
+        state = current.copy(feedback = current.feedback.opened())
     }
 
     fun dismissFeedbackDialog() {
         val current = state as? WordDetailUiState.Content ?: return
-        if (current.feedbackSubmitting) return
-        val issueUrl = current.feedbackIssueUrl
-        state = current.copy(
-            feedbackDialogVisible = false,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackError = null,
-            feedbackIssueUrl = null
-        )
+        if (current.feedback.submitting) return
+        val issueUrl = current.feedback.resultUrl
+        state = current.copy(feedback = current.feedback.dismissed())
         if (issueUrl != null) {
             viewModelScope.launch {
                 val result = snackbarHostState.showSnackbar(
@@ -641,25 +621,30 @@ class WordDetailViewModel(
 
     fun updateFeedbackComment(comment: String) {
         val current = state as? WordDetailUiState.Content ?: return
-        state = current.copy(feedbackComment = comment, feedbackError = null)
+        state = current.copy(feedback = current.feedback.withComment(comment))
     }
 
     fun updateFeedbackEmail(email: String) {
         val current = state as? WordDetailUiState.Content ?: return
-        state = current.copy(feedbackEmail = email)
+        state = current.copy(feedback = current.feedback.withEmail(email))
     }
 
     fun submitFeedback() {
         val current = state as? WordDetailUiState.Content ?: return
-        if (current.feedbackSubmitting) return
+        val form = current.feedback
+        if (form.submitting) return
 
-        val comment = current.feedbackComment.trim()
+        val comment = form.trimmedComment
         if (comment.isBlank()) {
-            state = current.copy(feedbackError = "Comment is required")
+            state = current.copy(
+                feedback = form.submissionFailed(
+                    UiText.Resource(Res.string.feedback_dialog_comment_required)
+                )
+            )
             return
         }
 
-        state = current.copy(feedbackSubmitting = true, feedbackError = null)
+        state = current.copy(feedback = form.submissionStarted())
         viewModelScope.launch {
             try {
                 val feedbackResponse = dictionaryClient.sendFeedback(
@@ -667,14 +652,12 @@ class WordDetailViewModel(
                     lemma = lemma,
                     translationTargets = requestedTranslationLanguages,
                     comment = comment,
-                    email = current.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                    email = form.trimmedEmail
                 )
                 val latest = state as? WordDetailUiState.Content
                 if (latest != null) {
                     state = latest.copy(
-                        feedbackSubmitting = false,
-                        feedbackError = null,
-                        feedbackIssueUrl = feedbackResponse.issueUrl
+                        feedback = latest.feedback.submissionSucceeded(feedbackResponse.issueUrl)
                     )
                 }
             } catch (e: CancellationException) {
@@ -682,8 +665,9 @@ class WordDetailViewModel(
             } catch (e: Exception) {
                 val latest = state as? WordDetailUiState.Content ?: return@launch
                 state = latest.copy(
-                    feedbackSubmitting = false,
-                    feedbackError = NetworkErrorClassifier.userMessage(e)
+                    feedback = latest.feedback.submissionFailed(
+                        UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    )
                 )
             }
         }
@@ -1087,16 +1071,16 @@ fun WordDetailScreenContent(
         )
     }
 
-    if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
+    if (state is WordDetailUiState.Content && state.feedback.dialogVisible) {
         com.slovy.slovymovyapp.ui.FeedbackDialog(
             title = stringResource(Res.string.word_details_feedback_title),
             commentPlaceholder = stringResource(Res.string.word_details_feedback_placeholder),
             commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-            comment = state.feedbackComment,
-            email = state.feedbackEmail,
-            isSending = state.feedbackSubmitting,
-            error = state.feedbackError,
-            resultUrl = state.feedbackIssueUrl,
+            comment = state.feedback.comment,
+            email = state.feedback.email,
+            isSending = state.feedback.submitting,
+            error = state.feedback.error?.resolve(),
+            resultUrl = state.feedback.resultUrl,
             onCommentChange = onFeedbackCommentChange,
             onEmailChange = onFeedbackEmailChange,
             onDismiss = onDismissFeedback,

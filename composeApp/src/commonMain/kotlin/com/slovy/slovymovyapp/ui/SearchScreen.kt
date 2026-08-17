@@ -67,6 +67,8 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.components.AppSearchBar
 import com.slovy.slovymovyapp.ui.components.EmptyState
 import com.slovy.slovymovyapp.ui.components.LanguageFilterDropdown
@@ -105,12 +107,7 @@ data class SearchUiState(
     // Gates the empty-state body so it renders once fully populated instead of flashing
     // the favorites/"start typing" fallback before curated lists finish loading.
     val isEmptyStateLoading: Boolean = false,
-    val listSuggestionDialogVisible: Boolean = false,
-    val listSuggestionComment: String = "",
-    val listSuggestionEmail: String = "",
-    val listSuggestionSubmitting: Boolean = false,
-    val listSuggestionError: String? = null,
-    val listSuggestionIssueUrl: String? = null
+    val listSuggestion: FeedbackFormState = FeedbackFormState()
 )
 
 class SearchViewModel(
@@ -289,61 +286,48 @@ class SearchViewModel(
     }
 
     fun openListSuggestionDialog() {
-        state = state.copy(
-            listSuggestionDialogVisible = true,
-            listSuggestionComment = "",
-            listSuggestionEmail = "",
-            listSuggestionSubmitting = false,
-            listSuggestionError = null,
-            listSuggestionIssueUrl = null
-        )
+        state = state.copy(listSuggestion = state.listSuggestion.opened())
     }
 
     fun dismissListSuggestionDialog() {
-        if (state.listSuggestionSubmitting) return
-        state = state.copy(
-            listSuggestionDialogVisible = false,
-            listSuggestionComment = "",
-            listSuggestionEmail = "",
-            listSuggestionError = null,
-            listSuggestionIssueUrl = null
-        )
+        if (state.listSuggestion.submitting) return
+        state = state.copy(listSuggestion = state.listSuggestion.dismissed())
     }
 
     fun updateListSuggestionComment(comment: String) {
-        state = state.copy(listSuggestionComment = comment, listSuggestionError = null)
+        state = state.copy(listSuggestion = state.listSuggestion.withComment(comment))
     }
 
     fun updateListSuggestionEmail(email: String) {
-        state = state.copy(listSuggestionEmail = email)
+        state = state.copy(listSuggestion = state.listSuggestion.withEmail(email))
     }
 
     fun submitListSuggestion() {
-        if (state.listSuggestionSubmitting) return
+        val form = state.listSuggestion
+        if (form.submitting) return
         val language = state.selectedLanguage ?: return
 
-        val comment = state.listSuggestionComment.trim()
+        val comment = form.trimmedComment
         if (comment.isBlank()) return
 
-        state = state.copy(listSuggestionSubmitting = true, listSuggestionError = null)
+        state = state.copy(listSuggestion = form.submissionStarted())
         viewModelScope.launch {
             try {
                 val response = dictionaryClient.sendListSuggestion(
                     language = language,
                     comment = comment,
-                    email = state.listSuggestionEmail.trim().takeIf { it.isNotBlank() }
+                    email = form.trimmedEmail
                 )
                 state = state.copy(
-                    listSuggestionSubmitting = false,
-                    listSuggestionError = null,
-                    listSuggestionIssueUrl = response.issueUrl
+                    listSuggestion = state.listSuggestion.submissionSucceeded(response.issueUrl)
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    listSuggestionSubmitting = false,
-                    listSuggestionError = NetworkErrorClassifier.userMessage(e)
+                    listSuggestion = state.listSuggestion.submissionFailed(
+                        UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    )
                 )
             }
         }
@@ -672,16 +656,16 @@ fun SearchScreenContent(
             }
         }
 
-    if (state.listSuggestionDialogVisible) {
+    if (state.listSuggestion.dialogVisible) {
         FeedbackDialog(
             title = stringResource(Res.string.search_suggest_list_dialog_title),
             commentPlaceholder = stringResource(Res.string.search_suggest_list_placeholder),
             commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-            comment = state.listSuggestionComment,
-            email = state.listSuggestionEmail,
-            isSending = state.listSuggestionSubmitting,
-            error = state.listSuggestionError,
-            resultUrl = state.listSuggestionIssueUrl,
+            comment = state.listSuggestion.comment,
+            email = state.listSuggestion.email,
+            isSending = state.listSuggestion.submitting,
+            error = state.listSuggestion.error?.resolve(),
+            resultUrl = state.listSuggestion.resultUrl,
             onCommentChange = onListSuggestionCommentChange,
             onEmailChange = onListSuggestionEmailChange,
             onDismiss = onDismissListSuggestion,

@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Échec de la mise à jour de la sélection de voix : %1$s</string>
     <string name="settings_feedback_sent">Avis envoyé</string>
     <string name="settings_feedback_view">Voir</string>
-    <string name="settings_feedback_comment_required">Le commentaire est obligatoire</string>
+    <string name="feedback_dialog_comment_required">Le commentaire est obligatoire</string>
     <string name="settings_download_cancelled">Téléchargement annulé</string>
     <string name="common_search">Rechercher</string>
     <string name="common_clear">Effacer</string>
