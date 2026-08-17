@@ -599,6 +599,8 @@ fun App(
                                     navController.navigate(AppDestination.SetupLanguages) {
                                         popUpTo<AppDestination.Welcome> { inclusive = true }
                                     }
+                                } catch (e: CancellationException) {
+                                    throw e
                                 } catch (_: Exception) {
                                     viewModel.onError()
                                 }

@@ -709,6 +709,8 @@ class FavoritesViewModel(
                     error = error
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Throwable) {
             updateSense(item.senseId) {
                 it.copy(
