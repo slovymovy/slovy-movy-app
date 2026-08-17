@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Preparando tu biblioteca</string>
     <string name="download_action_download_size">Descargar %1$s</string>
+    <string name="download_action_skip_recovery">Omitir</string>
     <string name="download_item_dictionary_name">Diccionario %1$s</string>
     <string name="download_title_ready">Listo para descargar</string>
     <string name="download_subtitle_ready">Necesitas estos diccionarios para terminar la configuración.</string>

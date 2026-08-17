@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.getPluralString
@@ -371,21 +370,22 @@ class SettingsViewModel(
         state = state.copy(isTranslationLanguagesExpanded = !state.isTranslationLanguagesExpanded)
     }
 
-    fun toggleTranslationLanguage(language: Language) {
+    /**
+     * Drops [language] from the translation preferences. Selecting a new one is not handled here:
+     * it goes through the download flow, which stores the preference only once the databases for
+     * the new target are in place.
+     */
+    fun removeTranslationLanguage(language: Language) {
         val previous = state.translationLanguages
-        val updated = if (language in previous) previous - language else previous + language
+        if (language !in previous) return
+        val updated = previous - language
         state = state.copy(translationLanguages = updated)
         translationSaveJob?.cancel()
         translationSaveJob = viewModelScope.launch {
             try {
-                val current = state.translationLanguages
-                val jsonArray = JsonArray(current.sortedBy { it.ordinal }.map { JsonPrimitive(it.code) })
-                settingsRepository.insert(Setting(Setting.Name.LANGUAGE, jsonArray))
+                settingsRepository.setTranslationLanguages(updated)
                 onDictionaryDataChanged(false)
                 loadLearningLanguages()
-                if (language !in previous) {
-                    downloadMissingTranslationsForInstalledLearningLanguages(current)
-                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -539,22 +539,6 @@ class SettingsViewModel(
     private suspend fun downloadMissingTranslationsForLearningLanguage(language: Language) {
         val translationLanguages = loadTranslationLanguagesForAutoDownload() ?: return
         downloadMissingTranslationsForLearningLanguage(language, translationLanguages)
-    }
-
-    private suspend fun downloadMissingTranslationsForInstalledLearningLanguages(
-        translationLanguages: Collection<Language>
-    ) {
-        if (translationLanguages.isEmpty()) return
-
-        val translationList = translationLanguages.toList()
-        val installedLearningLanguages = dataDbManager.listDownloadedDatabases()
-            .filterIsInstance<DatabaseFileInfo.Dictionary>()
-            .map { it.language }
-            .sortedBy { it.ordinal }
-
-        installedLearningLanguages.forEach { language ->
-            downloadMissingTranslationsForLearningLanguage(language, translationList)
-        }
     }
 
     private suspend fun downloadMissingTranslationsForLearningLanguage(

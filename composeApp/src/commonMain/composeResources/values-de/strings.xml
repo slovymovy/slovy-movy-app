@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Deine Bibliothek wird eingerichtet</string>
     <string name="download_action_download_size">%1$s herunterladen</string>
+    <string name="download_action_skip_recovery">Überspringen</string>
     <string name="download_item_dictionary_name">Wörterbuch %1$s</string>
     <string name="download_title_ready">Bereit zum Herunterladen</string>
     <string name="download_subtitle_ready">Du brauchst diese Wörterbücher, um alles einzurichten.</string>

@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">正在准备你的词库</string>
     <string name="download_action_download_size">下载 %1$s</string>
+    <string name="download_action_skip_recovery">跳过</string>
     <string name="download_item_dictionary_name">%1$s 词典</string>
     <string name="download_title_ready">可以开始下载</string>
     <string name="download_subtitle_ready">使用前需要下载以下词典。</string>

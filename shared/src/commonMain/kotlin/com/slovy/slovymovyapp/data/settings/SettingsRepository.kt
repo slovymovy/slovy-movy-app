@@ -44,6 +44,16 @@ class SettingsRepository(private val db: AppDatabase) {
     suspend fun getTranslationLanguages(): Set<Language> =
         getTranslationLanguagesOrNull().orEmpty()
 
+    suspend fun setTranslationLanguages(languages: Collection<Language>) {
+        val codes = languages.distinct().sortedBy { it.ordinal }.map { JsonPrimitive(it.code) }
+        insert(Setting(Setting.Name.LANGUAGE, JsonArray(codes)))
+    }
+
+    /** Adds [language] to the stored translation languages, leaving the existing ones untouched. */
+    suspend fun addTranslationLanguage(language: Language) {
+        setTranslationLanguages(getTranslationLanguages() + language)
+    }
+
     suspend fun deleteById(id: Setting.Name) = withContext(Dispatchers.IO) {
         db.settingsQueries.deleteById(id)
     }

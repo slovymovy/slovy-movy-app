@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Připravujeme tvou knihovnu</string>
     <string name="download_action_download_size">Stáhnout %1$s</string>
+    <string name="download_action_skip_recovery">Přeskočit</string>
     <string name="download_item_dictionary_name">Slovník %1$s</string>
     <string name="download_title_ready">Připraveno ke stažení</string>
     <string name="download_subtitle_ready">K plnému nastavení potřebuješ tyto slovníky.</string>

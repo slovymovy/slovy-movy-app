@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.remote.*
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -53,6 +54,10 @@ class DownloadViewModel(
     private var terminalHandled = false
     private var failedDuringLoadItems = false
     private var downloadStartedAtMs: Long = 0L
+    private var finalizeJob: Job? = null
+
+    /** Guards [onSuccess] against running twice when a skip races the finalizing step finishing. */
+    private var successHandled = false
 
     // Held for the lifetime of one download attempt — from beginDownload() until the terminal
     // handler runs. Bridges the gap between the last per-file download (which would otherwise
@@ -159,21 +164,7 @@ class DownloadViewModel(
                                     "bytes" to (entry?.progress?.totalBytes ?: 0L),
                                 ),
                             )
-                            try {
-                                state = DownloadUiState.Finalizing()
-                                finalize(::updateRecoveryProgress, ::updateWordListsSyncing)
-                                for (i in 3 downTo 1) {
-                                    state = DownloadUiState.Done(countdown = i)
-                                    delay(1_000.milliseconds)
-                                }
-                                onSuccess()
-                            } catch (e: CancellationException) {
-                                throw e
-                            } catch (e: Exception) {
-                                state = DownloadUiState.Failed(e)
-                            } finally {
-                                releaseKeepAlive()
-                            }
+                            startFinalizing()
                         }
                     }
 
@@ -207,6 +198,50 @@ class DownloadViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * Runs the post-download work in its own job so [skipFinalizing] can stop waiting for it
+     * without touching the download collector.
+     */
+    private fun startFinalizing() {
+        finalizeJob = viewModelScope.launch {
+            try {
+                state = DownloadUiState.Finalizing()
+                finalize(::updateRecoveryProgress, ::updateWordListsSyncing)
+                for (i in 3 downTo 1) {
+                    state = DownloadUiState.Done(countdown = i)
+                    delay(1_000.milliseconds)
+                }
+                finishSuccessfully()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                state = DownloadUiState.Failed(e)
+            } finally {
+                releaseKeepAlive()
+            }
+        }
+    }
+
+    /**
+     * Leaves the finalizing step without waiting for it to end. Only this screen's wait is
+     * cancelled — lemma recovery runs in `LemmaRecoveryController`'s own scope with its own process
+     * keep-alive, so it carries on in the background.
+     */
+    fun skipFinalizing() {
+        if (state !is DownloadUiState.Finalizing || successHandled) return
+        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_RECOVERY_SKIP_CLICK, analyticsParams)
+        finalizeJob?.cancel()
+        finalizeJob = null
+        releaseKeepAlive()
+        viewModelScope.launch { finishSuccessfully() }
+    }
+
+    private suspend fun finishSuccessfully() {
+        if (successHandled) return
+        successHandled = true
+        onSuccess()
     }
 
     fun updateRecoveryProgress(progress: LemmaRecoveryProgress) {

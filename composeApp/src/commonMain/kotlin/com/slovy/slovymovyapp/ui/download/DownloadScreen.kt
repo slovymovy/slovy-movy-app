@@ -44,6 +44,7 @@ fun DownloadScreen(
         onDownloadClick = { viewModel.startDownload() },
         onLaterClick = onLaterClick,
         onCancelClick = { viewModel.cancelDownload() },
+        onSkipFinalizingClick = { viewModel.skipFinalizing() },
         onRetryClick = { viewModel.retry() },
         onCloseClick = { viewModel.onDismissCancel() },
         onErrorLaterClick = { viewModel.onDismissError() }
@@ -60,15 +61,20 @@ fun DownloadScreenContent(
     onDownloadClick: () -> Unit = {},
     onLaterClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
+    onSkipFinalizingClick: () -> Unit = {},
     onRetryClick: () -> Unit = {},
     onCloseClick: () -> Unit = {},
     onErrorLaterClick: () -> Unit = {},
 ) {
     val descriptionText = description ?: stringResource(Res.string.download_description_setting_up_library)
+    // Skipping is offered once recovery reports in: it is the long, resumable part of finalizing,
+    // whereas the word-list sync before it must not be left half-done.
+    val canSkipFinalizing = state is DownloadUiState.Finalizing && state.recovery != null
     val hasActions = state is DownloadUiState.ReadyToDownload ||
             state is DownloadUiState.Running ||
             state is DownloadUiState.Failed ||
-            state is DownloadUiState.Cancelled
+            state is DownloadUiState.Cancelled ||
+            canSkipFinalizing
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -141,6 +147,17 @@ fun DownloadScreenContent(
                                     stringResource(Res.string.common_close),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                        }
+
+                        is DownloadUiState.Finalizing -> {
+                            if (canSkipFinalizing) {
+                                TextButton(onClick = onSkipFinalizingClick) {
+                                    Text(
+                                        stringResource(Res.string.download_action_skip_recovery),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }

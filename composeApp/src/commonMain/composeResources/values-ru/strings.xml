@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Настраиваем вашу библиотеку</string>
     <string name="download_action_download_size">Скачать %1$s</string>
+    <string name="download_action_skip_recovery">Пропустить</string>
     <string name="download_item_dictionary_name">Словарь %1$s</string>
     <string name="download_title_ready">Словари готовы к скачиванию</string>
     <string name="download_subtitle_ready">Чтобы начать, нужно скачать эти словари.</string>

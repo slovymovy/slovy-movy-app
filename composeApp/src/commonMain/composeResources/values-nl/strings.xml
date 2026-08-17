@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Je bibliotheek wordt ingesteld</string>
     <string name="download_action_download_size">Download %1$s</string>
+    <string name="download_action_skip_recovery">Overslaan</string>
     <string name="download_item_dictionary_name">Woordenboek %1$s</string>
     <string name="download_title_ready">Klaar om te downloaden</string>
     <string name="download_subtitle_ready">Je hebt deze woordenboeken nodig om te starten.</string>

@@ -15,8 +15,13 @@ internal sealed interface AppDestination {
     @Serializable
     data object Welcome : AppDestination
 
+    /**
+     * Downloads the databases the app is missing. With [addedTranslationCode] set, the run comes
+     * from Settings and adds that one translation target to every installed dictionary, returning
+     * to Settings when it ends; otherwise it is the initial setup for the chosen learning language.
+     */
     @Serializable
-    data object DownloadSetup : AppDestination
+    data class DownloadSetup(val addedTranslationCode: String?) : AppDestination
 
     @Serializable
     data object SetupLanguages : AppDestination
