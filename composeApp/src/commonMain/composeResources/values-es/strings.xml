@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Preparando tu biblioteca</string>
     <string name="download_action_download_size">Descargar %1$s</string>
+    <string name="download_action_skip_recovery">Continuar en segundo plano</string>
     <string name="download_item_dictionary_name">Diccionario %1$s</string>
     <string name="download_title_ready">Listo para descargar</string>
     <string name="download_subtitle_ready">Necesitas estos diccionarios para terminar la configuración.</string>
@@ -137,13 +138,13 @@
     <string name="download_subtitle_setting_up">Preparando tu biblioteca.\nTardará un momento.</string>
     <string name="download_content_desc_loading_info">Cargando información de la descarga</string>
     <string name="download_content_desc_preparing">Preparando la descarga</string>
-    <string name="download_finalizing_recovering_progress">Actualizando favoritos (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Sincronizando palabras guardadas... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Actualizando las listas de palabras…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Actualizando favoritos (%1$d/%2$d, %3$d con error)</item>
-        <item quantity="few">Actualizando favoritos (%1$d/%2$d, %3$d con error)</item>
-        <item quantity="many">Actualizando favoritos (%1$d/%2$d, %3$d con error)</item>
-        <item quantity="other">Actualizando favoritos (%1$d/%2$d, %3$d con error)</item>
+        <item quantity="one">Sincronizando palabras guardadas... (%1$d/%2$d, %3$d con error)</item>
+        <item quantity="few">Sincronizando palabras guardadas... (%1$d/%2$d, %3$d con error)</item>
+        <item quantity="many">Sincronizando palabras guardadas... (%1$d/%2$d, %3$d con error)</item>
+        <item quantity="other">Sincronizando palabras guardadas... (%1$d/%2$d, %3$d con error)</item>
     </plurals>
     <string name="download_preparing">Preparando...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

@@ -33,6 +33,11 @@ import com.slovy.slovymovyapp.ui.developer.DeveloperOptionsCard
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    /**
+     * Called when the user picks a translation language they do not have yet. The caller runs the
+     * download flow, which is what stores the preference once the databases are in place.
+     */
+    onAddTranslationLanguage: (Language) -> Unit,
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
@@ -62,7 +67,13 @@ fun SettingsScreen(
         onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
         onCancelDownload = { key -> viewModel.cancelDownload(key) },
         onDeleteTranslation = { src, tgt -> viewModel.deleteTranslation(src, tgt) },
-        onToggleTranslationLanguage = { viewModel.toggleTranslationLanguage(it) },
+        onToggleTranslationLanguage = { language ->
+            if (language in viewModel.state.translationLanguages) {
+                viewModel.removeTranslationLanguage(language)
+            } else {
+                onAddTranslationLanguage(language)
+            }
+        },
         onToggleTranslationLanguagesExpanded = { viewModel.toggleTranslationLanguagesExpanded() },
         onLanguageExpand = { viewModel.toggleLanguageExpansion(it) },
         onTestVoice = { voice -> viewModel.testVoice(voice) },

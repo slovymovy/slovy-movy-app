@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Deine Bibliothek wird eingerichtet</string>
     <string name="download_action_download_size">%1$s herunterladen</string>
+    <string name="download_action_skip_recovery">Im Hintergrund fortfahren</string>
     <string name="download_item_dictionary_name">Wörterbuch %1$s</string>
     <string name="download_title_ready">Bereit zum Herunterladen</string>
     <string name="download_subtitle_ready">Du brauchst diese Wörterbücher, um alles einzurichten.</string>
@@ -137,13 +138,13 @@
     <string name="download_subtitle_setting_up">Deine Bibliothek wird vorbereitet.\nDauert nur einen Moment.</string>
     <string name="download_content_desc_loading_info">Download-Informationen werden geladen</string>
     <string name="download_content_desc_preparing">Download wird vorbereitet</string>
-    <string name="download_finalizing_recovering_progress">Favoriten werden aktualisiert (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Wortlisten werden aktualisiert…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Favoriten werden aktualisiert (%1$d/%2$d, %3$d fehlgeschlagen)</item>
-        <item quantity="few">Favoriten werden aktualisiert (%1$d/%2$d, %3$d fehlgeschlagen)</item>
-        <item quantity="many">Favoriten werden aktualisiert (%1$d/%2$d, %3$d fehlgeschlagen)</item>
-        <item quantity="other">Favoriten werden aktualisiert (%1$d/%2$d, %3$d fehlgeschlagen)</item>
+        <item quantity="one">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d, %3$d fehlgeschlagen)</item>
+        <item quantity="few">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d, %3$d fehlgeschlagen)</item>
+        <item quantity="many">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d, %3$d fehlgeschlagen)</item>
+        <item quantity="other">Gespeicherte Wörter werden synchronisiert... (%1$d/%2$d, %3$d fehlgeschlagen)</item>
     </plurals>
     <string name="download_preparing">Wird vorbereitet...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

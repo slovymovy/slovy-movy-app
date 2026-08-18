@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Připravujeme tvou knihovnu</string>
     <string name="download_action_download_size">Stáhnout %1$s</string>
+    <string name="download_action_skip_recovery">Pokračovat na pozadí</string>
     <string name="download_item_dictionary_name">Slovník %1$s</string>
     <string name="download_title_ready">Připraveno ke stažení</string>
     <string name="download_subtitle_ready">K plnému nastavení potřebuješ tyto slovníky.</string>
@@ -137,13 +138,13 @@
     <string name="download_subtitle_setting_up">Připravujeme tvou knihovnu.\nBude to chvíli trvat.</string>
     <string name="download_content_desc_loading_info">Načítání informací o stahování</string>
     <string name="download_content_desc_preparing">Příprava stahování</string>
-    <string name="download_finalizing_recovering_progress">Obnovování oblíbených (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Synchronizace uložených slov... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Aktualizace seznamů slov…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Obnovování oblíbených (%1$d/%2$d, %3$d selhalo)</item>
-        <item quantity="few">Obnovování oblíbených (%1$d/%2$d, %3$d selhaly)</item>
-        <item quantity="many">Obnovování oblíbených (%1$d/%2$d, %3$d selhalo)</item>
-        <item quantity="other">Obnovování oblíbených (%1$d/%2$d, %3$d selhalo)</item>
+        <item quantity="one">Synchronizace uložených slov... (%1$d/%2$d, %3$d selhalo)</item>
+        <item quantity="few">Synchronizace uložených slov... (%1$d/%2$d, %3$d selhaly)</item>
+        <item quantity="many">Synchronizace uložených slov... (%1$d/%2$d, %3$d selhalo)</item>
+        <item quantity="other">Synchronizace uložených slov... (%1$d/%2$d, %3$d selhalo)</item>
     </plurals>
     <string name="download_preparing">Příprava...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>

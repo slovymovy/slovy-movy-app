@@ -246,7 +246,7 @@ fun App(
                 val needsDownload = !dataManager.hasDictionary(dictionary) ||
                         downloadableTargets.any { !dataManager.hasTranslation(dictionary, it) }
                 return if (needsDownload) {
-                    AppDestination.DownloadSetup
+                    AppDestination.DownloadSetup(addedTranslationCode = null)
                 } else {
                     AppDestination.Search
                 }
@@ -344,152 +344,135 @@ fun App(
                                 )
                                 nativeLanguages = native
                                 dictionaryLanguage = learning
-                                navController.navigate(AppDestination.DownloadSetup)
+                                navController.navigate(AppDestination.DownloadSetup(addedTranslationCode = null))
                             }
                         }
                     )
                 }
                 composable<AppDestination.DownloadSetup> { backStackEntry ->
+                    val args = backStackEntry.toRoute<AppDestination.DownloadSetup>()
+                    val addedTranslation = args.addedTranslationCode?.let { Language.fromCodeOrNull(it) }
                     val dictLang = dictionaryLanguage
-                    if (dictLang == null) {
+                    if (addedTranslation == null && dictLang == null) {
                         LaunchedEffect(Unit) {
                             navController.navigate(AppDestination.SetupLanguages) {
                                 popUpTo<AppDestination.SetupLanguages> { inclusive = true }
                             }
                         }
                     } else {
-                        var downloadDict = false
-                        val downloadTranslations = mutableListOf<Language>()
-                        // Resolved here rather than inside the download/loadItems lambdas: those run
-                        // outside composition, and the label is a fixed function of dictLang anyway.
-                        val dictionaryItemName =
-                            stringResource(Res.string.download_item_dictionary_name, dictLang.selfName)
+                        // Resolved here rather than inside the plan: it runs outside composition,
+                        // and the label is a fixed function of the learning language anyway.
+                        val dictionaryItemName = dictLang
+                            ?.let { stringResource(Res.string.download_item_dictionary_name, it.selfName) }
+                            .orEmpty()
+
+                        // Adding a translation language returns to the screen it started from and
+                        // leaves the installed dictionaries alone; initial setup continues into the
+                        // app and may still have to fetch the dictionary itself.
+                        val leaveDownload: () -> Unit = if (addedTranslation != null) {
+                            {
+                                if (!navController.popBackStack(AppDestination.Settings, inclusive = false)) {
+                                    navController.navigate(AppDestination.Settings)
+                                }
+                            }
+                        } else {
+                            {
+                                navController.navigate(AppDestination.Search) {
+                                    popUpTo<AppDestination.DownloadSetup> { inclusive = true }
+                                }
+                            }
+                        }
 
                         val viewModel = viewModel(
                             viewModelStoreOwner = backStackEntry
                         ) {
+                            val plan = if (addedTranslation != null) {
+                                SetupDownloadPlan(
+                                    dataDbManager = dataManager,
+                                    downloadCoordinator = container.downloadCoordinator,
+                                    learningLanguages = {
+                                        dataManager.listDownloadedDatabases()
+                                            .filterIsInstance<DatabaseFileInfo.Dictionary>()
+                                            .map { it.language }
+                                            .sortedBy { it.ordinal }
+                                    },
+                                    translationTargets = listOf(addedTranslation),
+                                    dictionaryLanguage = null,
+                                    dictionaryItemLabel = dictionaryItemName,
+                                )
+                            } else {
+                                SetupDownloadPlan(
+                                    dataDbManager = dataManager,
+                                    downloadCoordinator = container.downloadCoordinator,
+                                    learningLanguages = { listOfNotNull(dictLang) },
+                                    translationTargets = nativeLanguages,
+                                    dictionaryLanguage = dictLang,
+                                    dictionaryItemLabel = dictionaryItemName,
+                                )
+                            }
                             DownloadViewModel(
                                 downloadCoordinator = container.downloadCoordinator,
-                                downloadKey = "setup_${dictLang.code}",
-                                analyticsParams = mapOf(
-                                    "kind" to "setup",
-                                    "lang" to dictLang.code,
-                                ),
-                                download = { onProgress, cancel ->
-                                    val totalItems = (if (downloadDict) 1 else 0) + downloadTranslations.size
-                                    val translationOffset = if (downloadDict) 1 else 0
-                                    if (downloadDict) {
-                                        val fileName = dictionaryItemName
-                                        dataManager.ensureDictionary(dictLang, { p ->
-                                            val current = if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
-                                            onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
-                                                override val percent: Int = current.toInt()
-                                                override val currentFile: String = fileName
-                                            })
-                                        }, cancel)
-                                    }
-                                    downloadTranslations.forEachIndexed { index, target ->
-                                        val itemIndex = index + translationOffset
-                                        val fileName = "${dictLang.selfName} \u2192 ${target.selfName}"
-                                        dataManager.ensureTranslation(
-                                            dictLang,
-                                            target,
-                                            onProgress = { p ->
-                                                val base = (itemIndex.toFloat() / totalItems) * 100
-                                                val current =
-                                                    if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
-                                                onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
-                                                    override val percent: Int = (base + current).toInt()
-                                                    override val currentFile: String = fileName
-                                                })
-                                            },
-                                            cancelToken = cancel
-                                        )
-                                    }
+                                downloadKey = if (addedTranslation != null) {
+                                    "add_trans_${addedTranslation.code}"
+                                } else {
+                                    "setup_${dictLang?.code.orEmpty()}"
                                 },
+                                analyticsParams = if (addedTranslation != null) {
+                                    mapOf(
+                                        "kind" to "add_translation",
+                                        "lang" to addedTranslation.code,
+                                    )
+                                } else {
+                                    mapOf(
+                                        "kind" to "setup",
+                                        "lang" to dictLang?.code.orEmpty(),
+                                    )
+                                },
+                                download = plan::download,
                                 finalize = { onRecoveryProgress, onWordListsSync ->
-                                    favoritesReviewCoordinator.invalidateAllIntakeCache()
-                                    container.dictionaryRepository.clearSenseCache()
-                                    // Bring the curated lists for the freshly downloaded language
-                                    // up to date while the finalizing screen is visible.
-                                    onWordListsSync(true)
-                                    container.listsService.sync(dictLang)
-                                    onWordListsSync(false)
-                                    val recoveryJob = container.lemmaRecoveryController.ensureStarted()
-                                    coroutineScope {
-                                        val observerJob = launch {
-                                            container.lemmaRecoveryController.progress.collect { progress ->
-                                                if (progress != null) {
-                                                    onRecoveryProgress(progress)
-                                                }
-                                            }
+                                    try {
+                                        // The preference is stored only once every translation pair
+                                        // the run needed is in place, so leaving this screen early
+                                        // — Later, cancel, a failed pair or system back — keeps the
+                                        // language unselected. A run with no pair to fetch still
+                                        // gets here and selects it. Recovery cannot undo the write:
+                                        // it runs after, and its failures do not propagate. The
+                                        // write has to land before recovery, which reads the stored
+                                        // targets to decide what to fetch.
+                                        if (addedTranslation != null) {
+                                            settingsViewModel.addTranslationLanguage(addedTranslation)
                                         }
-                                        try {
-                                            recoveryJob.join()
-                                        } finally {
-                                            observerJob.cancel()
+                                        favoritesReviewCoordinator.invalidateAllIntakeCache()
+                                        container.dictionaryRepository.clearSenseCache()
+                                        // Curated lists are keyed by learning language, so only a new
+                                        // dictionary needs them synced; bring them up to date while
+                                        // the finalizing screen is visible.
+                                        if (addedTranslation == null && dictLang != null) {
+                                            onWordListsSync(true)
+                                            container.listsService.sync(dictLang)
+                                            onWordListsSync(false)
                                         }
+                                        container.lemmaRecoveryController.runToCompletion(onRecoveryProgress)
+                                    } finally {
+                                        // Also runs when the user skips the wait and recovery keeps
+                                        // going in the background, so the screen behind never shows
+                                        // details resolved before the new data landed.
+                                        favoritesViewModel.dropCachedFavoriteDetails()
                                     }
-                                    favoritesViewModel.dropCachedFavoriteDetails()
                                 },
-                                onSuccess = {
-                                    navController.navigate(AppDestination.Search) {
-                                        popUpTo<AppDestination.DownloadSetup> { inclusive = true }
-                                    }
-                                },
+                                onSuccess = { leaveDownload() },
                                 onCancel = {
-                                    navController.navigate(AppDestination.Search) {
-                                        popUpTo<AppDestination.SetupLanguages> { inclusive = false }
-                                    }
-                                },
-                                onError = { _ ->
-                                    navController.navigate(AppDestination.Search) {
-                                        popUpTo<AppDestination.DownloadSetup> { inclusive = true }
-                                    }
-                                },
-                                platform = platform,
-                                loadItems = {
-                                    downloadDict = !dataManager.hasDictionary(dictLang)
-                                    val available = dataManager.fetchAvailableLanguages()
-                                    val langInfo = available.find { it.language == dictLang }
-                                    val items = mutableListOf<DownloadItem>()
-                                    if (downloadDict) {
-                                        langInfo?.dictionarySizeBytes?.let { size ->
-                                            items.add(
-                                                DownloadItem(
-                                                    dictionaryItemName,
-                                                    size,
-                                                    dictLang.flag
-                                                )
-                                            )
+                                    if (addedTranslation != null) {
+                                        leaveDownload()
+                                    } else {
+                                        navController.navigate(AppDestination.Search) {
+                                            popUpTo<AppDestination.SetupLanguages> { inclusive = false }
                                         }
                                     }
-                                    val downloadableTargets = try {
-                                        dataManager.downloadableTranslationTargets(dictLang, nativeLanguages)
-                                    } catch (e: CancellationException) {
-                                        throw e
-                                    } catch (_: Exception) {
-                                        emptyList()
-                                    }
-                                    val missing =
-                                        downloadableTargets.filter { !dataManager.hasTranslation(dictLang, it) }
-                                    downloadTranslations.clear()
-                                    downloadTranslations.addAll(missing)
-                                    for (target in downloadTranslations) {
-                                        langInfo?.availableTranslations
-                                            ?.find { it.targetLanguage == target }?.sizeBytes
-                                            ?.let { size ->
-                                                items.add(
-                                                    DownloadItem(
-                                                        "${dictLang.selfName} \u2192 ${target.selfName}",
-                                                        size,
-                                                        target.flag
-                                                    )
-                                                )
-                                            }
-                                    }
-                                    items
-                                }
+                                },
+                                onError = { _ -> leaveDownload() },
+                                platform = platform,
+                                loadItems = plan::loadItems,
                             )
                         }
 
@@ -498,9 +481,7 @@ fun App(
                             description = stringResource(Res.string.download_title_downloading),
                             onLaterClick = {
                                 logEvent(AnalyticsEvent.DOWNLOAD_LATER_CLICK)
-                                navController.navigate(AppDestination.Search) {
-                                    popUpTo<AppDestination.DownloadSetup> { inclusive = true }
-                                }
+                                leaveDownload()
                             }
                         )
                     }
@@ -750,6 +731,11 @@ fun App(
                 composable<AppDestination.Settings> {
                     SettingsScreen(
                         viewModel = settingsViewModel,
+                        onAddTranslationLanguage = { language ->
+                            navController.navigate(
+                                AppDestination.DownloadSetup(addedTranslationCode = language.code)
+                            )
+                        },
                         onNavigateToSearch = {
                             if (!navController.popBackStack(AppDestination.Search, inclusive = false))
                                 navController.navigate(AppDestination.Search)

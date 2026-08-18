@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,6 +62,32 @@ class LemmaRecoveryController private constructor(
         }
         currentJob = job
         job
+    }
+
+    /**
+     * Starts a recovery run if none is in flight and suspends until it finishes, forwarding every
+     * progress update to [onProgress].
+     *
+     * Only the waiting is tied to the caller: the run itself lives in this controller's own scope
+     * with its own process keep-alive, so a cancelled caller (e.g. the user skipping the finalizing
+     * step) leaves recovery running in the background.
+     */
+    suspend fun runToCompletion(onProgress: (LemmaRecoveryProgress) -> Unit) {
+        val recoveryJob = ensureStarted()
+        coroutineScope {
+            val observerJob = launch {
+                progress.collect { value ->
+                    if (value != null) {
+                        onProgress(value)
+                    }
+                }
+            }
+            try {
+                recoveryJob.join()
+            } finally {
+                observerJob.cancel()
+            }
+        }
     }
 
     fun close() {

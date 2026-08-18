@@ -122,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Stiamo preparando la tua libreria</string>
     <string name="download_action_download_size">Scarica %1$s</string>
+    <string name="download_action_skip_recovery">Continua in background</string>
     <string name="download_item_dictionary_name">Dizionario %1$s</string>
     <string name="download_title_ready">Pronto per il download</string>
     <string name="download_subtitle_ready">Ti servono questi dizionari per completare la configurazione.</string>
@@ -137,13 +138,13 @@
     <string name="download_subtitle_setting_up">Stiamo preparando la tua libreria.\nCi vorrà un momento.</string>
     <string name="download_content_desc_loading_info">Caricamento delle informazioni sul download</string>
     <string name="download_content_desc_preparing">Preparazione del download</string>
-    <string name="download_finalizing_recovering_progress">Aggiornamento dei preferiti (%1$d/%2$d)</string>
+    <string name="download_finalizing_recovering_progress">Sincronizzazione delle parole salvate... (%1$d/%2$d)</string>
     <string name="download_finalizing_updating_lists">Aggiornamento degli elenchi di parole…</string>
     <plurals name="download_finalizing_recovering_progress_with_failures">
-        <item quantity="one">Aggiornamento dei preferiti (%1$d/%2$d, %3$d non riusciti)</item>
-        <item quantity="few">Aggiornamento dei preferiti (%1$d/%2$d, %3$d non riusciti)</item>
-        <item quantity="many">Aggiornamento dei preferiti (%1$d/%2$d, %3$d non riusciti)</item>
-        <item quantity="other">Aggiornamento dei preferiti (%1$d/%2$d, %3$d non riusciti)</item>
+        <item quantity="one">Sincronizzazione delle parole salvate... (%1$d/%2$d, %3$d non riuscite)</item>
+        <item quantity="few">Sincronizzazione delle parole salvate... (%1$d/%2$d, %3$d non riuscite)</item>
+        <item quantity="many">Sincronizzazione delle parole salvate... (%1$d/%2$d, %3$d non riuscite)</item>
+        <item quantity="other">Sincronizzazione delle parole salvate... (%1$d/%2$d, %3$d non riuscite)</item>
     </plurals>
     <string name="download_preparing">Preparazione...</string>
     <string name="download_item_accessibility">%1$s, %2$s</string>
