@@ -356,7 +356,7 @@ fun VoiceItem(
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = qualityColor,
-                        modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xxs)
                     )
                 }
                 if (voice.networkConnectionRequired) {
@@ -368,7 +368,7 @@ fun VoiceItem(
                             text = stringResource(Res.string.voice_network_online),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xxs)
                         )
                     }
                 }

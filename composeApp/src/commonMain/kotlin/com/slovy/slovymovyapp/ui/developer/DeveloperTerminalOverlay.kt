@@ -133,7 +133,7 @@ fun DeveloperTerminalOverlay(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .navigationBarsPadding()
-                .padding(end = 16.dp, bottom = 88.dp),
+                .padding(end = AppSpacing.lg, bottom = 88.dp),
             onOpen = {
                 syncTerminalLogs()
                 isTerminalOpen = true

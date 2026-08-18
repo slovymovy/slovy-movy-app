@@ -283,7 +283,7 @@ fun FavoritesScreenContent(
                                                     containerColor = MaterialTheme.colorScheme.primary,
                                                     contentColor = MaterialTheme.colorScheme.onPrimary,
                                                 ),
-                                                contentPadding = PaddingValues(horizontal = 28.dp),
+                                                contentPadding = PaddingValues(horizontal = AppSpacing.xlPlus),
                                                 modifier = Modifier
                                                     .height(56.dp)
                                                     .widthIn(min = 220.dp)
@@ -510,7 +510,7 @@ private fun FavoritesEmptyState(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ),
-            contentPadding = PaddingValues(horizontal = 28.dp),
+            contentPadding = PaddingValues(horizontal = AppSpacing.xlPlus),
             modifier = Modifier
                 .height(56.dp)
                 .widthIn(min = 220.dp)

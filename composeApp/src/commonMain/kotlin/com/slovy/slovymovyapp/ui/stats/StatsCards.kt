@@ -64,11 +64,11 @@ internal fun EffortCard(state: StatsUiState) {
     )
     StatsCard(
         shape = RoundedCornerShape(16.dp),
-        padding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+        padding = PaddingValues(horizontal = AppSpacing.lg, vertical = AppSpacing.mdPlus),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(13.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             EffortRow(
                 label = stringResource(Res.string.stats_today_label),
@@ -302,10 +302,10 @@ private fun AnnotatedString.Builder.appendDurationPart(
 internal fun LibraryCard(state: StatsUiState) {
     StatsCard(
         shape = RoundedCornerShape(16.dp),
-        padding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+        padding = PaddingValues(horizontal = AppSpacing.lg, vertical = AppSpacing.mdPlus),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus)) {
                 LibraryMetric(
                     value = state.wordsTotal,
                     label = pluralStringResource(Res.plurals.stats_words_label, state.wordsTotal),
@@ -338,7 +338,7 @@ private fun LibraryMetric(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(AppSpacing.xxs)) {
         CountText(
             text = formatCount(value, isLoading),
             style = MaterialTheme.typography.headlineMedium.copy(
@@ -397,7 +397,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.smPlus),
             ) {
                 PipelineStageLabel(label = label, layout = labelLayout)
                 Box(
@@ -548,7 +548,7 @@ private fun PipelineCaption() {
             lineHeight = 17.sp,
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 2.dp),
+        modifier = Modifier.padding(top = AppSpacing.xxs),
     )
 }
 

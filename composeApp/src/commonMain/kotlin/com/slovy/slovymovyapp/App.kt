@@ -19,23 +19,12 @@ import coil3.svg.SvgDecoder
 import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.export.AppDataExporter
-import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
-import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
-import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
-import com.slovy.slovymovyapp.data.learning.intake.IntakeService
-import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
-import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
-import com.slovy.slovymovyapp.data.learning.session.SessionService
-import com.slovy.slovymovyapp.data.learning.stats.ReviewQueueStats
-import com.slovy.slovymovyapp.data.learning.stats.StatsService
-import com.slovy.slovymovyapp.data.local.LocalDbManager
+import com.slovy.slovymovyapp.data.learning.review.FavoritesReviewCoordinator
+import com.slovy.slovymovyapp.data.learning.review.FavoritesReviewState
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
-import com.slovy.slovymovyapp.speech.TextToSpeechManager
-import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.favorites.*
 import com.slovy.slovymovyapp.ui.settings.*
@@ -45,9 +34,6 @@ import com.slovy.slovymovyapp.ui.stats.*
 import com.slovy.slovymovyapp.ui.listdetail.*
 import com.slovy.slovymovyapp.ui.languagesetup.*
 import com.slovy.slovymovyapp.ui.download.*
-import com.slovy.slovymovyapp.data.lists.ListsService
-import com.slovy.slovymovyapp.data.lists.WordListsRepository
-import com.slovy.slovymovyapp.data.recovery.RecoverableSense
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.reader.TextReaderScreen
@@ -56,153 +42,15 @@ import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.download_item_dictionary_name
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
-import kotlin.concurrent.Volatile
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-
-internal data class FavoritesReviewState(
-    val reviewByLanguage: Map<Language, FavoriteLanguageReviewState>,
-) {
-    val hasDueCards: Boolean get() = reviewByLanguage.values.any { it.dueCount > 0 }
-}
-
-internal data class FavoriteLanguageReviewState(
-    val dueCount: Int,
-    val activeCardCount: Int,
-    val delayedDueLemmaCount: Int,
-    val delayedDueCardCount: Int,
-    val pendingFavoriteLemmaCount: Int,
-    val canStudyPendingFavoritesNow: Boolean,
-    val nextReviewAtEpochMs: Long?,
-)
-
-@OptIn(ExperimentalTime::class)
-internal class FavoritesReviewCoordinator(
-    private val clock: Clock = Clock.System,
-) {
-    private val refreshMutex = Mutex()
-    private var lastIntakeAtByLanguage: Map<Language, Instant> = emptyMap()
-
-    // Intake reads the local dictionary DB. The data-version-mismatch flow wipes that DB
-    // (LocalDbManager.deleteAll closes the driver), so we must keep the coordinator disabled
-    // until the routing layer has confirmed we're past that check.
-    @Volatile
-    var enabled: Boolean = false
-
-    suspend fun refresh(
-        favoritesRepository: FavoritesRepository,
-        intakeService: LearningIntake,
-        statsService: StatsService,
-    ): FavoritesReviewState = refreshMutex.withLock {
-        if (!enabled) return@withLock FavoritesReviewState(emptyMap())
-        computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
-    }
-
-    /**
-     * Re-reads review queue state without running intake. Cheap enough to call right after a
-     * favorite toggle: remove/add already mutate `card.suspended` synchronously, so
-     * due and delayed-card metadata are accurate. Skipping intake here avoids serializing the dictionary-DB
-     * driver against the screen's own queries on iOS.
-     */
-    suspend fun refreshDueCountsOnly(
-        favoritesRepository: FavoritesRepository,
-        intakeService: LearningIntake,
-        statsService: StatsService,
-    ): FavoritesReviewState = refreshMutex.withLock {
-        if (!enabled) return@withLock FavoritesReviewState(emptyMap())
-        PerformanceMonitoring.startTrace("favorites_review_due_counts").useWithResult {
-            withContext(Dispatchers.Default) {
-                val languages = favoritesRepository.getAllGroupedByLangAndLemma()
-                    .map { it.language }
-                    .distinct()
-                putMetric("languages", languages.size.toLong())
-                val reviewByLanguage = languages.associateWith { language ->
-                    statsService.reviewQueueStats(language.code)
-                        .toFavoriteLanguageReviewState(language, intakeService)
-                }
-                putReviewStateMetrics(reviewByLanguage)
-                FavoritesReviewState(reviewByLanguage = reviewByLanguage)
-            }
-        }
-    }
-
-    fun invalidateIntakeCacheForLanguage(language: Language) {
-        lastIntakeAtByLanguage = lastIntakeAtByLanguage - language
-    }
-
-    fun invalidateAllIntakeCache() {
-        lastIntakeAtByLanguage = emptyMap()
-    }
-
-    private suspend fun computeFavoritesReviewState(
-        favoritesRepository: FavoritesRepository,
-        intakeService: LearningIntake,
-        statsService: StatsService,
-    ): FavoritesReviewState = PerformanceMonitoring.startTrace("favorites_review_compute_state").useWithResult {
-        withContext(Dispatchers.Default) {
-            val favorites = favoritesRepository.getAllGroupedByLangAndLemma()
-            val languages = favorites
-                .map { it.language }
-                .distinct()
-            putMetric("favorites", favorites.size.toLong())
-            putMetric("languages", languages.size.toLong())
-            var intakeRuns = 0L
-            languages.forEach { language ->
-                if (shouldRunIntake(language)) {
-                    intakeService.runIntake(language.code)
-                    markIntakeRun(language)
-                    intakeRuns += 1
-                }
-            }
-            putMetric("intake_runs", intakeRuns)
-            val reviewByLanguage = languages.associateWith { language ->
-                statsService.reviewQueueStats(language.code)
-                    .toFavoriteLanguageReviewState(language, intakeService)
-            }
-            putReviewStateMetrics(reviewByLanguage)
-            FavoritesReviewState(reviewByLanguage = reviewByLanguage)
-        }
-    }
-
-    private fun ReviewQueueStats.toFavoriteLanguageReviewState(
-        language: Language,
-        intakeService: LearningIntake,
-    ) =
-        FavoriteLanguageReviewState(
-            dueCount = dueToday,
-            activeCardCount = activeCardCount,
-            delayedDueLemmaCount = delayedDueLemmaCount,
-            delayedDueCardCount = delayedDueCardCount,
-            pendingFavoriteLemmaCount = pendingFavoriteLemmaCount,
-            canStudyPendingFavoritesNow = intakeService.canContinueWithPendingFavoritesNow(language.code),
-            nextReviewAtEpochMs = nextReviewAtEpochMs,
-        )
-
-    internal fun shouldRunIntake(language: Language): Boolean {
-        val lastRunAt = lastIntakeAtByLanguage[language] ?: return true
-        return clock.now() - lastRunAt >= INTAKE_CACHE_TTL
-    }
-
-    internal fun markIntakeRun(language: Language) {
-        lastIntakeAtByLanguage += language to clock.now()
-    }
-
-    private companion object {
-        val INTAKE_CACHE_TTL = 5.minutes
-    }
-}
 
 private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language, FavoriteLanguageReviewUiState> =
     reviewByLanguage.mapValues { (_, reviewState) ->
@@ -216,74 +64,6 @@ private fun FavoritesReviewState.toFavoriteLanguageReviewUiState(): Map<Language
             nextReviewAtEpochMs = reviewState.nextReviewAtEpochMs,
         )
     }
-
-private fun PerformanceTrace.putReviewStateMetrics(reviewByLanguage: Map<Language, FavoriteLanguageReviewState>) {
-    putMetric("due_cards", reviewByLanguage.values.sumOf { it.dueCount }.toLong())
-    putMetric("active_cards", reviewByLanguage.values.sumOf { it.activeCardCount }.toLong())
-    putMetric("delayed_due_lemmas", reviewByLanguage.values.sumOf { it.delayedDueLemmaCount }.toLong())
-    putMetric("delayed_due_cards", reviewByLanguage.values.sumOf { it.delayedDueCardCount }.toLong())
-    putMetric("pending_favorite_lemmas", reviewByLanguage.values.sumOf { it.pendingFavoriteLemmaCount }.toLong())
-}
-
-@Serializable
-private sealed interface AppDestination {
-    @Serializable
-    data object Welcome : AppDestination
-
-    @Serializable
-    data object DownloadSetup : AppDestination
-
-    @Serializable
-    data object SetupLanguages : AppDestination
-
-    @Serializable
-    data object Search : AppDestination
-
-    @Serializable
-    data object Favorites : AppDestination
-
-    @Serializable
-    data object Stats : AppDestination
-
-    @Serializable
-    data class StudySession(
-        val langCode: String,
-    ) : AppDestination
-
-    @Serializable
-    data class WordDetail(
-        @Deprecated("temporal hack, looks like IOS can't handle enums here")
-        val dictionaryLanguageCode: String,
-        val lemma: String,
-        val targetSenseId: String? = null,
-        val translationLanguageCodes: List<String>? = null,
-    ) : AppDestination {
-        @Suppress("DEPRECATION")
-        val dictionaryLanguage: Language
-            get() = Language.fromCode(dictionaryLanguageCode)
-
-        val translationLanguages: List<Language>?
-            get() = translationLanguageCodes?.mapNotNull { Language.fromCodeOrNull(it) }
-    }
-
-    @Serializable
-    data object Settings : AppDestination
-
-    @Serializable
-    data object Developer : AppDestination
-
-    @Serializable
-    data class TextReader(val languageCode: String) : AppDestination
-
-    @Serializable
-    data class Error(val message: String) : AppDestination
-
-    @Serializable
-    data object DataVersionMismatch : AppDestination
-
-    @Serializable
-    data class ListDetail(val languageCode: String, val listId: String) : AppDestination
-}
 
 @OptIn(ExperimentalTime::class)
 @Composable
@@ -304,91 +84,12 @@ fun App(
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
-    val appDatabase = remember(platform) {
-        DataDbManager.openAppDatabase(platform)
-    }
-    val favoritesRepository = remember(appDatabase) {
-        FavoritesRepository(appDatabase)
-    }
-    val localDbManager = remember(platform) { LocalDbManager(platform) }
-    val dictionaryRepository =
-        remember(dataManager, localDbManager, favoritesRepository, settingsRepository) {
-            DictionaryRepository(dataManager, localDbManager, favoritesRepository, settingsRepository)
-        }
-    val dictionaryClient = remember(platform, dictionaryRepository, localDbManager, dataManager) {
-        DictionaryClient(platform, dictionaryRepository, localDbManager, dataManager)
-    }
-    val listsClient = remember(platform) { ListsClient(platform) }
-    val wordListsRepository = remember(appDatabase) { WordListsRepository(appDatabase) }
-    val listsService = remember(wordListsRepository, listsClient) {
-        ListsService(wordListsRepository, listsClient)
-    }
-    val wordFetchManager = remember(dictionaryClient) {
-        WordFetchManager(dictionaryClient)
-    }
-    val lemmaRecovery = remember(
-        favoritesRepository,
-        wordListsRepository,
-        dataManager,
-        dictionaryRepository,
-        wordFetchManager,
-    ) {
-        LemmaRecovery(
-            itemsProvider = {
-                // Recover favorites and curated word-list senses in one combined pass; both
-                // implement RecoverableSense, and recover() dedups by (language, lemma).
-                val favorites: List<RecoverableSense> = favoritesRepository.getAll()
-                favorites + wordListsRepository.getAllSenses()
-            },
-            dataDbManager = dataManager,
-            dictionaryRepository = dictionaryRepository,
-            wordFetchManager = wordFetchManager,
-        )
-    }
-    val lemmaRecoveryController = remember(lemmaRecovery, platform) {
-        LemmaRecoveryController(lemmaRecovery, platform)
-    }
-    DisposableEffect(lemmaRecoveryController) {
-        onDispose { lemmaRecoveryController.close() }
-    }
-    val fsrsConfig = remember { FsrsDefaults.config() }
-    val fsrsScheduler = remember(fsrsConfig) {
-        FsrsScheduler(
-            retention = fsrsConfig.requestRetention,
-            weights = fsrsConfig.weights,
-            maximumInterval = fsrsConfig.maximumInterval,
-            enableFuzz = fsrsConfig.enableFuzz,
-        )
-    }
-    val intakeService = remember(appDatabase, dictionaryRepository, fsrsConfig) {
-        IntakeService(
-            learning = appDatabase.favoritesQueries,
-            dictionary = dictionaryRepository,
-            config = fsrsConfig,
-            clock = Clock.System,
-        )
-    }
-    val sessionService = remember(appDatabase, wordFetchManager, fsrsScheduler, fsrsConfig, dictionaryRepository) {
-        SessionService(
-            learning = appDatabase.favoritesQueries,
-            wordFetchManager = wordFetchManager,
-            scheduler = fsrsScheduler,
-            examplePicker = ExamplePicker(appDatabase.favoritesQueries),
-            config = fsrsConfig,
-            clock = Clock.System,
-            translationTargets = dictionaryRepository::defaultTranslationTargets,
-        )
-    }
-    val statsService = remember(appDatabase, fsrsConfig) {
-        StatsService(
-            learning = appDatabase.favoritesQueries,
-            clock = Clock.System,
-        )
-    }
-    val downloadCoordinator = remember { DownloadCoordinator() }
-    val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
-    val appDataExporter = remember(androidContext) { AppDataExporter(androidContext) }
-    val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
+    val container = rememberAppContainer(
+        settingsRepository = settingsRepository,
+        dataManager = dataManager,
+        platform = platform,
+        androidContext = androidContext,
+    )
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -401,20 +102,20 @@ fun App(
     // Shared ViewModel for Favorites screen to preserve state across navigation
     val favoritesViewModel = remember {
         FavoritesViewModel(
-            favoritesRepository = favoritesRepository,
-            dictionaryRepository = dictionaryRepository,
+            favoritesRepository = container.favoritesRepository,
+            dictionaryRepository = container.dictionaryRepository,
             settingsRepository = settingsRepository,
-            speechPlayer = ttsManager,
-            voiceFilterHelper = voiceFilterHelper,
+            speechPlayer = container.ttsManager,
+            voiceFilterHelper = container.voiceFilterHelper,
             clock = Clock.System,
         ).also { it.start() }
     }
 
     suspend fun refreshFavoritesReviewState() {
         val reviewState = favoritesReviewCoordinator.refresh(
-            favoritesRepository = favoritesRepository,
-            intakeService = intakeService,
-            statsService = statsService,
+            favoritesRepository = container.favoritesRepository,
+            intakeService = container.intakeService,
+            statsService = container.statsService,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -422,9 +123,9 @@ fun App(
 
     suspend fun refreshFavoritesDueCountsOnly() {
         val reviewState = favoritesReviewCoordinator.refreshDueCountsOnly(
-            favoritesRepository = favoritesRepository,
-            intakeService = intakeService,
-            statsService = statsService,
+            favoritesRepository = container.favoritesRepository,
+            intakeService = container.intakeService,
+            statsService = container.statsService,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -441,20 +142,20 @@ fun App(
     val settingsViewModel =
         remember {
             SettingsViewModel(
-                ttsManager,
-                voiceFilterHelper,
+                container.ttsManager,
+                container.voiceFilterHelper,
                 dataManager,
-                downloadCoordinator,
-                dictionaryClient,
-                appDataExporter,
+                container.downloadCoordinator,
+                container.dictionaryClient,
+                container.appDataExporter,
                 settingsRepository,
                 platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
                     favoritesReviewCoordinator.invalidateAllIntakeCache()
-                    dictionaryRepository.clearSenseCache()
+                    container.dictionaryRepository.clearSenseCache()
                     if (recoverFavorites) {
-                        lemmaRecoveryController.ensureStarted()
+                        container.lemmaRecoveryController.ensureStarted()
                     }
                     favoritesViewModel.dropCachedFavoriteDetails()
                 },
@@ -462,9 +163,6 @@ fun App(
         }
     LaunchedEffect(settingsViewModel) {
         settingsViewModel.migrateLegacyDefaultVoiceSelectionsAfterAppStart()
-    }
-    DisposableEffect(Unit) {
-        onDispose { downloadCoordinator.close() }
     }
 
     // Update the badge/due counts immediately from current SR state so the bottom-nav dot
@@ -517,7 +215,7 @@ fun App(
 
         // Check if data version is current (before welcome, so existing users see mismatch).
         // The coordinator defaults to disabled, so returning DataVersionMismatch here keeps
-        // intake off — the redownload flow calls localDbManager.deleteAll(), and any concurrent
+        // intake off — the redownload flow calls container.localDbManager.deleteAll(), and any concurrent
         // intake query against the cached driver would crash.
         if (!dataManager.hasRequiredVersion()) {
             val savedVersion = settingsRepository.getById(Setting.Name.DATA_VERSION)?.value?.jsonPrimitive?.content
@@ -622,7 +320,7 @@ fun App(
                     ) {
                         LanguageSetupViewModel(
                             dataManager,
-                            dictionaryClient,
+                            container.dictionaryClient,
                             initialLearningLanguage = dictionaryLanguage,
                             initialNativeLanguages = nativeLanguages.toSet()
                         )
@@ -671,7 +369,7 @@ fun App(
                             viewModelStoreOwner = backStackEntry
                         ) {
                             DownloadViewModel(
-                                downloadCoordinator = downloadCoordinator,
+                                downloadCoordinator = container.downloadCoordinator,
                                 downloadKey = "setup_${dictLang.code}",
                                 analyticsParams = mapOf(
                                     "kind" to "setup",
@@ -711,16 +409,16 @@ fun App(
                                 },
                                 finalize = { onRecoveryProgress, onWordListsSync ->
                                     favoritesReviewCoordinator.invalidateAllIntakeCache()
-                                    dictionaryRepository.clearSenseCache()
+                                    container.dictionaryRepository.clearSenseCache()
                                     // Bring the curated lists for the freshly downloaded language
                                     // up to date while the finalizing screen is visible.
                                     onWordListsSync(true)
-                                    listsService.sync(dictLang)
+                                    container.listsService.sync(dictLang)
                                     onWordListsSync(false)
-                                    val recoveryJob = lemmaRecoveryController.ensureStarted()
+                                    val recoveryJob = container.lemmaRecoveryController.ensureStarted()
                                     coroutineScope {
                                         val observerJob = launch {
-                                            lemmaRecoveryController.progress.collect { progress ->
+                                            container.lemmaRecoveryController.progress.collect { progress ->
                                                 if (progress != null) {
                                                     onRecoveryProgress(progress)
                                                 }
@@ -812,7 +510,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        SearchViewModel(dictionaryRepository, settingsRepository, listsService, dictionaryClient)
+                        SearchViewModel(container.dictionaryRepository, settingsRepository, container.listsService, container.dictionaryClient)
                     }
 
                     LaunchedEffect(pendingSearchQuery) {
@@ -883,12 +581,12 @@ fun App(
                         ListDetailViewModel(
                             listId = args.listId,
                             language = lang,
-                            repository = dictionaryRepository,
-                            favoritesRepository = favoritesRepository,
-                            listsService = listsService,
-                            lemmaRecovery = lemmaRecovery,
-                            speechPlayer = ttsManager,
-                            voiceFilterHelper = voiceFilterHelper,
+                            repository = container.dictionaryRepository,
+                            favoritesRepository = container.favoritesRepository,
+                            listsService = container.listsService,
+                            lemmaRecovery = container.lemmaRecovery,
+                            speechPlayer = container.ttsManager,
+                            voiceFilterHelper = container.voiceFilterHelper,
                             onFavoriteChanged = { _ ->
                                 favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
                                 appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
@@ -952,12 +650,12 @@ fun App(
                             appCoroutineScope.launch {
                                 val shouldStartStudy = when (action) {
                                     FavoritesStudyDoneAction.REVIEW_MORE -> {
-                                        sessionService.continueDelayedCardsNow(language.code)
+                                        container.sessionService.continueDelayedCardsNow(language.code)
                                         true
                                     }
 
                                     FavoritesStudyDoneAction.STUDY_NEW ->
-                                        intakeService.continueWithPendingFavoritesNow(language.code).cardsCreated > 0
+                                        container.intakeService.continueWithPendingFavoritesNow(language.code).cardsCreated > 0
                                 }
                                 refreshFavoritesDueCountsOnly()
                                 if (shouldStartStudy) {
@@ -983,7 +681,7 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        StatsViewModel(learningLanguagesForStats, statsService, settingsRepository, Clock.System)
+                        StatsViewModel(learningLanguagesForStats, container.statsService, settingsRepository, Clock.System)
                     }
 
                     StatsScreen(
@@ -1011,13 +709,13 @@ fun App(
                     ) {
                         StudySessionViewModel(
                             langCode = args.langCode,
-                            favoritesRepository = favoritesRepository,
-                            intakeService = intakeService,
-                            sessionService = sessionService,
-                            statsService = statsService,
+                            favoritesRepository = container.favoritesRepository,
+                            intakeService = container.intakeService,
+                            sessionService = container.sessionService,
+                            statsService = container.statsService,
                             clock = Clock.System,
-                            ttsManager = ttsManager,
-                            voiceFilterHelper = voiceFilterHelper,
+                            ttsManager = container.ttsManager,
+                            voiceFilterHelper = container.voiceFilterHelper,
                             onReviewSubmitted = {
                                 Language.fromCodeOrNull(args.langCode)?.let { lang ->
                                     favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(lang)
@@ -1073,9 +771,9 @@ fun App(
                 composable<AppDestination.Developer> { backStackEntry ->
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         DeveloperViewModel(
-                            favoritesRepository = favoritesRepository,
-                            intake = intakeService,
-                            listsService = listsService,
+                            favoritesRepository = container.favoritesRepository,
+                            intake = container.intakeService,
+                            listsService = container.listsService,
                             learningLanguagesProvider = {
                                 dataManager.listDownloadedDatabases()
                                     .filterIsInstance<DatabaseFileInfo.Dictionary>()
@@ -1112,12 +810,12 @@ fun App(
                             }
                         }
                         WordDetailViewModel(
-                            dictionaryRepository,
-                            dictionaryClient,
-                            wordFetchManager,
-                            favoritesRepository,
-                            ttsManager,
-                            voiceFilterHelper,
+                            container.dictionaryRepository,
+                            container.dictionaryClient,
+                            container.wordFetchManager,
+                            container.favoritesRepository,
+                            container.ttsManager,
+                            container.voiceFilterHelper,
                             args.dictionaryLanguage,
                             args.lemma,
                             args.targetSenseId,
@@ -1137,7 +835,6 @@ fun App(
                             wordDetailViewModels[args] = created
                         }
                     }
-
 
                     // Reload favorites and voices when navigating to this screen
                     LaunchedEffect(Unit) {
@@ -1186,7 +883,7 @@ fun App(
                         return@composable
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
-                        TextReaderViewModel(dictionaryRepository, favoritesRepository, language)
+                        TextReaderViewModel(container.dictionaryRepository, container.favoritesRepository, language)
                     }
                     TextReaderScreen(
                         viewModel = viewModel,
@@ -1209,8 +906,8 @@ fun App(
                             coroutineScope.launch {
                                 try {
                                     dataManager.deleteAllDownloadedData()
-                                    localDbManager.deleteAll()
-                                    dictionaryRepository.clearSenseCache()
+                                    container.localDbManager.deleteAll()
+                                    container.dictionaryRepository.clearSenseCache()
                                     favoritesReviewCoordinator.invalidateAllIntakeCache()
                                     favoritesViewModel.dropCachedFavoriteDetails()
                                     val target = selectInitialDestination()
@@ -1256,7 +953,7 @@ fun App(
                 enabled = settingsState.developerModeEnabled,
                 onShiftLearningTime = { duration ->
                     withContext(Dispatchers.IO) {
-                        favoritesRepository.shiftLearningTimestampsBack(duration)
+                        container.favoritesRepository.shiftLearningTimestampsBack(duration)
                     }
                     refreshFavoritesDueCountsOnly()
                 },

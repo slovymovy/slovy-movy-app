@@ -351,7 +351,7 @@ private fun InputView(
         modifier = modifier
             .fillMaxSize()
             .padding(start = AppSpacing.lg, end = AppSpacing.lg, top = AppSpacing.sm, bottom = AppSpacing.lg),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus)
     ) {
         val dashColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f)
         Column(
@@ -378,7 +378,7 @@ private fun InputView(
                     onClickLabel = stringResource(Res.string.reader_paste_from_clipboard),
                     role = Role.Button
                 ) { onPaste() }
-                .padding(horizontal = 22.dp, vertical = 24.dp)
+                .padding(horizontal = AppSpacing.lgPlus, vertical = AppSpacing.xl)
                 .semantics(mergeDescendants = true) {}
         ) {
             if (isAnalyzing) {
@@ -485,9 +485,14 @@ private fun ResultView(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(scrollState)
-                .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 16.dp),
+                .padding(
+                    start = AppSpacing.lgPlus,
+                    end = AppSpacing.lgPlus,
+                    top = AppSpacing.xs,
+                    bottom = AppSpacing.lg,
+                ),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)
         ) {
             val groups = remember(state.tokens) { groupTokensForRendering(state.tokens) }
             groups.forEach { group ->
@@ -543,13 +548,13 @@ private fun HighlightedWord(
     val semanticDescription = listOfNotNull(savedWord, bandLabelText).joinToString(", ")
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xxs),
         modifier = Modifier
             .semantics { contentDescription = semanticDescription }
             .clip(RoundedCornerShape(4.dp))
             .then(if (bandBackground != null) Modifier.background(bandBackground) else Modifier)
             .clickable(onClickLabel = lookUpLabel, role = Role.Button) { onClick() }
-            .padding(horizontal = 4.dp, vertical = 1.dp)
+            .padding(horizontal = AppSpacing.xs, vertical = 1.dp)
     ) {
         if (isFavorite) {
             Text(
@@ -570,9 +575,14 @@ private fun FrequencyLegend() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 11.dp)
+            .padding(
+                start = AppSpacing.lgPlus,
+                end = AppSpacing.lgPlus,
+                top = AppSpacing.xsPlus,
+                bottom = AppSpacing.smPlus,
+            )
             .semantics { contentDescription = legendLabel },
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -605,7 +615,7 @@ private fun FrequencyLegend() {
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
                         .background(bg)
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                        .padding(horizontal = AppSpacing.xsPlus, vertical = AppSpacing.xxs)
                 )
             }
         }

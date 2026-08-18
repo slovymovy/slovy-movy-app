@@ -22,7 +22,8 @@ Important namespaces and entry points:
 - Android application ID: `com.slovy.slovymovyapp`; Android app namespace: `com.slovy.slovymovyapp.androidApp`.
 - Shared Compose/library namespace: `com.slovy.slovymovyapp`.
 - Server main class: `com.slovy.slovymovyapp.ApplicationKt`.
-- Shared UI navigation and dependency wiring: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/App.kt`.
+- Shared UI navigation: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/App.kt`; its typed destinations
+  are in `AppDestination.kt` and the app-scoped object graph in `AppContainer.kt`, both alongside it.
 - Versions: `gradle/libs.versions.toml`. The root build derives `versionCode` from the git commit count and
   `versionName` as `1.3.<commit-count>`.
 
@@ -170,7 +171,7 @@ fun Screen(viewModel: ScreenViewModel) {
 - Map domain objects to UI models outside the rendering composable when the mapping contains decisions.
 - Add previews for meaningful content/loading/error/empty states.
 
-`App.kt` uses typed destinations (`AppDestination`) with Compose Navigation. Screen ViewModels are normally created
+`App.kt` uses typed destinations (`AppDestination.kt`) with Compose Navigation. Screen ViewModels are normally created
 with `viewModel(viewModelStoreOwner = backStackEntry) { ... }` so their lifetime matches the navigation entry. The
 current intentional exceptions are app-scoped Favorites/Settings ViewModels and the bounded Word Details ViewModel
 cache. Do not accidentally change those lifetimes when refactoring navigation.
@@ -229,9 +230,12 @@ cannot use Valkyrie; `WordListIcon` renders them through the app's singleton Coi
 
 ## Application services and platform wiring
 
-`App.kt` creates the app/session-level repositories and services, including dictionary/list clients, local/downloaded
-database managers, `WordFetchManager`, lemma recovery, intake/session/stats services, downloads, TTS, and export. Keep
-expensive managers stable across recompositions; do not recreate caches or coordinators in screen content.
+`AppContainer` holds the app/session-level repositories and services, including dictionary/list clients,
+local/downloaded database managers, `WordFetchManager`, lemma recovery, intake/session/stats services, downloads,
+TTS, and export. `rememberAppContainer` builds it and closes `LemmaRecoveryController` and `DownloadCoordinator`
+when the composition leaves. Each service keeps its own `remember` keys, so one is recreated when its own inputs
+change and not when a sibling's do. Take what a screen needs from the container; do not recreate caches or
+coordinators in screen content, and do not add a member to the container until something outside it needs one.
 
 Platform services use expect/actual or injectable interfaces:
 
@@ -379,8 +383,8 @@ explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can disti
 
 `StatsService` owns queue/global/screen snapshots, streak/practice data, and the pipeline stages `QUEUE`, `NEW`,
 `FRESH`, `MIDDLE`, `STRONG`, and `LEARNED`. Its retrievability function is reused in session priority.
-`FavoritesReviewCoordinator` caches a full intake refresh for five minutes per language; `refreshDueCountsOnly` must
-not rerun intake. It also avoids intake during a data-version mismatch.
+`FavoritesReviewCoordinator` (in `data/learning/review`) caches a full intake refresh for five minutes per language;
+`refreshDueCountsOnly` must not rerun intake. It also avoids intake during a data-version mismatch.
 
 ## Curated word lists
 

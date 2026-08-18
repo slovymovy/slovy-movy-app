@@ -70,7 +70,7 @@ internal fun PipelineShiftCompleteHero(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.smPlus)) {
                 stages.forEachIndexed { index, stage ->
                     PipelineShiftRow(
                         stage = stage,
@@ -111,7 +111,7 @@ private fun PipelineShiftRow(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.smPlus),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(

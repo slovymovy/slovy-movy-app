@@ -249,13 +249,15 @@ internal fun Badge(
         } else Modifier
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(
-                start = if (isClickable && isFavorite) 9.dp else if (isClickable) 11.dp else 12.dp,
-                end = if (isClickable) 8.dp else 12.dp,
-                top = 5.dp,
-                bottom = 5.dp
+                start = if (isClickable && isFavorite) AppSpacing.sm
+                else if (isClickable) AppSpacing.smPlus
+                else AppSpacing.md,
+                end = if (isClickable) AppSpacing.sm else AppSpacing.md,
+                top = AppSpacing.xs,
+                bottom = AppSpacing.xs
             )
         ) {
             if (isFavorite) {
@@ -293,7 +295,7 @@ internal fun MetaBadge(
     Box(
         modifier = Modifier
             .background(containerColor, RoundedCornerShape(4.dp))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
+            .padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xxs)
     ) {
         Text(
             text = text,

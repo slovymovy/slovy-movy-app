@@ -9,6 +9,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
+import com.slovy.slovymovyapp.server.ServerJson
 import com.slovy.slovymovyapp.server.ai.GEMINI_3_1_FLASH_LITE
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.OpenAIProvider
@@ -35,7 +36,6 @@ import io.ktor.util.logging.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.kohsuke.github.GHFileNotFoundException
 import org.kohsuke.github.HttpException
@@ -70,7 +70,6 @@ private data class GeneralFeedbackResponse(
     val discussionUrl: String
 )
 
-private val feedbackJson = Json { ignoreUnknownKeys = true }
 
 fun main() {
     val port = System.getenv(SERVER_PORT_ENV)?.toIntOrNull() ?: SERVER_PORT
@@ -118,14 +117,16 @@ fun Application.module() {
                     call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
                     return@get
                 }
-                val json = Json { ignoreUnknownKeys = true }
                 try {
                     // Prefer a fresh bundle's version (zero extra GitHub calls). Fall back to the
                     // dedicated version cache, which only does the cheap tree-walk and is unaffected
                     // by malformed list JSON or icon download failures.
                     val version = bundleCache.peekFresh(lang)?.version ?: versionCache.get(lang)
                     call.respondText(
-                        json.encodeToString(ListsVersionResponse.serializer(), ListsVersionResponse(version)),
+                        ServerJson.lenient.encodeToString(
+                            ListsVersionResponse.serializer(),
+                            ListsVersionResponse(version)
+                        ),
                         ContentType.Application.Json
                     )
                 } catch (_: GHFileNotFoundException) {
@@ -146,12 +147,11 @@ fun Application.module() {
                     call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
                     return@get
                 }
-                val json = Json { ignoreUnknownKeys = true }
                 try {
                     val bundle = bundleCache.get(lang)
                     val response = LanguageListsResponse(version = bundle.version, lists = bundle.lists)
                     call.respondText(
-                        json.encodeToString(LanguageListsResponse.serializer(), response),
+                        ServerJson.lenient.encodeToString(LanguageListsResponse.serializer(), response),
                         ContentType.Application.Json
                     )
                 } catch (_: GHFileNotFoundException) {
@@ -203,11 +203,9 @@ fun Application.module() {
                 return@get
             }
 
-            val json = Json { ignoreUnknownKeys = true }
-
             try {
                 // Step 1: Prepare base data before starting the stream so we can still return errors
-                val baseResult = loadBaseWordData(lang, word, json, logger = call.application.environment.log)
+                val baseResult = loadBaseWordData(lang, word, logger = call.application.environment.log)
 
                 // Step 2: Stream results as NDJSON (base, then translated if available)
                 //
@@ -225,7 +223,7 @@ fun Application.module() {
                         // Send filtered base response to client (always filter based on requested codes)
                         val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
                         val baseChunk = WordStreamChunk(WordStreamStage.BASE, baseResponseToClient)
-                        write(json.encodeToString(WordStreamChunk.serializer(), baseChunk))
+                        write(ServerJson.lenient.encodeToString(WordStreamChunk.serializer(), baseChunk))
                         write("\n")
                         flush()
 
@@ -239,7 +237,6 @@ fun Application.module() {
                                 lang = lang,
                                 word = word,
                                 requestedLangCodes = requestedLangCodes,
-                                json = json,
                                 logger = streamLogger
                             )
 
@@ -250,7 +247,7 @@ fun Application.module() {
                                 val translatedResponseToClient = filterTranslations(fullResponse, requestedLangCodes)
                                 val translatedChunk =
                                     WordStreamChunk(WordStreamStage.TRANSLATED, translatedResponseToClient)
-                                write(json.encodeToString(WordStreamChunk.serializer(), translatedChunk))
+                                write(ServerJson.lenient.encodeToString(WordStreamChunk.serializer(), translatedChunk))
                                 write("\n")
                                 flush()
                             }
@@ -259,7 +256,7 @@ fun Application.module() {
                         // Step 3: Queue Cloud Tasks update if requested (only if something was processed)
                         // IMPORTANT: Use fullResponse (unfiltered) to ensure nothing is lost in repo
                         if (!push.isNullOrBlank() && wasProcessed) {
-                            val responseJson = json.encodeToString(
+                            val responseJson = ServerJson.lenient.encodeToString(
                                 LanguageCardResponse.serializer(),
                                 fullResponse
                             )
@@ -287,7 +284,7 @@ fun Application.module() {
             artifactName = "feedback discussion"
         ) { _, comment, email ->
             val discussion = GitHubClient.createFeedbackDiscussion(comment = comment, email = email)
-            feedbackJson.encodeToString(
+            ServerJson.lenient.encodeToString(
                 GeneralFeedbackResponse.serializer(),
                 GeneralFeedbackResponse(
                     discussionNumber = discussion.number,
@@ -307,7 +304,7 @@ fun Application.module() {
                 comment = comment,
                 email = email
             )
-            feedbackJson.encodeToString(
+            ServerJson.lenient.encodeToString(
                 GitHubIssueResponse.serializer(),
                 GitHubIssueResponse(
                     issueNumber = createdIssue.number,
@@ -329,7 +326,7 @@ fun Application.module() {
                 comment = comment,
                 email = email
             )
-            feedbackJson.encodeToString(
+            ServerJson.lenient.encodeToString(
                 GitHubIssueResponse.serializer(),
                 GitHubIssueResponse(
                     issueNumber = createdIssue.number,
@@ -360,12 +357,9 @@ fun Application.module() {
                 return@post
             }
 
-            val jsonDecoder = Json { ignoreUnknownKeys = false }
-            val jsonEncoder = Json { prettyPrint = true }
-
             try {
                 val responseJson = call.receiveText()
-                val incoming = jsonDecoder.decodeFromString(
+                val incoming = ServerJson.strict.decodeFromString(
                     LanguageCardResponse.serializer(),
                     responseJson
                 )
@@ -377,18 +371,18 @@ fun Application.module() {
                 // Check if file exists and handle accordingly
                 try {
                     val (existingContent, sha) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
-                    val existing = jsonDecoder.decodeFromString(
+                    val existing = ServerJson.strict.decodeFromString(
                         LanguageCardResponse.serializer(),
                         existingContent
                     )
                     val merged = WordDataMerger.merge(existing, incoming)
-                    val mergedJson = jsonEncoder.encodeToString(
+                    val mergedJson = ServerJson.pretty.encodeToString(
                         LanguageCardResponse.serializer(),
                         merged
                     )
 
                     // Skip commit if content is identical
-                    val existingPretty = jsonEncoder.encodeToString(
+                    val existingPretty = ServerJson.pretty.encodeToString(
                         LanguageCardResponse.serializer(),
                         existing
                     )
@@ -400,7 +394,7 @@ fun Application.module() {
                     }
                 } catch (_: GHFileNotFoundException) {
                     // File doesn't exist - create it
-                    val prettyJson = jsonEncoder.encodeToString(
+                    val prettyJson = ServerJson.pretty.encodeToString(
                         LanguageCardResponse.serializer(),
                         incoming
                     )
@@ -469,7 +463,7 @@ private fun Route.feedbackSubmission(
         }
 
         val submission = try {
-            feedbackJson.decodeFromString(
+            ServerJson.lenient.decodeFromString(
                 FeedbackSubmissionRequest.serializer(),
                 call.receiveText()
             )
@@ -611,14 +605,13 @@ internal suspend fun <T> raceWithFallback(
 private suspend fun enhanceWithAI(
     lang: String,
     word: String,
-    json: Json,
     logger: Logger
 ): LanguageCardResponse {
     val geminiProvider = GeminiProvider()
     val openAIProvider = OpenAIProvider()
 
     val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
-    val extractedData = json.decodeFromString(ExtractedWordData.serializer(), content)
+    val extractedData = ServerJson.lenient.decodeFromString(ExtractedWordData.serializer(), content)
     val request = DbExtractEnhancerUtils.createLanguageCardRequest(extractedData)
         ?: throw IllegalArgumentException("No entries found for word '$word' in language '$lang'")
 
@@ -672,20 +665,20 @@ private data class EnhancedTranslations(
     val mergedLangCodes: List<String>
 )
 
-private suspend fun loadBaseWordData(lang: String, word: String, json: Json, logger: Logger): WordProcessResult {
+private suspend fun loadBaseWordData(lang: String, word: String, logger: Logger): WordProcessResult {
     var wasProcessed = false
     val response = try {
         // Try push branch first (contains latest updates)
         val (content, _) = GitHubClient.loadWordsContentFromPushBranch(lang, word)
-        json.decodeFromString(LanguageCardResponse.serializer(), content)
+        ServerJson.lenient.decodeFromString(LanguageCardResponse.serializer(), content)
     } catch (_: GHFileNotFoundException) {
         // Fall back to main branch
         try {
             val content = GitHubClient.loadWordsContent(lang, word)
-            json.decodeFromString(LanguageCardResponse.serializer(), content)
+            ServerJson.lenient.decodeFromString(LanguageCardResponse.serializer(), content)
         } catch (_: GHFileNotFoundException) {
             wasProcessed = true
-            enhanceWithAI(lang, word, json, logger = logger)
+            enhanceWithAI(lang, word, logger = logger)
         }
     }
     return WordProcessResult(response = response, wasProcessed = wasProcessed)
@@ -721,7 +714,6 @@ private suspend fun addMissingTranslations(
     lang: String,
     word: String,
     requestedLangCodes: List<String>,
-    json: Json,
     logger: Logger
 ): TranslationResult {
     if (requestedLangCodes.isEmpty()) return TranslationResult(response, updated = false)
@@ -748,7 +740,7 @@ private suspend fun addMissingTranslations(
 
     val extractedData = try {
         val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
-        json.decodeFromString(ExtractedWordData.serializer(), content)
+        ServerJson.lenient.decodeFromString(ExtractedWordData.serializer(), content)
     } catch (_: GHFileNotFoundException) {
         logger.warn("No db-extract for $lang/$word; cannot translate it into $missingLangCodes")
         return TranslationResult(response, updated = false)
