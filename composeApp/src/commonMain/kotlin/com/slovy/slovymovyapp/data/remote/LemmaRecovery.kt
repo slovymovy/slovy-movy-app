@@ -54,7 +54,7 @@ class LemmaRecovery internal constructor(
                 language = language,
                 lemma = lemma,
                 translationTargets = translationTargets,
-                pushToRepo = false,
+                pushToRepo = true
             ).first { result ->
                 !result.isWordLoading && !result.isTranslationLoading
             }
