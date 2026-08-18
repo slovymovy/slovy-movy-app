@@ -71,12 +71,14 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
         CardKind.WORD_TO_TRANSLATION -> {
             val target = targetLanguage ?: return null
             val back = bilingualBack(
+                lemma = lemma,
                 sense = sense,
                 targetLanguage = target,
                 translationTargets = translationTargets,
                 favoriteLemmas = favoriteLemmas,
             ) ?: return null
             val senses = studiedSenses.toBilingualSenseUiStates(
+                lemma = lemma,
                 targetLanguage = target,
                 translationTargets = translationTargets,
                 favoriteLemmas = favoriteLemmas,
@@ -358,12 +360,14 @@ private fun LanguageCardResponseSense.translationCue(language: Language): String
     translationLines(setOf(language)).firstOrNull()
 
 private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
+    lemma: String,
     targetLanguage: Language,
     translationTargets: List<Language>,
     favoriteLemmas: Set<String>,
 ): List<StudyCardSenseUiState> =
     mapNotNull { sense ->
         bilingualBack(
+            lemma = lemma,
             sense = sense,
             targetLanguage = targetLanguage,
             translationTargets = translationTargets,
@@ -376,9 +380,12 @@ private fun List<LanguageCardResponseSense>.toBilingualSenseUiStates(
 // The headline is the answer: translation words in every configured language, in the exact same
 // bullet-per-language block the word-details screen uses, so no language looks subordinate. The
 // definition follows the same rule — one line per configured language — with the source-language
-// definition below, as before. Returns null when the tested language cannot be rendered, judged
-// by the same satisfiesTranslationData gate that variant building and load-state checks use.
+// definition below, as before. The studied word sits under the headline so the back also answers
+// "which word was this?" without flipping back. Returns null when the tested language cannot be
+// rendered, judged by the same satisfiesTranslationData gate that variant building and load-state
+// checks use.
 private fun bilingualBack(
+    lemma: String,
     sense: LanguageCardResponseSense,
     targetLanguage: Language,
     translationTargets: List<Language>,
@@ -390,11 +397,13 @@ private fun bilingualBack(
     val definition = blocks.definitions ?: return null
     return StudyCardBackUiState(
         headline = headline,
+        sourceWord = lemma,
         isMultiLanguageHeadline = blocks.isMultiLanguage,
         definition = definition,
         definitionTranslation = sense.senseDefinition.takeIf { it.isNotBlank() },
         examples = sense.studyExamples(targetLanguage),
         synonyms = sense.toStudySynonyms(favoriteLemmas),
+        // No speaker on this back: the front of a word -> translation card already voices the word.
         audioText = null,
     )
 }

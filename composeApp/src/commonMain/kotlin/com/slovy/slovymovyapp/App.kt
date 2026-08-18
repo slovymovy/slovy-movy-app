@@ -733,14 +733,14 @@ fun App(
                     }
                     StudySessionScreen(
                         viewModel = viewModel,
+                        // The session reports its own end, so that a session closed with the
+                        // system back button is still counted; these only navigate.
                         onCancel = {
-                            logEvent(AnalyticsEvent.STUDY_CANCEL_SESSION, viewModel.buildSessionEndParams("cancel"))
                             if (!navController.popBackStack()) {
                                 navController.navigate(AppDestination.Favorites)
                             }
                         },
                         onEnd = {
-                            logEvent(AnalyticsEvent.STUDY_END_SESSION, viewModel.buildSessionEndParams("finished"))
                             if (!navController.popBackStack()) {
                                 navController.navigate(AppDestination.Favorites)
                             }

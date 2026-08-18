@@ -119,6 +119,10 @@ enum class StudyRecognitionMode {
 data class StudyCardBackUiState(
     val headline: String,
     val isLemmaHeadline: Boolean = false,
+    // The studied-language word, shown under the headline when the headline is not the word itself
+    // (bilingual recognition backs). Backs whose headline is already the lemma leave this null so
+    // the word never appears twice.
+    val sourceWord: String? = null,
     // True when the headline is a bullet block covering several translation languages; the UI
     // steps the headline typography down one size so the block doesn't overwhelm the card.
     val isMultiLanguageHeadline: Boolean = false,
