@@ -389,6 +389,7 @@ fun App(
                             val plan = if (addedTranslation != null) {
                                 SetupDownloadPlan(
                                     dataDbManager = dataManager,
+                                    downloadCoordinator = container.downloadCoordinator,
                                     learningLanguages = {
                                         dataManager.listDownloadedDatabases()
                                             .filterIsInstance<DatabaseFileInfo.Dictionary>()
@@ -402,6 +403,7 @@ fun App(
                             } else {
                                 SetupDownloadPlan(
                                     dataDbManager = dataManager,
+                                    downloadCoordinator = container.downloadCoordinator,
                                     learningLanguages = { listOfNotNull(dictLang) },
                                     translationTargets = nativeLanguages,
                                     dictionaryLanguage = dictLang,
@@ -438,8 +440,7 @@ fun App(
                                         // write has to land before recovery, which reads the stored
                                         // targets to decide what to fetch.
                                         if (addedTranslation != null) {
-                                            settingsRepository.addTranslationLanguage(addedTranslation)
-                                            settingsViewModel.onTranslationLanguageAdded(addedTranslation)
+                                            settingsViewModel.addTranslationLanguage(addedTranslation)
                                         }
                                         favoritesReviewCoordinator.invalidateAllIntakeCache()
                                         container.dictionaryRepository.clearSenseCache()

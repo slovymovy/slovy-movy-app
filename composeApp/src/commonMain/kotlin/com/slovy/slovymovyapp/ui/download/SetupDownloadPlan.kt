@@ -3,9 +3,13 @@ package com.slovy.slovymovyapp.ui.download
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.CancelToken
 import com.slovy.slovymovyapp.data.remote.DataDbManager
+import com.slovy.slovymovyapp.data.remote.DownloadCoordinator
 import com.slovy.slovymovyapp.data.remote.DownloadProgress
+import com.slovy.slovymovyapp.data.remote.DownloadStatus
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 
 /**
  * The set of database files one `DownloadSetup` run has to fetch, plus the work that fetches them.
@@ -22,6 +26,7 @@ import kotlinx.coroutines.CancellationException
  */
 class SetupDownloadPlan(
     private val dataDbManager: DataDbManager,
+    private val downloadCoordinator: DownloadCoordinator,
     private val learningLanguages: suspend () -> List<Language>,
     private val translationTargets: List<Language>,
     /** Dictionary to fetch when it is not installed yet; `null` never downloads a dictionary. */
@@ -79,14 +84,26 @@ class SetupDownloadPlan(
         translationDownloads.forEachIndexed { index, item ->
             val itemIndex = index + translationOffset
             val label = translationItemLabel(item.source, item.target)
-            dataDbManager.ensureTranslation(
-                src = item.source,
-                tgt = item.target,
-                onProgress = { progress ->
-                    onProgress(scaled(progress, itemIndex = itemIndex, totalItems = totalItems, label = label))
-                },
-                cancelToken = cancelToken,
-            )
+            val key = "trans_${item.source.code}_${item.target.code}"
+            val entry = downloadCoordinator.startDownload(key) { pairProgress, pairCancelToken ->
+                dataDbManager.ensureTranslation(
+                    src = item.source,
+                    tgt = item.target,
+                    onProgress = pairProgress,
+                    cancelToken = pairCancelToken,
+                )
+            }.filterNotNull().first { entry ->
+                entry.progress?.let { progress ->
+                    onProgress(scaled(progress, itemIndex, totalItems, label))
+                }
+                entry.status != DownloadStatus.Running
+            }
+            when (entry.status) {
+                DownloadStatus.Done -> Unit
+                DownloadStatus.Cancelled -> throw DataDbManager.DownloadCancelledException()
+                DownloadStatus.Failed -> throw entry.error ?: IllegalStateException("Translation download failed")
+                DownloadStatus.Idle, DownloadStatus.Running -> error("Unexpected terminal download status")
+            }
         }
     }
 

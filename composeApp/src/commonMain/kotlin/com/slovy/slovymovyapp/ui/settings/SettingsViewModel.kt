@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.getPluralString
@@ -118,6 +120,7 @@ class SettingsViewModel(
     val snackbarHostState = SnackbarHostState()
     private val downloadJobs = mutableMapOf<String, Job>()
     private var translationSaveJob: Job? = null
+    private val translationLanguagesMutex = Mutex()
     private var loadLearningLanguagesJob: Job? = null
     private var loadLanguagesJob: Job? = null
 
@@ -375,8 +378,12 @@ class SettingsViewModel(
      * app-scoped state — and the translation targets `App` builds word routes from — would keep
      * the old selection until the next reload finishes.
      */
-    fun onTranslationLanguageAdded(language: Language) {
-        state = state.copy(translationLanguages = state.translationLanguages + language)
+    suspend fun addTranslationLanguage(language: Language) {
+        translationSaveJob?.join()
+        translationLanguagesMutex.withLock {
+            settingsRepository.addTranslationLanguage(language)
+            state = state.copy(translationLanguages = state.translationLanguages + language)
+        }
     }
 
     /**
@@ -389,17 +396,22 @@ class SettingsViewModel(
         if (language !in previous) return
         val updated = previous - language
         state = state.copy(translationLanguages = updated)
-        translationSaveJob?.cancel()
+        val pendingSave = translationSaveJob
         translationSaveJob = viewModelScope.launch {
             try {
-                settingsRepository.setTranslationLanguages(updated)
+                pendingSave?.join()
+                translationLanguagesMutex.withLock {
+                    settingsRepository.setTranslationLanguages(
+                        settingsRepository.getTranslationLanguages() - language
+                    )
+                }
                 onDictionaryDataChanged(false)
                 loadLearningLanguages()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    translationLanguages = previous,
+                    translationLanguages = state.translationLanguages + language,
                     errorMessage = UiText.Resource(
                         Res.string.settings_error_save_translation_languages,
                         listOf(messageOrUnknown(e))
@@ -1051,4 +1063,3 @@ class SettingsViewModel(
         downloadJobs[downloadKey] = job
     }
 }
-
