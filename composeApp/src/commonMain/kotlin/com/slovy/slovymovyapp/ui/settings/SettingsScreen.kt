@@ -27,7 +27,7 @@ import com.slovy.slovymovyapp.ui.DeleteConfirmationDialog
 import com.slovy.slovymovyapp.ui.FeedbackDialog
 import com.slovy.slovymovyapp.ui.LoadingIndicator
 import com.slovy.slovymovyapp.ui.SectionHeader
-import com.slovy.slovymovyapp.ui.DeveloperOptionsCard
+import com.slovy.slovymovyapp.ui.developer.DeveloperOptionsCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
