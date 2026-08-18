@@ -13,6 +13,7 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.ui.components.LanguageFilterDropdown
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -113,8 +114,8 @@ fun StatsScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 4.dp, bottom = 16.dp),
+                    .padding(horizontal = AppSpacing.lg)
+                    .padding(top = AppSpacing.xs, bottom = AppSpacing.lg),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 StreakCard(state = state, onStepMonth = onStepMonth)
@@ -139,7 +140,7 @@ private fun StatsHeader(
             .padding(horizontal = 20.dp)
             .padding(top = 14.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
         Text(
             text = stringResource(Res.string.stats_title),

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
 import kotlinx.coroutines.*
@@ -92,7 +93,7 @@ internal fun StudyDoneCard(
             ) {
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.xs),
                 ) {
                     Text(
                         text = stringResource(Res.string.favorites_study_done_title),
@@ -102,7 +103,7 @@ internal fun StudyDoneCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                         verticalAlignment = Alignment.Bottom,
                     ) {
                         Text(

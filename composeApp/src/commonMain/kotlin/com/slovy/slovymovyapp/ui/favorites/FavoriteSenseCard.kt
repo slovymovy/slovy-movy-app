@@ -41,7 +41,7 @@ internal fun FavoriteSenseCard(
             sense = item.sense,
             pos = item.pos,
             loading = item.loading,
-            error = item.error?.resolve(),
+            error = item.error,
             diagnosticInfoOnError = buildDeveloperDiagnosticInfo(item.senseId, item.createdAt)
         ),
         state = senseState,

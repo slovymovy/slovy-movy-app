@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
 import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import androidx.compose.ui.unit.dp
@@ -74,9 +75,9 @@ internal fun EmptySearchState(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
-            .padding(top = 4.dp, bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = AppSpacing.lg)
+            .padding(top = AppSpacing.xs, bottom = AppSpacing.lg),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
         if (wordSuggestions.isNotEmpty()) {
             Text(
@@ -93,8 +94,8 @@ internal fun EmptySearchState(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 wordSuggestions.forEach { lemma ->
                     WordChip(lemma = lemma, onClick = { onWordClick(lemma) })
@@ -154,7 +155,7 @@ internal fun EmptySearchState(
                 onClick = onSuggestListClick,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 4.dp),
+                    .padding(top = AppSpacing.xs),
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -205,7 +206,7 @@ internal fun EmptySearchState(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 32.dp),
+                    .padding(top = AppSpacing.xxl),
                 textAlign = TextAlign.Center
             )
         }
@@ -225,7 +226,7 @@ private fun ReadSection(onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     // Warm but flat: a 16% primary wash over the container, no border, no shadow/glow.
     val rowFill = lerp(MaterialTheme.colorScheme.surfaceContainer, primary, 0.16f)
-    Column(modifier = Modifier.padding(bottom = 4.dp)) {
+    Column(modifier = Modifier.padding(bottom = AppSpacing.xs)) {
         Text(
             text = stringResource(Res.string.search_add_words).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
@@ -353,7 +354,7 @@ internal fun NoDictionaryState(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp),
+                .padding(horizontal = AppSpacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(

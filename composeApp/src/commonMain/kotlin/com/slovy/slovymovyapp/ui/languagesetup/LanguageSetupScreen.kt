@@ -100,7 +100,11 @@ fun LanguageSetupScreenContent(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(state.errorMessage, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                Text(
+                    state.errorMessage.resolve(),
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center
+                )
                 Button(onClick = onRetry, modifier = Modifier.padding(top = AppSpacing.lg)) {
                     Text(stringResource(Res.string.common_retry))
                 }

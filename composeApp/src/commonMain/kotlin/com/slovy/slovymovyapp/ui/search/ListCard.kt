@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.lists.WordList
 import androidx.compose.ui.unit.dp
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.flow.*
 import org.jetbrains.compose.resources.pluralStringResource
@@ -76,7 +77,7 @@ internal fun ListCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppSpacing.lg),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

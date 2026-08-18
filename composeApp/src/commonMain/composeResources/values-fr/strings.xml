@@ -766,4 +766,14 @@
     <string name="search_add_words">Ajouter des mots</string>
     <string name="search_add_words_row">Colle un texte — cherche chaque mot</string>
     <string name="search_add_words_cd">Colle un texte et cherche chaque mot</string>
+
+    <string name="network_error_offline">Pas de connexion internet. Vérifiez votre connexion et réessayez.</string>
+    <string name="network_error_timeout">Délai d\'attente dépassé. Veuillez réessayer.</string>
+    <string name="network_error_server_with_code">Erreur du serveur (%1$s). Veuillez réessayer.</string>
+    <string name="network_error_server">Erreur du serveur. Veuillez réessayer.</string>
+    <string name="network_error_insufficient_storage">Espace libre insuffisant pour le téléchargement.</string>
+    <string name="network_error_unknown">Une erreur est survenue. Veuillez réessayer.</string>
+    <string name="common_loading">Chargement…</string>
+    <string name="common_cancelled">Annulé</string>
+    <string name="word_details_load_failed">Impossible de charger le mot</string>
 </resources>

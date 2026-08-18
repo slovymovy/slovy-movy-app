@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import com.slovy.slovymovyapp.data.lists.WordList
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.word.DownloadVector
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.analytics.Analytics
@@ -180,9 +181,9 @@ fun SearchScreenContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(horizontal = AppSpacing.lg)
+                        .padding(top = AppSpacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Search field
@@ -251,8 +252,8 @@ fun SearchScreenContent(
                         else -> {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                                contentPadding = PaddingValues(AppSpacing.lg),
                                 state = state.scrollState
                             ) {
                                 items(state.results) { item ->
@@ -323,7 +324,7 @@ private fun SearchResultCard(
             )
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (showLanguageIndicator) {

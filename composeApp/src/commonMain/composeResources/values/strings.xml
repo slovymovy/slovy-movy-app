@@ -766,4 +766,14 @@
     <string name="search_add_words">Add words</string>
     <string name="search_add_words_row">Paste a text — look up every word</string>
     <string name="search_add_words_cd">Paste a text and look up every word</string>
+
+    <string name="network_error_offline">No internet connection. Check your connection and try again.</string>
+    <string name="network_error_timeout">Request timed out. Please try again.</string>
+    <string name="network_error_server_with_code">Server error (%1$s). Please try again.</string>
+    <string name="network_error_server">Server error. Please try again.</string>
+    <string name="network_error_insufficient_storage">Not enough free space to complete the download.</string>
+    <string name="network_error_unknown">Something went wrong. Please try again.</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_cancelled">Cancelled</string>
+    <string name="word_details_load_failed">Failed to load word</string>
 </resources>

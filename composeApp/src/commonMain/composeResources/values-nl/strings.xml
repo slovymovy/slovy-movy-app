@@ -766,4 +766,14 @@
     <string name="search_add_words">Woorden toevoegen</string>
     <string name="search_add_words_row">Plak een tekst — zoek elk woord op</string>
     <string name="search_add_words_cd">Plak een tekst en zoek elk woord op</string>
+
+    <string name="network_error_offline">Geen internetverbinding. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="network_error_timeout">Time-out. Probeer het opnieuw.</string>
+    <string name="network_error_server_with_code">Serverfout (%1$s). Probeer het opnieuw.</string>
+    <string name="network_error_server">Serverfout. Probeer het opnieuw.</string>
+    <string name="network_error_insufficient_storage">Onvoldoende vrije ruimte voor de download.</string>
+    <string name="network_error_unknown">Er is iets misgegaan. Probeer het opnieuw.</string>
+    <string name="common_loading">Laden…</string>
+    <string name="common_cancelled">Geannuleerd</string>
+    <string name="word_details_load_failed">Kan het woord niet laden</string>
 </resources>

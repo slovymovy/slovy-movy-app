@@ -2,6 +2,7 @@ package com.slovy.slovymovyapp.ui.word.preview
 
 import androidx.compose.runtime.Composable
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
@@ -84,7 +85,7 @@ private fun WordDetailScreenPreviewCardError(
             state = WordDetailUiState.Content(
                 card = loadingCard,
                 entries = emptyList(),
-                cardError = "Failed to load card data"
+                cardError = UiText.Plain("Failed to load card data")
             )
         )
     }
@@ -101,7 +102,7 @@ private fun WordDetailScreenPreviewCardErrorMultiPos(
             state = WordDetailUiState.Content(
                 card = loadingCard,
                 entries = emptyList(),
-                cardError = "Network error: Unable to connect"
+                cardError = UiText.Plain("Network error: Unable to connect")
             )
         )
     }
@@ -117,7 +118,7 @@ private fun WordDetailScreenPreviewSenseTranslationError(
         val entriesWithError = base.entries.mapIndexed { idx, entry ->
             if (idx == 0) {
                 entry.copy(senses = entry.senses.mapIndexed { sIdx, sense ->
-                    if (sIdx == 0) sense.copy(translationError = "Failed to translate", expanded = true) else sense
+                    if (sIdx == 0) sense.copy(translationError = UiText.Plain("Failed to translate"), expanded = true) else sense
                 })
             } else entry
         }

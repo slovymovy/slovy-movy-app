@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 
@@ -39,7 +40,7 @@ fun FeedbackDialog(
             title = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CheckCircle,
@@ -56,7 +57,7 @@ fun FeedbackDialog(
                 }
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     Text(
                         text = stringResource(Res.string.feedback_dialog_sent_message),
                         style = MaterialTheme.typography.bodyMedium
@@ -101,7 +102,7 @@ fun FeedbackDialog(
                     focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     OutlinedTextField(
                         value = commentValue,
                         onValueChange = { commentValue = it; onCommentChange(it.text) },

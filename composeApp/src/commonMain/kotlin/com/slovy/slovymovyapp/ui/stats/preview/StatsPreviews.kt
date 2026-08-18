@@ -23,6 +23,7 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
 import com.slovy.slovymovyapp.data.learning.stats.StatsPracticeDay
 import com.slovy.slovymovyapp.data.learning.stats.StatsYearMonth
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
 import slovymovyapp.composeapp.generated.resources.*
@@ -147,8 +148,8 @@ private fun PipelineStageLabelAutoSizePreview(
         Surface {
             val labelLayout = rememberPipelineLabelLayout(samples)
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             ) {
                 samples.forEach { label ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
