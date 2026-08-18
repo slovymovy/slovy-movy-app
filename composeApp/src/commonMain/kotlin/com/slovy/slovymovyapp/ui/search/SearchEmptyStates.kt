@@ -88,12 +88,12 @@ internal fun EmptySearchState(
                     fontSize = 10.5.sp,
                 ),
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                modifier = Modifier.padding(top = AppSpacing.sm, bottom = AppSpacing.xxs)
             )
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp),
+                    .padding(top = AppSpacing.xxs),
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
@@ -104,8 +104,8 @@ internal fun EmptySearchState(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
+                    .padding(top = AppSpacing.xsPlus),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -139,8 +139,8 @@ internal fun EmptySearchState(
                 ),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(
-                    top = if (wordSuggestions.isNotEmpty()) 12.dp else 8.dp,
-                    bottom = 2.dp
+                    top = if (wordSuggestions.isNotEmpty()) AppSpacing.md else AppSpacing.sm,
+                    bottom = AppSpacing.xxs
                 )
             )
             curatedLists.forEachIndexed { index, list ->
@@ -175,9 +175,12 @@ internal fun EmptySearchState(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (wordSuggestions.isNotEmpty()) 12.dp else 8.dp, bottom = 2.dp),
+                    .padding(
+                        top = if (wordSuggestions.isNotEmpty()) AppSpacing.md else AppSpacing.sm,
+                        bottom = AppSpacing.xxs,
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
@@ -235,7 +238,7 @@ private fun ReadSection(onClick: () -> Unit) {
                 fontSize = 10.5.sp,
             ),
             color = primary,
-            modifier = Modifier.padding(top = 8.dp, bottom = 10.dp)
+            modifier = Modifier.padding(top = AppSpacing.sm, bottom = AppSpacing.smPlus)
         )
         // Min height + real vertical padding so the row grows when a localized label wraps
         // to two lines (e.g. German) instead of crowding or clipping on a fixed height.
@@ -246,8 +249,8 @@ private fun ReadSection(onClick: () -> Unit) {
                 .clip(shape)
                 .background(rowFill)
                 .clickable(onClickLabel = stringResource(Res.string.search_add_words_cd), role = Role.Button) { onClick() }
-                .padding(start = 12.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(13.dp),
+                .padding(start = AppSpacing.md, end = AppSpacing.mdPlus, top = AppSpacing.md, bottom = AppSpacing.md),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
             verticalAlignment = Alignment.Top
         ) {
             Box(
@@ -275,7 +278,7 @@ private fun ReadSection(onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface,
                 // Centers the first text line (19sp line height) on the 34dp icon tile, so the
                 // icon stays anchored to line one instead of floating mid-gap on two-line copy.
-                modifier = Modifier.weight(1f).padding(top = 7.dp)
+                modifier = Modifier.weight(1f).padding(top = AppSpacing.xsPlus)
             )
         }
     }
@@ -301,7 +304,7 @@ private fun WordChip(lemma: String, onClick: () -> Unit) {
             )
             // Taller vertical padding lifts the tap target without the empty centering gap
             // that a reserved 48dp slot leaves between wrapped rows.
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.smPlus)
     ) {
         Text(
             text = lemma,
@@ -338,7 +341,7 @@ private fun SuggestionCard(lemma: String, onClick: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.mdPlus)
         )
     }
 }
@@ -400,7 +403,7 @@ internal fun NoDictionaryState(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
-                contentPadding = PaddingValues(horizontal = 28.dp),
+                contentPadding = PaddingValues(horizontal = AppSpacing.xlPlus),
                 modifier = Modifier
                     .height(56.dp)
                     .widthIn(min = 220.dp)

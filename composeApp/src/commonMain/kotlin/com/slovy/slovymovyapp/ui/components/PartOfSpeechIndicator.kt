@@ -140,7 +140,7 @@ fun PartOfSpeechBadge(
                 color = color.copy(alpha = 0.1f),
                 shape = MaterialTheme.shapes.small
             )
-            .padding(horizontal = AppSpacing.md, vertical = 6.dp)
+            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.xsPlus)
     ) {
         Text(
             text = label.replaceFirstChar { it.uppercase() },

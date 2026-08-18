@@ -310,7 +310,7 @@ private fun SearchResultCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 20.dp),
+                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.lgPlus),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

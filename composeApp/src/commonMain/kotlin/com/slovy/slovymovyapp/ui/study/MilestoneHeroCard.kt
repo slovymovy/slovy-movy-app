@@ -70,7 +70,12 @@ internal fun MilestoneHeroCard(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(start = 22.dp, top = 22.dp, end = 22.dp, bottom = 24.dp),
+                .padding(
+                    start = AppSpacing.lgPlus,
+                    top = AppSpacing.lgPlus,
+                    end = AppSpacing.lgPlus,
+                    bottom = AppSpacing.xl,
+                ),
         ) {
             val medallionCount by rememberCountUp(
                 target = medallionTarget,

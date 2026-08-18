@@ -108,7 +108,7 @@ internal fun SenseCard(
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.small)
                     .clickable(onClick = onToggle)
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.mdPlus),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
@@ -254,7 +254,7 @@ internal fun SenseCard(
                             if (sense.targetLangDefinitions.isNotEmpty()) {
                                 Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                                     SectionLabel(stringResource(Res.string.word_details_definition))
-                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)) {
                                         HighlightedText(
                                             text = sense.targetLangDefinitions.map { definition ->
                                                 definition.value.replaceFirstChar { if (it.isUpperCase()) it.lowercase() else it.toString() }
@@ -286,7 +286,7 @@ internal fun SenseCard(
                             if (sense.examples.isNotEmpty()) {
                                 Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                                     SectionLabel(text = stringResource(Res.string.word_details_examples))
-                                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.lgPlus)) {
                                         sense.examples.forEach { ex ->
                                             ExampleItem(
                                                 example = ex,
@@ -458,7 +458,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 11.dp),
+                .padding(start = AppSpacing.smPlus),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             traits.forEach { trait ->
@@ -511,7 +511,7 @@ internal fun ExampleItem(
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
             modifier = Modifier.weight(1f)
         ) {
             ExampleText(

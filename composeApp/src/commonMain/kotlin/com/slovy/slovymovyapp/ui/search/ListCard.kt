@@ -78,12 +78,12 @@ internal fun ListCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(AppSpacing.lg),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
             ) {
                 if (badge != null) {
                     Box(
@@ -91,7 +91,7 @@ internal fun ListCard(
                             .clip(RoundedCornerShape(6.dp))
                             .background(hue.copy(alpha = 0.14f))
                             .border(0.5.dp, hue.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 9.dp, vertical = 3.dp)
+                            .padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xxs)
                     ) {
                         Text(
                             text = badge.uppercase(),
@@ -127,7 +127,7 @@ internal fun ListCard(
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                    modifier = Modifier.padding(top = 2.dp),
+                    modifier = Modifier.padding(top = AppSpacing.xxs),
                 )
             }
 

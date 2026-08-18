@@ -326,7 +326,7 @@ private fun LanguageSetupOptionRow(
 
                 Spacer(Modifier.width(AppSpacing.md))
 
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xxs)) {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.bodyLarge.copy(

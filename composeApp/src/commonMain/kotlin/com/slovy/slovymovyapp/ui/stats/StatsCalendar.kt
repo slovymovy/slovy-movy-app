@@ -35,7 +35,7 @@ internal fun StreakCard(
 ) {
     StatsCard(
         shape = RoundedCornerShape(18.dp),
-        padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+        padding = PaddingValues(horizontal = AppSpacing.mdPlus, vertical = AppSpacing.md),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
             Row(
@@ -212,7 +212,7 @@ private fun CalendarGrid(
             modifier = Modifier
                 .widthIn(max = 280.dp)
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
         ) {
             MonthStepper(
                 viewMonth = state.viewMonth,
@@ -245,7 +245,7 @@ private fun CalendarGrid(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppSpacing.xs),
-                horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 LegendDot(
@@ -354,7 +354,7 @@ private fun CalendarCell(
 private fun LegendDot(color: Color, label: String, borderStroke: BorderStroke) {
     val shape = RoundedCornerShape(3.dp)
     Row(
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(

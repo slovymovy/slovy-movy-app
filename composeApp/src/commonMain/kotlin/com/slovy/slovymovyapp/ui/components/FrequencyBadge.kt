@@ -40,7 +40,7 @@ fun FrequencyBadge(
     ) {
         Text(
             text = stringResource(frequency.label),
-            modifier = Modifier.padding(horizontal = AppSpacing.md, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = AppSpacing.md, vertical = AppSpacing.xsPlus),
             style = MaterialTheme.typography.labelSmall,
             color = textColor
         )
