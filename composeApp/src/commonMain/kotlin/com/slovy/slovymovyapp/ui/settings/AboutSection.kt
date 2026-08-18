@@ -1,4 +1,11 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.settings
+
+import com.slovy.slovymovyapp.ui.StoreReviewTarget
+import com.slovy.slovymovyapp.ui.storeReviewTarget
+import com.slovy.slovymovyapp.ui.storeReviewUrl
+
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
