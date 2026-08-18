@@ -177,6 +177,10 @@ class StudySessionViewModel(
         viewModelScope.launch {
             try {
                 if (availableVoices.isEmpty()) loadVoicesSync()
+                // Voice discovery may suspend. A rewarded exit keeps this ViewModel alive, so a
+                // play request that started before the close tap must not begin speaking over the
+                // summary after discovery resumes.
+                if (isExitingSession) return@launch
                 if (availableVoices.isNotEmpty()) {
                     currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
                     ttsManager.setVoice(availableVoices[currentVoiceIndex])
@@ -467,6 +471,16 @@ class StudySessionViewModel(
         // still being built means leave now. Without this, any state reached after the exit began
         // would have a dead close button.
         if (isExitingSession) {
+            exitRequested = true
+            return
+        }
+        // The queue is already finished even if its reward snapshot has not returned and rendered
+        // Complete yet. In that window close must leave immediately rather than reclassifying the
+        // finished session as a rewarded cancel and starting a second snapshot.
+        if (completionArm == COMPLETION_FINISHED || state is StudySessionUiState.Complete) {
+            isExitingSession = true
+            cardLoadJob?.cancel()
+            ttsManager.stop()
             exitRequested = true
             return
         }
