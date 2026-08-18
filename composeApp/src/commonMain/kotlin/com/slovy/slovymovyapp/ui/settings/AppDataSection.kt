@@ -1,4 +1,8 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.settings
+
+
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

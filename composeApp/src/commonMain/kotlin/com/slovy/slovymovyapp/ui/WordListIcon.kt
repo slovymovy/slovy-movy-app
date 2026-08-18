@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.ui
 
+import com.slovy.slovymovyapp.ui.listdetail.WordListEmblem
+
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState

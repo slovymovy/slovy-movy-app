@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.speech.FakeSpeechPlayer
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.ui.favorites.*
 import com.slovy.slovymovyapp.test.BaseTest
 import kotlinx.coroutines.test.runTest
 import slovymovyapp.composeapp.generated.resources.Res

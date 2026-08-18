@@ -1,4 +1,4 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.download
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -7,9 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -18,266 +15,20 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.slovy.slovymovyapp.analytics.Analytics
-import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.ExperimentalTime
-
-data class DownloadItem(
-    val label: String,
-    val sizeBytes: Long,
-    val flag: String = ""
-)
-
-class DownloadViewModel(
-    private val downloadCoordinator: DownloadCoordinator,
-    private val downloadKey: String,
-    private val download: suspend (onProgress: (DownloadProgress) -> Unit, cancelToken: CancelToken) -> Unit,
-    private val finalize: suspend (
-        onRecoveryProgress: (LemmaRecoveryProgress) -> Unit,
-        onWordListsSync: (Boolean) -> Unit,
-    ) -> Unit = { _, _ -> },
-    private val onSuccess: suspend () -> Unit,
-    private val onCancel: () -> Unit,
-    private val onError: (Throwable) -> Unit,
-    private val loadItems: (suspend () -> List<DownloadItem>)? = null,
-    private val platform: PlatformDbSupport? = null,
-    private val analyticsParams: Map<String, Any> = emptyMap(),
-) : ViewModel() {
-
-    var state by mutableStateOf(
-        if (loadItems != null) DownloadUiState.Loading else DownloadUiState.Idle
-    )
-        private set
-
-    val hadConfirmation: Boolean = loadItems != null
-    val scrollState = ScrollState(0)
-
-    private var terminalHandled = false
-    private var failedDuringLoadItems = false
-    private var downloadStartedAtMs: Long = 0L
-
-    // Held for the lifetime of one download attempt — from beginDownload() until the terminal
-    // handler runs. Bridges the gap between the last per-file download (which would otherwise
-    // stop the foreground service) and finalize(), so on Android 12+ we never have to attempt
-    // a fresh startForegroundService from the background-observer coroutine.
-    private var keepAliveHandle: ProcessKeepAlive? = null
-
-    init {
-        if (loadItems != null) {
-            fetchItems()
-        } else {
-            val downloadFlow = beginDownload()
-            observeProgress(downloadFlow)
-            attachDownloadCallbacks(downloadFlow)
-        }
-    }
-
-    private fun fetchItems() {
-        state = DownloadUiState.Loading
-        viewModelScope.launch {
-            try {
-                val items = loadItems!!.invoke()
-                if (items.isEmpty()) {
-                    startDownload()
-                    return@launch
-                }
-                failedDuringLoadItems = false
-                state = DownloadUiState.ReadyToDownload(items)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                failedDuringLoadItems = true
-                state = DownloadUiState.Failed(e)
-            }
-        }
-    }
-
-    fun startDownload() {
-        if (state is DownloadUiState.Idle || state is DownloadUiState.Running) return
-        terminalHandled = false
-        failedDuringLoadItems = false
-        state = DownloadUiState.Idle
-        val downloadFlow = beginDownload()
-        observeProgress(downloadFlow)
-        attachDownloadCallbacks(downloadFlow)
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun beginDownload(): Flow<DownloadEntry?> {
-        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_DICTIONARY_CLICK, analyticsParams)
-        downloadStartedAtMs = Clock.System.now().toEpochMilliseconds()
-        acquireKeepAlive()
-        return downloadCoordinator.startDownload(downloadKey, download)
-    }
-
-    private fun acquireKeepAlive() {
-        val platform = platform ?: return
-        if (keepAliveHandle != null) return
-        keepAliveHandle = platform.acquireProcessKeepAlive()
-    }
-
-    private fun releaseKeepAlive() {
-        val handle = keepAliveHandle ?: return
-        keepAliveHandle = null
-        handle.release()
-    }
-
-    private fun observeProgress(downloadFlow: Flow<DownloadEntry?>) {
-        viewModelScope.launch {
-            downloadFlow.collect { entry ->
-                when (entry?.status ?: DownloadStatus.Idle) {
-                    DownloadStatus.Idle -> {
-                        if (!terminalHandled) {
-                            state = DownloadUiState.Idle
-                        }
-                    }
-
-                    DownloadStatus.Running -> {
-                        val progress = entry?.progress
-                        val percent = progress?.percent?.coerceAtLeast(0) ?: 0
-                        state = DownloadUiState.Running(percent, progress?.totalBytes, progress?.currentFile)
-                    }
-
-                    // Terminal states are owned by attachDownloadCallbacks
-                    else -> Unit
-                }
-            }
-        }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun attachDownloadCallbacks(downloadFlow: Flow<DownloadEntry?>) {
-        viewModelScope.launch {
-            downloadFlow.collect { entry ->
-                when (entry?.status ?: DownloadStatus.Idle) {
-                    DownloadStatus.Done -> {
-                        if (!terminalHandled) {
-                            terminalHandled = true
-                            downloadCoordinator.clear(downloadKey)
-                            Analytics.logEvent(
-                                AnalyticsEvent.DOWNLOAD_COMPLETED,
-                                analyticsParams + mapOf(
-                                    "duration_ms" to (Clock.System.now().toEpochMilliseconds() - downloadStartedAtMs),
-                                    "bytes" to (entry?.progress?.totalBytes ?: 0L),
-                                ),
-                            )
-                            try {
-                                state = DownloadUiState.Finalizing()
-                                finalize(::updateRecoveryProgress, ::updateWordListsSyncing)
-                                for (i in 3 downTo 1) {
-                                    state = DownloadUiState.Done(countdown = i)
-                                    delay(1_000.milliseconds)
-                                }
-                                onSuccess()
-                            } catch (e: CancellationException) {
-                                throw e
-                            } catch (e: Exception) {
-                                state = DownloadUiState.Failed(e)
-                            } finally {
-                                releaseKeepAlive()
-                            }
-                        }
-                    }
-
-                    DownloadStatus.Cancelled -> {
-                        if (!terminalHandled) {
-                            terminalHandled = true
-                            state = DownloadUiState.Cancelled
-                            downloadCoordinator.clear(downloadKey)
-                            releaseKeepAlive()
-                        }
-                    }
-
-                    DownloadStatus.Failed -> {
-                        if (!terminalHandled) {
-                            terminalHandled = true
-                            val error = entry?.error ?: Throwable("Unknown error")
-                            Analytics.logEvent(
-                                AnalyticsEvent.DOWNLOAD_FAILED,
-                                analyticsParams + mapOf(
-                                    "duration_ms" to (Clock.System.now().toEpochMilliseconds() - downloadStartedAtMs),
-                                    "error" to (error.message ?: error::class.simpleName ?: "unknown"),
-                                ),
-                            )
-                            state = DownloadUiState.Failed(error)
-                            downloadCoordinator.clear(downloadKey)
-                            releaseKeepAlive()
-                        }
-                    }
-
-                    else -> Unit
-                }
-            }
-        }
-    }
-
-    fun updateRecoveryProgress(progress: LemmaRecoveryProgress) {
-        // Late controller emissions can arrive after finalization has moved to a terminal state.
-        val current = state
-        if (current is DownloadUiState.Finalizing) {
-            state = current.copy(recovery = progress)
-        }
-    }
-
-    fun updateWordListsSyncing(active: Boolean) {
-        val current = state
-        if (current is DownloadUiState.Finalizing) {
-            state = current.copy(updatingWordLists = active)
-        }
-    }
-
-    fun onDismissCancel() {
-        onCancel()
-    }
-
-    fun onDismissError() {
-        onError((state as? DownloadUiState.Failed)?.error ?: Throwable("Unknown error"))
-    }
-
-    fun cancelDownload() {
-        Analytics.logEvent(AnalyticsEvent.DOWNLOAD_CANCEL_CLICK)
-        downloadCoordinator.cancel(downloadKey)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        downloadCoordinator.cancel(downloadKey)
-        releaseKeepAlive()
-    }
-
-    fun retry() {
-        terminalHandled = false
-        if (failedDuringLoadItems) {
-            fetchItems()
-        } else {
-            state = DownloadUiState.Idle
-            val downloadFlow = beginDownload()
-            observeProgress(downloadFlow)
-            attachDownloadCallbacks(downloadFlow)
-        }
-    }
-}
+import com.slovy.slovymovyapp.ui.formatFileSize
 
 @Composable
 fun DownloadScreen(
@@ -620,9 +371,8 @@ fun DownloadScreenContent(
                 }
 
                 is DownloadUiState.Failed -> {
-                    val classified = NetworkErrorClassifier.classify(state.error)
                     Text(
-                        text = classified.userMessage,
+                        text = networkErrorUiText(state.error).resolve(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -655,120 +405,3 @@ fun DownloadScreenContent(
     }
 }
 
-sealed interface DownloadUiState {
-    data object Loading : DownloadUiState
-    data class ReadyToDownload(val items: List<DownloadItem>) : DownloadUiState
-    data object Idle : DownloadUiState
-    data class Running(val percent: Int, val total: Long?, val currentFile: String? = null) : DownloadUiState
-    data class Finalizing(
-        val recovery: LemmaRecoveryProgress? = null,
-        val updatingWordLists: Boolean = false,
-    ) : DownloadUiState
-    data class Failed(val error: Throwable) : DownloadUiState
-    data object Cancelled : DownloadUiState
-    data class Done(val countdown: Int) : DownloadUiState
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Loading)
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewReadyToDownload(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(
-            state = DownloadUiState.ReadyToDownload(
-                items = listOf(
-                    DownloadItem("Nederlands Dictionary", 156_000_000L, "\uD83C\uDDF3\uD83C\uDDF1"),
-                    DownloadItem("Nederlands \u2192 English", 42_000_000L, "\uD83C\uDDEC\uD83C\uDDE7"),
-                    DownloadItem("Nederlands \u2192 Русский", 38_000_000L, "\uD83C\uDDF7\uD83C\uDDFA")
-                )
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewIdle(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Idle)
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewRunning(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Running(percent = 42, total = 1000L))
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewFinalizing(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(
-            state = DownloadUiState.Finalizing(
-                LemmaRecoveryProgress(currentLemma = "test", completed = 1, total = 3, failed = 0)
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewFinalizingWordLists(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(
-            state = DownloadUiState.Finalizing(updatingWordLists = true)
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewFailed(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Failed(Throwable("Network error")))
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewCancelled(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Cancelled)
-    }
-}
-
-@Preview
-@Composable
-private fun DownloadScreenPreviewDone(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        DownloadScreenContent(state = DownloadUiState.Done(countdown = 3))
-    }
-}

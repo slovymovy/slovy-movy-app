@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
@@ -548,92 +549,53 @@ class DictionaryClient(
         translationTargets: List<Language>,
         comment: String,
         email: String? = null
-    ): FeedbackResponse {
-        val url = buildFeedbackUrl(language, lemma, translationTargets)
-
-        try {
-            val response = httpClient.post(url) {
-                contentType(ContentType.Application.Json)
-                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
-                setBody(
-                    json.encodeToString(
-                        FeedbackRequest.serializer(),
-                        FeedbackRequest(comment.trim(), trimmedEmail)
-                    )
-                )
-            }
-
-            if (!response.status.isSuccess()) {
-                val body = response.bodyAsText()
-                throw DictionaryClientException.ServerException(response.status.value, body)
-            }
-
-            val body = response.bodyAsText()
-            return json.decodeFromString(FeedbackResponse.serializer(), body)
-        } catch (e: CancellationException) {
-            AppLogger.warn(TAG, "sendFeedback cancelled for $language/$lemma", e)
-            throw e
-        } catch (e: Exception) {
-            if (e is DictionaryClientException) {
-                AppLogger.error(TAG, "sendFeedback failed for $language/$lemma", e)
-                throw e
-            }
-            AppLogger.error(TAG, "sendFeedback failed for $language/$lemma", e)
-            throw DictionaryClientException.NetworkException(
-                NetworkErrorClassifier.userMessage(e),
-                e
-            )
-        }
-    }
+    ): FeedbackResponse = postFeedback(
+        url = buildFeedbackUrl(language, lemma, translationTargets),
+        comment = comment,
+        email = email,
+        responseSerializer = FeedbackResponse.serializer(),
+        opLabel = "sendFeedback for $language/$lemma"
+    )
 
     suspend fun sendListSuggestion(
         language: Language,
         comment: String,
         email: String? = null
-    ): FeedbackResponse {
-        val url = "$serverBaseUrl/list-suggestion/${language.code}"
-
-        try {
-            val response = httpClient.post(url) {
-                contentType(ContentType.Application.Json)
-                val trimmedEmail = email?.trim()?.takeIf { it.isNotBlank() }
-                setBody(
-                    json.encodeToString(
-                        FeedbackRequest.serializer(),
-                        FeedbackRequest(comment.trim(), trimmedEmail)
-                    )
-                )
-            }
-
-            if (!response.status.isSuccess()) {
-                val body = response.bodyAsText()
-                throw DictionaryClientException.ServerException(response.status.value, body)
-            }
-
-            val body = response.bodyAsText()
-            return json.decodeFromString(FeedbackResponse.serializer(), body)
-        } catch (e: CancellationException) {
-            AppLogger.warn(TAG, "sendListSuggestion cancelled for ${language.code}", e)
-            throw e
-        } catch (e: Exception) {
-            if (e is DictionaryClientException) {
-                AppLogger.error(TAG, "sendListSuggestion failed for ${language.code}", e)
-                throw e
-            }
-            AppLogger.error(TAG, "sendListSuggestion failed for ${language.code}", e)
-            throw DictionaryClientException.NetworkException(
-                NetworkErrorClassifier.userMessage(e),
-                e
-            )
-        }
-    }
+    ): FeedbackResponse = postFeedback(
+        url = "$serverBaseUrl/list-suggestion/${language.code}",
+        comment = comment,
+        email = email,
+        responseSerializer = FeedbackResponse.serializer(),
+        opLabel = "sendListSuggestion for ${language.code}"
+    )
 
     suspend fun sendGeneralFeedback(
         comment: String,
         email: String? = null
-    ): GeneralFeedbackResponse {
-        val url = "$serverBaseUrl/feedback"
+    ): GeneralFeedbackResponse = postFeedback(
+        url = "$serverBaseUrl/feedback",
+        comment = comment,
+        email = email,
+        responseSerializer = GeneralFeedbackResponse.serializer(),
+        opLabel = "sendGeneralFeedback"
+    )
 
+    /**
+     * Posts a [FeedbackRequest] and decodes the response, which is the whole of what the three
+     * feedback endpoints do differently only by URL and response shape.
+     *
+     * Comment and email are trimmed here so every caller sends the same normalized body, and a
+     * blank email is dropped rather than sent as an empty string.
+     *
+     * @param opLabel Names the operation in the logs; it is the only per-caller diagnostic.
+     */
+    private suspend fun <T> postFeedback(
+        url: String,
+        comment: String,
+        email: String?,
+        responseSerializer: DeserializationStrategy<T>,
+        opLabel: String
+    ): T {
         try {
             val response = httpClient.post(url) {
                 contentType(ContentType.Application.Json)
@@ -652,16 +614,13 @@ class DictionaryClient(
             }
 
             val body = response.bodyAsText()
-            return json.decodeFromString(GeneralFeedbackResponse.serializer(), body)
+            return json.decodeFromString(responseSerializer, body)
         } catch (e: CancellationException) {
-            AppLogger.warn(TAG, "sendGeneralFeedback cancelled", e)
+            AppLogger.warn(TAG, "$opLabel cancelled", e)
             throw e
         } catch (e: Exception) {
-            if (e is DictionaryClientException) {
-                AppLogger.error(TAG, "sendGeneralFeedback failed", e)
-                throw e
-            }
-            AppLogger.error(TAG, "sendGeneralFeedback failed", e)
+            AppLogger.error(TAG, "$opLabel failed", e)
+            if (e is DictionaryClientException) throw e
             throw DictionaryClientException.NetworkException(
                 NetworkErrorClassifier.userMessage(e),
                 e

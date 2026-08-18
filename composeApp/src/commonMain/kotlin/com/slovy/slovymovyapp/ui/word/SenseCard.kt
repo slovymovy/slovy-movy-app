@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.speech.LemmaAudioControl
 import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.ui.SpeakerVector
@@ -45,6 +46,7 @@ import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
 import com.slovy.slovymovyapp.ui.components.appendWithMutedCenteredBullets
 import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import org.jetbrains.compose.resources.stringResource
@@ -58,9 +60,9 @@ data class SenseCardData(
     val sense: LanguageCardResponseSense? = null,
     val pos: PartOfSpeech? = null,
     val loading: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val translationLoading: Boolean = false,
-    val translationError: String? = null,
+    val translationError: UiText? = null,
     val diagnosticInfoOnError: String? = null,
     val ambiguousTranslations: Set<String> = emptySet(),
     // Summary shown while the full sense is not loaded (e.g. list rows before expansion).
@@ -111,7 +113,7 @@ internal fun SenseCard(
             ) {
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                 ) {
                     when {
                         data.error != null -> {
@@ -163,7 +165,7 @@ internal fun SenseCard(
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                         ) {
                             LevelAndFrequencyRow(
                                 level = sense.learnerLevel,
@@ -196,7 +198,7 @@ internal fun SenseCard(
                 }
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (state.showFavoriteToggle) {
@@ -241,11 +243,16 @@ internal fun SenseCard(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                                .padding(
+                                    start = AppSpacing.lg,
+                                    end = AppSpacing.lg,
+                                    top = AppSpacing.sm,
+                                    bottom = AppSpacing.lg,
+                                ),
+                            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
                         ) {
                             if (sense.targetLangDefinitions.isNotEmpty()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                                     SectionLabel(stringResource(Res.string.word_details_definition))
                                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                         HighlightedText(
@@ -277,7 +284,7 @@ internal fun SenseCard(
                             }
 
                             if (sense.examples.isNotEmpty()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                                     SectionLabel(text = stringResource(Res.string.word_details_examples))
                                     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                                         sense.examples.forEach { ex ->
@@ -332,14 +339,14 @@ internal fun SenseCard(
             ) {
                 Column {
                     HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                        modifier = Modifier.padding(horizontal = AppSpacing.lg),
                         color = MaterialTheme.colorScheme.outlineVariant
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onViewFullDetails?.invoke() }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                            .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -445,14 +452,14 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
     if (traits.isEmpty()) return
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
         SectionLabel(stringResource(Res.string.word_details_usage_context))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 11.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             traits.forEach { trait ->
                 val traitName = stringResource(trait.traitType.displayName)
@@ -494,7 +501,7 @@ internal fun ExampleItem(
 ) {
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
         Box(
             modifier = Modifier
@@ -561,7 +568,7 @@ internal fun LevelAndFrequencyRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val (lc, lcc) = colorsForLevel(level)

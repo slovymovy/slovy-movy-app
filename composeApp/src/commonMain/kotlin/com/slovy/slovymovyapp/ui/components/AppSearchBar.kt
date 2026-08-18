@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
@@ -135,7 +136,7 @@ private fun AppSearchBarEmptyPreview(
         AppSearchBar(
             query = "",
             onQueryChange = {},
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(AppSpacing.lg)
         )
     }
 }
@@ -149,7 +150,7 @@ private fun AppSearchBarWithTextPreview(
         AppSearchBar(
             query = "example search",
             onQueryChange = {},
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(AppSpacing.lg)
         )
     }
 }
@@ -164,7 +165,7 @@ private fun AppSearchBarDisabledPreview(
             query = "disabled",
             onQueryChange = {},
             enabled = false,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(AppSpacing.lg)
         )
     }
 }
