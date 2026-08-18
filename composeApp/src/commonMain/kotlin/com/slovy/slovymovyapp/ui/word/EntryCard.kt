@@ -147,7 +147,7 @@ private fun FormsGridCell(cell: GridCell, value: String?) {
                 drawLine(color, Offset(0f, size.height), Offset(size.width, size.height), stroke)
                 drawLine(color, Offset(size.width, 0f), Offset(size.width, size.height), stroke)
             }
-            .padding(horizontal = 8.dp, vertical = 5.dp),
+            .padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xs),
         contentAlignment = contentAlignment
     ) {
         if (text.isNotEmpty()) {
@@ -451,9 +451,9 @@ private fun GrammarSection(
             shape = shape
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = AppSpacing.smPlus, vertical = AppSpacing.xsPlus),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.LibraryBooks,
@@ -485,7 +485,7 @@ private fun GrammarSection(
             exit = shrinkVertically() + fadeOut()
         ) {
             Column(
-                modifier = Modifier.padding(start = 6.dp, top = 2.dp),
+                modifier = Modifier.padding(start = AppSpacing.xsPlus, top = AppSpacing.xxs),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 if (formsViews.size > 1) {
@@ -547,10 +547,15 @@ internal fun EntryCard(
                                 RoundedCornerShape(50)
                             )
                             .clickable(role = Role.Button) { onFormsToggle() }
-                            .padding(top = 4.dp, bottom = 4.dp, start = 9.dp, end = 10.dp)
+                            .padding(
+                                top = AppSpacing.xs,
+                                bottom = AppSpacing.xs,
+                                start = AppSpacing.sm,
+                                end = AppSpacing.smPlus,
+                            )
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(

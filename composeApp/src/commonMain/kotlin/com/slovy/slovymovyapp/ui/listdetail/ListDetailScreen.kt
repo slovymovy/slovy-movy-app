@@ -432,7 +432,7 @@ private fun ListDetailHeader(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(top = 6.dp),
+                    modifier = Modifier.padding(top = AppSpacing.xsPlus),
                 )
             }
         }

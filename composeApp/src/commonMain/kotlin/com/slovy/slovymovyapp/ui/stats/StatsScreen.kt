@@ -116,7 +116,7 @@ fun StatsScreenContent(
                     .fillMaxWidth()
                     .padding(horizontal = AppSpacing.lg)
                     .padding(top = AppSpacing.xs, bottom = AppSpacing.lg),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus),
             ) {
                 StreakCard(state = state, onStepMonth = onStepMonth)
                 SectionHeader(text = stringResource(Res.string.stats_effort_section))
@@ -137,8 +137,8 @@ private fun StatsHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(top = 14.dp, bottom = 10.dp),
+            .padding(horizontal = AppSpacing.lgPlus)
+            .padding(top = AppSpacing.mdPlus, bottom = AppSpacing.smPlus),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {

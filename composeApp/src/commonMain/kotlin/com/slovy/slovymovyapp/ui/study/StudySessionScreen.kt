@@ -697,7 +697,7 @@ private fun StudySessionProgressLabel(
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(AppSpacing.xsPlus))
         }
         Text(
             text = stringResource(
@@ -897,7 +897,7 @@ private fun StudyOverflowMenuItem(
                 }
             }
             Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.xxs),
             ) {
                 Text(
                     text = label,
@@ -1430,9 +1430,9 @@ private fun CantListenNowButton(
         modifier = modifier
             .clip(RoundedCornerShape(6.dp))
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = AppSpacing.smPlus, vertical = AppSpacing.xsPlus),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
     ) {
         Icon(
             imageVector = SpeakerOffVector,
@@ -1520,7 +1520,7 @@ private fun StudyCardBackContent(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
         back.cloze?.let { cloze ->
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)) {
                 StudyClozeText(
                     cloze = cloze,
                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -1583,7 +1583,7 @@ private fun StudyCardBackContent(
         }
 
         back.definition?.let { definition ->
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)) {
                 StudyTaggedText(
                     text = definition,
                     style = MaterialTheme.typography.bodyLarge.copy(
@@ -1665,7 +1665,7 @@ private fun StudySynonymsRow(
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
     ) {
         Text(
             text = stringResource(Res.string.word_details_synonyms).uppercase(),
@@ -1716,7 +1716,7 @@ private fun SenseDotRow(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         repeat(count) { index ->
@@ -1830,7 +1830,7 @@ private fun StudyExampleBlock(
         )
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
         ) {
             StudyExampleText(
                 text = example.text,
@@ -2096,7 +2096,7 @@ private fun HintRevealPill(
                 this.contentDescription = contentDescription
             }
             .clickable(role = Role.Button, onClickLabel = contentDescription) { onReveal() }
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = AppSpacing.mdPlus),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -2156,9 +2156,9 @@ private fun FirstLetterHintView(
         Row(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(horizontal = 14.dp),
+                .padding(horizontal = AppSpacing.mdPlus),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus),
         ) {
             Text(
                 text = hint.letter.toString(),

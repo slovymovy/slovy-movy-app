@@ -156,7 +156,7 @@ private fun PipelineStageLabelAutoSizePreview(
                         PipelineStageLabel(label = label, layout = labelLayout)
                         Box(
                             modifier = Modifier
-                                .padding(start = 10.dp)
+                                .padding(start = AppSpacing.smPlus)
                                 .weight(1f)
                                 .height(10.dp)
                                 .clip(RoundedCornerShape(5.dp))

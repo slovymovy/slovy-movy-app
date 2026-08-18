@@ -1020,7 +1020,7 @@ fun WordDetailScreenContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
-                            .padding(bottom = 20.dp),
+                            .padding(bottom = AppSpacing.lgPlus),
                         cardLoading = state.cardLoading,
                         cardError = state.cardError,
                         translationLoading = state.translationLoading,
@@ -1139,7 +1139,12 @@ private fun WordDetailContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
+                    .padding(
+                        start = AppSpacing.lgPlus,
+                        end = AppSpacing.md,
+                        top = AppSpacing.sm,
+                        bottom = AppSpacing.xs,
+                    ),
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
@@ -1182,7 +1187,7 @@ private fun WordDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = AppSpacing.lg, end = AppSpacing.lg, top = AppSpacing.sm),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.lgPlus),
         ) {
 
             if (card.entries.isEmpty()) {
@@ -1308,7 +1313,7 @@ internal fun ChapterRule() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 40.dp, end = 40.dp, top = 2.dp, bottom = 4.dp),
+            .padding(start = 40.dp, end = 40.dp, top = AppSpacing.xxs, bottom = AppSpacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
         HorizontalDivider(

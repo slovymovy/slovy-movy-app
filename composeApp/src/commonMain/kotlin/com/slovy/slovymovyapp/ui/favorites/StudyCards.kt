@@ -85,7 +85,7 @@ internal fun StudyDoneCard(
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -151,7 +151,7 @@ internal fun StudyDoneCard(
             }
             if (continueLabel != null) {
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = 13.dp, bottom = 11.dp),
+                    modifier = Modifier.padding(top = AppSpacing.md, bottom = AppSpacing.smPlus),
                     thickness = 0.5.dp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
                 )
@@ -205,12 +205,12 @@ internal fun StudyDueCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 16.dp),
+                .padding(AppSpacing.lg),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.xxs),
             ) {
                 Text(
                     text = stringResource(Res.string.favorites_study_due_title),
@@ -219,7 +219,7 @@ internal fun StudyDueCard(
                     letterSpacing = 1.4.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.smPlus)) {
                     Text(
                         text = pluralStringResource(
                             Res.plurals.favorites_study_due_count,
