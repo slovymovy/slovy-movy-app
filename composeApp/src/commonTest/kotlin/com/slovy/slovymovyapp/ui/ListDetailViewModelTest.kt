@@ -1,5 +1,7 @@
 package com.slovy.slovymovyapp.ui
 
+import com.slovy.slovymovyapp.ui.listdetail.*
+
 import androidx.lifecycle.ViewModelStore
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
