@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.server.ServerJson
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import io.ktor.client.request.*
@@ -8,7 +9,6 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -65,8 +65,7 @@ class ApplicationTest {
         if (response.status == HttpStatusCode.NotFound) return@testApplication
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
-        val json = Json { ignoreUnknownKeys = true }
-        val version = json.parseToJsonElement(response.bodyAsText())
+        val version = ServerJson.lenient.parseToJsonElement(response.bodyAsText())
             .jsonObject["version"]?.jsonPrimitive?.content
         assertNotNull(version, "Response must contain 'version'")
         assertEquals(40, version.length, "Version must be a 40-char tree SHA")
@@ -83,8 +82,7 @@ class ApplicationTest {
         if (response.status == HttpStatusCode.NotFound) return@testApplication
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
-        val json = Json { ignoreUnknownKeys = true }
-        val body = json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val body = ServerJson.lenient.parseToJsonElement(response.bodyAsText()).jsonObject
         val version = body["version"]?.jsonPrimitive?.content
         assertNotNull(version, "Response must contain 'version'")
         assertEquals(40, version.length)
@@ -117,8 +115,7 @@ class ApplicationTest {
         val body = response.bodyAsText()
         assertTrue(body.isNotBlank(), "Response body should not be blank")
 
-        val json = Json { ignoreUnknownKeys = true }
-        val chunks = parseNdjson(body, json)
+        val chunks = parseNdjson(body)
         assertTrue(chunks.isNotEmpty(), "NDJSON stream should contain at least one chunk")
         val baseChunk = chunks.first()
         assertEquals("base", baseChunk["stage"]?.jsonPrimitive?.content)
@@ -161,8 +158,7 @@ class ApplicationTest {
         assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
 
         val body = response.bodyAsText()
-        val json = Json { ignoreUnknownKeys = true }
-        val chunks = parseNdjson(body, json)
+        val chunks = parseNdjson(body)
         assertTrue(chunks.isNotEmpty(), "NDJSON stream should contain at least one chunk")
         val lastPayload = chunks.last()["payload"]?.jsonObject
         val entries = lastPayload?.get("entries")?.jsonArray
@@ -194,8 +190,7 @@ class ApplicationTest {
         assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
 
         val body = response.bodyAsText()
-        val json = Json { ignoreUnknownKeys = true }
-        val chunks = parseNdjson(body, json)
+        val chunks = parseNdjson(body)
         assertTrue(chunks.isNotEmpty(), "NDJSON stream should contain at least one chunk")
         val entries = chunks.last()["payload"]?.jsonObject?.get("entries")?.jsonArray
         assertNotNull(entries, "Response should contain 'entries' field")
@@ -223,8 +218,7 @@ class ApplicationTest {
         assertEquals(ContentType.parse("application/x-ndjson"), response.contentType()?.withoutParameters())
 
         val body = response.bodyAsText()
-        val json = Json { ignoreUnknownKeys = true }
-        val chunks = parseNdjson(body, json)
+        val chunks = parseNdjson(body)
         assertEquals(1, chunks.size, "Self-translation request should not produce a translated stage")
         assertEquals("base", chunks.first()["stage"]?.jsonPrimitive?.content)
     }
@@ -248,8 +242,7 @@ class ApplicationTest {
             assertEquals(HttpStatusCode.Created, response.status)
             assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
 
-            val json = Json { ignoreUnknownKeys = true }
-            val responseJson = json.parseToJsonElement(response.bodyAsText()).jsonObject
+            val responseJson = ServerJson.lenient.parseToJsonElement(response.bodyAsText()).jsonObject
             issueNumber = responseJson["issueNumber"]?.jsonPrimitive?.content?.toIntOrNull()
             assertNotNull(issueNumber, "Issue number should be present in response")
             val createdIssueNumber = issueNumber
@@ -296,8 +289,7 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.Created, response.status)
         assertEquals(ContentType.Application.Json, response.contentType()?.withoutParameters())
 
-        val json = Json { ignoreUnknownKeys = true }
-        val responseJson = json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val responseJson = ServerJson.lenient.parseToJsonElement(response.bodyAsText()).jsonObject
         val discussionNumber = responseJson["discussionNumber"]?.jsonPrimitive?.content?.toIntOrNull()
         assertNotNull(discussionNumber, "Discussion number should be present in response")
         assertTrue(discussionNumber > 0, "Discussion number should be positive")
@@ -335,11 +327,11 @@ class ApplicationTest {
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
-    private fun parseNdjson(body: String, json: Json) =
+    private fun parseNdjson(body: String) =
         body
             .lineSequence()
             .filter { it.isNotBlank() }
-            .map { json.parseToJsonElement(it).jsonObject }
+            .map { ServerJson.lenient.parseToJsonElement(it).jsonObject }
             .toList()
 }
 

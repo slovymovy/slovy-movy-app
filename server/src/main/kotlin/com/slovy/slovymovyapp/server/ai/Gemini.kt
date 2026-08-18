@@ -2,9 +2,9 @@ package com.slovy.slovymovyapp.server.ai
 
 import com.google.genai.Client
 import com.google.genai.types.*
+import com.slovy.slovymovyapp.server.ServerJson
 import io.ktor.util.logging.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.io.File
 
 @Serializable
@@ -97,7 +97,6 @@ object Gemini {
  * Gemini AI provider implementation.
  */
 class GeminiProvider : AIProvider {
-    private val cacheJson = Json { prettyPrint = true }
 
     override fun complete(parameters: AIParameters, cache: AICache, retryStrategy: RetryStrategy): String {
         val clientProvider = Gemini.clientProvider()
@@ -128,7 +127,7 @@ class GeminiProvider : AIProvider {
         )
 
         // Check cache
-        val parametersJson = cacheJson.encodeToString(geminiParams)
+        val parametersJson = ServerJson.pretty.encodeToString(geminiParams)
         val cachedResponse = cache.get(parametersJson)
         if (cachedResponse != null) {
             return cachedResponse

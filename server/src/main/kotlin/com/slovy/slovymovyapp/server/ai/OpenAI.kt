@@ -14,6 +14,7 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams.Verbosity
 import com.openai.models.chat.completions.ChatCompletionMessageParam
 import com.openai.models.chat.completions.ChatCompletionSystemMessageParam
 import com.openai.models.chat.completions.ChatCompletionUserMessageParam
+import com.slovy.slovymovyapp.server.ServerJson
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import java.io.File
@@ -162,7 +163,6 @@ object OpenAI {
  */
 class OpenAIProvider : AIProvider {
 
-    private val cacheJson = Json { prettyPrint = true }
     private val encodingRegistry = Encodings.newDefaultEncodingRegistry()
 
     override fun complete(parameters: AIParameters, cache: AICache, retryStrategy: RetryStrategy): String {
@@ -187,7 +187,7 @@ class OpenAIProvider : AIProvider {
         )
 
         // Check cache
-        val parametersJson = cacheJson.encodeToString(openAIParams)
+        val parametersJson = ServerJson.pretty.encodeToString(openAIParams)
         val cachedResponse = cache.get(parametersJson)
         if (cachedResponse != null) {
             return cachedResponse
@@ -363,8 +363,7 @@ object SchemaConverter {
      * @return OpenAI compatible JSON Schema as a JsonObject
      */
     fun geminiToOpenAI(geminiSchema: String): JsonObject {
-        val json = Json { ignoreUnknownKeys = true }
-        val geminiJsonObject = json.parseToJsonElement(geminiSchema).jsonObject
+        val geminiJsonObject = ServerJson.lenient.parseToJsonElement(geminiSchema).jsonObject
 
         return convertJsonObjectToOpenAI(geminiJsonObject)
     }

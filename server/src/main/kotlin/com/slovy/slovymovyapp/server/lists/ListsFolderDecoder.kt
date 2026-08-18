@@ -1,6 +1,6 @@
 package com.slovy.slovymovyapp.server.lists
 
-import kotlinx.serialization.json.Json
+import com.slovy.slovymovyapp.server.ServerJson
 import org.slf4j.LoggerFactory
 
 /**
@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory
 internal object ListsFolderDecoder {
 
     private val log = LoggerFactory.getLogger("ListsFolderDecoder")
-
-    private val json = Json { ignoreUnknownKeys = true }
 
     /** UI locale every list should provide; clients fall back to it for unknown locales. */
     private const val BASE_LOCALE = "en"
@@ -35,7 +33,7 @@ internal object ListsFolderDecoder {
         text: String,
         iconsByName: Map<String, String>,
     ): ListContent {
-        val raw = json.decodeFromString(RawListFile.serializer(), text)
+        val raw = ServerJson.lenient.decodeFromString(RawListFile.serializer(), text)
         // Prefer the new {senseId, lemma} shape; fall back to the legacy sense-ids-only shape
         // for files not yet re-exported. Legacy senses get an empty lemma, so clients cannot
         // fetch them when they are missing from the local dictionary until the file is updated.
