@@ -47,44 +47,30 @@ const val updateRepoPath = "/internal/update-repo/"
 const val SERVER_PORT_ENV = "SERVER_PORT"
 const val SERVER_PORT = 8080
 
+/** Wire body shared by every feedback-style endpoint; the client posts this same shape to all. */
 @Serializable
-private data class FeedbackIssueRequest(
+private data class FeedbackSubmissionRequest(
     val comment: String,
     val email: String? = null
 )
 
+/** Reply for the endpoints that create an issue: word feedback and list suggestions. */
 @Serializable
-private data class FeedbackIssueResponse(
+private data class GitHubIssueResponse(
     val issueNumber: Int,
     val issueTitle: String,
     val issueUrl: String
 )
 
-@Serializable
-private data class ListSuggestionRequest(
-    val comment: String,
-    val email: String? = null
-)
-
-@Serializable
-private data class ListSuggestionResponse(
-    val issueNumber: Int,
-    val issueTitle: String,
-    val issueUrl: String
-)
-
-@Serializable
-private data class GeneralFeedbackRequest(
-    val comment: String,
-    val email: String? = null
-)
-
+/** Reply for general feedback, which creates a discussion rather than an issue. */
 @Serializable
 private data class GeneralFeedbackResponse(
     val discussionNumber: Int,
     val discussionTitle: String,
     val discussionUrl: String
 )
+
+private val feedbackJson = Json { ignoreUnknownKeys = true }
 
 fun main() {
     val port = System.getenv(SERVER_PORT_ENV)?.toIntOrNull() ?: SERVER_PORT
@@ -296,166 +282,61 @@ fun Application.module() {
             }
         }
 
-        post("/feedback") {
-            if (!GitHubClient.isAvailable()) {
-                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
-                return@post
-            }
-
-            val json = Json { ignoreUnknownKeys = true }
-            val feedbackRequest = try {
-                json.decodeFromString(
-                    GeneralFeedbackRequest.serializer(),
-                    call.receiveText()
-                )
-            } catch (_: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid request body")
-                return@post
-            }
-
-            val comment = feedbackRequest.comment.trim()
-            if (comment.isBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing comment")
-                return@post
-            }
-
-            try {
-                val discussion = GitHubClient.createFeedbackDiscussion(
-                    comment = comment,
-                    email = feedbackRequest.email
-                )
-                val response = GeneralFeedbackResponse(
+        feedbackSubmission(
+            path = "/feedback",
+            artifactName = "feedback discussion"
+        ) { _, comment, email ->
+            val discussion = GitHubClient.createFeedbackDiscussion(comment = comment, email = email)
+            feedbackJson.encodeToString(
+                GeneralFeedbackResponse.serializer(),
+                GeneralFeedbackResponse(
                     discussionNumber = discussion.number,
                     discussionTitle = discussion.title,
                     discussionUrl = discussion.url
                 )
-                call.respondText(
-                    text = json.encodeToString(GeneralFeedbackResponse.serializer(), response),
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.Created
-                )
-            } catch (e: Exception) {
-                call.application.environment.log.error(
-                    "Failed to create feedback discussion: ${e.message}",
-                    e
-                )
-                call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback discussion")
-            }
+            )
         }
 
-        post("/list-suggestion/{lang}") {
-            val lang = call.parameters["lang"]?.trim()
-
-            if (lang.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing lang parameter")
-                return@post
-            }
-
-            if (!GitHubClient.isAvailable()) {
-                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
-                return@post
-            }
-
-            val json = Json { ignoreUnknownKeys = true }
-            val suggestionRequest = try {
-                json.decodeFromString(
-                    ListSuggestionRequest.serializer(),
-                    call.receiveText()
-                )
-            } catch (_: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid request body")
-                return@post
-            }
-
-            val comment = suggestionRequest.comment.trim()
-            if (comment.isBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing comment")
-                return@post
-            }
-
-            try {
-                val createdIssue = GitHubClient.createListSuggestionIssue(
-                    lang = lang,
-                    comment = comment,
-                    email = suggestionRequest.email
-                )
-                val response = ListSuggestionResponse(
+        feedbackSubmission(
+            path = "/list-suggestion/{lang}",
+            requiredParams = listOf("lang"),
+            artifactName = "list suggestion issue"
+        ) { params, comment, email ->
+            val createdIssue = GitHubClient.createListSuggestionIssue(
+                lang = params.getValue("lang"),
+                comment = comment,
+                email = email
+            )
+            feedbackJson.encodeToString(
+                GitHubIssueResponse.serializer(),
+                GitHubIssueResponse(
                     issueNumber = createdIssue.number,
                     issueTitle = createdIssue.title,
                     issueUrl = createdIssue.htmlUrl
                 )
-                call.respondText(
-                    text = json.encodeToString(ListSuggestionResponse.serializer(), response),
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.Created
-                )
-            } catch (e: Exception) {
-                call.application.environment.log.error(
-                    "Failed to create list suggestion issue for $lang: ${e.message}",
-                    e
-                )
-                call.respond(HttpStatusCode.InternalServerError, "Failed to create list suggestion issue")
-            }
+            )
         }
 
-        post("/feedback/{lang}/{word}") {
-            val lang = call.parameters["lang"]?.trim()
-            val word = call.parameters["word"]?.trim()
-
-            if (lang.isNullOrBlank() || word.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing lang or word parameter")
-                return@post
-            }
-
-            if (!GitHubClient.isAvailable()) {
-                call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
-                return@post
-            }
-
-            val json = Json { ignoreUnknownKeys = true }
-            val feedbackRequest = try {
-                json.decodeFromString(
-                    FeedbackIssueRequest.serializer(),
-                    call.receiveText()
-                )
-            } catch (_: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid request body")
-                return@post
-            }
-
-            val comment = feedbackRequest.comment.trim()
-            if (comment.isBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Missing comment")
-                return@post
-            }
-
-            val translationCodes = parseTranslationCodes(call.request.queryParameters["translations"])
-
-            try {
-                val createdIssue = GitHubClient.createFeedbackIssue(
-                    lang = lang,
-                    word = word,
-                    translationCodes = translationCodes,
-                    comment = comment,
-                    email = feedbackRequest.email
-                )
-                val response = FeedbackIssueResponse(
+        feedbackSubmission(
+            path = "/feedback/{lang}/{word}",
+            requiredParams = listOf("lang", "word"),
+            artifactName = "feedback issue"
+        ) { params, comment, email ->
+            val createdIssue = GitHubClient.createFeedbackIssue(
+                lang = params.getValue("lang"),
+                word = params.getValue("word"),
+                translationCodes = parseTranslationCodes(call.request.queryParameters["translations"]),
+                comment = comment,
+                email = email
+            )
+            feedbackJson.encodeToString(
+                GitHubIssueResponse.serializer(),
+                GitHubIssueResponse(
                     issueNumber = createdIssue.number,
                     issueTitle = createdIssue.title,
                     issueUrl = createdIssue.htmlUrl
                 )
-                call.respondText(
-                    text = json.encodeToString(FeedbackIssueResponse.serializer(), response),
-                    contentType = ContentType.Application.Json,
-                    status = HttpStatusCode.Created
-                )
-            } catch (e: Exception) {
-                call.application.environment.log.error(
-                    "Failed to create feedback issue for $lang/$word: ${e.message}",
-                    e
-                )
-                call.respond(HttpStatusCode.InternalServerError, "Failed to create feedback issue")
-            }
+            )
         }
 
         // Internal endpoint for Cloud Tasks callbacks
@@ -541,6 +422,82 @@ fun Application.module() {
                 call.application.environment.log.error("Failed to update $lang/$word: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, "Failed to update: ${e.message}")
             }
+        }
+    }
+}
+
+/**
+ * Installs a POST route for one of the feedback-style endpoints, which all turn a comment plus an
+ * optional email into a GitHub artifact and differ only in what they create.
+ *
+ * The shared pipeline, in order: every name in [requiredParams] must be present and non-blank,
+ * a GitHub token must be configured, the body must decode as [FeedbackSubmissionRequest], and the
+ * comment must be non-blank once trimmed. Only then does [createArtifact] run; whatever JSON it
+ * returns is sent back as `201 Created`.
+ *
+ * @param requiredParams Path parameter names to validate, in the order they should be reported.
+ * @param artifactName What the endpoint creates, e.g. "feedback issue". Names the operation in
+ *   both the error log and the 500 response body.
+ * @param createArtifact Creates the artifact and returns the response JSON. Receives the validated
+ *   path parameters, the trimmed comment, and the raw email. Runs with the route's [RoutingContext]
+ *   as receiver so it can still reach `call` for query parameters.
+ */
+private fun Route.feedbackSubmission(
+    path: String,
+    requiredParams: List<String> = emptyList(),
+    artifactName: String,
+    createArtifact: suspend RoutingContext.(
+        params: Map<String, String>,
+        comment: String,
+        email: String?
+    ) -> String
+) {
+    post(path) {
+        val params = LinkedHashMap<String, String>(requiredParams.size)
+        for (name in requiredParams) {
+            val value = call.parameters[name]?.trim()
+            if (value.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "Missing $name parameter")
+                return@post
+            }
+            params[name] = value
+        }
+
+        if (!GitHubClient.isAvailable()) {
+            call.respond(HttpStatusCode.ServiceUnavailable, "GitHub token not configured")
+            return@post
+        }
+
+        val submission = try {
+            feedbackJson.decodeFromString(
+                FeedbackSubmissionRequest.serializer(),
+                call.receiveText()
+            )
+        } catch (_: Exception) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid request body")
+            return@post
+        }
+
+        val comment = submission.comment.trim()
+        if (comment.isBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Missing comment")
+            return@post
+        }
+
+        try {
+            val responseJson = createArtifact(params, comment, submission.email)
+            call.respondText(
+                text = responseJson,
+                contentType = ContentType.Application.Json,
+                status = HttpStatusCode.Created
+            )
+        } catch (e: Exception) {
+            val context = if (params.isEmpty()) "" else " for ${params.values.joinToString("/")}"
+            call.application.environment.log.error(
+                "Failed to create $artifactName$context: ${e.message}",
+                e
+            )
+            call.respond(HttpStatusCode.InternalServerError, "Failed to create $artifactName")
         }
     }
 }

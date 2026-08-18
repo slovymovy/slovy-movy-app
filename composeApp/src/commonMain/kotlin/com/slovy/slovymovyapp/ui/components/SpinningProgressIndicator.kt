@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 
 /**
  * Indeterminate spinner used in place of the Material 3 [androidx.compose.material3.CircularProgressIndicator].
@@ -94,8 +95,8 @@ private fun SpinningProgressIndicatorPreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SpinningProgressIndicator()

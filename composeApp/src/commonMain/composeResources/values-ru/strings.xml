@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Не удалось сохранить выбор голоса: %1$s</string>
     <string name="settings_feedback_sent">Отзыв отправлен. Спасибо!</string>
     <string name="settings_feedback_view">Посмотреть</string>
-    <string name="settings_feedback_comment_required">Пожалуйста, добавьте комментарий</string>
+    <string name="feedback_dialog_comment_required">Пожалуйста, добавьте комментарий</string>
     <string name="settings_download_cancelled">Скачивание отменено</string>
     <string name="common_search">Поиск</string>
     <string name="common_clear">Очистить</string>
@@ -766,4 +766,14 @@
     <string name="search_add_words">Добавить слова</string>
     <string name="search_add_words_row">Вставьте текст — разберите каждое слово</string>
     <string name="search_add_words_cd">Вставьте текст и разберите каждое слово</string>
+
+    <string name="network_error_offline">Нет подключения к интернету. Проверьте соединение и попробуйте снова.</string>
+    <string name="network_error_timeout">Время ожидания истекло. Попробуйте снова.</string>
+    <string name="network_error_server_with_code">Ошибка сервера (%1$s). Попробуйте снова.</string>
+    <string name="network_error_server">Ошибка сервера. Попробуйте снова.</string>
+    <string name="network_error_insufficient_storage">Недостаточно свободного места для загрузки.</string>
+    <string name="network_error_unknown">Что-то пошло не так. Попробуйте снова.</string>
+    <string name="common_loading">Загрузка…</string>
+    <string name="common_cancelled">Отменено</string>
+    <string name="word_details_load_failed">Не удалось загрузить слово</string>
 </resources>

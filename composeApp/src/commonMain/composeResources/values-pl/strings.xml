@@ -425,7 +425,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s</string>
     <string name="settings_feedback_sent">Opinia została wysłana</string>
     <string name="settings_feedback_view">Pokaż</string>
-    <string name="settings_feedback_comment_required">Komentarz jest wymagany</string>
+    <string name="feedback_dialog_comment_required">Komentarz jest wymagany</string>
     <string name="settings_download_cancelled">Pobieranie anulowane</string>
     <string name="common_search">Szukaj</string>
     <string name="common_clear">Wyczyść</string>
@@ -765,4 +765,14 @@
     <string name="search_add_words">Dodaj słowa</string>
     <string name="search_add_words_row">Wklej tekst — sprawdź każde słowo</string>
     <string name="search_add_words_cd">Wklej tekst i sprawdź każde słowo</string>
+
+    <string name="network_error_offline">Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie.</string>
+    <string name="network_error_timeout">Przekroczono czas oczekiwania. Spróbuj ponownie.</string>
+    <string name="network_error_server_with_code">Błąd serwera (%1$s). Spróbuj ponownie.</string>
+    <string name="network_error_server">Błąd serwera. Spróbuj ponownie.</string>
+    <string name="network_error_insufficient_storage">Za mało wolnego miejsca, aby pobrać dane.</string>
+    <string name="network_error_unknown">Coś poszło nie tak. Spróbuj ponownie.</string>
+    <string name="common_loading">Ładowanie…</string>
+    <string name="common_cancelled">Anulowano</string>
+    <string name="word_details_load_failed">Nie udało się wczytać słowa</string>
 </resources>

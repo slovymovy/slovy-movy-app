@@ -1,20 +1,11 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.settings
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.analytics.Analytics
@@ -25,12 +16,9 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.UiText
-import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
-import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
-import com.slovy.slovymovyapp.ui.theme.AppSpacing
-import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -43,11 +31,11 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
+import com.slovy.slovymovyapp.ui.FeedbackFormState
 
 data class LanguageUiState(
     val voices: List<Text2SpeechVoice> = emptyList(),
@@ -93,12 +81,7 @@ data class SettingsUiState(
     val acknowledgementsVisible: Boolean = false,
 
     // Feedback
-    val feedbackDialogVisible: Boolean = false,
-    val feedbackComment: String = "",
-    val feedbackEmail: String = "",
-    val feedbackSubmitting: Boolean = false,
-    val feedbackError: UiText? = null,
-    val feedbackDiscussionUrl: String? = null,
+    val feedback: FeedbackFormState = FeedbackFormState(),
 
     // Developer
     val developerModeEnabled: Boolean = false
@@ -337,7 +320,7 @@ class SettingsViewModel(
                 state = state.copy(
                     isLoadingAvailable = false,
                     isLoading = false,
-                    errorMessage = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    errorMessage = networkErrorUiText(e)
                 )
             }
         }
@@ -681,7 +664,7 @@ class SettingsViewModel(
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    errorMessage = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    errorMessage = networkErrorUiText(e)
                 )
             }
         }
@@ -894,26 +877,13 @@ class SettingsViewModel(
     }
 
     fun openFeedbackDialog() {
-        state = state.copy(
-            feedbackDialogVisible = true,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackSubmitting = false,
-            feedbackError = null,
-            feedbackDiscussionUrl = null
-        )
+        state = state.copy(feedback = state.feedback.opened())
     }
 
     fun dismissFeedbackDialog() {
-        if (state.feedbackSubmitting) return
-        val discussionUrl = state.feedbackDiscussionUrl
-        state = state.copy(
-            feedbackDialogVisible = false,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackError = null,
-            feedbackDiscussionUrl = null
-        )
+        if (state.feedback.submitting) return
+        val discussionUrl = state.feedback.resultUrl
+        state = state.copy(feedback = state.feedback.dismissed())
         if (discussionUrl != null) {
             viewModelScope.launch {
                 val result = showSnackbar(
@@ -929,48 +899,58 @@ class SettingsViewModel(
     }
 
     fun updateFeedbackComment(comment: String) {
-        state = state.copy(feedbackComment = comment, feedbackError = null)
+        state = state.copy(feedback = state.feedback.withComment(comment))
     }
 
     fun updateFeedbackEmail(email: String) {
-        state = state.copy(feedbackEmail = email)
+        state = state.copy(feedback = state.feedback.withEmail(email))
     }
 
     fun submitFeedback() {
-        if (state.feedbackSubmitting) return
+        val form = state.feedback
+        if (form.submitting) return
 
-        val comment = state.feedbackComment.trim()
+        val comment = form.trimmedComment
         if (comment.isBlank()) {
-            state = state.copy(feedbackError = UiText.Resource(Res.string.settings_feedback_comment_required))
+            state = state.copy(
+                feedback = form.submissionFailed(
+                    UiText.Resource(Res.string.feedback_dialog_comment_required)
+                )
+            )
             return
         }
 
-        state = state.copy(feedbackSubmitting = true, feedbackError = null)
+        state = state.copy(feedback = form.submissionStarted())
         viewModelScope.launch {
             try {
                 val response = dictionaryClient.sendGeneralFeedback(
                     comment = comment,
-                    email = state.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                    email = form.trimmedEmail
                 )
                 state = state.copy(
-                    feedbackSubmitting = false,
-                    feedbackError = null,
-                    feedbackDiscussionUrl = response.discussionUrl
+                    feedback = state.feedback.submissionSucceeded(response.discussionUrl)
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    feedbackSubmitting = false,
-                    feedbackError = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    feedback = state.feedback.submissionFailed(
+                        networkErrorUiText(e)
+                    )
                 )
             }
         }
     }
 
-    private fun messageOrUnknown(throwable: Throwable): String {
+    /**
+     * Reason text for the `..._with_reason` templates. These wrap local storage and settings
+     * failures, where the platform's own message ("database is locked", "permission denied") is
+     * the diagnostic worth showing, so it wins over any generic copy. Only a blank message falls
+     * back, and it falls back to the localized "unknown error" rather than an English sentence.
+     */
+    private suspend fun messageOrUnknown(throwable: Throwable): String {
         val message = throwable.message?.takeIf { it.isNotBlank() }
-        return message ?: NetworkErrorClassifier.userMessage(throwable)
+        return message ?: resolveUiText(UiText.Resource(Res.string.common_unknown_error))
     }
 
     private suspend fun resolveUiText(text: UiText): String = when (text) {
@@ -1055,9 +1035,10 @@ class SettingsViewModel(
 
                         DownloadStatus.Failed -> {
                             downloadCoordinator.clear(downloadKey)
-                            val message =
-                                if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error)
-                                else resolveUiText(UiText.Resource(Res.string.common_unknown_error))
+                            val message = resolveUiText(
+                                if (entry.error != null) networkErrorUiText(entry.error)
+                                else UiText.Resource(Res.string.common_unknown_error)
+                            )
                             state = state.copy(errorMessage = errorMessageBuilder(message))
                             onTerminal()
                             cancel()
@@ -1078,677 +1059,3 @@ class SettingsViewModel(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel,
-    onNavigateToSearch: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
-    onNavigateToStats: () -> Unit = {},
-    onNavigateToDeveloper: () -> Unit = {},
-    hasFavoritesToReview: Boolean = false,
-) {
-    LifecycleResumeEffect(Unit) {
-        viewModel.reloadSettings()
-        onPauseOrDispose { }
-    }
-
-    val uriHandler = LocalUriHandler.current
-
-    LaunchedEffect(viewModel.pendingDiscussionUrl) {
-        viewModel.consumePendingDiscussionUrl()?.let { url ->
-            uriHandler.openUri(url)
-        }
-    }
-
-    SettingsScreenContent(
-        state = viewModel.state,
-        scrollState = viewModel.scrollState,
-        snackbarHostState = viewModel.snackbarHostState,
-        onToggleLearningLanguageExpansion = { viewModel.toggleLearningLanguageExpansion(it) },
-        onRemoveLearningLanguage = { viewModel.removeLearningLanguage(it) },
-        onAddLearningLanguage = { viewModel.addLearningLanguage(it) },
-        onDownloadTranslation = { src, tgt -> viewModel.downloadTranslation(src, tgt) },
-        onCancelDownload = { key -> viewModel.cancelDownload(key) },
-        onDeleteTranslation = { src, tgt -> viewModel.deleteTranslation(src, tgt) },
-        onToggleTranslationLanguage = { viewModel.toggleTranslationLanguage(it) },
-        onToggleTranslationLanguagesExpanded = { viewModel.toggleTranslationLanguagesExpanded() },
-        onLanguageExpand = { viewModel.toggleLanguageExpansion(it) },
-        onTestVoice = { voice -> viewModel.testVoice(voice) },
-        onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
-        onOpenSettings = { viewModel.openSystemSettings() },
-        onExportAppData = { viewModel.exportAppData() },
-        onDismissError = { viewModel.dismissError() },
-        onConfirmDelete = { viewModel.confirmDelete() },
-        onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
-        onAcknowledgements = { viewModel.openAcknowledgements() },
-        onDismissAcknowledgements = { viewModel.dismissAcknowledgements() },
-        onSendFeedback = { viewModel.openFeedbackDialog() },
-        onDismissFeedback = { viewModel.dismissFeedbackDialog() },
-        onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
-        onFeedbackEmailChange = { viewModel.updateFeedbackEmail(it) },
-        onSubmitFeedback = { viewModel.submitFeedback() },
-        onVersionClick = { viewModel.onVersionClick() },
-        onNavigateToSearch = onNavigateToSearch,
-        onNavigateToFavorites = onNavigateToFavorites,
-        onNavigateToStats = onNavigateToStats,
-        onNavigateToDeveloper = onNavigateToDeveloper,
-        hasFavoritesToReview = hasFavoritesToReview,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SettingsScreenContent(
-    state: SettingsUiState,
-    scrollState: LazyListState = LazyListState(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onToggleLearningLanguageExpansion: (Language) -> Unit = {},
-    onRemoveLearningLanguage: (Language) -> Unit = {},
-    onAddLearningLanguage: (Language) -> Unit = {},
-    onDownloadTranslation: (Language, Language) -> Unit = { _, _ -> },
-    onCancelDownload: (String) -> Unit = {},
-    onDeleteTranslation: (Language, Language) -> Unit = { _, _ -> },
-    onToggleTranslationLanguage: (Language) -> Unit = {},
-    onToggleTranslationLanguagesExpanded: () -> Unit = {},
-    onLanguageExpand: (Text2SpeechLanguage) -> Unit = {},
-    onTestVoice: (Text2SpeechVoice) -> Unit = { _ -> },
-    onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
-    onOpenSettings: () -> Unit = {},
-    onExportAppData: () -> Unit = {},
-    onDismissError: () -> Unit = {},
-    onConfirmDelete: () -> Unit = {},
-    onDismissDeleteConfirmation: () -> Unit = {},
-    onAcknowledgements: () -> Unit = {},
-    onDismissAcknowledgements: () -> Unit = {},
-    onSendFeedback: () -> Unit = {},
-    onDismissFeedback: () -> Unit = {},
-    onFeedbackCommentChange: (String) -> Unit = {},
-    onFeedbackEmailChange: (String) -> Unit = {},
-    onSubmitFeedback: () -> Unit = {},
-    onVersionClick: () -> Unit = {},
-    onNavigateToSearch: () -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
-    onNavigateToStats: () -> Unit = {},
-    onNavigateToDeveloper: () -> Unit = {},
-    hasFavoritesToReview: Boolean = false,
-) {
-    val dismissActionLabel = stringResource(Res.string.common_dismiss)
-    state.errorMessage?.let { error ->
-        val errorMessage = error.resolve()
-        LaunchedEffect(error) {
-            snackbarHostState.showSnackbar(
-                message = errorMessage,
-                actionLabel = dismissActionLabel,
-                duration = SnackbarDuration.Short
-            )
-            onDismissError()
-        }
-    }
-
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            stringResource(Res.string.settings_title),
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontFamily = MaterialTheme.serifFontFamily,
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
-                    }
-                )
-            },
-            bottomBar = {
-                AppNavigationBar(
-                    currentScreen = AppScreen.SETTINGS,
-                    onNavigateToSearch = onNavigateToSearch,
-                    onNavigateToFavorites = onNavigateToFavorites,
-                    onNavigateToStats = onNavigateToStats,
-                    onNavigateToSettings = {},
-                    hasFavoritesToReview = hasFavoritesToReview,
-                )
-            },
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                when {
-                    state.isLoading -> {
-                        LoadingIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-
-                    else -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            state = scrollState,
-                            contentPadding = PaddingValues(AppSpacing.lg),
-                            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-                        ) {
-                            // === Languages I learn ===
-                            item {
-                                SectionHeader(title = stringResource(Res.string.settings_section_languages_i_learn))
-                            }
-
-                            if (state.isLoadingAvailable) {
-                                item {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        SpinningProgressIndicator(modifier = Modifier.size(24.dp))
-                                    }
-                                }
-                            } else {
-                                // Installed learning language cards
-                                if (state.learningLanguages.isEmpty() && state.addableLanguages.isEmpty()) {
-                                    item {
-                                        Text(
-                                            text = stringResource(Res.string.settings_no_languages_available),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-
-                                items(
-                                    items = state.learningLanguages,
-                                    key = { "learning_${it.language.code}" }
-                                ) { langState ->
-                                    LearningLanguageCard(
-                                        state = langState,
-                                        downloadingItems = state.downloadingItems,
-                                        onToggleExpansion = { onToggleLearningLanguageExpansion(langState.language) },
-                                        onRemove = { onRemoveLearningLanguage(langState.language) },
-                                        onDownloadTranslation = { tgt ->
-                                            onDownloadTranslation(langState.language, tgt)
-                                        },
-                                        onCancelDownload = onCancelDownload,
-                                        onDeleteTranslation = { tgt ->
-                                            onDeleteTranslation(langState.language, tgt)
-                                        }
-                                    )
-                                }
-
-                                // Add a language to learn
-                                if (state.addableLanguages.isNotEmpty()) {
-                                    item {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = AppSpacing.sm),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            HorizontalDivider(
-                                                modifier = Modifier.weight(1f),
-                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                                            )
-                                            Text(
-                                                text = stringResource(Res.string.settings_add_language_to_learn),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.padding(horizontal = AppSpacing.md)
-                                            )
-                                            HorizontalDivider(
-                                                modifier = Modifier.weight(1f),
-                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                                            )
-                                        }
-                                    }
-
-                                    items(
-                                        items = state.addableLanguages,
-                                        key = { "addable_${it.language.code}" }
-                                    ) { langInfo ->
-                                        AddLanguageCard(
-                                            language = langInfo.language,
-                                            dictionarySizeBytes = langInfo.dictionarySizeBytes,
-                                            downloadingItems = state.downloadingItems,
-                                            onDownload = { onAddLearningLanguage(langInfo.language) },
-                                            onCancelDownload = onCancelDownload
-                                        )
-                                    }
-                                }
-
-                            }
-
-                            // Translation languages (always visible — prefs are local)
-                            item {
-                                SectionHeader(
-                                    title = stringResource(Res.string.settings_section_translation_languages),
-                                    modifier = Modifier.padding(top = AppSpacing.sm)
-                                )
-                            }
-                            item {
-                                TranslationLanguageSection(
-                                    allLanguages = Language.entries.sortedBy { it.selfName },
-                                    selectedLanguages = state.translationLanguages,
-                                    isExpanded = state.isTranslationLanguagesExpanded,
-                                    onToggleExpanded = onToggleTranslationLanguagesExpanded,
-                                    onToggleLanguage = onToggleTranslationLanguage
-                                )
-                            }
-
-                            // === Voice ===
-                            if (state.languages.isNotEmpty()) {
-                                item {
-                                    SectionHeader(
-                                        title = stringResource(Res.string.settings_section_voice),
-                                        modifier = Modifier.padding(top = AppSpacing.sm)
-                                    )
-                                }
-
-                                items(
-                                    items = state.languages.entries.toList(),
-                                    key = { "voice_${it.key.language.code}" }
-                                ) { e ->
-                                    VoiceSectionItem(
-                                        language = e.key,
-                                        languageState = e.value,
-                                        onExpand = { onLanguageExpand(e.key) },
-                                        onTestVoice = onTestVoice,
-                                        onToggleVoiceEnabled = { voiceId -> onToggleVoiceEnabled(e.key, voiceId) },
-                                        testingVoice = state.testingVoice
-                                    )
-                                }
-
-                                item {
-                                    DownloadMoreVoicesCard(onOpenSettings = onOpenSettings)
-                                }
-                            }
-
-                            if (state.isAppDataExportSupported) {
-                                item {
-                                    SectionHeader(
-                                        title = stringResource(Res.string.settings_section_your_data),
-                                        modifier = Modifier.padding(top = AppSpacing.sm)
-                                    )
-                                }
-
-                                item {
-                                    AppDataSection(
-                                        isExporting = state.isExportingAppData,
-                                        onExport = onExportAppData
-                                    )
-                                }
-                            }
-
-                            // === About ===
-                            state.buildConfig.let { buildConfig ->
-                                item {
-                                    SectionHeader(
-                                        title = stringResource(Res.string.settings_section_about),
-                                        modifier = Modifier.padding(top = AppSpacing.sm)
-                                    )
-                                }
-
-                                item {
-                                    AboutSection(
-                                        buildConfig = buildConfig,
-                                        onSendFeedback = onSendFeedback,
-                                        onAcknowledgements = onAcknowledgements,
-                                        onVersionClick = onVersionClick
-                                    )
-                                }
-                            }
-
-                            if (state.developerModeEnabled) {
-                                item {
-                                    SectionHeader(
-                                        title = stringResource(Res.string.settings_section_developer),
-                                        modifier = Modifier.padding(top = AppSpacing.sm)
-                                    )
-                                }
-                                item {
-                                    DeveloperOptionsCard(onClick = onNavigateToDeveloper)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        state.deleteConfirmation?.let { confirmation ->
-            DeleteConfirmationDialog(
-                title = confirmation.title.resolve(),
-                message = confirmation.message.resolve(),
-                warning = confirmation.warning?.resolve(),
-                onConfirm = onConfirmDelete,
-                onDismiss = onDismissDeleteConfirmation
-            )
-        }
-
-        if (state.acknowledgementsVisible) {
-            AcknowledgementsBottomSheet(onDismiss = onDismissAcknowledgements)
-        }
-
-        if (state.feedbackDialogVisible) {
-            FeedbackDialog(
-                title = stringResource(Res.string.feedback_dialog_title),
-                commentPlaceholder = stringResource(Res.string.feedback_dialog_placeholder),
-                commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-                comment = state.feedbackComment,
-                email = state.feedbackEmail,
-                isSending = state.feedbackSubmitting,
-                error = state.feedbackError?.resolve(),
-                resultUrl = state.feedbackDiscussionUrl,
-                onCommentChange = onFeedbackCommentChange,
-                onEmailChange = onFeedbackEmailChange,
-                onDismiss = onDismissFeedback,
-                onSend = onSubmitFeedback
-            )
-        }
-    }
-}
-
-// === Previews ===
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewLoading(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(isLoading = true)
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewEmpty(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                languages = emptyMap(),
-                learningLanguages = emptyList()
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewWithLanguages(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                learningLanguages = listOf(
-                    LearningLanguageUiState(
-                        language = Language.DUTCH,
-                        isExpanded = true,
-                        dictionarySizeBytes = 12 * 1024 * 1024L,
-                        translations = listOf(
-                            TranslationUiState(
-                                targetLanguage = Language.ENGLISH,
-                                isDownloaded = true,
-                                isDownloadable = true,
-                                sizeBytes = 4 * 1024 * 1024L
-                            ),
-                            TranslationUiState(
-                                targetLanguage = Language.RUSSIAN,
-                                isDownloaded = false,
-                                isDownloadable = false
-                            ),
-                            TranslationUiState(
-                                targetLanguage = Language.POLISH,
-                                isDownloaded = false,
-                                isDownloadable = true,
-                                sizeBytes = 3 * 1024 * 1024L
-                            )
-                        )
-                    ),
-                    LearningLanguageUiState(
-                        language = Language.ENGLISH,
-                        isExpanded = false,
-                        dictionarySizeBytes = 15 * 1024 * 1024L,
-                        translations = listOf(
-                            TranslationUiState(
-                                targetLanguage = Language.RUSSIAN,
-                                isDownloaded = true,
-                                isDownloadable = true,
-                                sizeBytes = 8 * 1024 * 1024L
-                            )
-                        )
-                    )
-                ),
-                addableLanguages = listOf(
-                    AvailableLanguageInfo(
-                        language = Language.GERMAN,
-                        dictionarySizeBytes = 14 * 1024 * 1024,
-                        availableTranslations = emptyList()
-                    )
-                ),
-                translationLanguages = setOf(Language.ENGLISH, Language.RUSSIAN, Language.POLISH),
-                languages = mapOf(
-                    Text2SpeechLanguage(
-                        language = Language.DUTCH,
-                        isAvailable = true,
-                        missingData = false
-                    ) to LanguageUiState(),
-                    // The bound engine reports no voices for this language.
-                    Text2SpeechLanguage(
-                        language = Language.ENGLISH,
-                        isAvailable = true,
-                        missingData = false
-                    ) to LanguageUiState(voicesLoaded = true)
-                )
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewWithExpandedVoice(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                learningLanguages = listOf(
-                    LearningLanguageUiState(
-                        language = Language.ENGLISH,
-                        isExpanded = false,
-                        dictionarySizeBytes = 15 * 1024 * 1024L,
-                        translations = listOf(
-                            TranslationUiState(
-                                targetLanguage = Language.RUSSIAN,
-                                isDownloaded = true,
-                                isDownloadable = true,
-                                sizeBytes = 8 * 1024 * 1024L
-                            )
-                        )
-                    )
-                ),
-                translationLanguages = setOf(Language.RUSSIAN),
-                languages = mapOf(
-                    Text2SpeechLanguage(
-                        language = Language.ENGLISH,
-                        isAvailable = true,
-                        missingData = false
-                    ) to LanguageUiState(
-                        isExpanded = true,
-                        voicesLoaded = true,
-                        enabledVoiceIds = setOf("en-us-x-sfg#female_1-local", "en-us-x-sfg#male_1-local"),
-                        voices = listOf(
-                            Text2SpeechVoice(
-                                id = "en-us-x-sfg#female_1-local",
-                                name = "Female 1",
-                                language = Language.ENGLISH,
-                                localeTag = "en-US",
-                                quality = VoiceQuality.BEST,
-                                networkConnectionRequired = false,
-                                enabledByDefault = true
-                            ),
-                            Text2SpeechVoice(
-                                id = "en-us-x-sfg#male_1-local",
-                                name = "Male 1",
-                                language = Language.ENGLISH,
-                                localeTag = "en-US",
-                                quality = VoiceQuality.GOOD,
-                                networkConnectionRequired = false,
-                                enabledByDefault = true
-                            ),
-                            Text2SpeechVoice(
-                                id = "en-us-x-tpf-network",
-                                name = "Network Voice",
-                                language = Language.ENGLISH,
-                                localeTag = "en-US",
-                                quality = VoiceQuality.MEDIUM,
-                                networkConnectionRequired = true,
-                                enabledByDefault = false
-                            )
-                        )
-                    )
-                )
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewWithError(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                learningLanguages = listOf(
-                    LearningLanguageUiState(
-                        language = Language.ENGLISH,
-                        isExpanded = false,
-                        dictionarySizeBytes = 15 * 1024 * 1024L,
-                        translations = emptyList()
-                    )
-                ),
-                translationLanguages = emptySet(),
-                errorMessage = UiText.Plain("Failed to load voices for this language")
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewWithDeleteConfirmation(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                learningLanguages = listOf(
-                    LearningLanguageUiState(
-                        language = Language.ENGLISH,
-                        isExpanded = false,
-                        dictionarySizeBytes = 15 * 1024 * 1024L,
-                        translations = listOf(
-                            TranslationUiState(
-                                targetLanguage = Language.RUSSIAN,
-                                isDownloaded = true,
-                                isDownloadable = true,
-                                sizeBytes = 8 * 1024 * 1024L
-                            )
-                        )
-                    )
-                ),
-                translationLanguages = setOf(Language.RUSSIAN),
-                deleteConfirmation = DeleteConfirmationState(
-                    title = UiText.Plain("Remove English?"),
-                    message = UiText.Plain("The dictionary and all its translations will be deleted. You can re-download anytime."),
-                    warning = UiText.Plain("This will also remove 1 translation."),
-                    onConfirm = {}
-                )
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewWithMixedStates(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                learningLanguages = listOf(
-                    LearningLanguageUiState(
-                        language = Language.ENGLISH,
-                        isExpanded = true,
-                        dictionarySizeBytes = 15 * 1024 * 1024L,
-                        translations = listOf(
-                            TranslationUiState(
-                                targetLanguage = Language.RUSSIAN,
-                                isDownloaded = true,
-                                isDownloadable = true,
-                                sizeBytes = 8 * 1024 * 1024L
-                            ),
-                            TranslationUiState(
-                                targetLanguage = Language.POLISH,
-                                isDownloaded = false,
-                                isDownloadable = true,
-                                sizeBytes = 7 * 1024 * 1024L
-                            )
-                        )
-                    )
-                ),
-                addableLanguages = listOf(
-                    AvailableLanguageInfo(
-                        language = Language.RUSSIAN,
-                        dictionarySizeBytes = 12 * 1024 * 1024,
-                        availableTranslations = emptyList()
-                    ),
-                    AvailableLanguageInfo(
-                        language = Language.DUTCH,
-                        dictionarySizeBytes = 10 * 1024 * 1024,
-                        availableTranslations = emptyList()
-                    )
-                ),
-                translationLanguages = setOf(Language.RUSSIAN, Language.POLISH),
-                downloadingItems = mapOf(
-                    "dict_ru" to DownloadProgress(5 * 1024 * 1024, 12 * 1024 * 1024),
-                    "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
-                ),
-                isAppDataExportSupported = true,
-            )
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SettingsScreenPreviewAcknowledgements(
-    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
-) {
-    ThemedPreview(darkTheme = isDark) {
-        SettingsScreenContent(
-            state = SettingsUiState(
-                isLoading = false,
-                acknowledgementsVisible = true
-            )
-        )
-    }
-}
