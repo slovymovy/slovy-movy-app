@@ -158,7 +158,7 @@ private fun PartOfSpeechIndicatorPreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             PartOfSpeechIndicator(pos = PartOfSpeech.VERB, meaningCount = 3)
@@ -178,7 +178,7 @@ private fun PartOfSpeechIndicatorPreviewLoadingError(
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             PartOfSpeechIndicator(pos = PartOfSpeech.VERB, cardLoading = true, cardError = null)
@@ -198,7 +198,7 @@ private fun PartOfSpeechBadgePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
         ) {
             Row(

@@ -44,6 +44,7 @@ import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
 import com.slovy.slovymovyapp.ui.word.ClipboardVector
@@ -349,13 +350,13 @@ private fun InputView(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+            .padding(start = AppSpacing.lg, end = AppSpacing.lg, top = AppSpacing.sm, bottom = AppSpacing.lg),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         val dashColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg, Alignment.CenterVertically),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -585,7 +586,7 @@ private fun FrequencyLegend() {
             modifier = Modifier.clearAndSetSemantics {}
         )
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clearAndSetSemantics {}
         ) {

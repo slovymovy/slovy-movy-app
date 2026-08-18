@@ -58,6 +58,7 @@ import com.slovy.slovymovyapp.ui.FeedbackFormState
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -1047,7 +1048,7 @@ fun WordDetailScreenContent(
                         Column(
                             modifier = Modifier.fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(24.dp),
+                                .padding(AppSpacing.xl),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -1056,7 +1057,7 @@ fun WordDetailScreenContent(
                             } else if (state.isError) {
                                 ErrorIcon(Modifier.size(30.dp))
                             }
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(AppSpacing.sm))
                             Text(
                                 text = state.message.resolve(),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -1140,7 +1141,7 @@ private fun WordDetailContent(
                     .fillMaxWidth()
                     .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 LemmaHeadlineText(
                     lemma = card.lemma,
@@ -1150,7 +1151,7 @@ private fun WordDetailContent(
                     onClick = { if (isPlaying) onStopWord() else onPlayWord() },
                     enabled = canPlay && !isPreparing,
                     modifier = Modifier
-                        .padding(bottom = 4.dp)
+                        .padding(bottom = AppSpacing.xs)
                         .size(36.dp)
                 ) {
                     when {
@@ -1180,7 +1181,7 @@ private fun WordDetailContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                .padding(start = AppSpacing.lg, end = AppSpacing.lg, top = AppSpacing.sm),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
 
@@ -1225,8 +1226,8 @@ private fun WordDetailContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                 ) {
                     EntryList(
                         label = stringResource(Res.string.word_details_word_family),
@@ -1317,7 +1318,7 @@ internal fun ChapterRule() {
         Icon(
             imageVector = ChapterDiamondVector,
             contentDescription = null,
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = AppSpacing.sm),
             tint = color
         )
         HorizontalDivider(
@@ -1344,16 +1345,16 @@ private fun LemmaHeadlineAutoSizePreview(
             Column(
                 modifier = Modifier
                     .width(360.dp)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
             ) {
                 samples.forEach { lemma ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(end = 12.dp),
+                            .padding(end = AppSpacing.md),
                         verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                     ) {
                         LemmaHeadlineText(
                             lemma = lemma,
@@ -1361,7 +1362,7 @@ private fun LemmaHeadlineAutoSizePreview(
                         )
                         Box(
                             modifier = Modifier
-                                .padding(bottom = 4.dp)
+                                .padding(bottom = AppSpacing.xs)
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(18.dp))
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),

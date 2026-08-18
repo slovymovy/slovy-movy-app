@@ -32,6 +32,7 @@ import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
 import kotlin.math.max
@@ -375,7 +376,7 @@ private fun FormsModeSelector(
     val scrollState = rememberScrollState()
     Row(
         modifier = Modifier.horizontalScroll(scrollState),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
         formsViews.forEach { formsView ->
             val viewId = formsView.view.viewId
@@ -441,7 +442,7 @@ private fun GrammarSection(
     val selectedViewIdResolved = selectedFormsView.view.viewId
     val shape = RoundedCornerShape(14.dp)
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         if (showToggleButton) Surface(
             modifier = Modifier
                 .clip(shape)
@@ -485,7 +486,7 @@ private fun GrammarSection(
         ) {
             Column(
                 modifier = Modifier.padding(start = 6.dp, top = 2.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 if (formsViews.size > 1) {
                     FormsModeSelector(
@@ -524,9 +525,9 @@ internal fun EntryCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 4.dp),
+                .padding(horizontal = AppSpacing.xs, vertical = AppSpacing.xs),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             PartOfSpeechIndicator(
                 pos = entry.pos,
@@ -581,8 +582,8 @@ internal fun EntryCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (entry.formsViews.isEmpty()) 8.dp else 0.dp, bottom = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(top = if (entry.formsViews.isEmpty()) AppSpacing.sm else 0.dp, bottom = 0.dp),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 // Grammar section - indented under POS header
                 if (entry.formsViews.isNotEmpty()) {
@@ -592,7 +593,7 @@ internal fun EntryCard(
                         expanded = entryState.formsExpanded,
                         onToggle = onFormsToggle,
                         onFormsViewSelect = onFormsViewSelect,
-                        modifier = Modifier.padding(horizontal = 8.dp),
+                        modifier = Modifier.padding(horizontal = AppSpacing.sm),
                         showToggleButton = false
                     )
                 }

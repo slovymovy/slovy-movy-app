@@ -571,7 +571,7 @@ internal fun StudySessionSnackbarHost(
         hostState = hostState,
         modifier = modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(AppSpacing.md),
     ) { data ->
         StudySessionSnackbar(data = data)
     }
@@ -606,8 +606,8 @@ private fun StudySessionSnackbar(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
-                .padding(horizontal = AppSpacing.lg, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -2101,7 +2101,7 @@ private fun HintRevealPill(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
             Icon(
                 imageVector = Icons.Filled.VpnKey,

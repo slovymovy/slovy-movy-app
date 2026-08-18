@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.i18n.ShortDuration
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
 import org.jetbrains.compose.resources.pluralStringResource
@@ -115,7 +116,7 @@ private fun EffortRow(
             softWrap = false,
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 12.dp),
+                .padding(end = AppSpacing.md),
         )
         CountText(
             text = formatCount(cards, isLoading),
@@ -132,7 +133,7 @@ private fun EffortRow(
             softWrap = false,
             modifier = Modifier
                 .width(layout.cardsUnitWidth)
-                .padding(start = 4.dp),
+                .padding(start = AppSpacing.xs),
         )
         Text(
             // Matches the unit labels' metrics, but deliberately not their font: they use the serif
@@ -372,7 +373,7 @@ private fun PipelineBars(pipeline: List<StatsPipelineStage>, isLoading: Boolean)
     }
     val rows = pipeline.map { stage -> stage to stageLabel(stage.id).uppercase() }
     val labelLayout = rememberPipelineLabelLayout(rows.map { (_, label) -> label })
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         rows.forEach { (stage, label) ->
             val pct = if (isLoading) {
                 loadingPipelineWidth(stage.id)

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -51,7 +52,7 @@ internal fun SectionLabel(text: String) {
             letterSpacing = 1.2.sp,
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 4.dp)
+        modifier = Modifier.padding(top = AppSpacing.xs)
     )
 }
 
@@ -63,7 +64,7 @@ internal fun LoadingPlaceholder(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         LoadingIndicator(
@@ -85,7 +86,7 @@ internal fun ErrorPlaceholder(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ErrorIcon(Modifier.size(20.dp))
@@ -122,7 +123,7 @@ internal fun EntryList(
     chipSpacing: Dp = 6.dp
 ) {
     if (values.isEmpty()) return
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         SectionLabel(label)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),

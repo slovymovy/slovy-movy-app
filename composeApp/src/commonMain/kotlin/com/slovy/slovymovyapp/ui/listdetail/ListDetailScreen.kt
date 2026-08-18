@@ -44,6 +44,7 @@ import com.slovy.slovymovyapp.speech.LemmaAudioControl
 import com.slovy.slovymovyapp.speech.RowAudioActions
 import com.slovy.slovymovyapp.speech.RowAudioUiState
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.word.ChapterRule
@@ -124,8 +125,8 @@ internal fun ListDetailErrorScreen(onBack: () -> Unit, onRetry: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                .padding(horizontal = AppSpacing.xxl),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -228,14 +229,14 @@ fun ListDetailContent(
             state = scrollState,
             contentPadding = PaddingValues(
                 top = 0.dp,
-                bottom = innerPadding.calculateBottomPadding() + 16.dp,
-                start = 16.dp,
-                end = 16.dp,
+                bottom = innerPadding.calculateBottomPadding() + AppSpacing.lg,
+                start = AppSpacing.lg,
+                end = AppSpacing.lg,
             ),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding()),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
             item {
                 ListDetailHeader(
@@ -258,7 +259,7 @@ fun ListDetailContent(
             if (state.isLoading) {
                 item {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = AppSpacing.xxl),
                         contentAlignment = Alignment.Center
                     ) {
                         SpinningProgressIndicator()
@@ -271,7 +272,9 @@ fun ListDetailContent(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(top = 32.dp, start = 16.dp, end = 16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = AppSpacing.xxl, start = AppSpacing.lg, end = AppSpacing.lg),
                     )
                 }
             } else {
@@ -359,10 +362,10 @@ private fun ListDetailHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, bottom = 4.dp),
+            .padding(top = AppSpacing.xs, bottom = AppSpacing.xs),
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg),
             verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -404,7 +407,7 @@ private fun ListDetailHeader(
                         fontFamily = MaterialTheme.serifFontFamily,
                         lineHeight = (13.5f * 1.38f).sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp),
+                        modifier = Modifier.padding(top = AppSpacing.xs),
                     )
                 }
                 val inMyWordsText = stringResource(Res.string.list_detail_in_my_words_count, inMyWordsCount)
@@ -448,14 +451,14 @@ private fun ListDetailHeader(
                             modifier = Modifier.size(14.dp),
                             strokeWidth = 2.dp,
                         )
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(AppSpacing.sm))
                     } else if (!allInMyWords) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
                         )
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(AppSpacing.xs))
                     }
                     Text(
                         text = stringResource(
@@ -468,7 +471,7 @@ private fun ListDetailHeader(
             }
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(AppSpacing.xs))
         ChapterRule()
     }
 }

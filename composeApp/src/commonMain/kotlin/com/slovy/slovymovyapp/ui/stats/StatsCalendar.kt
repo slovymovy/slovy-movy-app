@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.learning.stats.StatsPracticeDay
 import com.slovy.slovymovyapp.data.learning.stats.StatsYearMonth
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
 import kotlinx.coroutines.flow.first
@@ -36,7 +37,7 @@ internal fun StreakCard(
         shape = RoundedCornerShape(18.dp),
         padding = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
@@ -218,7 +219,7 @@ private fun CalendarGrid(
                 today = state.today,
                 onStepMonth = onStepMonth,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
                 weekdays.forEach { day ->
                     Text(
                         text = day,
@@ -234,7 +235,7 @@ private fun CalendarGrid(
                 }
             }
             cells.chunked(7).forEach { week ->
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
                     week.forEach { day ->
                         CalendarCell(day = day, state = state, modifier = Modifier.weight(1f))
                     }
@@ -243,7 +244,7 @@ private fun CalendarGrid(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = AppSpacing.xs),
                 horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -389,6 +390,6 @@ internal fun SectionHeader(text: String) {
             letterSpacing = 0.1.sp,
         ),
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 0.dp),
+        modifier = Modifier.padding(start = AppSpacing.xs, top = AppSpacing.xs, bottom = 0.dp),
     )
 }

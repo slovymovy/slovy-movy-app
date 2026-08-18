@@ -55,7 +55,7 @@ internal fun PipelineShiftCompleteHero(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
             Text(

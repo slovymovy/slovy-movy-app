@@ -65,7 +65,7 @@ fun CompactFrequencyBadge(
     ) {
         Text(
             text = stringResource(frequency.label),
-            modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xs),
             style = MaterialTheme.typography.labelSmall,
             color = textColor
         )
@@ -80,7 +80,7 @@ private fun FrequencyBadgePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             FrequencyBadge(frequency = SenseFrequency.HIGH)
@@ -98,7 +98,7 @@ private fun CompactFrequencyBadgePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
         ) {
             CompactFrequencyBadge(frequency = SenseFrequency.HIGH)

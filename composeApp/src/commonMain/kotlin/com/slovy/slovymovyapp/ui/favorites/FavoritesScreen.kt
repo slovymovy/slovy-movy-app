@@ -45,6 +45,7 @@ import com.slovy.slovymovyapp.ui.components.LanguageFilterDropdown
 import com.slovy.slovymovyapp.ui.icons.NoFavsImage
 import com.slovy.slovymovyapp.ui.icons.SearchOtter
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
 import com.slovy.slovymovyapp.ui.word.LoadingPlaceholder
@@ -217,8 +218,8 @@ fun FavoritesScreenContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                .padding(horizontal = AppSpacing.lg),
+                            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             AppSearchBar(
@@ -319,7 +320,7 @@ fun FavoritesScreenContent(
                                             },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
                                         )
                                     } ?: state.studyDone?.let { studyDone ->
                                         StudyDoneCard(
@@ -345,7 +346,7 @@ fun FavoritesScreenContent(
                                             },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
                                         )
                                     }
                                     Text(
@@ -356,16 +357,20 @@ fun FavoritesScreenContent(
                                         ),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+                                        modifier = Modifier.padding(
+                                            start = AppSpacing.lg,
+                                            top = AppSpacing.sm,
+                                            bottom = AppSpacing.sm,
+                                        )
                                     )
 
                                     LazyColumn(
                                         state = scrollState,
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .padding(horizontal = 16.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        contentPadding = PaddingValues(bottom = 16.dp)
+                                            .padding(horizontal = AppSpacing.lg),
+                                        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                                        contentPadding = PaddingValues(bottom = AppSpacing.lg)
                                     ) {
                                         items(
                                             state.senses,
@@ -458,7 +463,7 @@ private fun FavoritesEmptyState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp),
+            .padding(horizontal = AppSpacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
