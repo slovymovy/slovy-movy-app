@@ -101,6 +101,7 @@
     <string name="stats_month_october">October</string>
     <string name="stats_month_november">November</string>
     <string name="stats_month_december">December</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">M</string>
     <string name="stats_weekday_initial_tuesday">T</string>
     <string name="stats_weekday_initial_wednesday">W</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Setting up your library</string>
     <string name="download_action_download_size">Download %1$s</string>
+    <string name="download_item_dictionary_name">%1$s Dictionary</string>
     <string name="download_title_ready">Ready to Download</string>
     <string name="download_subtitle_ready">You need these dictionaries to get all set.</string>
     <string name="download_title_failed">Download Failed</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Let us know</string>
     <string name="language_setup_request_language_after">&#32;so we can add it.</string>
     <string name="language_setup_request_language_title">Request a language</string>
-    <string name="language_setup_request_language_placeholder">Which language would you like to add?</string>
+    <string name="language_setup_request_language_roadmap">See which languages we're adding next on the %1$s.</string>
+    <string name="language_setup_request_language_roadmap_link">roadmap</string>
+    <string name="language_setup_request_language_learn_label">Language to learn</string>
+    <string name="language_setup_request_language_translate_label">Language to translate into</string>
+    <string name="language_setup_request_language_required">Enter at least one language</string>
     <string name="language_setup_request_language_sent_title">Request sent</string>
     <string name="language_setup_request_language_sent_message">Thank you! We have received your language request. You can follow its progress on GitHub.</string>
 
@@ -348,24 +354,16 @@
     <string name="developer_working_status">Working...</string>
     <string name="acknowledgements_title">Acknowledgements</string>
     <string name="acknowledgements_vocab_data_title">Vocabulary data</string>
-    <string name="acknowledgements_vocab_data_body">Our word data is sourced from Wiktionary, the free multilingual
-        dictionary built by volunteers worldwide.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Our word data is sourced from Wiktionary, the free multilingual dictionary built by volunteers worldwide.</string>
     <string name="acknowledgements_dictionary_extracts_title">Dictionary extracts</string>
-    <string name="acknowledgements_dictionary_extracts_body">We use pre-processed dictionary data from Kaikki.org,
-        extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">We use pre-processed dictionary data from Kaikki.org, extracted from Wiktionary using the open-source wiktextract tool by Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Application code</string>
     <string name="acknowledgements_application_code_body">Application source code is available under BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">FSRS scheduling algorithm</string>
-    <string name="acknowledgements_fsrs_body">We use a Kotlin port of FSRS-Kotlin, provided under the MIT License. FSRS
-        was originally developed by Jarrett Ye with the Open Spaced Repetition community.
-    </string>
+    <string name="acknowledgements_fsrs_body">We use a Kotlin port of FSRS-Kotlin, provided under the MIT License. FSRS was originally developed by Jarrett Ye with the Open Spaced Repetition community.</string>
     <string name="acknowledgements_words_sources_title">Words sources</string>
     <string name="acknowledgements_words_sources_body">All words data is available under CC-BY-SA-4.0 license.</string>
-    <string name="acknowledgements_thanks">We are grateful to the Wiktionary community and to Tatu Ylonen for making
-        this data freely available.
-    </string>
+    <string name="acknowledgements_thanks">We are grateful to the Wiktionary community and to Tatu Ylonen for making this data freely available.</string>
 
     <string name="app_data_backup_title">Back up your saved words</string>
     <string name="app_data_backup_description">Exports your saved words and app settings to an archive. Useful for keeping a copy or moving to a new device.</string>
@@ -428,12 +426,13 @@
     <string name="settings_error_update_voice_selection_with_reason">Failed to update voice selection: %1$s</string>
     <string name="settings_feedback_sent">Feedback sent</string>
     <string name="settings_feedback_view">View</string>
-    <string name="settings_feedback_comment_required">Comment is required</string>
+    <string name="feedback_dialog_comment_required">Comment is required</string>
     <string name="settings_download_cancelled">Download cancelled</string>
     <string name="common_search">Search</string>
     <string name="common_clear">Clear</string>
     <string name="common_search_placeholder">Search...</string>
     <string name="common_unknown_error">Unknown error</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d meaning</item>
         <item quantity="few">%1$s - %2$d meanings</item>
@@ -767,4 +766,14 @@
     <string name="search_add_words">Add words</string>
     <string name="search_add_words_row">Paste a text — look up every word</string>
     <string name="search_add_words_cd">Paste a text and look up every word</string>
+
+    <string name="network_error_offline">No internet connection. Check your connection and try again.</string>
+    <string name="network_error_timeout">Request timed out. Please try again.</string>
+    <string name="network_error_server_with_code">Server error (%1$s). Please try again.</string>
+    <string name="network_error_server">Server error. Please try again.</string>
+    <string name="network_error_insufficient_storage">Not enough free space to complete the download.</string>
+    <string name="network_error_unknown">Something went wrong. Please try again.</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_cancelled">Cancelled</string>
+    <string name="word_details_load_failed">Failed to load word</string>
 </resources>

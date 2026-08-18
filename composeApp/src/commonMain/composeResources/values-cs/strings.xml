@@ -101,6 +101,7 @@
     <string name="stats_month_october">říjen</string>
     <string name="stats_month_november">listopad</string>
     <string name="stats_month_december">prosinec</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">P</string>
     <string name="stats_weekday_initial_tuesday">Ú</string>
     <string name="stats_weekday_initial_wednesday">S</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Připravujeme tvou knihovnu</string>
     <string name="download_action_download_size">Stáhnout %1$s</string>
+    <string name="download_item_dictionary_name">Slovník %1$s</string>
     <string name="download_title_ready">Připraveno ke stažení</string>
     <string name="download_subtitle_ready">K plnému nastavení potřebuješ tyto slovníky.</string>
     <string name="download_title_failed">Stahování selhalo</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Dej nám vědět</string>
     <string name="language_setup_request_language_after">&#32;a my ho přidáme.</string>
     <string name="language_setup_request_language_title">Požádat o jazyk</string>
-    <string name="language_setup_request_language_placeholder">Jaký jazyk bys chtěl(a) přidat?</string>
+    <string name="language_setup_request_language_roadmap">Které jazyky přidáme jako další, najdeš v %1$s.</string>
+    <string name="language_setup_request_language_roadmap_link">plánu</string>
+    <string name="language_setup_request_language_learn_label">Jazyk k učení</string>
+    <string name="language_setup_request_language_translate_label">Jazyk pro překlad</string>
+    <string name="language_setup_request_language_required">Zadej alespoň jeden jazyk</string>
     <string name="language_setup_request_language_sent_title">Žádost odeslána</string>
     <string name="language_setup_request_language_sent_message">Díky! Tvou žádost o jazyk jsme přijali. Její průběh můžeš sledovat na GitHubu.</string>
 
@@ -348,24 +354,16 @@
     <string name="developer_working_status">Pracuji...</string>
     <string name="acknowledgements_title">Poděkování</string>
     <string name="acknowledgements_vocab_data_title">Slovníková data</string>
-    <string name="acknowledgements_vocab_data_body">Naše slovní data pocházejí z Wikislovníku, svobodného vícejazyčného
-        slovníku, který tvoří dobrovolníci z celého světa.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Naše slovní data pocházejí z Wikislovníku, svobodného vícejazyčného slovníku, který tvoří dobrovolníci z celého světa.</string>
     <string name="acknowledgements_dictionary_extracts_title">Slovníkové extrakty</string>
-    <string name="acknowledgements_dictionary_extracts_body">Používáme předzpracovaná slovníková data z Kaikki.org,
-        extrahovaná z Wikislovníku pomocí open source nástroje wiktextract od Tatu Ylonena.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Používáme předzpracovaná slovníková data z Kaikki.org, extrahovaná z Wikislovníku pomocí open source nástroje wiktextract od Tatu Ylonena.</string>
     <string name="acknowledgements_application_code_title">Kód aplikace</string>
     <string name="acknowledgements_application_code_body">Zdrojový kód aplikace je dostupný pod licencí BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Plánovací algoritmus FSRS</string>
-    <string name="acknowledgements_fsrs_body">Používáme kotlinový port FSRS-Kotlin, poskytovaný pod licencí MIT. FSRS
-        původně vyvinul Jarrett Ye s komunitou Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Používáme kotlinový port FSRS-Kotlin, poskytovaný pod licencí MIT. FSRS původně vyvinul Jarrett Ye s komunitou Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Zdroje slov</string>
     <string name="acknowledgements_words_sources_body">Všechna slovní data jsou dostupná pod licencí CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Děkujeme komunitě Wikislovníku a Tatu Ylonenovi za volné zpřístupnění těchto
-        dat.
-    </string>
+    <string name="acknowledgements_thanks">Děkujeme komunitě Wikislovníku a Tatu Ylonenovi za volné zpřístupnění těchto dat.</string>
 
     <string name="app_data_backup_title">Zálohuj si uložená slova</string>
     <string name="app_data_backup_description">Exportuje tvoje uložená slova a nastavení aplikace do archivu. Hodí se pro zálohu nebo přechod na nové zařízení.</string>
@@ -428,12 +426,13 @@
     <string name="settings_error_update_voice_selection_with_reason">Aktualizace výběru hlasu se nezdařila: %1$s</string>
     <string name="settings_feedback_sent">Zpětná vazba odeslána</string>
     <string name="settings_feedback_view">Zobrazit</string>
-    <string name="settings_feedback_comment_required">Komentář je povinný</string>
+    <string name="feedback_dialog_comment_required">Komentář je povinný</string>
     <string name="settings_download_cancelled">Stahování zrušeno</string>
     <string name="common_search">Hledat</string>
     <string name="common_clear">Vymazat</string>
     <string name="common_search_placeholder">Hledat...</string>
     <string name="common_unknown_error">Neznámá chyba</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d význam</item>
         <item quantity="few">%1$s - %2$d významy</item>
@@ -767,4 +766,14 @@
     <string name="search_add_words">Přidat slova</string>
     <string name="search_add_words_row">Vlož text — vyhledej každé slovo</string>
     <string name="search_add_words_cd">Vlož text a vyhledej každé slovo</string>
+
+    <string name="network_error_offline">Není připojení k internetu. Zkontrolujte připojení a zkuste to znovu.</string>
+    <string name="network_error_timeout">Vypršel časový limit. Zkuste to znovu.</string>
+    <string name="network_error_server_with_code">Chyba serveru (%1$s). Zkuste to znovu.</string>
+    <string name="network_error_server">Chyba serveru. Zkuste to znovu.</string>
+    <string name="network_error_insufficient_storage">Nedostatek volného místa pro stažení.</string>
+    <string name="network_error_unknown">Něco se pokazilo. Zkuste to znovu.</string>
+    <string name="common_loading">Načítání…</string>
+    <string name="common_cancelled">Zrušeno</string>
+    <string name="word_details_load_failed">Slovo se nepodařilo načíst</string>
 </resources>

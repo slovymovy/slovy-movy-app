@@ -61,7 +61,7 @@ object RepoUpdateTaskClient {
         try {
             client.createTask(queuePath, task)
         } catch (e: Exception) {
-            logger.error("Failed to queue task: ${e.message}")
+            logger.error("Failed to queue repo update task for $lang/$word: ${e.message}", e)
         }
     }
 

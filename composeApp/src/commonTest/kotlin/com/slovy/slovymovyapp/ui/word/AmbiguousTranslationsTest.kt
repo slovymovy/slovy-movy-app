@@ -103,7 +103,7 @@ class AmbiguousTranslationsTest {
             LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
         )
         val ambiguous = setOf("miss")
-        val annotated = buildClarificationRow(translations, ambiguous, multiLang = false)
+        val annotated = buildClarificationRow(translations, Language.ENGLISH, ambiguous, multiLang = false)
         val links = annotated.getLinkAnnotations(0, annotated.length)
         assertTrue(links.isEmpty(), "clarification row must not contain any link annotations, found: $links")
     }
@@ -113,7 +113,7 @@ class AmbiguousTranslationsTest {
         val translations = listOf(
             LanguageCardTranslation(targetLangWord = "miss", targetLangSenseClarification = "a target")
         )
-        val annotated = buildClarificationRow(translations, setOf("miss"), multiLang = false)
+        val annotated = buildClarificationRow(translations, Language.ENGLISH, setOf("miss"), multiLang = false)
         assertTrue(annotated.text.contains("a target"), "clarification text must appear in the row")
     }
 
@@ -123,8 +123,39 @@ class AmbiguousTranslationsTest {
             LanguageCardTranslation(targetLangWord = "zeta", idx = 2),
             LanguageCardTranslation(targetLangWord = "alpha", idx = 1)
         )
-        val annotated = buildClarificationRow(translations, emptySet(), multiLang = false)
+        val annotated = buildClarificationRow(translations, Language.ENGLISH, emptySet(), multiLang = false)
         assertEquals("alpha, zeta", annotated.text)
+    }
+
+    @Test
+    fun clarificationRow_chineseUsesIdeographicComma() {
+        val translations = listOf(
+            LanguageCardTranslation(targetLangWord = "受托人", idx = 1),
+            LanguageCardTranslation(targetLangWord = "理事", idx = 2)
+        )
+        val annotated = buildClarificationRow(translations, Language.CHINESE, emptySet(), multiLang = false)
+        assertEquals("受托人、理事", annotated.text)
+    }
+
+    @Test
+    fun translationsHeader_chineseUsesIdeographicComma() {
+        val sense = sense("1", mapOf(Language.CHINESE to trans("受托人", "理事")))
+        assertEquals("受托人、理事", sense.translationsHeader())
+    }
+
+    @Test
+    fun translationsHeader_separatorFollowsEachLanguage() {
+        // The separator belongs to the language of the line, not to the surface, so a card showing
+        // both languages must punctuate each line its own way.
+        val sense = sense(
+            "1",
+            mapOf(
+                Language.ENGLISH to trans("trustee", "board member"),
+                Language.CHINESE to trans("受托人", "理事"),
+            )
+        )
+        val lines = sense.translationLines(sense.translations.keys)
+        assertEquals(listOf("trustee, board member", "受托人、理事"), lines)
     }
 
     @Test

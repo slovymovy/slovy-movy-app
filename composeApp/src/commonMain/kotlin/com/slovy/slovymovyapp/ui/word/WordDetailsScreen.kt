@@ -50,10 +50,15 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.AppNavigationBar
+import com.slovy.slovymovyapp.ui.FeedbackFormState
 import com.slovy.slovymovyapp.ui.SpeakerVector
 import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -70,7 +75,7 @@ import kotlin.time.Duration.Companion.milliseconds
 sealed interface WordDetailUiState {
     data class Empty(
         val lemma: String? = null,
-        val message: String = "No entries available.",
+        val message: UiText = UiText.Resource(Res.string.word_details_no_entries),
         val isError: Boolean = false,
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false
@@ -81,15 +86,10 @@ sealed interface WordDetailUiState {
         val entries: List<EntryUiState>,
         val wordFamilyExpanded: Boolean = false,
         val cardLoading: Boolean = false,
-        val cardError: String? = null,
+        val cardError: UiText? = null,
         val translationLoading: Boolean = false,
-        val translationError: String? = null,
-        val feedbackDialogVisible: Boolean = false,
-        val feedbackComment: String = "",
-        val feedbackEmail: String = "",
-        val feedbackSubmitting: Boolean = false,
-        val feedbackError: String? = null,
-        val feedbackIssueUrl: String? = null,
+        val translationError: UiText? = null,
+        val feedback: FeedbackFormState = FeedbackFormState(),
         val isRefreshing: Boolean = false
     ) : WordDetailUiState
 }
@@ -116,7 +116,7 @@ data class SenseUiState(
     val pos: PartOfSpeech? = null,
     val showFavoriteToggle: Boolean = expanded,
     val translationLoading: Boolean = false,
-    val translationError: String? = null
+    val translationError: UiText? = null
 )
 
 internal fun LanguageCard.toContentUiState(
@@ -287,7 +287,7 @@ class WordDetailViewModel(
     var state by mutableStateOf<WordDetailUiState>(
         WordDetailUiState.Empty(
             lemma = lemma,
-            message = "Loading...",
+            message = UiText.Resource(Res.string.common_loading),
             isLoading = true
         )
     )
@@ -385,7 +385,7 @@ class WordDetailViewModel(
             // Determine where error occurred based on what was loading before
             val wasWordLoading = current?.cardLoading == true
             val wasTranslationLoading = current?.translationLoading == true
-            val errorMessage = result.error?.message
+            val errorMessage = result.error?.let { networkErrorUiText(it) }
 
             val nextState = card.toContentUiState(
                 targetSenseId = targetSenseId,
@@ -400,17 +400,12 @@ class WordDetailViewModel(
                 cardError = if (wasWordLoading && errorMessage != null) errorMessage else null,
                 translationLoading = result.isTranslationLoading,
                 translationError = if (wasTranslationLoading && errorMessage != null) errorMessage else null,
-                feedbackDialogVisible = current?.feedbackDialogVisible ?: false,
-                feedbackComment = current?.feedbackComment ?: "",
-                feedbackEmail = current?.feedbackEmail ?: "",
-                feedbackSubmitting = current?.feedbackSubmitting ?: false,
-                feedbackError = current?.feedbackError,
-                feedbackIssueUrl = current?.feedbackIssueUrl
+                feedback = current?.feedback ?: FeedbackFormState()
             )
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
                 lemma = lemma,
-                message = result.error.message ?: "Failed to load word",
+                message = networkErrorUiText(result.error),
                 isError = true
             )
         }
@@ -464,14 +459,21 @@ class WordDetailViewModel(
         }
     }
 
+    /**
+     * Error copy for a section that was still loading when the fetch was cancelled. Returns null
+     * for a section that had already finished, so a completed half of the card keeps its content.
+     */
+    private fun cancelledMarker(wasLoading: Boolean): UiText? =
+        if (wasLoading) UiText.Resource(Res.string.common_cancelled) else null
+
     private fun markCancelled() {
         state = when (val s = state) {
             is WordDetailUiState.Empty -> s.copy(isError = true)
             is WordDetailUiState.Content -> s.copy(
                 cardLoading = false,
                 translationLoading = false,
-                cardError = s.cardError ?: if (s.cardLoading) "Cancelled" else null,
-                translationError = s.translationError ?: if (s.translationLoading) "Cancelled" else null
+                cardError = s.cardError ?: cancelledMarker(s.cardLoading),
+                translationError = s.translationError ?: cancelledMarker(s.translationLoading)
             )
         }
     }
@@ -604,27 +606,14 @@ class WordDetailViewModel(
 
     fun openFeedbackDialog() {
         val current = state as? WordDetailUiState.Content ?: return
-        state = current.copy(
-            feedbackDialogVisible = true,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackSubmitting = false,
-            feedbackError = null,
-            feedbackIssueUrl = null
-        )
+        state = current.copy(feedback = current.feedback.opened())
     }
 
     fun dismissFeedbackDialog() {
         val current = state as? WordDetailUiState.Content ?: return
-        if (current.feedbackSubmitting) return
-        val issueUrl = current.feedbackIssueUrl
-        state = current.copy(
-            feedbackDialogVisible = false,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackError = null,
-            feedbackIssueUrl = null
-        )
+        if (current.feedback.submitting) return
+        val issueUrl = current.feedback.resultUrl
+        state = current.copy(feedback = current.feedback.dismissed())
         if (issueUrl != null) {
             viewModelScope.launch {
                 val result = snackbarHostState.showSnackbar(
@@ -641,25 +630,30 @@ class WordDetailViewModel(
 
     fun updateFeedbackComment(comment: String) {
         val current = state as? WordDetailUiState.Content ?: return
-        state = current.copy(feedbackComment = comment, feedbackError = null)
+        state = current.copy(feedback = current.feedback.withComment(comment))
     }
 
     fun updateFeedbackEmail(email: String) {
         val current = state as? WordDetailUiState.Content ?: return
-        state = current.copy(feedbackEmail = email)
+        state = current.copy(feedback = current.feedback.withEmail(email))
     }
 
     fun submitFeedback() {
         val current = state as? WordDetailUiState.Content ?: return
-        if (current.feedbackSubmitting) return
+        val form = current.feedback
+        if (form.submitting) return
 
-        val comment = current.feedbackComment.trim()
+        val comment = form.trimmedComment
         if (comment.isBlank()) {
-            state = current.copy(feedbackError = "Comment is required")
+            state = current.copy(
+                feedback = form.submissionFailed(
+                    UiText.Resource(Res.string.feedback_dialog_comment_required)
+                )
+            )
             return
         }
 
-        state = current.copy(feedbackSubmitting = true, feedbackError = null)
+        state = current.copy(feedback = form.submissionStarted())
         viewModelScope.launch {
             try {
                 val feedbackResponse = dictionaryClient.sendFeedback(
@@ -667,21 +661,22 @@ class WordDetailViewModel(
                     lemma = lemma,
                     translationTargets = requestedTranslationLanguages,
                     comment = comment,
-                    email = current.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                    email = form.trimmedEmail
                 )
                 val latest = state as? WordDetailUiState.Content
                 if (latest != null) {
                     state = latest.copy(
-                        feedbackSubmitting = false,
-                        feedbackError = null,
-                        feedbackIssueUrl = feedbackResponse.issueUrl
+                        feedback = latest.feedback.submissionSucceeded(feedbackResponse.issueUrl)
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 val latest = state as? WordDetailUiState.Content ?: return@launch
                 state = latest.copy(
-                    feedbackSubmitting = false,
-                    feedbackError = NetworkErrorClassifier.userMessage(e)
+                    feedback = latest.feedback.submissionFailed(
+                        networkErrorUiText(e)
+                    )
                 )
             }
         }
@@ -1053,7 +1048,7 @@ fun WordDetailScreenContent(
                         Column(
                             modifier = Modifier.fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(24.dp),
+                                .padding(AppSpacing.xl),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -1062,9 +1057,9 @@ fun WordDetailScreenContent(
                             } else if (state.isError) {
                                 ErrorIcon(Modifier.size(30.dp))
                             }
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(AppSpacing.sm))
                             Text(
-                                text = state.message,
+                                text = state.message.resolve(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
@@ -1085,18 +1080,16 @@ fun WordDetailScreenContent(
         )
     }
 
-    if (state is WordDetailUiState.Content && state.feedbackDialogVisible) {
+    if (state is WordDetailUiState.Content && state.feedback.dialogVisible) {
         com.slovy.slovymovyapp.ui.FeedbackDialog(
             title = stringResource(Res.string.word_details_feedback_title),
             commentPlaceholder = stringResource(Res.string.word_details_feedback_placeholder),
             commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-            successCopy = null,
-            allowDismissWhileSending = false,
-            comment = state.feedbackComment,
-            email = state.feedbackEmail,
-            isSending = state.feedbackSubmitting,
-            error = state.feedbackError,
-            resultUrl = state.feedbackIssueUrl,
+            comment = state.feedback.comment,
+            email = state.feedback.email,
+            isSending = state.feedback.submitting,
+            error = state.feedback.error?.resolve(),
+            resultUrl = state.feedback.resultUrl,
             onCommentChange = onFeedbackCommentChange,
             onEmailChange = onFeedbackEmailChange,
             onDismiss = onDismissFeedback,
@@ -1111,9 +1104,9 @@ private fun WordDetailContent(
     entryStates: List<EntryUiState>,
     modifier: Modifier = Modifier,
     cardLoading: Boolean = false,
-    cardError: String? = null,
+    cardError: UiText? = null,
     translationLoading: Boolean = false,
-    translationError: String? = null,
+    translationError: UiText? = null,
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
@@ -1148,7 +1141,7 @@ private fun WordDetailContent(
                     .fillMaxWidth()
                     .padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 LemmaHeadlineText(
                     lemma = card.lemma,
@@ -1158,7 +1151,7 @@ private fun WordDetailContent(
                     onClick = { if (isPlaying) onStopWord() else onPlayWord() },
                     enabled = canPlay && !isPreparing,
                     modifier = Modifier
-                        .padding(bottom = 4.dp)
+                        .padding(bottom = AppSpacing.xs)
                         .size(36.dp)
                 ) {
                     when {
@@ -1188,7 +1181,7 @@ private fun WordDetailContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                .padding(start = AppSpacing.lg, end = AppSpacing.lg, top = AppSpacing.sm),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
 
@@ -1233,8 +1226,8 @@ private fun WordDetailContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                 ) {
                     EntryList(
                         label = stringResource(Res.string.word_details_word_family),
@@ -1325,7 +1318,7 @@ internal fun ChapterRule() {
         Icon(
             imageVector = ChapterDiamondVector,
             contentDescription = null,
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = AppSpacing.sm),
             tint = color
         )
         HorizontalDivider(
@@ -1352,16 +1345,16 @@ private fun LemmaHeadlineAutoSizePreview(
             Column(
                 modifier = Modifier
                     .width(360.dp)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
             ) {
                 samples.forEach { lemma ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(end = 12.dp),
+                            .padding(end = AppSpacing.md),
                         verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                     ) {
                         LemmaHeadlineText(
                             lemma = lemma,
@@ -1369,7 +1362,7 @@ private fun LemmaHeadlineAutoSizePreview(
                         )
                         Box(
                             modifier = Modifier
-                                .padding(bottom = 4.dp)
+                                .padding(bottom = AppSpacing.xs)
                                 .size(36.dp)
                                 .clip(RoundedCornerShape(18.dp))
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),

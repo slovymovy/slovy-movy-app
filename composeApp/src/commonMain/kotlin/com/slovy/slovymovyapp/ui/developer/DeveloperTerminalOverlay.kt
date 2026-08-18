@@ -1,4 +1,9 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.developer
+
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.developerLogSignature
+import com.slovy.slovymovyapp.ui.toDeveloperTerminalLine
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
@@ -36,11 +41,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -52,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.ui.theme.AppElevation
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -66,6 +70,8 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 private const val TAG = "DeveloperTerminalOverlay"
 
@@ -150,6 +156,8 @@ fun DeveloperTerminalOverlay(
                         try {
                             onShiftLearningTime(option.duration)
                             AppLogger.info(TAG, "Action finished: Shifted learning time ${option.label}", null)
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
                             AppLogger.warn(TAG, "Shift ${option.label} failed: ${e.toLogLabel()}", e)
                         } finally {

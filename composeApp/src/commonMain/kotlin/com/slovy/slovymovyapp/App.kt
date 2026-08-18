@@ -37,6 +37,14 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import com.slovy.slovymovyapp.ui.*
+import com.slovy.slovymovyapp.ui.favorites.*
+import com.slovy.slovymovyapp.ui.settings.*
+import com.slovy.slovymovyapp.ui.search.*
+import com.slovy.slovymovyapp.ui.developer.*
+import com.slovy.slovymovyapp.ui.stats.*
+import com.slovy.slovymovyapp.ui.listdetail.*
+import com.slovy.slovymovyapp.ui.languagesetup.*
+import com.slovy.slovymovyapp.ui.download.*
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordListsRepository
 import com.slovy.slovymovyapp.data.recovery.RecoverableSense
@@ -55,6 +63,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
+import slovymovyapp.composeapp.generated.resources.download_item_dictionary_name
 import slovymovyapp.composeapp.generated.resources.download_title_downloading
 import kotlin.concurrent.Volatile
 import kotlin.time.Clock
@@ -598,6 +607,8 @@ fun App(
                                     navController.navigate(AppDestination.SetupLanguages) {
                                         popUpTo<AppDestination.Welcome> { inclusive = true }
                                     }
+                                } catch (e: CancellationException) {
+                                    throw e
                                 } catch (_: Exception) {
                                     viewModel.onError()
                                 }
@@ -651,6 +662,10 @@ fun App(
                     } else {
                         var downloadDict = false
                         val downloadTranslations = mutableListOf<Language>()
+                        // Resolved here rather than inside the download/loadItems lambdas: those run
+                        // outside composition, and the label is a fixed function of dictLang anyway.
+                        val dictionaryItemName =
+                            stringResource(Res.string.download_item_dictionary_name, dictLang.selfName)
 
                         val viewModel = viewModel(
                             viewModelStoreOwner = backStackEntry
@@ -666,7 +681,7 @@ fun App(
                                     val totalItems = (if (downloadDict) 1 else 0) + downloadTranslations.size
                                     val translationOffset = if (downloadDict) 1 else 0
                                     if (downloadDict) {
-                                        val fileName = "${dictLang.selfName} Dictionary"
+                                        val fileName = dictionaryItemName
                                         dataManager.ensureDictionary(dictLang, { p ->
                                             val current = if (p.percent >= 0) p.percent.toFloat() / totalItems else 0f
                                             onProgress(object : DownloadProgress(p.bytesDownloaded, p.totalBytes) {
@@ -744,7 +759,7 @@ fun App(
                                         langInfo?.dictionarySizeBytes?.let { size ->
                                             items.add(
                                                 DownloadItem(
-                                                    "${dictLang.selfName} Dictionary",
+                                                    dictionaryItemName,
                                                     size,
                                                     dictLang.flag
                                                 )

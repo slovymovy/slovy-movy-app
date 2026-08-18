@@ -81,6 +81,11 @@ object DbExtractEnhancerUtils {
             ?: error("Unsupported language code: $langCode")
     }
 
+    fun targetLanguageNotes(langCode: String): String {
+        return Language.fromCodeOrNull(langCode)?.translationPromptNotes
+            ?: error("Unsupported language code: $langCode")
+    }
+
     private fun ExtractedWordEntry.toRequestEntry(): LanguageCardEntry {
         val formReqs = forms.map { it.toRequestForm() }
         val senseReqs = senses.map { it.toRequestSense() }

@@ -40,6 +40,14 @@ object GitHubClient {
 
     private const val GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
     private const val FEEDBACK_DISCUSSION_CATEGORY = "Feedback"
+    private const val GENERAL_FEEDBACK_TITLE = "App feedback"
+    private const val LANGUAGE_REQUEST_TITLE = "Language request"
+
+    // Language requests arrive on the shared /feedback endpoint and mark themselves with this
+    // prefix. Kept in sync with LANGUAGE_REQUEST_PREFIX in the client's LanguageSetupViewModel;
+    // changing one without the other only costs the discussion its specific title, so older
+    // clients keep working and simply fall back to the general feedback title.
+    private const val LANGUAGE_REQUEST_PREFIX = "[Language request]"
     private const val DISCUSSION_REPO_OWNER = "slovymovy"
     private const val DISCUSSION_REPO_NAME = "slovy-movy-app"
 
@@ -523,7 +531,7 @@ object GitHubClient {
         email: String? = null
     ): CreatedDiscussion {
         val (repoId, categoryId) = resolveDiscussionCategoryId()
-        val title = "App feedback"
+        val title = feedbackDiscussionTitle(comment)
         val body = buildGeneralFeedbackBody(comment, email)
 
         val mutation = """
@@ -559,6 +567,18 @@ object GitHubClient {
             title = discussion["title"]!!.jsonPrimitive.content,
             url = discussion["url"]!!.jsonPrimitive.content
         )
+    }
+
+    /**
+     * Titles the discussion by what the comment actually is, so language requests are separable
+     * from general feedback in the discussion list rather than only by reading each body.
+     */
+    internal fun feedbackDiscussionTitle(comment: String): String {
+        return if (comment.trimStart().startsWith(LANGUAGE_REQUEST_PREFIX)) {
+            LANGUAGE_REQUEST_TITLE
+        } else {
+            GENERAL_FEEDBACK_TITLE
+        }
     }
 
     internal fun buildGeneralFeedbackBody(comment: String, email: String? = null): String {

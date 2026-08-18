@@ -101,6 +101,7 @@
     <string name="stats_month_october">octubre</string>
     <string name="stats_month_november">noviembre</string>
     <string name="stats_month_december">diciembre</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">L</string>
     <string name="stats_weekday_initial_tuesday">M</string>
     <string name="stats_weekday_initial_wednesday">X</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Preparando tu biblioteca</string>
     <string name="download_action_download_size">Descargar %1$s</string>
+    <string name="download_item_dictionary_name">Diccionario %1$s</string>
     <string name="download_title_ready">Listo para descargar</string>
     <string name="download_subtitle_ready">Necesitas estos diccionarios para terminar la configuración.</string>
     <string name="download_title_failed">Error en la descarga</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Cuéntanoslo</string>
     <string name="language_setup_request_language_after">&#32;para que podamos añadirlo.</string>
     <string name="language_setup_request_language_title">Solicitar un idioma</string>
-    <string name="language_setup_request_language_placeholder">¿Qué idioma te gustaría añadir?</string>
+    <string name="language_setup_request_language_roadmap">Mira en la %1$s qué idiomas añadiremos próximamente.</string>
+    <string name="language_setup_request_language_roadmap_link">hoja de ruta</string>
+    <string name="language_setup_request_language_learn_label">Idioma que aprender</string>
+    <string name="language_setup_request_language_translate_label">Idioma al que traducir</string>
+    <string name="language_setup_request_language_required">Escribe al menos un idioma</string>
     <string name="language_setup_request_language_sent_title">Solicitud enviada</string>
     <string name="language_setup_request_language_sent_message">¡Gracias! Hemos recibido tu solicitud de idioma. Puedes seguir su progreso en GitHub.</string>
 
@@ -348,24 +354,16 @@
     <string name="developer_working_status">Trabajando...</string>
     <string name="acknowledgements_title">Agradecimientos</string>
     <string name="acknowledgements_vocab_data_title">Datos de vocabulario</string>
-    <string name="acknowledgements_vocab_data_body">Nuestros datos de palabras provienen de Wiktionary, el diccionario
-        multilingüe libre creado por voluntarios de todo el mundo.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Nuestros datos de palabras provienen de Wiktionary, el diccionario multilingüe libre creado por voluntarios de todo el mundo.</string>
     <string name="acknowledgements_dictionary_extracts_title">Extractos de diccionario</string>
-    <string name="acknowledgements_dictionary_extracts_body">Usamos datos de diccionario preprocesados de Kaikki.org,
-        extraídos de Wiktionary con la herramienta de código abierto wiktextract de Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">Usamos datos de diccionario preprocesados de Kaikki.org, extraídos de Wiktionary con la herramienta de código abierto wiktextract de Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Código de la aplicación</string>
     <string name="acknowledgements_application_code_body">El código fuente de la aplicación está disponible bajo BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">Algoritmo de planificación FSRS</string>
-    <string name="acknowledgements_fsrs_body">Usamos una adaptación a Kotlin de FSRS-Kotlin, proporcionada bajo la licencia MIT. FSRS
-        fue desarrollado originalmente por Jarrett Ye junto con la comunidad Open Spaced Repetition.
-    </string>
+    <string name="acknowledgements_fsrs_body">Usamos una adaptación a Kotlin de FSRS-Kotlin, proporcionada bajo la licencia MIT. FSRS fue desarrollado originalmente por Jarrett Ye junto con la comunidad Open Spaced Repetition.</string>
     <string name="acknowledgements_words_sources_title">Fuentes de las palabras</string>
     <string name="acknowledgements_words_sources_body">Todos los datos de palabras están disponibles bajo la licencia CC-BY-SA-4.0.</string>
-    <string name="acknowledgements_thanks">Agradecemos a la comunidad de Wiktionary y a Tatu Ylonen por hacer que estos datos
-        estén disponibles libremente.
-    </string>
+    <string name="acknowledgements_thanks">Agradecemos a la comunidad de Wiktionary y a Tatu Ylonen por hacer que estos datos estén disponibles libremente.</string>
 
     <string name="app_data_backup_title">Haz una copia de tus palabras guardadas</string>
     <string name="app_data_backup_description">Exporta tus palabras guardadas y los ajustes de la app a un archivo. Útil para guardar una copia o pasar a un dispositivo nuevo.</string>
@@ -428,12 +426,13 @@
     <string name="settings_error_update_voice_selection_with_reason">No se pudo actualizar la selección de voz: %1$s</string>
     <string name="settings_feedback_sent">Comentarios enviados</string>
     <string name="settings_feedback_view">Ver</string>
-    <string name="settings_feedback_comment_required">El comentario es obligatorio</string>
+    <string name="feedback_dialog_comment_required">El comentario es obligatorio</string>
     <string name="settings_download_cancelled">Descarga cancelada</string>
     <string name="common_search">Buscar</string>
     <string name="common_clear">Borrar</string>
     <string name="common_search_placeholder">Buscar...</string>
     <string name="common_unknown_error">Error desconocido</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d significado</item>
         <item quantity="few">%1$s - %2$d significados</item>
@@ -767,4 +766,14 @@
     <string name="search_add_words">Añadir palabras</string>
     <string name="search_add_words_row">Pega un texto — consulta cada palabra</string>
     <string name="search_add_words_cd">Pega un texto y consulta cada palabra</string>
+
+    <string name="network_error_offline">Sin conexión a internet. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="network_error_timeout">Se agotó el tiempo de espera. Inténtalo de nuevo.</string>
+    <string name="network_error_server_with_code">Error del servidor (%1$s). Inténtalo de nuevo.</string>
+    <string name="network_error_server">Error del servidor. Inténtalo de nuevo.</string>
+    <string name="network_error_insufficient_storage">No hay espacio libre suficiente para la descarga.</string>
+    <string name="network_error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="common_loading">Cargando…</string>
+    <string name="common_cancelled">Cancelado</string>
+    <string name="word_details_load_failed">No se pudo cargar la palabra</string>
 </resources>

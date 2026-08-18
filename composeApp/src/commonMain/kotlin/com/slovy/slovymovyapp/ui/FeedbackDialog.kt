@@ -14,21 +14,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
-
-data class FeedbackSuccessCopy(
-    val title: String,
-    val message: String
-)
 
 @Composable
 fun FeedbackDialog(
     title: String,
     commentPlaceholder: String,
     commentLabel: String?,
-    successCopy: FeedbackSuccessCopy?,
-    allowDismissWhileSending: Boolean,
     comment: String,
     email: String,
     isSending: Boolean,
@@ -46,7 +40,7 @@ fun FeedbackDialog(
             title = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CheckCircle,
@@ -55,7 +49,7 @@ fun FeedbackDialog(
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = successCopy?.title ?: stringResource(Res.string.feedback_dialog_sent_title),
+                        text = stringResource(Res.string.feedback_dialog_sent_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.SemiBold
                         )
@@ -63,9 +57,9 @@ fun FeedbackDialog(
                 }
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     Text(
-                        text = successCopy?.message ?: stringResource(Res.string.feedback_dialog_sent_message),
+                        text = stringResource(Res.string.feedback_dialog_sent_message),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     TextButton(
@@ -91,7 +85,7 @@ fun FeedbackDialog(
         var emailValue by remember { mutableStateOf(TextFieldValue(email)) }
         AlertDialog(
             onDismissRequest = {
-                if (!isSending || allowDismissWhileSending) {
+                if (!isSending) {
                     onDismiss()
                 }
             },
@@ -108,7 +102,7 @@ fun FeedbackDialog(
                     focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     focusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                     OutlinedTextField(
                         value = commentValue,
                         onValueChange = { commentValue = it; onCommentChange(it.text) },
@@ -180,11 +174,11 @@ fun FeedbackDialog(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        if (!isSending || allowDismissWhileSending) {
+                        if (!isSending) {
                             onDismiss()
                         }
                     },
-                    enabled = !isSending || allowDismissWhileSending,
+                    enabled = !isSending,
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -206,8 +200,6 @@ private fun FeedbackDialogInputPreview(
             title = "App feedback",
             commentPlaceholder = "Share your thoughts…",
             commentLabel = "Comment",
-            successCopy = null,
-            allowDismissWhileSending = false,
             comment = "",
             email = "",
             isSending = false,
@@ -231,8 +223,6 @@ private fun FeedbackDialogSendingPreview(
             title = "App feedback",
             commentPlaceholder = "Share your thoughts…",
             commentLabel = "Comment",
-            successCopy = null,
-            allowDismissWhileSending = false,
             comment = "Great app!",
             email = "user@example.com",
             isSending = true,
@@ -256,8 +246,6 @@ private fun FeedbackDialogErrorPreview(
             title = "App feedback",
             commentPlaceholder = "Share your thoughts…",
             commentLabel = "Comment",
-            successCopy = null,
-            allowDismissWhileSending = false,
             comment = "",
             email = "",
             isSending = false,
@@ -281,8 +269,6 @@ private fun FeedbackDialogSuccessPreview(
             title = "App feedback",
             commentPlaceholder = "Share your thoughts…",
             commentLabel = "Comment",
-            successCopy = null,
-            allowDismissWhileSending = false,
             comment = "",
             email = "",
             isSending = false,

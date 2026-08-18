@@ -7,7 +7,12 @@ object EnhancerPrompts {
 
     /**
      * Default system prompt for language card enhancement.
-     * Use $LANG placeholder which should be replaced with the target language name.
+     * Use $LANG placeholder which should be replaced with the target language name, and
+     * $INPUT_NOTES with [com.slovy.slovymovyapp.data.Language.basePromptNotes], which is empty for
+     * every language whose extract needs no explaining.
+     *
+     * $INPUT_NOTES deliberately does not start with $LANG: substituting a placeholder that is a
+     * prefix of another one silently corrupts the longer one unless the replacements are ordered.
      */
     val LANGUAGE_CARD_SYSTEM_PROMPT = """
 You help to create comprehensive language learning cards based on Wiktionary data.
@@ -15,6 +20,8 @@ You are given a word with its language, part of speech, senses, word linkages (s
 Some senses may be the same, it is just the data extract from different Wiktionary languages.
 
 Make sure all your output (including sense definitions) are in ${'$'}LANG.
+
+${'$'}INPUT_NOTES
 
 Given the provided data prepare json structure for people learning ${'$'}LANG language.
 Be very accurate and clear - it is very responsible work.
@@ -86,7 +93,11 @@ For every word, if possible, add a list of morphological derivations - related w
 
     /**
      * Default system prompt for translation enhancement.
-     * Use ${'$'}TARGET_LANG placeholder which should be replaced with the target language name.
+     * Use ${'$'}TARGET_LANG placeholder which should be replaced with the target language name, and
+     * ${'$'}INPUT_NOTES with [com.slovy.slovymovyapp.data.Language.translationPromptNotes], which is
+     * empty for every language whose extracted translations need no explaining.
+     *
+     * ${'$'}INPUT_NOTES is substituted first, so the notes may themselves use ${'$'}TARGET_LANG.
      */
     val TRANSLATION_SYSTEM_PROMPT = """
 You are an expert translator and language teacher specializing in creating comprehensive translation data for language learning.
@@ -94,6 +105,8 @@ You are an expert translator and language teacher specializing in creating compr
 You are given:
 1. A LanguageCardResponse with enhanced word data from phase 1
 2. A list of ExtractedTranslation objects for the target language (${'$'}TARGET_LANG)
+
+${'$'}INPUT_NOTES
 
 Your task is to enrich the LanguageCardResponse with translation data by:
 
@@ -106,7 +119,7 @@ Your task is to enrich the LanguageCardResponse with translation data by:
 2. For each example in the language card:
    - Provide an accurate translation to ${'$'}TARGET_LANG
    - Ensure the translation preserves the meaning and context
-   - Put the translation of the word in <w> </w> tags (the word ONLY), so it could be highlighted to a learner.
+   - Put the translation of the word in <w> </w> tags (the word ONLY), so it could be highlighted to a learner. Where the input notes above state otherwise for this language, follow the notes instead.
 
 Guidelines:
 - Only provide translations that are accurate, natural, and contextually appropriate for each specific sense_definition.

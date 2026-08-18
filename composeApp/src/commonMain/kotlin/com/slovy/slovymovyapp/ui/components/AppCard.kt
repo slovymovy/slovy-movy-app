@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.elevationLevel1
 
 /**
@@ -100,10 +101,10 @@ private fun AppCardPreview(
     @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        AppCard(modifier = Modifier.padding(16.dp)) {
+        AppCard(modifier = Modifier.padding(AppSpacing.lg)) {
             Text(
                 text = "Sample Card Content",
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(AppSpacing.lg),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -117,12 +118,12 @@ private fun AppCardClickablePreview(
 ) {
     ThemedPreview(darkTheme = isDark) {
         AppCard(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(AppSpacing.lg),
             onClick = {}
         ) {
             Text(
                 text = "Clickable Card",
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(AppSpacing.lg),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -135,10 +136,10 @@ private fun CompactCardPreview(
     @androidx.compose.ui.tooling.preview.PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
-        CompactCard(modifier = Modifier.padding(16.dp)) {
+        CompactCard(modifier = Modifier.padding(AppSpacing.lg)) {
             Text(
                 text = "Compact Card",
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(AppSpacing.md),
                 style = MaterialTheme.typography.bodySmall
             )
         }

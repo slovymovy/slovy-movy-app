@@ -101,6 +101,7 @@
     <string name="stats_month_october">Oktober</string>
     <string name="stats_month_november">November</string>
     <string name="stats_month_december">December</string>
+    <string name="stats_month_year">%1$s %2$d</string>
     <string name="stats_weekday_initial_monday">M</string>
     <string name="stats_weekday_initial_tuesday">D</string>
     <string name="stats_weekday_initial_wednesday">W</string>
@@ -121,6 +122,7 @@
 
     <string name="download_description_setting_up_library">Je bibliotheek wordt ingesteld</string>
     <string name="download_action_download_size">Download %1$s</string>
+    <string name="download_item_dictionary_name">Woordenboek %1$s</string>
     <string name="download_title_ready">Klaar om te downloaden</string>
     <string name="download_subtitle_ready">Je hebt deze woordenboeken nodig om te starten.</string>
     <string name="download_title_failed">Download mislukt</string>
@@ -182,7 +184,11 @@
     <string name="language_setup_request_language_link">Laat het ons weten</string>
     <string name="language_setup_request_language_after">, dan voegen we deze toe.</string>
     <string name="language_setup_request_language_title">Taal aanvragen</string>
-    <string name="language_setup_request_language_placeholder">Welke taal wil je toevoegen?</string>
+    <string name="language_setup_request_language_roadmap">Bekijk op de %1$s welke talen we hierna toevoegen.</string>
+    <string name="language_setup_request_language_roadmap_link">roadmap</string>
+    <string name="language_setup_request_language_learn_label">Taal om te leren</string>
+    <string name="language_setup_request_language_translate_label">Taal om naar te vertalen</string>
+    <string name="language_setup_request_language_required">Vul minstens één taal in</string>
     <string name="language_setup_request_language_sent_title">Verzoek verzonden</string>
     <string name="language_setup_request_language_sent_message">Bedankt! We hebben je taalverzoek ontvangen. Je kunt de voortgang op GitHub volgen.</string>
 
@@ -348,23 +354,15 @@
     <string name="developer_working_status">Bezig...</string>
     <string name="acknowledgements_title">Met dank aan</string>
     <string name="acknowledgements_vocab_data_title">Woordenschatgegevens</string>
-    <string name="acknowledgements_vocab_data_body">Onze woordgegevens komen uit Wiktionary, het gratis meertalige
-        woordenboek dat wereldwijd door vrijwilligers wordt opgebouwd.
-    </string>
+    <string name="acknowledgements_vocab_data_body">Onze woordgegevens komen uit Wiktionary, het gratis meertalige woordenboek dat wereldwijd door vrijwilligers wordt opgebouwd.</string>
     <string name="acknowledgements_dictionary_extracts_title">Woordenboekextractie</string>
-    <string name="acknowledgements_dictionary_extracts_body">We gebruiken voorbewerkte woordenboekgegevens van
-        Kaikki.org, geëxtraheerd uit Wiktionary met de open-source tool wiktextract van Tatu Ylonen.
-    </string>
+    <string name="acknowledgements_dictionary_extracts_body">We gebruiken voorbewerkte woordenboekgegevens van Kaikki.org, geëxtraheerd uit Wiktionary met de open-source tool wiktextract van Tatu Ylonen.</string>
     <string name="acknowledgements_application_code_title">Applicatiecode</string>
     <string name="acknowledgements_application_code_body">De broncode van de applicatie is beschikbaar onder BUSL-1.1.</string>
     <string name="acknowledgements_fsrs_title">FSRS-herhalingsalgoritme</string>
-    <string name="acknowledgements_fsrs_body">We gebruiken een Kotlin-port van FSRS-Kotlin, beschikbaar onder de
-        MIT-licentie. FSRS is oorspronkelijk ontwikkeld door Jarrett Ye met de Open Spaced Repetition-community.
-    </string>
+    <string name="acknowledgements_fsrs_body">We gebruiken een Kotlin-port van FSRS-Kotlin, beschikbaar onder de MIT-licentie. FSRS is oorspronkelijk ontwikkeld door Jarrett Ye met de Open Spaced Repetition-community.</string>
     <string name="acknowledgements_words_sources_title">Woordbronnen</string>
-    <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de
-        CC-BY-SA-4.0-licentie.
-    </string>
+    <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de CC-BY-SA-4.0-licentie.</string>
     <string name="acknowledgements_thanks">Onze dank gaat uit naar de Wiktionary-community en Tatu Ylonen voor het gratis beschikbaar stellen van deze gegevens.</string>
 
     <string name="app_data_backup_title">Maak een back-up van je opgeslagen woorden</string>
@@ -428,12 +426,13 @@
     <string name="settings_error_update_voice_selection_with_reason">Bijwerken van stemselectie mislukt: %1$s</string>
     <string name="settings_feedback_sent">Feedback verzonden</string>
     <string name="settings_feedback_view">Bekijk</string>
-    <string name="settings_feedback_comment_required">Opmerking is verplicht</string>
+    <string name="feedback_dialog_comment_required">Opmerking is verplicht</string>
     <string name="settings_download_cancelled">Download geannuleerd</string>
     <string name="common_search">Zoeken</string>
     <string name="common_clear">Wissen</string>
     <string name="common_search_placeholder">Zoeken...</string>
     <string name="common_unknown_error">Onbekende fout</string>
+    <string name="common_list_separator">,&#32;</string>
     <plurals name="part_of_speech_with_sense_count">
         <item quantity="one">%1$s - %2$d betekenis</item>
         <item quantity="few">%1$s - %2$d betekenissen</item>
@@ -627,8 +626,7 @@
     <string name="study_remove_undo">Ongedaan maken</string>
     <string name="study_loading">Je herhaling wordt voorbereid…</string>
     <string name="study_empty_title">Nu niets te herhalen</string>
-    <string name="study_empty_description">Opgeslagen woorden verschijnen hier wanneer ze klaar zijn voor herhaling.
-    </string>
+    <string name="study_empty_description">Opgeslagen woorden verschijnen hier wanneer ze klaar zijn voor herhaling.</string>
     <string name="study_error_title">Deze kaart kon niet worden geladen</string>
     <string name="study_error_prepare_failed">Studiesessie kon niet worden voorbereid.</string>
     <string name="study_error_next_card_failed">Volgende kaart kon niet worden geladen.</string>
@@ -768,4 +766,14 @@
     <string name="search_add_words">Woorden toevoegen</string>
     <string name="search_add_words_row">Plak een tekst — zoek elk woord op</string>
     <string name="search_add_words_cd">Plak een tekst en zoek elk woord op</string>
+
+    <string name="network_error_offline">Geen internetverbinding. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="network_error_timeout">Time-out. Probeer het opnieuw.</string>
+    <string name="network_error_server_with_code">Serverfout (%1$s). Probeer het opnieuw.</string>
+    <string name="network_error_server">Serverfout. Probeer het opnieuw.</string>
+    <string name="network_error_insufficient_storage">Onvoldoende vrije ruimte voor de download.</string>
+    <string name="network_error_unknown">Er is iets misgegaan. Probeer het opnieuw.</string>
+    <string name="common_loading">Laden…</string>
+    <string name="common_cancelled">Geannuleerd</string>
+    <string name="word_details_load_failed">Kan het woord niet laden</string>
 </resources>

@@ -1,4 +1,11 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.settings
+
+import com.slovy.slovymovyapp.ui.formatFileSize
+import com.slovy.slovymovyapp.ui.CancellableProgressIndicator
+import com.slovy.slovymovyapp.ui.CircularToggle
+
+import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.ThemedPreview
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border

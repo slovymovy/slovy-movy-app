@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_download_title">正在下载词典</string>
+    <string name="notification_download_channel">下载</string>
+</resources>

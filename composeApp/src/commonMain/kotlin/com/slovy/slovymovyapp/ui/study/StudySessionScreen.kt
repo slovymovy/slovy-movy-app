@@ -116,6 +116,7 @@ import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.LocalIsDarkTheme
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
+import com.slovy.slovymovyapp.ui.theme.uiItalic
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.Res
@@ -530,7 +531,7 @@ private fun StudySessionActiveContent(
                             Text(
                                 text = stringResource(Res.string.study_swipe_back_to_rate),
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontStyle = FontStyle.Italic,
+                                    fontStyle = MaterialTheme.uiItalic,
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
@@ -576,7 +577,7 @@ internal fun StudySessionSnackbarHost(
         hostState = hostState,
         modifier = modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(AppSpacing.md),
     ) { data ->
         StudySessionSnackbar(data = data)
     }
@@ -611,8 +612,8 @@ private fun StudySessionSnackbar(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
-                .padding(horizontal = AppSpacing.lg, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -1147,7 +1148,7 @@ private fun MultiSenseBack(
             Text(
                 text = swipeHint,
                 style = MaterialTheme.typography.bodySmall.copy(
-                    fontStyle = FontStyle.Italic,
+                    fontStyle = MaterialTheme.uiItalic,
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center,
@@ -1470,7 +1471,7 @@ private fun ListeningMultiSenseByline(
         ),
         style = MaterialTheme.typography.bodySmall.copy(
             fontFamily = MaterialTheme.serifFontFamily,
-            fontStyle = FontStyle.Italic,
+            fontStyle = MaterialTheme.uiItalic,
             fontWeight = FontWeight.Normal,
             fontSize = 12.sp,
             lineHeight = 17.sp,
@@ -1500,7 +1501,7 @@ private fun MultiSenseFrontHint(
             ),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = FontStyle.Italic,
+                fontStyle = MaterialTheme.uiItalic,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
             ),
@@ -2121,7 +2122,7 @@ private fun HintRevealPill(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
             Icon(
                 imageVector = Icons.Filled.VpnKey,
