@@ -41,6 +41,7 @@ import com.slovy.slovymovyapp.ui.favorites.*
 import com.slovy.slovymovyapp.ui.settings.*
 import com.slovy.slovymovyapp.ui.search.*
 import com.slovy.slovymovyapp.ui.developer.*
+import com.slovy.slovymovyapp.ui.stats.*
 import com.slovy.slovymovyapp.data.lists.ListsService
 import com.slovy.slovymovyapp.data.lists.WordListsRepository
 import com.slovy.slovymovyapp.data.recovery.RecoverableSense
