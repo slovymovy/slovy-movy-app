@@ -93,12 +93,7 @@ data class SettingsUiState(
     val acknowledgementsVisible: Boolean = false,
 
     // Feedback
-    val feedbackDialogVisible: Boolean = false,
-    val feedbackComment: String = "",
-    val feedbackEmail: String = "",
-    val feedbackSubmitting: Boolean = false,
-    val feedbackError: UiText? = null,
-    val feedbackDiscussionUrl: String? = null,
+    val feedback: FeedbackFormState = FeedbackFormState(),
 
     // Developer
     val developerModeEnabled: Boolean = false
@@ -894,26 +889,13 @@ class SettingsViewModel(
     }
 
     fun openFeedbackDialog() {
-        state = state.copy(
-            feedbackDialogVisible = true,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackSubmitting = false,
-            feedbackError = null,
-            feedbackDiscussionUrl = null
-        )
+        state = state.copy(feedback = state.feedback.opened())
     }
 
     fun dismissFeedbackDialog() {
-        if (state.feedbackSubmitting) return
-        val discussionUrl = state.feedbackDiscussionUrl
-        state = state.copy(
-            feedbackDialogVisible = false,
-            feedbackComment = "",
-            feedbackEmail = "",
-            feedbackError = null,
-            feedbackDiscussionUrl = null
-        )
+        if (state.feedback.submitting) return
+        val discussionUrl = state.feedback.resultUrl
+        state = state.copy(feedback = state.feedback.dismissed())
         if (discussionUrl != null) {
             viewModelScope.launch {
                 val result = showSnackbar(
@@ -929,40 +911,44 @@ class SettingsViewModel(
     }
 
     fun updateFeedbackComment(comment: String) {
-        state = state.copy(feedbackComment = comment, feedbackError = null)
+        state = state.copy(feedback = state.feedback.withComment(comment))
     }
 
     fun updateFeedbackEmail(email: String) {
-        state = state.copy(feedbackEmail = email)
+        state = state.copy(feedback = state.feedback.withEmail(email))
     }
 
     fun submitFeedback() {
-        if (state.feedbackSubmitting) return
+        val form = state.feedback
+        if (form.submitting) return
 
-        val comment = state.feedbackComment.trim()
+        val comment = form.trimmedComment
         if (comment.isBlank()) {
-            state = state.copy(feedbackError = UiText.Resource(Res.string.settings_feedback_comment_required))
+            state = state.copy(
+                feedback = form.submissionFailed(
+                    UiText.Resource(Res.string.feedback_dialog_comment_required)
+                )
+            )
             return
         }
 
-        state = state.copy(feedbackSubmitting = true, feedbackError = null)
+        state = state.copy(feedback = form.submissionStarted())
         viewModelScope.launch {
             try {
                 val response = dictionaryClient.sendGeneralFeedback(
                     comment = comment,
-                    email = state.feedbackEmail.trim().takeIf { it.isNotBlank() }
+                    email = form.trimmedEmail
                 )
                 state = state.copy(
-                    feedbackSubmitting = false,
-                    feedbackError = null,
-                    feedbackDiscussionUrl = response.discussionUrl
+                    feedback = state.feedback.submissionSucceeded(response.discussionUrl)
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    feedbackSubmitting = false,
-                    feedbackError = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    feedback = state.feedback.submissionFailed(
+                        UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    )
                 )
             }
         }
@@ -1432,16 +1418,16 @@ fun SettingsScreenContent(
             AcknowledgementsBottomSheet(onDismiss = onDismissAcknowledgements)
         }
 
-        if (state.feedbackDialogVisible) {
+        if (state.feedback.dialogVisible) {
             FeedbackDialog(
                 title = stringResource(Res.string.feedback_dialog_title),
                 commentPlaceholder = stringResource(Res.string.feedback_dialog_placeholder),
                 commentLabel = stringResource(Res.string.feedback_dialog_comment_label),
-                comment = state.feedbackComment,
-                email = state.feedbackEmail,
-                isSending = state.feedbackSubmitting,
-                error = state.feedbackError?.resolve(),
-                resultUrl = state.feedbackDiscussionUrl,
+                comment = state.feedback.comment,
+                email = state.feedback.email,
+                isSending = state.feedback.submitting,
+                error = state.feedback.error?.resolve(),
+                resultUrl = state.feedback.resultUrl,
                 onCommentChange = onFeedbackCommentChange,
                 onEmailChange = onFeedbackEmailChange,
                 onDismiss = onDismissFeedback,

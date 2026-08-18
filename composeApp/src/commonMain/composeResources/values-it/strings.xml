@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Impossibile aggiornare la selezione della voce: %1$s</string>
     <string name="settings_feedback_sent">Feedback inviato</string>
     <string name="settings_feedback_view">Visualizza</string>
-    <string name="settings_feedback_comment_required">Il commento è obbligatorio</string>
+    <string name="feedback_dialog_comment_required">Il commento è obbligatorio</string>
     <string name="settings_download_cancelled">Download annullato</string>
     <string name="common_search">Cerca</string>
     <string name="common_clear">Cancella</string>

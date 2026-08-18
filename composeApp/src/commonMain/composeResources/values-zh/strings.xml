@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">更新语音选择失败：%1$s</string>
     <string name="settings_feedback_sent">反馈已发送</string>
     <string name="settings_feedback_view">查看</string>
-    <string name="settings_feedback_comment_required">请填写内容</string>
+    <string name="feedback_dialog_comment_required">请填写内容</string>
     <string name="settings_download_cancelled">下载已取消</string>
     <string name="common_search">搜索</string>
     <string name="common_clear">清除</string>

@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Failed to update voice selection: %1$s</string>
     <string name="settings_feedback_sent">Feedback sent</string>
     <string name="settings_feedback_view">View</string>
-    <string name="settings_feedback_comment_required">Comment is required</string>
+    <string name="feedback_dialog_comment_required">Comment is required</string>
     <string name="settings_download_cancelled">Download cancelled</string>
     <string name="common_search">Search</string>
     <string name="common_clear">Clear</string>

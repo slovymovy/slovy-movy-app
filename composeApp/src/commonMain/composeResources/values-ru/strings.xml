@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Не удалось сохранить выбор голоса: %1$s</string>
     <string name="settings_feedback_sent">Отзыв отправлен. Спасибо!</string>
     <string name="settings_feedback_view">Посмотреть</string>
-    <string name="settings_feedback_comment_required">Пожалуйста, добавьте комментарий</string>
+    <string name="feedback_dialog_comment_required">Пожалуйста, добавьте комментарий</string>
     <string name="settings_download_cancelled">Скачивание отменено</string>
     <string name="common_search">Поиск</string>
     <string name="common_clear">Очистить</string>
