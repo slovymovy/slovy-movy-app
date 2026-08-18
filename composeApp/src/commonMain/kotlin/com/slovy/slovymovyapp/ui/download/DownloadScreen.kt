@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.icons.DownloadScreenTransparent
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
@@ -369,9 +371,8 @@ fun DownloadScreenContent(
                 }
 
                 is DownloadUiState.Failed -> {
-                    val classified = NetworkErrorClassifier.classify(state.error)
                     Text(
-                        text = classified.userMessage,
+                        text = networkErrorUiText(state.error).resolve(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.speech.LemmaAudioControl
 import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.ui.SpeakerVector
@@ -58,9 +59,9 @@ data class SenseCardData(
     val sense: LanguageCardResponseSense? = null,
     val pos: PartOfSpeech? = null,
     val loading: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val translationLoading: Boolean = false,
-    val translationError: String? = null,
+    val translationError: UiText? = null,
     val diagnosticInfoOnError: String? = null,
     val ambiguousTranslations: Set<String> = emptySet(),
     // Summary shown while the full sense is not loaded (e.g. list rows before expansion).

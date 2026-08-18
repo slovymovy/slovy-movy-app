@@ -19,12 +19,12 @@ import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -270,7 +270,7 @@ class SearchViewModel(
             } catch (e: Exception) {
                 state = state.copy(
                     listSuggestion = state.listSuggestion.submissionFailed(
-                        UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                        networkErrorUiText(e)
                     )
                 )
             }

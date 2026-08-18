@@ -30,6 +30,7 @@ import com.slovy.slovymovyapp.data.remote.FormsSchemeView
 import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
@@ -504,9 +505,9 @@ internal fun EntryCard(
     entry: LanguageCardPosEntry,
     entryState: EntryUiState,
     cardLoading: Boolean = false,
-    cardError: String? = null,
+    cardError: UiText? = null,
     translationLoading: Boolean = false,
-    translationError: String? = null,
+    translationError: UiText? = null,
     onFormsToggle: () -> Unit,
     onFormsViewSelect: (String) -> Unit,
     onSenseToggle: (String) -> Unit,

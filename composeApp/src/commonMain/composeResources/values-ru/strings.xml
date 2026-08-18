@@ -766,4 +766,14 @@
     <string name="search_add_words">Добавить слова</string>
     <string name="search_add_words_row">Вставьте текст — разберите каждое слово</string>
     <string name="search_add_words_cd">Вставьте текст и разберите каждое слово</string>
+
+    <string name="network_error_offline">Нет подключения к интернету. Проверьте соединение и попробуйте снова.</string>
+    <string name="network_error_timeout">Время ожидания истекло. Попробуйте снова.</string>
+    <string name="network_error_server_with_code">Ошибка сервера (%1$s). Попробуйте снова.</string>
+    <string name="network_error_server">Ошибка сервера. Попробуйте снова.</string>
+    <string name="network_error_insufficient_storage">Недостаточно свободного места для загрузки.</string>
+    <string name="network_error_unknown">Что-то пошло не так. Попробуйте снова.</string>
+    <string name="common_loading">Загрузка…</string>
+    <string name="common_cancelled">Отменено</string>
+    <string name="word_details_load_failed">Не удалось загрузить слово</string>
 </resources>

@@ -766,4 +766,14 @@
     <string name="search_add_words">Añadir palabras</string>
     <string name="search_add_words_row">Pega un texto — consulta cada palabra</string>
     <string name="search_add_words_cd">Pega un texto y consulta cada palabra</string>
+
+    <string name="network_error_offline">Sin conexión a internet. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="network_error_timeout">Se agotó el tiempo de espera. Inténtalo de nuevo.</string>
+    <string name="network_error_server_with_code">Error del servidor (%1$s). Inténtalo de nuevo.</string>
+    <string name="network_error_server">Error del servidor. Inténtalo de nuevo.</string>
+    <string name="network_error_insufficient_storage">No hay espacio libre suficiente para la descarga.</string>
+    <string name="network_error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="common_loading">Cargando…</string>
+    <string name="common_cancelled">Cancelado</string>
+    <string name="word_details_load_failed">No se pudo cargar la palabra</string>
 </resources>

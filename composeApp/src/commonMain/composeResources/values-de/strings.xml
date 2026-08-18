@@ -766,4 +766,14 @@
     <string name="search_add_words">Wörter hinzufügen</string>
     <string name="search_add_words_row">Text einfügen — jedes Wort nachschlagen</string>
     <string name="search_add_words_cd">Text einfügen und jedes Wort nachschlagen</string>
+
+    <string name="network_error_offline">Keine Internetverbindung. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="network_error_timeout">Zeitüberschreitung. Bitte versuche es erneut.</string>
+    <string name="network_error_server_with_code">Serverfehler (%1$s). Bitte versuche es erneut.</string>
+    <string name="network_error_server">Serverfehler. Bitte versuche es erneut.</string>
+    <string name="network_error_insufficient_storage">Nicht genug freier Speicher für den Download.</string>
+    <string name="network_error_unknown">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
+    <string name="common_loading">Wird geladen…</string>
+    <string name="common_cancelled">Abgebrochen</string>
+    <string name="word_details_load_failed">Wort konnte nicht geladen werden</string>
 </resources>

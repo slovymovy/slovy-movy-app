@@ -316,7 +316,7 @@ private fun ListWordSenseCard(
             pos = item.pos,
             loading = item.loading,
             translationLoading = item.translationLoading,
-            error = item.error?.resolve(),
+            error = item.error,
         ),
         state = SenseUiState(
             senseId = item.senseId,

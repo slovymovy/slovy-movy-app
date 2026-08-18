@@ -11,8 +11,8 @@ import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.DictionaryClient
-import com.slovy.slovymovyapp.data.remote.NetworkErrorClassifier
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -26,7 +26,7 @@ data class LanguageSetupUiState(
     val learningLanguage: Language? = null,
     val nativeLanguages: Set<Language> = emptySet(),
     val noTranslationSelected: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: UiText? = null,
     val languageRequestDialogVisible: Boolean = false,
     val languageRequestLearnLanguage: String = "",
     val languageRequestTranslateLanguage: String = "",
@@ -78,7 +78,7 @@ class LanguageSetupViewModel(
             } catch (e: Exception) {
                 state = state.copy(
                     isLoading = false,
-                    errorMessage = NetworkErrorClassifier.userMessage(e)
+                    errorMessage = networkErrorUiText(e)
                 )
             }
         }
@@ -185,7 +185,7 @@ class LanguageSetupViewModel(
                 if (isCurrentLanguageRequestJob() && state.languageRequestDialogVisible) {
                     state = state.copy(
                         languageRequestSubmitting = false,
-                        languageRequestError = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                        languageRequestError = networkErrorUiText(e)
                     )
                 }
             } finally {

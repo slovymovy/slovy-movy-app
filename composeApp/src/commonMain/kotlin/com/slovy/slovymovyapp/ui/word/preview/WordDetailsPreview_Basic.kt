@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.word.preview
 
 import androidx.compose.runtime.Composable
+import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.word.WordDetailScreenContent
@@ -52,7 +53,7 @@ private fun WordDetailScreenPreviewLoading(
             state = WordDetailUiState.Empty(
                 lemma = "Word",
                 isLoading = true,
-                message = "Loading..."
+                message = UiText.Plain("Loading...")
             )
         )
     }
@@ -68,7 +69,7 @@ private fun WordDetailScreenPreviewError(
             state = WordDetailUiState.Empty(
                 lemma = "Word",
                 isError = true,
-                message = "No such word found"
+                message = UiText.Plain("No such word found")
             )
         )
     }

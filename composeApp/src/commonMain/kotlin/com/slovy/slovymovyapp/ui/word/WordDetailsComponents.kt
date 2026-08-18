@@ -18,6 +18,8 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -78,7 +80,7 @@ internal fun LoadingPlaceholder(
 
 @Composable
 internal fun ErrorPlaceholder(
-    message: String,
+    message: UiText,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -88,7 +90,7 @@ internal fun ErrorPlaceholder(
     ) {
         ErrorIcon(Modifier.size(20.dp))
         Text(
-            text = message,
+            text = message.resolve(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.error
         )

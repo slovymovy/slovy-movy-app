@@ -16,6 +16,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
 import kotlinx.coroutines.CancellationException
@@ -319,7 +320,7 @@ class SettingsViewModel(
                 state = state.copy(
                     isLoadingAvailable = false,
                     isLoading = false,
-                    errorMessage = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    errorMessage = networkErrorUiText(e)
                 )
             }
         }
@@ -663,7 +664,7 @@ class SettingsViewModel(
                 throw e
             } catch (e: Exception) {
                 state = state.copy(
-                    errorMessage = UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                    errorMessage = networkErrorUiText(e)
                 )
             }
         }
@@ -934,16 +935,22 @@ class SettingsViewModel(
             } catch (e: Exception) {
                 state = state.copy(
                     feedback = state.feedback.submissionFailed(
-                        UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                        networkErrorUiText(e)
                     )
                 )
             }
         }
     }
 
-    private fun messageOrUnknown(throwable: Throwable): String {
+    /**
+     * Reason text for the `..._with_reason` templates. These wrap local storage and settings
+     * failures, where the platform's own message ("database is locked", "permission denied") is
+     * the diagnostic worth showing, so it wins over any generic copy. Only a blank message falls
+     * back, and it falls back to the localized "unknown error" rather than an English sentence.
+     */
+    private suspend fun messageOrUnknown(throwable: Throwable): String {
         val message = throwable.message?.takeIf { it.isNotBlank() }
-        return message ?: NetworkErrorClassifier.userMessage(throwable)
+        return message ?: resolveUiText(UiText.Resource(Res.string.common_unknown_error))
     }
 
     private suspend fun resolveUiText(text: UiText): String = when (text) {
@@ -1028,9 +1035,10 @@ class SettingsViewModel(
 
                         DownloadStatus.Failed -> {
                             downloadCoordinator.clear(downloadKey)
-                            val message =
-                                if (entry.error != null) NetworkErrorClassifier.userMessage(entry.error)
-                                else resolveUiText(UiText.Resource(Res.string.common_unknown_error))
+                            val message = resolveUiText(
+                                if (entry.error != null) networkErrorUiText(entry.error)
+                                else UiText.Resource(Res.string.common_unknown_error)
+                            )
                             state = state.copy(errorMessage = errorMessageBuilder(message))
                             onTerminal()
                             cancel()

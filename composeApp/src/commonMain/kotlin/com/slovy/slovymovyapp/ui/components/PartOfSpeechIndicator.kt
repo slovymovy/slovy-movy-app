@@ -16,6 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
+import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
@@ -46,7 +48,7 @@ fun PartOfSpeechIndicator(
     modifier: Modifier = Modifier,
     meaningCount: Int? = null,
     cardLoading: Boolean = false,
-    cardError: String? = null
+    cardError: UiText? = null
 ) {
     val color = getPartOfSpeechColor(pos)
     val partOfSpeech = stringResource(pos.displayName)
@@ -97,7 +99,7 @@ fun PartOfSpeechIndicator(
             )
         } else if (cardError != null) {
             Text(
-                text = cardError,
+                text = cardError.resolve(),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error
             )
@@ -180,7 +182,11 @@ private fun PartOfSpeechIndicatorPreviewLoadingError(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             PartOfSpeechIndicator(pos = PartOfSpeech.VERB, cardLoading = true, cardError = null)
-            PartOfSpeechIndicator(pos = PartOfSpeech.NOUN, cardLoading = false, cardError = "Errors")
+            PartOfSpeechIndicator(
+                pos = PartOfSpeech.NOUN,
+                cardLoading = false,
+                cardError = UiText.Plain("Errors")
+            )
         }
     }
 }

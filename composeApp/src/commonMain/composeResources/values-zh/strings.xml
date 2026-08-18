@@ -766,4 +766,14 @@
     <string name="search_add_words">添加单词</string>
     <string name="search_add_words_row">粘贴一段文本——查询其中的每个词</string>
     <string name="search_add_words_cd">粘贴一段文本并查询其中的每个词</string>
+
+    <string name="network_error_offline">无网络连接。请检查网络后重试。</string>
+    <string name="network_error_timeout">请求超时，请重试。</string>
+    <string name="network_error_server_with_code">服务器错误（%1$s），请重试。</string>
+    <string name="network_error_server">服务器错误，请重试。</string>
+    <string name="network_error_insufficient_storage">剩余空间不足，无法完成下载。</string>
+    <string name="network_error_unknown">出了点问题，请重试。</string>
+    <string name="common_loading">加载中…</string>
+    <string name="common_cancelled">已取消</string>
+    <string name="word_details_load_failed">无法加载该词</string>
 </resources>

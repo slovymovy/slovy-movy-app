@@ -51,6 +51,7 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.*
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.AppNavigationBar
 import com.slovy.slovymovyapp.ui.FeedbackFormState
@@ -73,7 +74,7 @@ import kotlin.time.Duration.Companion.milliseconds
 sealed interface WordDetailUiState {
     data class Empty(
         val lemma: String? = null,
-        val message: String = "No entries available.",
+        val message: UiText = UiText.Resource(Res.string.word_details_no_entries),
         val isError: Boolean = false,
         val isLoading: Boolean = false,
         val isRefreshing: Boolean = false
@@ -84,9 +85,9 @@ sealed interface WordDetailUiState {
         val entries: List<EntryUiState>,
         val wordFamilyExpanded: Boolean = false,
         val cardLoading: Boolean = false,
-        val cardError: String? = null,
+        val cardError: UiText? = null,
         val translationLoading: Boolean = false,
-        val translationError: String? = null,
+        val translationError: UiText? = null,
         val feedback: FeedbackFormState = FeedbackFormState(),
         val isRefreshing: Boolean = false
     ) : WordDetailUiState
@@ -114,7 +115,7 @@ data class SenseUiState(
     val pos: PartOfSpeech? = null,
     val showFavoriteToggle: Boolean = expanded,
     val translationLoading: Boolean = false,
-    val translationError: String? = null
+    val translationError: UiText? = null
 )
 
 internal fun LanguageCard.toContentUiState(
@@ -285,7 +286,7 @@ class WordDetailViewModel(
     var state by mutableStateOf<WordDetailUiState>(
         WordDetailUiState.Empty(
             lemma = lemma,
-            message = "Loading...",
+            message = UiText.Resource(Res.string.common_loading),
             isLoading = true
         )
     )
@@ -383,7 +384,7 @@ class WordDetailViewModel(
             // Determine where error occurred based on what was loading before
             val wasWordLoading = current?.cardLoading == true
             val wasTranslationLoading = current?.translationLoading == true
-            val errorMessage = result.error?.message
+            val errorMessage = result.error?.let { networkErrorUiText(it) }
 
             val nextState = card.toContentUiState(
                 targetSenseId = targetSenseId,
@@ -403,7 +404,7 @@ class WordDetailViewModel(
         } else if (result.error != null) {
             state = WordDetailUiState.Empty(
                 lemma = lemma,
-                message = result.error.message ?: "Failed to load word",
+                message = networkErrorUiText(result.error),
                 isError = true
             )
         }
@@ -457,14 +458,21 @@ class WordDetailViewModel(
         }
     }
 
+    /**
+     * Error copy for a section that was still loading when the fetch was cancelled. Returns null
+     * for a section that had already finished, so a completed half of the card keeps its content.
+     */
+    private fun cancelledMarker(wasLoading: Boolean): UiText? =
+        if (wasLoading) UiText.Resource(Res.string.common_cancelled) else null
+
     private fun markCancelled() {
         state = when (val s = state) {
             is WordDetailUiState.Empty -> s.copy(isError = true)
             is WordDetailUiState.Content -> s.copy(
                 cardLoading = false,
                 translationLoading = false,
-                cardError = s.cardError ?: if (s.cardLoading) "Cancelled" else null,
-                translationError = s.translationError ?: if (s.translationLoading) "Cancelled" else null
+                cardError = s.cardError ?: cancelledMarker(s.cardLoading),
+                translationError = s.translationError ?: cancelledMarker(s.translationLoading)
             )
         }
     }
@@ -666,7 +674,7 @@ class WordDetailViewModel(
                 val latest = state as? WordDetailUiState.Content ?: return@launch
                 state = latest.copy(
                     feedback = latest.feedback.submissionFailed(
-                        UiText.Plain(NetworkErrorClassifier.userMessage(e))
+                        networkErrorUiText(e)
                     )
                 )
             }
@@ -1050,7 +1058,7 @@ fun WordDetailScreenContent(
                             }
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = state.message,
+                                text = state.message.resolve(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
@@ -1095,9 +1103,9 @@ private fun WordDetailContent(
     entryStates: List<EntryUiState>,
     modifier: Modifier = Modifier,
     cardLoading: Boolean = false,
-    cardError: String? = null,
+    cardError: UiText? = null,
     translationLoading: Boolean = false,
-    translationError: String? = null,
+    translationError: UiText? = null,
     isPlaying: Boolean = false,
     isPreparing: Boolean = false,
     canPlay: Boolean = false,
