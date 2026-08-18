@@ -1,4 +1,9 @@
-package com.slovy.slovymovyapp.ui
+package com.slovy.slovymovyapp.ui.settings
+
+import com.slovy.slovymovyapp.ui.StepRow
+
+import com.slovy.slovymovyapp.ui.CircularToggle
+
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable

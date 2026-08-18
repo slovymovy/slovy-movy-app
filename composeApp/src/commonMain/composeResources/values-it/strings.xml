@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Impossibile aggiornare la selezione della voce: %1$s</string>
     <string name="settings_feedback_sent">Feedback inviato</string>
     <string name="settings_feedback_view">Visualizza</string>
-    <string name="settings_feedback_comment_required">Il commento è obbligatorio</string>
+    <string name="feedback_dialog_comment_required">Il commento è obbligatorio</string>
     <string name="settings_download_cancelled">Download annullato</string>
     <string name="common_search">Cerca</string>
     <string name="common_clear">Cancella</string>
@@ -766,4 +766,14 @@
     <string name="search_add_words">Aggiungi parole</string>
     <string name="search_add_words_row">Incolla un testo — cerca ogni parola</string>
     <string name="search_add_words_cd">Incolla un testo e cerca ogni parola</string>
+
+    <string name="network_error_offline">Nessuna connessione a internet. Controlla la connessione e riprova.</string>
+    <string name="network_error_timeout">Tempo scaduto. Riprova.</string>
+    <string name="network_error_server_with_code">Errore del server (%1$s). Riprova.</string>
+    <string name="network_error_server">Errore del server. Riprova.</string>
+    <string name="network_error_insufficient_storage">Spazio libero insufficiente per il download.</string>
+    <string name="network_error_unknown">Qualcosa è andato storto. Riprova.</string>
+    <string name="common_loading">Caricamento…</string>
+    <string name="common_cancelled">Annullato</string>
+    <string name="word_details_load_failed">Impossibile caricare la parola</string>
 </resources>

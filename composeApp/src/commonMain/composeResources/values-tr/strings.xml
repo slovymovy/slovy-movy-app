@@ -426,7 +426,7 @@
     <string name="settings_error_update_voice_selection_with_reason">Ses seçimi güncellenemedi: %1$s</string>
     <string name="settings_feedback_sent">Geri bildirim gönderildi</string>
     <string name="settings_feedback_view">Görüntüle</string>
-    <string name="settings_feedback_comment_required">Yorum gerekli</string>
+    <string name="feedback_dialog_comment_required">Yorum gerekli</string>
     <string name="settings_download_cancelled">İndirme iptal edildi</string>
     <string name="common_search">Ara</string>
     <string name="common_clear">Temizle</string>
@@ -766,4 +766,14 @@
     <string name="search_add_words">Kelime ekle</string>
     <string name="search_add_words_row">Metin yapıştır — her kelimeye bak</string>
     <string name="search_add_words_cd">Metin yapıştır ve her kelimeye bak</string>
+
+    <string name="network_error_offline">İnternet bağlantısı yok. Bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="network_error_timeout">İstek zaman aşımına uğradı. Lütfen tekrar deneyin.</string>
+    <string name="network_error_server_with_code">Sunucu hatası (%1$s). Lütfen tekrar deneyin.</string>
+    <string name="network_error_server">Sunucu hatası. Lütfen tekrar deneyin.</string>
+    <string name="network_error_insufficient_storage">İndirme için yeterli boş alan yok.</string>
+    <string name="network_error_unknown">Bir şeyler ters gitti. Lütfen tekrar deneyin.</string>
+    <string name="common_loading">Yükleniyor…</string>
+    <string name="common_cancelled">İptal edildi</string>
+    <string name="word_details_load_failed">Kelime yüklenemedi</string>
 </resources>
