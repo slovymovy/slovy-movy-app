@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui
 
+import com.slovy.slovymovyapp.ui.stats.formatCountForLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
