@@ -1,4 +1,4 @@
-package com.slovy.slovymovyapp
+package com.slovy.slovymovyapp.data.learning.review
 
 import com.slovy.slovymovyapp.data.Language
 import kotlin.test.Test
