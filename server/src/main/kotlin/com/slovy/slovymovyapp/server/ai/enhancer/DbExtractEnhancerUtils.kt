@@ -2,7 +2,7 @@ package com.slovy.slovymovyapp.server.ai.enhancer
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.ingestion.*
-import kotlinx.serialization.json.Json
+import com.slovy.slovymovyapp.server.ServerJson
 import java.io.File
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -12,8 +12,6 @@ import kotlin.uuid.ExperimentalUuidApi
  */
 @OptIn(ExperimentalUuidApi::class)
 object DbExtractEnhancerUtils {
-    private val json = Json { ignoreUnknownKeys = true }
-
     fun loadExtractedWordData(
         word: String,
         langCode: String,
@@ -23,7 +21,7 @@ object DbExtractEnhancerUtils {
         val cl = Thread.currentThread().contextClassLoader
         val url = cl.getResource(path) ?: error("Resource not found: $path")
         val file = File(url.toURI())
-        return json.decodeFromString(ExtractedWordData.serializer(), file.readText())
+        return ServerJson.lenient.decodeFromString(ExtractedWordData.serializer(), file.readText())
     }
 
     fun createLanguageCardRequest(extractedData: ExtractedWordData): LanguageCardRequest? {
