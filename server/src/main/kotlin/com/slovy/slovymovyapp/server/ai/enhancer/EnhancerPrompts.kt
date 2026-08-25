@@ -45,7 +45,7 @@ For synonyms and antonyms:
 * Only include synonyms that are interchangeable in typical contexts for this sense.
 * Never include the word itself or any of its inflected forms as a synonym or antonym.
 
-Provide common_phrases that must include the target word. 
+Provide common_phrases that must include the target word. Before emitting each phrase, check that the target word, or an inflected form of it, literally appears in it. If it does not, the item belongs in synonyms instead. Write each phrase in the form in which it is actually used, including number, rather than forcing it into the dictionary form of the word. 
 Semantic Filtering: Every phrase must directly correlate to the specific sense_definition.
 Idiom Restriction: Only include idiomatic phrases if the sense_definition itself is idiomatic. If the sense is literal, the phrases must be literal.
 Grammatical Fitness: Use 2–5 words. Do not use full sentences. Avoid specific subjects (pronouns or names). Ensure the word appears in the same part_of_speech as the sense. If there are no good common phrases, leave common_phrases empty. 
@@ -55,13 +55,14 @@ Provide at least 2 example sentences per sense that match its learner_level.
 Examples must:
 - Be full sentences (subject + predicate), 6–25 words.
 - Include the target word used naturally in the given sense.
+- The learned word itself must appear in every example - never a synonym, nickname or alternative name in its place.
 - Use the target word in the same part of speech as the sense_definition; do not change part of speech.
-- At least one example must incorporate any one common_phrases item, but remain a complete sentence.
+- Where a common_phrases item fits the sentence naturally, build one example around it. If none fits, simply write examples that make the sense clear. Never force a phrase into a sentence that already uses the word.
 - Never duplicate common_phrases as a standalone line.
 - If the input examples are too complex for the assigned level, replace them with simpler ones.
 - If no examples exist in the input, generate new ones following all rules.
 - Examples should sound like natural, real-world usage, not textbook constructions.
-- Wrap only the relevant form(s) of the learned word in <w></w> tags. Each tag must wrap a single word only — never a phrase or surrounding text. For separable verbs, tag each part separately (e.g., <w>bel</w> hem <w>op</w>).
+- Wrap only the relevant form(s) of the learned word in <w></w> tags. Each tag must wrap a single word only — never a phrase or surrounding text. For separable verbs, tag each part separately (e.g., <w>bel</w> hem <w>op</w>). Every tagged span in an example must be a form of the learned word itself. Before you finalise each example, name each span you tagged: if it is a synonym of the learned word, or another word of a phrase around it, remove its tags and leave it as plain text. An example may freely contain a common_phrases item: write the phrase out in full and tag only the learned word inside it, leaving the rest of the phrase as plain text.
 
 Assign semantic_group_id to group semantically close senses; leave blank if unique. Name the group according to its sense.
 
