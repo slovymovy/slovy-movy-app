@@ -120,7 +120,8 @@ Your task is to enrich the LanguageCardResponse with translation data by:
 2. For each example in the language card:
    - Provide an accurate translation to ${'$'}TARGET_LANG
    - Ensure the translation preserves the meaning and context
-   - Put the translation of the word in <w> </w> tags (the word ONLY), so it could be highlighted to a learner. Where the input notes above state otherwise for this language, follow the notes instead.
+   - Put the translation of the word in <w> </w> tags so it can be highlighted to a learner. A translation that is several words long may be tagged as it stands; what stays outside the tags is anything that merely sits beside the translation in the sentence - an article, a modifier, a neighbouring noun. Where the input notes above state otherwise for this language, follow the notes instead.
+   - After writing each example translation, read back the sentence you have just written and name the span that carries the sense; that span is what gets tagged. If a declared translation for this sense, or an inflected form of one, is present in the sentence, it is that span.
 
 Guidelines:
 - Only provide translations that are accurate, natural, and contextually appropriate for each specific sense_definition.
