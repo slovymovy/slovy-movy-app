@@ -145,15 +145,26 @@ class FavoritesViewModel(
 
     val rowAudioActions = RowAudioActions(
         onToggle = ::toggleAudio,
+        onToggleExample = ::toggleExampleAudio,
         onOpenVoiceSettings = rowAudio::openVoiceSettings,
         onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
         onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
     )
 
     fun toggleAudio(senseId: String) {
-        val content = state as? FavoritesUiState.Content ?: return
-        val item = content.senses.firstOrNull { it.senseId == senseId } ?: return
-        rowAudio.toggle(senseId, item.lemma, item.targetLang)
+        val item = findSense(senseId) ?: return
+        rowAudio.toggleLemma(senseId, item.lemma, item.targetLang)
+    }
+
+    /**
+     * Plays the source sentence of the example at [index]. Examples only render once the sense is
+     * loaded and expanded, so a missing one means the row changed under the tap — ignore it rather
+     * than speaking the wrong sentence.
+     */
+    fun toggleExampleAudio(senseId: String, index: Int) {
+        val item = findSense(senseId) ?: return
+        val example = item.sense?.examples?.getOrNull(index) ?: return
+        rowAudio.toggleExample(senseId, index, example.text, item.targetLang)
     }
 
     override fun onCleared() {

@@ -16,6 +16,7 @@ import com.slovy.slovymovyapp.analytics.putAttributes
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.Favorite
+import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
@@ -27,6 +28,7 @@ import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.logging.AppLogger
+import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.speech.TTSStatus
 import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
@@ -98,6 +100,20 @@ class StudySessionViewModel(
     private var sessionStartPipeline: List<StatsPipelineStage> = emptyList()
     private var sessionPrepared: Boolean = false
     private var isStarting: Boolean = false
+    // Which speaker the utterance now in the engine belongs to, so the engine's SPEAKING lands on
+    // the control the user actually tapped rather than on whichever one was last active.
+    private var pendingAudioKey: String? = null
+
+    // Bumped by every play request and by every silence. A play coroutine captures the token it
+    // started with and bails if a newer request — or a stop — superseded it while it was suspended
+    // resolving voices. Without this a stop is simply ignored: the coroutine resumes and speaks
+    // anyway, with no control left showing a stop glyph.
+    private var audioRequestToken = 0L
+
+    // True between handing an utterance to the engine and its IDLE. The status listener is shared,
+    // so it also receives the flush from our own pre-play stop() and any audio another screen
+    // started; neither may move a control belonging to a request that has not spoken yet.
+    private var utteranceInEngine = false
     private var availableVoices: List<Text2SpeechVoice> = emptyList()
     private var currentVoiceIndex: Int = 0
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
@@ -119,9 +135,24 @@ class StudySessionViewModel(
     init {
         ttsManager.addOnStatusChangeListener(this) { status ->
             val active = state as? StudySessionUiState.Active ?: return@addOnStatusChangeListener
+            if (!utteranceInEngine) return@addOnStatusChangeListener
             state = when (status) {
-                TTSStatus.SPEAKING -> active.copy(isPreparingAudio = false, isPlayingAudio = true)
-                TTSStatus.IDLE -> active.copy(isPreparingAudio = false, isPlayingAudio = false)
+                // A SPEAKING arriving while a control already shows playing did not come from us:
+                // another owner of the shared engine preempted our utterance. Android QUEUE_FLUSH
+                // and iOS stop-then-speak swallow the IDLE for the flushed one, so release here —
+                // otherwise the control sticks on its stop glyph and tapping it would silence the
+                // other feature's audio. Mirrors RowAudioController's Starting/Playing split.
+                TTSStatus.SPEAKING -> if (active.playingAudioKey != null) {
+                    utteranceInEngine = false
+                    active.copy(preparingAudioKey = null, playingAudioKey = null)
+                } else {
+                    active.copy(preparingAudioKey = null, playingAudioKey = pendingAudioKey)
+                }
+
+                TTSStatus.IDLE -> {
+                    utteranceInEngine = false
+                    active.copy(preparingAudioKey = null, playingAudioKey = null)
+                }
             }
         }
         loadVoices()
@@ -161,37 +192,69 @@ class StudySessionViewModel(
         }
     }
 
-    fun playAudio(text: String) {
-        playAudio(text = text, logClick = true)
+    /**
+     * Plays [text] for the speaker identified by [key], or stops if that speaker is already active.
+     * Holding a single key is what makes a card's speakers mutually exclusive: starting an example
+     * releases the word's control and starting the word releases the example's.
+     *
+     * Examples are only ever played this way, never autoplayed: the card already speaks its word on
+     * entry or reveal, and adding sentences to that would talk over the user.
+     */
+    fun toggleAudio(key: String, text: String) {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.audioPhase(key) != RowAudioPhase.IDLE) {
+            stopAudio()
+            return
+        }
+        playAudio(key = key, text = text, logClick = true)
     }
 
-    private fun playAudio(text: String, logClick: Boolean) {
+    private fun playAudio(key: String, text: String, logClick: Boolean) {
         val active = state as? StudySessionUiState.Active ?: return
         if (logClick) {
             Analytics.logEvent(
                 AnalyticsEvent.WORD_PLAY_CLICK,
-                mapOf("lang" to langCode, "source" to "study"),
+                mapOf(
+                    "lang" to langCode,
+                    "source" to "study",
+                    "kind" to if (key == StudyAudioKeys.WORD) "lemma" else "example",
+                ),
             )
         }
-        state = active.copy(isPreparingAudio = true, isPlayingAudio = false)
+        val token = ++audioRequestToken
+        // Silence any current utterance before the async voice path. This request clears the old
+        // playing key immediately, so if it then stalls (slow load) or finds no voice, the previous
+        // speaker would otherwise keep sounding with no control showing a stop glyph.
+        utteranceInEngine = false
+        ttsManager.stop()
+        pendingAudioKey = key
+        state = active.copy(preparingAudioKey = key, playingAudioKey = null)
         viewModelScope.launch {
             try {
                 if (availableVoices.isEmpty()) loadVoicesSync()
-                // Voice discovery may suspend. A rewarded exit keeps this ViewModel alive, so a
-                // play request that started before the close tap must not begin speaking over the
-                // summary after discovery resumes.
+                // Voice discovery suspends, and the engine can take seconds to bind after a resume
+                // (loadVoices clears the cache), so this is a wide window: the user can stop, tap
+                // another speaker, leave the screen, or rate the card before it reopens.
+                if (token != audioRequestToken) return@launch
+                // A rewarded exit keeps this ViewModel alive, so a play request that started before
+                // the close tap must not begin speaking over the summary after discovery resumes.
                 if (isExitingSession) return@launch
                 if (availableVoices.isNotEmpty()) {
                     currentVoiceIndex = (currentVoiceIndex + 1) % availableVoices.size
                     ttsManager.setVoice(availableVoices[currentVoiceIndex])
-                    ttsManager.speak(text)
+                    // Example sentences are stored with <w> highlight markup around the word
+                    // they illustrate; the engine would otherwise read the tags out loud. A
+                    // lemma has no markup, so this is a no-op for the word speaker.
+                    utteranceInEngine = true
+                    ttsManager.speak(HtmlTagParser.plainText(text))
                 } else {
                     val latest = state as? StudySessionUiState.Active ?: return@launch
-                    state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
+                    state = latest.copy(preparingAudioKey = null, playingAudioKey = null)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                utteranceInEngine = false
                 AppLogger.warn(TAG, "Unable to play study audio for $langCode", e)
                 Analytics.logEvent(
                     AnalyticsEvent.TTS_PLAY_FAILED,
@@ -202,7 +265,7 @@ class StudySessionViewModel(
                     ),
                 )
                 val latest = state as? StudySessionUiState.Active ?: return@launch
-                state = latest.copy(isPreparingAudio = false, isPlayingAudio = false)
+                state = latest.copy(preparingAudioKey = null, playingAudioKey = null)
             }
         }
     }
@@ -234,7 +297,7 @@ class StudySessionViewModel(
             isAutoplayEnabled = autoplayEnabled,
         )
         if (autoplayEnabled) {
-            autoplayFrontAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+            autoplayFrontAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
         }
     }
 
@@ -313,7 +376,7 @@ class StudySessionViewModel(
         skippedCount += 1
         currentCard = null
         currentOutcomes = emptyList()
-        state = active.copy(isPreparingAudio = false, isPlayingAudio = false)
+        state = active.copy(preparingAudioKey = null, playingAudioKey = null)
         loadNextCard()
         viewModelScope.launch {
             showStudySnackbar(
@@ -439,6 +502,21 @@ class StudySessionViewModel(
     }
 
     fun stopAudio() {
+        silenceAudio()
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(preparingAudioKey = null, playingAudioKey = null)
+    }
+
+    /**
+     * Silences the engine and invalidates any in-flight play request. Callers that go on to build a
+     * fresh state (a new card) rely on the invalidation: without it a request started on the
+     * previous card resumes, speaks, and its SPEAKING lands on the new card's control of the same
+     * key.
+     */
+    private fun silenceAudio() {
+        ++audioRequestToken
+        utteranceInEngine = false
+        pendingAudioKey = null
         ttsManager.stop()
     }
 
@@ -536,7 +614,7 @@ class StudySessionViewModel(
                 ratingOptions = currentOutcomes.toStudyRatings(),
             )
             if (autoplayEnabled) {
-                autoplayBackAudioText(active.card)?.let { playAudio(text = it, logClick = false) }
+                autoplayBackAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
             }
         }
     }
@@ -680,7 +758,7 @@ class StudySessionViewModel(
         // Catches work that outlived the exit — most importantly a review submitted just before
         // close, whose success path loads the next card.
         if (isExitingSession) return
-        ttsManager.stop()
+        silenceAudio()
         cardLoadJob?.cancel()
         cardLoadJob = viewModelScope.launch {
             PerformanceMonitoring.startTrace("study_card_load").useWithResult {
@@ -775,7 +853,7 @@ class StudySessionViewModel(
             isAutoplayEnabled = autoplayEnabled,
         )
         if (autoplayEnabled) {
-            autoplayFrontAudioText(uiCard)?.let { playAudio(text = it, logClick = false) }
+            autoplayFrontAudioText(uiCard)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
         }
     }
 
