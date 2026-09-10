@@ -212,6 +212,7 @@
     <string name="word_details_title">Wortdetails</string>
     <string name="word_details_action_stop">Stopp</string>
     <string name="word_details_action_play_word">Wort abspielen</string>
+    <string name="word_details_action_play_example">Beispiel abspielen</string>
     <string name="word_details_feedback_title">Korrektur vorschlagen</string>
     <string name="word_details_feedback_placeholder">Was muss korrigiert werden?</string>
     <string name="word_details_no_entries">Keine Einträge verfügbar.</string>
@@ -703,6 +704,7 @@
     <string name="study_prompt_translate_to">Übersetze auf %1$s</string>
     <string name="guess_by_context">Aus dem Kontext erraten</string>
     <string name="study_play_word_audio">Wort-Audio abspielen</string>
+    <string name="study_play_example_audio">Beispiel abspielen</string>
     <string name="study_play_prompt_audio">Aufgaben-Audio abspielen</string>
     <string name="study_stop_audio">Audio stoppen</string>
     <string name="study_hint_show">Hinweis</string>

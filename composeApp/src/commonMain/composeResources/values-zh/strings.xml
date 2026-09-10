@@ -212,6 +212,7 @@
     <string name="word_details_title">单词详情</string>
     <string name="word_details_action_stop">停止</string>
     <string name="word_details_action_play_word">朗读单词</string>
+    <string name="word_details_action_play_example">朗读例句</string>
     <string name="word_details_feedback_title">提交纠错</string>
     <string name="word_details_feedback_placeholder">哪里需要更正？</string>
     <string name="word_details_no_entries">暂无内容。</string>
@@ -703,6 +704,7 @@
     <string name="study_prompt_translate_to">翻译成 %1$s</string>
     <string name="guess_by_context">根据上下文猜词</string>
     <string name="study_play_word_audio">播放单词发音</string>
+    <string name="study_play_example_audio">朗读例句</string>
     <string name="study_play_prompt_audio">播放题目发音</string>
     <string name="study_stop_audio">停止播放</string>
     <string name="study_hint_show">提示</string>

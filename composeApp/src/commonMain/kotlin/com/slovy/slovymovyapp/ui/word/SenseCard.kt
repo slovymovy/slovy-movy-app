@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -34,15 +35,20 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.i18n.UiText
-import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.AudioControl
 import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.ui.SpeakerVector
+import com.slovy.slovymovyapp.ui.components.ExampleSpeakerGlyphSize
+import com.slovy.slovymovyapp.ui.components.LemmaSpeakerGlyphSize
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.components.appendSpeakerPlaceholder
+import com.slovy.slovymovyapp.ui.components.speakerInlineContent
 import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
 import com.slovy.slovymovyapp.ui.components.appendWithMutedCenteredBullets
 import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
@@ -84,7 +90,11 @@ internal fun SenseCard(
     favoriteLemmas: Set<String> = emptySet(),
     // Inline lemma speaker (My words / list detail). When null no speaker is shown — Word details
     // renders its own hero speaker, so it leaves this off.
-    lemmaAudio: LemmaAudioControl? = null,
+    lemmaAudio: AudioControl? = null,
+    // Inline speaker on each example's source sentence, by example index. Returning null for an
+    // index shows that example without a speaker; the default leaves every example silent, which is
+    // what Word details renders today.
+    exampleAudio: (index: Int) -> AudioControl? = { null },
 ) {
     val sense = data.sense
     val translationBasedHeader = remember(data.senseId, sense?.translations) { sense?.translationsHeader() }
@@ -287,9 +297,10 @@ internal fun SenseCard(
                                 Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
                                     SectionLabel(text = stringResource(Res.string.word_details_examples))
                                     Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.lgPlus)) {
-                                        sense.examples.forEach { ex ->
+                                        sense.examples.forEachIndexed { index, ex ->
                                             ExampleItem(
                                                 example = ex,
+                                                audio = exampleAudio(index),
                                                 modifier = Modifier.fillMaxWidth()
                                             )
                                         }
@@ -368,84 +379,32 @@ internal fun SenseCard(
 }
 
 /**
- * Lemma with an inline speaker glyph that follows the last fragment on wrap (spec §3). The glyph is
- * an inline placeholder so it stays bound to the word's text run and never detaches or truncates;
- * the 44dp tap target is grown past the placeholder with [Modifier.requiredSize] so it never adds
- * row height. Colour/glyph mirror the Word-details speaker.
+ * Lemma with an inline speaker glyph that follows the last fragment on wrap (spec §3).
+ * Colour/glyph mirror the Word-details speaker.
  */
 @Composable
 private fun LemmaWithSpeaker(
     lemma: String,
-    control: LemmaAudioControl,
+    control: AudioControl,
 ) {
-    val playing = control.phase == RowAudioPhase.PLAYING
-    val playLabel = stringResource(Res.string.word_details_action_play_word)
-    val stopLabel = stringResource(Res.string.word_details_action_stop)
-    // Secondary ink, dialled back so the word stays the hero (design review #3). Theme-aware in
-    // both light/dark via onSurfaceVariant.
-    val speakerTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
     val text = buildAnnotatedString {
         append(lemma)
-        // A normal space lets the glyph wrap onto the next line with the word rather than overflow.
-        append(' ')
-        appendInlineContent(SPEAKER_INLINE_ID, "🔊")
+        appendSpeakerPlaceholder(this)
     }
-    val inlineContent = mapOf(
-        SPEAKER_INLINE_ID to InlineTextContent(
-            // Width kept close to the glyph so the word-to-glyph gap reads tight (design review #4);
-            // height tracks ~1em of the lemma. The 44dp hit box overflows this slot, so the
-            // placeholder only governs layout/spacing, never the tap target.
-            Placeholder(
-                width = 1.2.em,
-                height = 1.1.em,
-                placeholderVerticalAlign = PlaceholderVerticalAlign.Center,
-            )
-        ) {
-            // Outer box fills the placeholder slot; the inner 44dp target overflows symmetrically
-            // (centred) so the glyph stays aligned to the lemma while the hit box extends out.
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .requiredSize(44.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            onClick = control.onToggle,
-                            role = Role.Button,
-                            onClickLabel = if (playing) stopLabel else playLabel,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    when {
-                        control.phase == RowAudioPhase.PREPARING -> SpinningProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                            color = speakerTint,
-                        )
-
-                        else -> Icon(
-                            imageVector = if (playing) Icons.Filled.StopCircle else SpeakerVector,
-                            contentDescription = if (playing) stopLabel else playLabel,
-                            tint = speakerTint,
-                            // Nudge the glyph to the lemma's optical midline (x-height centre), which
-                            // reads slightly below the line centre (design review #2). Visual only —
-                            // the hit box is unmoved.
-                            modifier = Modifier.size(18.dp).offset(y = 1.dp),
-                        )
-                    }
-                }
-            }
-        }
-    )
     Text(
         text = text,
-        inlineContent = inlineContent,
+        inlineContent = speakerInlineContent(
+            control = control,
+            glyphSize = LemmaSpeakerGlyphSize,
+            playLabel = stringResource(Res.string.word_details_action_play_word),
+            stopLabel = stringResource(Res.string.word_details_action_stop),
+        ),
         style = MaterialTheme.typography.titleMedium.copy(
             fontFamily = MaterialTheme.serifFontFamily
         ),
     )
 }
 
-private const val SPEAKER_INLINE_ID = "lemma_speaker"
 
 @Composable
 internal fun TraitsList(traits: List<LanguageCardTrait>) {
@@ -497,6 +456,7 @@ internal fun TraitsList(traits: List<LanguageCardTrait>) {
 @Composable
 internal fun ExampleItem(
     example: LanguageCardExample,
+    audio: AudioControl?,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -521,6 +481,7 @@ internal fun ExampleItem(
                     fontStyle = FontStyle.Normal,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f
                 ),
+                audio = audio,
             )
             if (example.targetLangTranslations.isNotEmpty()) {
                 example.targetLangTranslations.forEach { (_, translation) ->
@@ -530,6 +491,10 @@ internal fun ExampleItem(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f
                         ),
+                        // Only the source sentence is speakable: a translation may be in a language
+                        // with no installed voice, and the row's availability gate covers the
+                        // source language only.
+                        audio = null,
                     )
                 }
             }
@@ -541,6 +506,7 @@ internal fun ExampleItem(
 private fun ExampleText(
     text: String,
     style: TextStyle,
+    audio: AudioControl?,
     modifier: Modifier = Modifier
 ) {
     val highlight = SpanStyle(
@@ -549,14 +515,26 @@ private fun ExampleText(
     )
     val annotated = buildAnnotatedString {
         appendTextWithW(this, text, highlight, highlight, emptySet())
+        if (audio != null) appendSpeakerPlaceholder(this)
     }
     val bulletColor = style.color.takeOrElse { LocalContentColor.current }
+    val bulletContent = remember(bulletColor) { centeredBulletInlineContent(bulletColor) }
 
     Text(
         text = annotated,
         style = style,
         modifier = modifier,
-        inlineContent = remember(bulletColor) { centeredBulletInlineContent(bulletColor) },
+        // The bullet content must stay even when a speaker is added: the same run can carry both.
+        inlineContent = if (audio == null) {
+            bulletContent
+        } else {
+            bulletContent + speakerInlineContent(
+                control = audio,
+                glyphSize = ExampleSpeakerGlyphSize,
+                playLabel = stringResource(Res.string.word_details_action_play_example),
+                stopLabel = stringResource(Res.string.word_details_action_stop),
+            )
+        },
     )
 }
 

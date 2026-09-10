@@ -106,11 +106,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.speech.AudioControl
+import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
+import com.slovy.slovymovyapp.ui.components.ExampleSpeakerGlyphSize
+import com.slovy.slovymovyapp.ui.components.LemmaSpeakerGlyphSize
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.components.appendSpeakerPlaceholder
+import com.slovy.slovymovyapp.ui.components.speakerInlineContent
 import com.slovy.slovymovyapp.ui.components.appendWithCenteredBullets
 import com.slovy.slovymovyapp.ui.components.centeredBulletInlineContent
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
@@ -145,6 +151,7 @@ import slovymovyapp.composeapp.generated.resources.study_cant_listen_now
 import slovymovyapp.composeapp.generated.resources.study_listening_postponed_message
 import slovymovyapp.composeapp.generated.resources.study_loading
 import slovymovyapp.composeapp.generated.resources.study_multi_sense_front_hint
+import slovymovyapp.composeapp.generated.resources.study_play_example_audio
 import slovymovyapp.composeapp.generated.resources.study_play_prompt_audio
 import slovymovyapp.composeapp.generated.resources.study_play_word_audio
 import slovymovyapp.composeapp.generated.resources.study_hint_starts_with
@@ -178,7 +185,9 @@ fun StudySessionScreen(
 ) {
     LifecycleResumeEffect(viewModel) {
         viewModel.loadVoices()
-        onPauseOrDispose { }
+        // Leaving the screen must silence it: a card's word or an example sentence outliving the
+        // session, with no visible stop control, reads as a bug.
+        onPauseOrDispose { viewModel.stopAudio() }
     }
 
     // The close action goes through the ViewModel, which may answer it with the reward screen
@@ -197,8 +206,7 @@ fun StudySessionScreen(
         onRevealFirstLetterHint = viewModel::revealFirstLetterHint,
         onRevealTranslationHint = viewModel::revealTranslationHint,
         onRate = viewModel::rate,
-        onPlayAudio = viewModel::playAudio,
-        onStopAudio = viewModel::stopAudio,
+        onToggleAudio = viewModel::toggleAudio,
         onPostponeListeningCards = viewModel::postponeListeningCards,
         onRetry = viewModel::retry,
         onViewedSenseChange = viewModel::setViewedSense,
@@ -223,8 +231,7 @@ fun StudySessionScreenContent(
     onRevealFirstLetterHint: () -> Unit = {},
     onRevealTranslationHint: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
-    onPlayAudio: (String) -> Unit = {},
-    onStopAudio: () -> Unit = {},
+    onToggleAudio: (key: String, text: String) -> Unit = { _, _ -> },
     onPostponeListeningCards: (String) -> Unit = {},
     onRetry: () -> Unit = {},
     onViewedSenseChange: (String) -> Unit = {},
@@ -312,8 +319,7 @@ fun StudySessionScreenContent(
             onRevealFirstLetterHint = onRevealFirstLetterHint,
             onRevealTranslationHint = onRevealTranslationHint,
             onRate = onRate,
-            onPlayAudio = onPlayAudio,
-            onStopAudio = onStopAudio,
+            onToggleAudio = onToggleAudio,
             onPostponeListeningCards = onPostponeListeningCards,
             onViewedSenseChange = onViewedSenseChange,
             onOpenOverflowMenu = onOpenOverflowMenu,
@@ -454,8 +460,7 @@ private fun StudySessionActiveContent(
     onRevealFirstLetterHint: () -> Unit,
     onRevealTranslationHint: () -> Unit,
     onRate: (StudyRating) -> Unit,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    onToggleAudio: (key: String, text: String) -> Unit,
     onPostponeListeningCards: (String) -> Unit,
     onViewedSenseChange: (String) -> Unit,
     onOpenOverflowMenu: () -> Unit,
@@ -503,10 +508,10 @@ private fun StudySessionActiveContent(
                 StudyCardSurface(
                     card = state.card,
                     side = state.side,
-                    isPlayingAudio = state.isPlayingAudio,
-                    isPreparingAudio = state.isPreparingAudio,
-                    onPlayAudio = onPlayAudio,
-                    onStopAudio = onStopAudio,
+                    // Derived from the state rather than passed in: the keys live on it, so a
+                    // caller cannot supply a state whose speakers all render idle.
+                    audioPhaseFor = { key -> state.audioPhase(key) },
+                    onToggleAudio = onToggleAudio,
                     onPostponeListeningCards = { onPostponeListeningCards(listeningPostponedMessage) },
                     onReveal = onReveal,
                     onRevealFirstLetterHint = onRevealFirstLetterHint,
@@ -961,10 +966,8 @@ private fun StudyProgressBar(
 private fun StudyCardSurface(
     card: StudyCardUiState,
     side: StudyCardSide,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    audioPhaseFor: (key: String) -> RowAudioPhase,
+    onToggleAudio: (key: String, text: String) -> Unit,
     onPostponeListeningCards: () -> Unit,
     onReveal: () -> Unit,
     onRevealFirstLetterHint: () -> Unit,
@@ -1006,10 +1009,8 @@ private fun StudyCardSurface(
                     Spacer(Modifier.height(AppSpacing.xl))
                     StudyCardFront(
                         card = card,
-                        isPlayingAudio = isPlayingAudio,
-                        isPreparingAudio = isPreparingAudio,
-                        onPlayAudio = onPlayAudio,
-                        onStopAudio = onStopAudio,
+                        audioPhaseFor = audioPhaseFor,
+                        onToggleAudio = onToggleAudio,
                         onPostponeListeningCards = onPostponeListeningCards,
                         onRevealFirstLetterHint = onRevealFirstLetterHint,
                         onRevealTranslationHint = onRevealTranslationHint,
@@ -1051,10 +1052,8 @@ private fun StudyCardSurface(
                     card = card,
                     viewedSenseId = viewedSenseId,
                     onViewedSenseChange = onViewedSenseChange,
-                    isPlayingAudio = isPlayingAudio,
-                    isPreparingAudio = isPreparingAudio,
-                    onPlayAudio = onPlayAudio,
-                    onStopAudio = onStopAudio,
+                    audioPhaseFor = audioPhaseFor,
+                    onToggleAudio = onToggleAudio,
                 )
             } else {
                 Column(
@@ -1067,10 +1066,9 @@ private fun StudyCardSurface(
                     Spacer(Modifier.height(AppSpacing.xl))
                     StudyCardBackContent(
                         back = card.back,
-                        isPlayingAudio = isPlayingAudio,
-                        isPreparingAudio = isPreparingAudio,
-                        onPlayAudio = onPlayAudio,
-                        onStopAudio = onStopAudio,
+                        senseAudioKey = "back",
+                        audioPhaseFor = audioPhaseFor,
+                        onToggleAudio = onToggleAudio,
                     )
                 }
             }
@@ -1083,10 +1081,8 @@ private fun MultiSenseBack(
     card: StudyCardUiState,
     viewedSenseId: String?,
     onViewedSenseChange: (String) -> Unit,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    audioPhaseFor: (key: String) -> RowAudioPhase,
+    onToggleAudio: (key: String, text: String) -> Unit,
 ) {
     val senses = card.senses
     val initialPage = senses
@@ -1130,10 +1126,9 @@ private fun MultiSenseBack(
                 ) {
                     StudyCardBackContent(
                         back = senses[page].back,
-                        isPlayingAudio = isPlayingAudio,
-                        isPreparingAudio = isPreparingAudio,
-                        onPlayAudio = onPlayAudio,
-                        onStopAudio = onStopAudio,
+                        senseAudioKey = "sense$page",
+                        audioPhaseFor = audioPhaseFor,
+                        onToggleAudio = onToggleAudio,
                         headlineEmphasized = true,
                     )
                 }
@@ -1181,10 +1176,8 @@ private fun StudyChip(
 @Composable
 private fun StudyCardFront(
     card: StudyCardUiState,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    audioPhaseFor: (key: String) -> RowAudioPhase,
+    onToggleAudio: (key: String, text: String) -> Unit,
     onPostponeListeningCards: () -> Unit,
     onRevealFirstLetterHint: () -> Unit,
     onRevealTranslationHint: () -> Unit,
@@ -1193,10 +1186,8 @@ private fun StudyCardFront(
     when (card) {
         is StudyCardUiState.Recognition -> RecognitionFront(
             card = card,
-            isPlayingAudio = isPlayingAudio,
-            isPreparingAudio = isPreparingAudio,
-            onPlayAudio = onPlayAudio,
-            onStopAudio = onStopAudio,
+            audioPhaseFor = audioPhaseFor,
+            onToggleAudio = onToggleAudio,
             modifier = modifier,
         )
 
@@ -1215,10 +1206,8 @@ private fun StudyCardFront(
 
         is StudyCardUiState.Listening -> ListeningFront(
             card = card,
-            isPlayingAudio = isPlayingAudio,
-            isPreparingAudio = isPreparingAudio,
-            onPlayAudio = onPlayAudio,
-            onStopAudio = onStopAudio,
+            audioPhaseFor = audioPhaseFor,
+            onToggleAudio = onToggleAudio,
             onPostponeListeningCards = onPostponeListeningCards,
             modifier = modifier,
         )
@@ -1228,10 +1217,8 @@ private fun StudyCardFront(
 @Composable
 private fun RecognitionFront(
     card: StudyCardUiState.Recognition,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    audioPhaseFor: (key: String) -> RowAudioPhase,
+    onToggleAudio: (key: String, text: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(
@@ -1264,13 +1251,10 @@ private fun RecognitionFront(
                 )
                 card.promptAudioText?.let { audioText ->
                     StudySpeakerButton(
-                        audioText = audioText,
+                        phase = audioPhaseFor(StudyAudioKeys.WORD),
                         playContentDescription = stringResource(Res.string.study_play_word_audio),
                         stopContentDescription = stringResource(Res.string.study_stop_audio),
-                        isPlayingAudio = isPlayingAudio,
-                        isPreparingAudio = isPreparingAudio,
-                        onPlayAudio = onPlayAudio,
-                        onStopAudio = onStopAudio,
+                        onToggle = { onToggleAudio(StudyAudioKeys.WORD, audioText) },
                     )
                 }
             }
@@ -1348,6 +1332,8 @@ private fun ClozeFront(
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontFamily = MaterialTheme.serifFontFamily,
                 ),
+                // The answer is still blanked here; speaking the sentence would give it away.
+                audio = null,
             )
             card.firstLetterHint?.let { hint ->
                 FirstLetterHintView(
@@ -1375,13 +1361,15 @@ private fun ClozeFront(
 @Composable
 private fun ListeningFront(
     card: StudyCardUiState.Listening,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    audioPhaseFor: (key: String) -> RowAudioPhase,
+    onToggleAudio: (key: String, text: String) -> Unit,
     onPostponeListeningCards: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // This card's whole point is its audio, so its hero speaker is the card's word speaker.
+    val wordPhase = audioPhaseFor(StudyAudioKeys.WORD)
+    val isPreparingAudio = wordPhase == RowAudioPhase.PREPARING
+    val isPlayingAudio = wordPhase == RowAudioPhase.PLAYING
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
@@ -1395,7 +1383,7 @@ private fun ListeningFront(
                     .size(132.dp)
                     .clip(CircleShape)
                     .clickable(enabled = !isPreparingAudio, role = Role.Button) {
-                        if (isPlayingAudio) onStopAudio() else onPlayAudio(card.promptAudioText)
+                        onToggleAudio(StudyAudioKeys.WORD, card.promptAudioText)
                     },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
@@ -1515,10 +1503,11 @@ private fun MultiSenseFrontHint(
 @Composable
 private fun StudyCardBackContent(
     back: StudyCardBackUiState,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    audioPhaseFor: (key: String) -> RowAudioPhase,
+    onToggleAudio: (key: String, text: String) -> Unit,
+    // Scopes this back's example keys. A multi-sense card renders one back per pager page, so a
+    // bare index would make example 0 of every sense the same speaker.
+    senseAudioKey: String,
     headlineEmphasized: Boolean = false,
 ) {
     Column(
@@ -1531,6 +1520,12 @@ private fun StudyCardBackContent(
                     cloze = cloze,
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontFamily = MaterialTheme.serifFontFamily,
+                    ),
+                    audio = AudioControl(
+                        phase = audioPhaseFor(StudyAudioKeys.cloze(senseAudioKey)),
+                        onToggle = {
+                            onToggleAudio(StudyAudioKeys.cloze(senseAudioKey), cloze.text)
+                        },
                     ),
                 )
                 back.clozeTranslation?.let { translation ->
@@ -1570,13 +1565,10 @@ private fun StudyCardBackContent(
                 )
                 back.audioText?.let { audioText ->
                     StudySpeakerButton(
-                        audioText = audioText,
+                        phase = audioPhaseFor(StudyAudioKeys.WORD),
                         playContentDescription = stringResource(Res.string.study_play_word_audio),
                         stopContentDescription = stringResource(Res.string.study_stop_audio),
-                        isPlayingAudio = isPlayingAudio,
-                        isPreparingAudio = isPreparingAudio,
-                        onPlayAudio = onPlayAudio,
-                        onStopAudio = onStopAudio,
+                        onToggle = { onToggleAudio(StudyAudioKeys.WORD, audioText) },
                     )
                 }
             }
@@ -1622,8 +1614,15 @@ private fun StudyCardBackContent(
             }
         }
 
-        back.examples.forEach { example ->
-            StudyExampleBlock(example = example)
+        back.examples.forEachIndexed { index, example ->
+            val key = StudyAudioKeys.example(senseAudioKey, index)
+            StudyExampleBlock(
+                example = example,
+                audio = AudioControl(
+                    phase = audioPhaseFor(key),
+                    onToggle = { onToggleAudio(key, example.text) },
+                ),
+            )
         }
 
         StudySynonymsRow(synonyms = back.synonyms)
@@ -1759,22 +1758,19 @@ private fun SenseDotRow(
 
 @Composable
 private fun StudySpeakerButton(
-    audioText: String,
+    phase: RowAudioPhase,
     playContentDescription: String,
     stopContentDescription: String,
-    isPlayingAudio: Boolean,
-    isPreparingAudio: Boolean,
-    onPlayAudio: (String) -> Unit,
-    onStopAudio: () -> Unit,
+    onToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isPreparingAudio = phase == RowAudioPhase.PREPARING
+    val isPlayingAudio = phase == RowAudioPhase.PLAYING
     Surface(
         modifier = modifier
             .size(36.dp)
             .clip(CircleShape)
-            .clickable(enabled = !isPreparingAudio, role = Role.Button) {
-                if (isPlayingAudio) onStopAudio() else onPlayAudio(audioText)
-            },
+            .clickable(enabled = !isPreparingAudio, role = Role.Button, onClick = onToggle),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1826,6 +1822,8 @@ private fun StudyTranslationHintBlock(
                 fontStyle = FontStyle.Normal,
                 lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f,
             ),
+            // Target language: study does not gate on voice availability, so leave it silent.
+            audio = null,
             modifier = Modifier.weight(1f),
         )
     }
@@ -1834,6 +1832,7 @@ private fun StudyTranslationHintBlock(
 @Composable
 private fun StudyExampleBlock(
     example: StudyExampleUiState,
+    audio: AudioControl?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -1860,6 +1859,7 @@ private fun StudyExampleBlock(
                     fontStyle = FontStyle.Normal,
                     lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.1f,
                 ),
+                audio = audio,
             )
             example.translation?.let { translation ->
                 StudyExampleText(
@@ -1868,6 +1868,9 @@ private fun StudyExampleBlock(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.1f,
                     ),
+                    // Only the source sentence is speakable; a translation may be in a language
+                    // with no installed voice.
+                    audio = null,
                 )
             }
         }
@@ -1878,6 +1881,7 @@ private fun StudyExampleBlock(
 private fun StudyExampleText(
     text: String,
     style: TextStyle,
+    audio: AudioControl?,
     modifier: Modifier = Modifier,
 ) {
     val annotated = buildAnnotatedString {
@@ -1890,8 +1894,23 @@ private fun StudyExampleText(
                 append(segment.text)
             }
         }
+        if (audio != null) appendSpeakerPlaceholder(this)
     }
-    Text(text = annotated, style = style, modifier = modifier)
+    Text(
+        text = annotated,
+        style = style,
+        modifier = modifier,
+        inlineContent = if (audio == null) {
+            emptyMap()
+        } else {
+            speakerInlineContent(
+                control = audio,
+                glyphSize = ExampleSpeakerGlyphSize,
+                playLabel = stringResource(Res.string.study_play_example_audio),
+                stopLabel = stringResource(Res.string.study_stop_audio),
+            )
+        },
+    )
 }
 
 internal data class StudyClozeDisplayText(
@@ -1969,6 +1988,9 @@ private fun StudyClozeTranslationText(
 private fun StudyClozeText(
     cloze: StudyClozeTextUiState,
     style: TextStyle,
+    // Speaker for the sentence, or null where it must stay silent: the front (speaking it would
+    // give the answer away) and the translation hint (target language, which may have no voice).
+    audio: AudioControl?,
     modifier: Modifier = Modifier,
 ) {
     val highlightColor = MaterialTheme.colorScheme.primary
@@ -1988,6 +2010,8 @@ private fun StudyClozeText(
             cursor = range.last + 1
         }
         append(displayText.text.substring(cursor))
+        // Appended after every answer range, so the highlight rectangles drawn below are unaffected.
+        if (audio != null) appendSpeakerPlaceholder(this)
     }
 
     var layoutResult by remember(text) { mutableStateOf<TextLayoutResult?>(null) }
@@ -2022,6 +2046,17 @@ private fun StudyClozeText(
                 }
             },
         onTextLayout = { layoutResult = it },
+        inlineContent = if (audio == null) {
+            emptyMap()
+        } else {
+            speakerInlineContent(
+                control = audio,
+                // The cloze renders at headlineSmall, so it takes the larger of the two glyphs.
+                glyphSize = LemmaSpeakerGlyphSize,
+                playLabel = stringResource(Res.string.study_play_example_audio),
+                stopLabel = stringResource(Res.string.study_stop_audio),
+            )
+        },
     )
 }
 
@@ -2623,6 +2658,28 @@ private fun StudySessionRecognitionFrontPreview(
     }
 }
 
+/**
+ * The example speakers in their active phases. Study reuses the sense cards' inline glyph, so this
+ * preview is the place to check the two surfaces still look identical: same glyph, same size, same
+ * position trailing the sentence.
+ */
+@Preview
+@Composable
+private fun StudySessionExampleSpeakerPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    val state = activeState(recognitionCard(), StudyCardSide.BACK).copy(
+        playingAudioKey = StudyAudioKeys.example("back", 0),
+    )
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = state,
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun StudySessionRecognitionBackPreview(
@@ -2737,6 +2794,28 @@ private fun StudySessionClozeFrontHintRevealedPreview(
                 StudyCardSide.FRONT,
                 current = 6,
             ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+/**
+ * The cloze back's speaker while playing. On a CLOZE_SOURCE back this sentence is the only one on
+ * screen — that back carries no examples — so this is the preview to check the glyph does not
+ * disturb the highlight rectangles drawn behind the answer span.
+ */
+@Preview
+@Composable
+private fun StudySessionClozeBackSpeakerPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    val state = activeState(clozeCard(), StudyCardSide.BACK, current = 6).copy(
+        playingAudioKey = StudyAudioKeys.cloze("back"),
+    )
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = state,
             onCancel = {},
             onEnd = {},
         )

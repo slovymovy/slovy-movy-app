@@ -131,7 +131,7 @@ private fun ListDetailPreviewRowPlaying(
                 favoriteLemmas = setOf("huis"),
             ),
             // Row 1 is speaking (stop glyph); tapping any other row would move playback there.
-            rowAudio = RowAudioUiState(playingSenseId = "1"),
+            rowAudio = RowAudioUiState(playingKey = "1"),
         )
     }
 }

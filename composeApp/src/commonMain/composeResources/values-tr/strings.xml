@@ -212,6 +212,7 @@
     <string name="word_details_title">Kelime Detayları</string>
     <string name="word_details_action_stop">Durdur</string>
     <string name="word_details_action_play_word">Kelimeyi seslendir</string>
+    <string name="word_details_action_play_example">Örneği seslendir</string>
     <string name="word_details_feedback_title">Düzeltme öner</string>
     <string name="word_details_feedback_placeholder">Neyin düzeltilmesi gerekiyor?</string>
     <string name="word_details_no_entries">Kayıt bulunamadı.</string>
@@ -703,6 +704,7 @@
     <string name="study_prompt_translate_to">%1$s diline çevir</string>
     <string name="guess_by_context">Bağlamdan tahmin et</string>
     <string name="study_play_word_audio">Kelime sesini oynat</string>
+    <string name="study_play_example_audio">Örneği seslendir</string>
     <string name="study_play_prompt_audio">Soru sesini oynat</string>
     <string name="study_stop_audio">Sesi durdur</string>
     <string name="study_hint_show">İpucu</string>
