@@ -585,6 +585,7 @@ class FavoritesViewModel(
     }
 
     fun toggleSense(senseId: String) {
+        rowAudio.stopExamplesOf(senseId)
         val item = findSense(senseId) ?: return
         val wasExpanded = item.expanded
         val shouldLoad = !wasExpanded && item.sense == null && !item.loading && item.error == null

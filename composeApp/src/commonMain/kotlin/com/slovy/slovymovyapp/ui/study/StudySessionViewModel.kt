@@ -671,7 +671,23 @@ class StudySessionViewModel(
         val active = state as? StudySessionUiState.Active ?: return
         if (active.card.senses.none { it.id == senseId }) return
         if (active.viewedSenseId == senseId) return
-        state = active.copy(viewedSenseId = senseId)
+        stopPageScopedAudio()
+        // Re-read: stopping rewrote the state this function was about to copy from.
+        val latest = state as? StudySessionUiState.Active ?: return
+        state = latest.copy(viewedSenseId = senseId)
+    }
+
+    /**
+     * Silences a speaker whose control belongs to the sense being swiped away from. Examples and the
+     * cloze sentence are scoped to the back they were played from, so their controls are gone once
+     * another sense is on screen. The word speaker is page-independent — every sense of a card
+     * speaks the same lemma — so it keeps a visible control and is left alone.
+     */
+    private fun stopPageScopedAudio() {
+        val active = state as? StudySessionUiState.Active ?: return
+        val key = active.playingAudioKey ?: active.preparingAudioKey ?: return
+        if (key == StudyAudioKeys.WORD) return
+        stopAudio()
     }
 
     fun rate(rating: StudyRating) {

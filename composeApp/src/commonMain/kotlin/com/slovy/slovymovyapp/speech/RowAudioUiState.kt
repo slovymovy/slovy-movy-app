@@ -29,6 +29,12 @@ object RowAudioKeys {
      * one per screen and it belongs to no sense, so it is keyed by the lemma under its own prefix.
      */
     fun word(lemma: String): String = "word:$lemma"
+
+    /**
+     * Whether [key] addresses an example of [senseId]. Asked when a sense's examples are about to
+     * leave the screen; the format is owned here so callers never pick a key apart themselves.
+     */
+    fun isExampleOf(key: String, senseId: String): Boolean = key.startsWith("$senseId#ex")
 }
 
 /**

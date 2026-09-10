@@ -327,6 +327,7 @@ class ListDetailViewModel(
     private fun findItem(senseId: String): ListWordItem? = state.items.find { it.senseId == senseId }
 
     fun toggleSense(senseId: String) {
+        rowAudio.stopExamplesOf(senseId)
         val item = findItem(senseId) ?: return
         val wasExpanded = item.expanded
         val shouldLoad = !wasExpanded && item.sense == null && !item.loading && item.error == null

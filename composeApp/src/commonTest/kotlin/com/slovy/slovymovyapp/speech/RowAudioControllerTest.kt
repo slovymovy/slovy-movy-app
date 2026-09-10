@@ -686,6 +686,51 @@ open class RowAudioControllerTest : BaseTest() {
     }
 
     @Test
+    fun collapsingASenseStopsItsExampleAudio() = runBlocking {
+        val fake = fakeWithEnglishVoices(voice("v1"))
+        withController(fake) { controller ->
+            controller.toggleExample(SENSE_A, 0, EXAMPLE_MARKUP, Language.ENGLISH)
+            awaitUntil("example handed to the engine") { fake.spokenTexts.isNotEmpty() }
+            fake.emitStatus(TTSStatus.SPEAKING)
+            val stopsBefore = fake.stopCount
+
+            // The card collapses: the example's speaker leaves the screen with it, so the audio
+            // must not carry on with no stop control anywhere.
+            controller.stopExamplesOf(SENSE_A)
+            assertEquals(stopsBefore + 1, fake.stopCount, "Collapsing the sense must silence its example")
+            assertNull(controller.uiState.playingKey, "Collapsing should clear the playing example")
+        }
+    }
+
+    @Test
+    fun collapsingASenseLeavesOtherAudioAlone() = runBlocking {
+        val fake = fakeWithEnglishVoices(voice("v1"))
+        withController(fake) { controller ->
+            controller.toggleExample(SENSE_A, 0, EXAMPLE_MARKUP, Language.ENGLISH)
+            awaitUntil("example handed to the engine") { fake.spokenTexts.isNotEmpty() }
+            fake.emitStatus(TTSStatus.SPEAKING)
+            val stopsBefore = fake.stopCount
+
+            // A different row collapsing must not silence this one.
+            controller.stopExamplesOf(SENSE_B)
+            assertEquals(stopsBefore, fake.stopCount, "Collapsing another sense must not stop this example")
+            assertEquals(
+                RowAudioKeys.example(SENSE_A, 0),
+                controller.uiState.playingKey,
+                "The playing example should be untouched"
+            )
+
+            // The lemma speaker stays on screen when its row collapses, so it keeps playing too.
+            controller.toggleLemma(SENSE_A, LEMMA_A, Language.ENGLISH)
+            awaitUntil("lemma handed to the engine") { fake.spokenTexts.contains(LEMMA_A) }
+            fake.emitStatus(TTSStatus.SPEAKING)
+            val stopsBeforeLemma = fake.stopCount
+            controller.stopExamplesOf(SENSE_A)
+            assertEquals(stopsBeforeLemma, fake.stopCount, "A row's lemma audio survives its collapse")
+        }
+    }
+
+    @Test
     fun disposeStopsAndDetachesListener() = runBlocking {
         val fake = fakeWithEnglishVoices(voice("v1"))
         withController(fake) { controller ->

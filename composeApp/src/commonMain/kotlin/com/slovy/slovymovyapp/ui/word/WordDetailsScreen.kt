@@ -557,6 +557,7 @@ class WordDetailViewModel(
     }
 
     fun toggleSense(entryId: String, senseId: String) {
+        rowAudio.stopExamplesOf(senseId)
         val current = state
         if (current is WordDetailUiState.Content) {
             state = current.toggleSense(entryId, senseId)

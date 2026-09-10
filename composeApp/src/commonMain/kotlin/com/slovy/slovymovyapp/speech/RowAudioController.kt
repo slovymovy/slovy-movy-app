@@ -183,6 +183,17 @@ class RowAudioController(
         playback = Playback.Idle
     }
 
+    /**
+     * Stops if an example of [senseId] is the active speaker. Call when that sense's examples are
+     * about to leave the screen — its card collapsing — because their control goes with them, and
+     * audio still sounding with no stop control anywhere is the defect [stopForPause] exists to
+     * prevent. The row's lemma speaker stays on screen when collapsed, so it is left alone.
+     */
+    fun stopExamplesOf(senseId: String) {
+        val key = uiState.playingKey ?: uiState.preparingKey ?: return
+        if (RowAudioKeys.isExampleOf(key, senseId)) silence()
+    }
+
     fun dismissVoiceSetup() {
         consumeVoiceSetup()
     }
