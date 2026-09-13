@@ -9,8 +9,11 @@ import android.speech.tts.TextToSpeech.Engine.ACTION_CHECK_TTS_DATA
 import android.speech.tts.TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA
 import android.speech.tts.TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import android.speech.tts.Voice.QUALITY_HIGH
 import android.speech.tts.Voice.QUALITY_VERY_HIGH
+import com.slovy.slovymovyapp.analytics.Analytics
+import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CompletableDeferred
@@ -145,10 +148,9 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
             if (!awaitEngineReady()) return@withContext emptyList()
 
             val locale = toLocale(language.language)
-            val matching = tts.voices?.filter { voice ->
-                voice.locale.language == locale.language &&
-                        (locale.country.isEmpty() || voice.locale.country == locale.country)
-            } ?: emptyList()
+            val engineVoices: Set<Voice>? = tts.voices
+            val matching = engineVoices?.filter { TtsVoiceLocales.matches(it, locale) } ?: emptyList()
+            if (matching.isEmpty()) reportNoVoices(language.language, locale, engineVoices)
 
             // Engines advertise voices whose data was never downloaded (Google lists a large set of
             // `<locale>-x-<variant>-local` names this way). They can be selected, but every utterance
@@ -195,6 +197,43 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
 
     private fun currentVoiceName(): String =
         runCatching { tts.voice?.name }.getOrNull() ?: "unknown"
+
+    /**
+     * Settings shows "No voices available" for [language] after this, so the engine's whole answer
+     * is recorded where it can still reach us (#944: a Samsung engine with an installed English
+     * voice). The developer log gets the full inventory, the only channel a user can hand back. The
+     * Analytics event counts affected users per engine and says whether the engine claims the
+     * language at all, which separates an enumeration mismatch from a voice pack that was never
+     * installed. It fires once per engine and language per process: row audio reloads voices on
+     * every play, and a user stuck in this state would otherwise dominate the event count.
+     */
+    private fun reportNoVoices(language: Language, locale: Locale, engineVoices: Set<Voice>?) {
+        val engine = boundEngine ?: "unknown"
+        val availability = tts.isLanguageAvailable(locale)
+        val defaultVoice = runCatching { tts.defaultVoice?.let { "${it.name}@${it.locale}" } }.getOrNull() ?: "none"
+        AppLogger.info(
+            TAG,
+            "No ${language.code} voices on engine $engine (availability=$availability, " +
+                    "defaultVoice=$defaultVoice): ${TtsVoiceLocales.describe(engineVoices)}",
+            null
+        )
+
+        val firstReport = synchronized(reportedNoVoices) { reportedNoVoices.add("$engine/${language.code}") }
+        if (!firstReport) return
+        val locales = engineVoices.orEmpty().map { it.locale.toString() }.distinct().sorted()
+        Analytics.logEvent(
+            AnalyticsEvent.TTS_NO_VOICES,
+            mapOf(
+                "lang" to language.code,
+                "engine" to engine,
+                "availability" to availability,
+                "language_available" to (availability >= TextToSpeech.LANG_AVAILABLE),
+                "voice_count" to (engineVoices?.size ?: -1),
+                "default_voice" to defaultVoice.take(ANALYTICS_PARAM_MAX_LENGTH),
+                "locales" to locales.joinToString(",").take(ANALYTICS_PARAM_MAX_LENGTH),
+            )
+        )
+    }
 
     actual override fun openSettings() {
         // The engine picker comes first: the install/check actions only open an engine's
@@ -260,8 +299,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         statusListeners.remove(key)
     }
 
+    /** Engine/language pairs whose empty voice list was already sent to Analytics. */
+    private val reportedNoVoices = mutableSetOf<String>()
+
     private companion object {
         const val TAG = "TextToSpeechManager"
+
+        /** Firebase Analytics truncates longer string parameter values. */
+        const val ANALYTICS_PARAM_MAX_LENGTH = 100
 
         /** Not exposed by the SDK; the documented action for the system TTS output screen. */
         const val ACTION_TTS_SETTINGS = "com.android.settings.TTS_SETTINGS"
