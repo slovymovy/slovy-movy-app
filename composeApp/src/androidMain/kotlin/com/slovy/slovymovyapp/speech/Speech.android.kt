@@ -224,13 +224,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         val locales = engineVoices.orEmpty().map { it.locale.toString() }.distinct().sorted()
         Analytics.logEvent(
             AnalyticsEvent.TTS_NO_VOICES,
+            // Kept small on purpose: each parameter worth filtering by in the console takes one
+            // of the property's event-scoped custom dimension slots. The raw availability code and
+            // default voice stay in the developer log line above.
             mapOf(
                 "lang" to language.code,
                 "engine" to engine,
-                "availability" to availability,
                 "language_available" to (availability >= TextToSpeech.LANG_AVAILABLE),
                 "voice_count" to (engineVoices?.size ?: -1),
-                "default_voice" to defaultVoice.take(ANALYTICS_PARAM_MAX_LENGTH),
                 "locales" to locales.joinToString(",").take(ANALYTICS_PARAM_MAX_LENGTH),
             )
         )
