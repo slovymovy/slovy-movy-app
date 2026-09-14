@@ -205,7 +205,8 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
      * Analytics event counts affected users per engine and says whether the engine claims the
      * language at all, which separates an enumeration mismatch from a voice pack that was never
      * installed. It fires once per engine and language per process: row audio reloads voices on
-     * every play, and a user stuck in this state would otherwise dominate the event count.
+     * every play, and each activity recreation builds a new manager, so a user stuck in this
+     * state would otherwise dominate the event count.
      */
     private fun reportNoVoices(language: Language, locale: Locale, engineVoices: Set<Voice>?) {
         val engine = boundEngine ?: "unknown"
@@ -299,11 +300,14 @@ actual class TextToSpeechManager actual constructor(androidContext: Any?) : Spee
         statusListeners.remove(key)
     }
 
-    /** Engine/language pairs whose empty voice list was already sent to Analytics. */
-    private val reportedNoVoices = mutableSetOf<String>()
-
     private companion object {
         const val TAG = "TextToSpeechManager"
+
+        /**
+         * Engine/language pairs whose empty voice list was already sent to Analytics. Process-wide,
+         * not per manager: the composition creates a new manager whenever the activity is recreated.
+         */
+        val reportedNoVoices = mutableSetOf<String>()
 
         /** Firebase Analytics truncates longer string parameter values. */
         const val ANALYTICS_PARAM_MAX_LENGTH = 100

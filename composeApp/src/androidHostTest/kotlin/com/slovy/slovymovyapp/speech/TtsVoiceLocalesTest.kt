@@ -31,6 +31,35 @@ class TtsVoiceLocalesTest {
     }
 
     @Test
+    fun matchesBibliographicThreeLetterLocales() {
+        @Suppress("DEPRECATION")
+        val cases = listOf(
+            Locale("dut", "NLD") to "nl",
+            Locale("ger", "DEU") to "de",
+            Locale("fre", "FRA") to "fr",
+            Locale("cze", "CZE") to "cs",
+            Locale("chi", "CHN") to "zh",
+            Locale("nld", "NLD") to "nl",
+        )
+        for ((spoken, wanted) in cases) {
+            val wantedLocale = Locale.Builder().setLanguage(wanted).build()
+            assertTrue(
+                TtsVoiceLocales.matches(voice("voice", spoken), wantedLocale),
+                "a $spoken voice must match $wanted"
+            )
+        }
+    }
+
+    @Test
+    fun canonicalLanguageKeepsUnknownThreeLetterCodes() {
+        @Suppress("DEPRECATION")
+        val unknown = Locale("qqq")
+        assertEquals("qqq", TtsVoiceLocales.canonicalLanguage(unknown))
+        assertEquals("en", TtsVoiceLocales.canonicalLanguage(Locale.US))
+        assertEquals(null, TtsVoiceLocales.canonicalLanguage(Locale.ROOT))
+    }
+
+    @Test
     fun rejectsOtherLanguages() {
         assertFalse(TtsVoiceLocales.matches(voice("nl-nl", Locale("nl", "NL")), english), "nl_NL must not match en")
         @Suppress("DEPRECATION")
