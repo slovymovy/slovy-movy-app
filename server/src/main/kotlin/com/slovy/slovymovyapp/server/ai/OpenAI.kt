@@ -279,6 +279,14 @@ class OpenAIProvider : AIProvider {
 
             ),
             ModelInfo(
+                GPT_6_ASTRA,
+                "OpenAI gpt-6 astra",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
                 ChatModel.GPT_5_1.asString(),
                 "OpenAI gpt-5.1",
                 AIProviderType.OPENAI,
@@ -430,3 +438,6 @@ object SchemaConverter {
         return JsonObject(result)
     }
 }
+
+/** Not yet a ChatModel constant in openai-java 4.50.0; served by the API as of 2026-09-13. */
+const val GPT_6_ASTRA = "gpt-6-astra"
