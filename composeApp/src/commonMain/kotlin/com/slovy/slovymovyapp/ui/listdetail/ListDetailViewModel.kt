@@ -103,6 +103,11 @@ class ListDetailViewModel(
         onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
     )
 
+    /** A list is single-language, so only [language] is probed. */
+    fun refreshAudioAvailability() {
+        rowAudio.refreshAvailability(setOf(language))
+    }
+
     fun toggleAudio(senseId: String) {
         val item = findItem(senseId) ?: return
         rowAudio.toggleLemma(senseId, item.lemma, language)

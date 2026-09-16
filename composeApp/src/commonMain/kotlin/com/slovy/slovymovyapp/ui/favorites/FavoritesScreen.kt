@@ -79,7 +79,7 @@ fun FavoritesScreen(
     val undoLabel = stringResource(Res.string.favorites_removed_undo)
 
     LifecycleResumeEffect(viewModel) {
-        viewModel.rowAudio.refreshAvailability()
+        viewModel.refreshAudioAvailability()
         viewModel.loadFavorites()
         onRefreshReviewState()
         // This view model is app-scoped, so nothing else stops its audio when the user leaves:

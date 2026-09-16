@@ -363,7 +363,9 @@ open class RowAudioControllerTest : BaseTest() {
                 "Before availability resolves every language shows the speaker optimistically"
             )
 
-            controller.refreshAvailability()
+            controller.refreshAvailability(
+                setOf(Language.ENGLISH, Language.DUTCH, Language.FRENCH, Language.GERMAN)
+            )
             awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
             assertTrue(controller.uiState.isPlayable(Language.ENGLISH), "Available language should be playable")
             assertFalse(controller.uiState.isPlayable(Language.DUTCH), "Unavailable language should hide the speaker")
@@ -373,12 +375,35 @@ open class RowAudioControllerTest : BaseTest() {
     }
 
     @Test
+    fun availabilityProbesOnlyTheRequestedLanguages() = runBlocking {
+        val fake = FakeSpeechPlayer().apply {
+            languages = listOf(ttsLanguage(Language.ENGLISH), ttsLanguage(Language.FRENCH))
+            voicesByLanguage = mapOf(
+                Language.ENGLISH to listOf(voice("en-v1")),
+                Language.FRENCH to listOf(voice("fr-v1")),
+            )
+        }
+        withController(fake) { controller ->
+            // Word details speaks one language; its hero speaker waits on this probe, so the other
+            // engine languages must not be queried on its behalf.
+            controller.refreshAvailability(setOf(Language.ENGLISH))
+            awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
+            assertEquals(1, fake.voiceLoadRequests, "Only the requested language should be probed")
+            assertTrue(controller.uiState.isKnownPlayable(Language.ENGLISH), "The probed language is playable")
+            assertFalse(
+                controller.uiState.isPlayable(Language.FRENCH),
+                "A language left out of the probe is not playable until a refresh includes it"
+            )
+        }
+    }
+
+    @Test
     fun availabilityRefreshPicksUpNewlyInstalledVoices() = runBlocking {
         val fake = FakeSpeechPlayer().apply {
             languages = listOf(ttsLanguage(Language.ENGLISH))
         }
         withController(fake) { controller ->
-            controller.refreshAvailability()
+            controller.refreshAvailability(setOf(Language.ENGLISH))
             awaitUntil("first availability probe resolved") { controller.uiState.availableLanguages != null }
             assertFalse(
                 controller.uiState.isPlayable(Language.ENGLISH),
@@ -388,7 +413,7 @@ open class RowAudioControllerTest : BaseTest() {
             // The user installs a voice in system settings and comes back; the resume re-probe
             // must pick it up without recreating the controller.
             fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("v1")))
-            controller.refreshAvailability()
+            controller.refreshAvailability(setOf(Language.ENGLISH))
             awaitUntil("re-probe picked up the installed voice") {
                 controller.uiState.isPlayable(Language.ENGLISH)
             }
@@ -402,12 +427,12 @@ open class RowAudioControllerTest : BaseTest() {
             // A resume probe stalls on the engine while the user is away in system settings.
             val gate = CompletableDeferred<Unit>()
             fake.voiceLoadGate = gate
-            controller.refreshAvailability()
+            controller.refreshAvailability(setOf(Language.ENGLISH))
             awaitUntil("first probe reached the voice load") { fake.voiceLoadRequests == 1 }
 
             // They come back with a different engine, whose voices the stalled probe never saw.
             fake.voicesByLanguage = mapOf(Language.ENGLISH to listOf(voice("new-engine-v1")))
-            controller.refreshAvailability()
+            controller.refreshAvailability(setOf(Language.ENGLISH))
             awaitUntil("stale probe replaced") { fake.voiceLoadRequests == 2 }
 
             gate.complete(Unit)
@@ -446,7 +471,7 @@ open class RowAudioControllerTest : BaseTest() {
         // The user disabled every English voice in Settings.
         VoiceFilterHelper(settingsRepository()).setEnabledVoices(ttsLanguage(Language.ENGLISH), emptySet())
         withController(fake) { controller ->
-            controller.refreshAvailability()
+            controller.refreshAvailability(setOf(Language.ENGLISH))
             awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
             assertFalse(
                 controller.uiState.isPlayable(Language.ENGLISH),
@@ -672,7 +697,7 @@ open class RowAudioControllerTest : BaseTest() {
                 "isKnownPlayable must not claim a language is speakable before the probe lands"
             )
 
-            controller.refreshAvailability()
+            controller.refreshAvailability(setOf(Language.ENGLISH))
             awaitUntil("availability resolved") { controller.uiState.availableLanguages != null }
             assertTrue(
                 controller.uiState.isKnownPlayable(Language.ENGLISH),

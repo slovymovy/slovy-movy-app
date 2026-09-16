@@ -93,22 +93,28 @@ class RowAudioController(
     private var listenerAttached = false
 
     /**
-     * Re-probes which languages are speakable. Call when a host screen becomes visible or resumes
-     * (not at controller construction, so the shared TTS engine isn't initialised at app start for
-     * the app-lifetime Favorites controller). Refreshing on every resume picks up whatever the user
-     * changed while away in Settings — voices installed or disabled, or a different TTS engine,
-     * which [SpeechPlayer] handles behind its voice queries. A language counts as playable only when
-     * the engine supports it AND at least one enabled voice remains, so rows never show a speaker
-     * that cannot produce sound.
+     * Re-probes which of [languages] are speakable. Call when a host screen becomes visible or
+     * resumes (not at controller construction, so the shared TTS engine isn't initialised at app
+     * start for the app-lifetime Favorites controller). Refreshing on every resume picks up whatever
+     * the user changed while away in Settings — voices installed or disabled, or a different TTS
+     * engine, which [SpeechPlayer] handles behind its voice queries. A language counts as playable
+     * only when the engine supports it AND at least one enabled voice remains, so rows never show a
+     * speaker that cannot produce sound.
+     *
+     * Only [languages] are probed, and a language outside it is never playable until a later
+     * refresh includes it. Each probed language costs a voice query, which fetches the engine's
+     * whole voice inventory over IPC and cannot run concurrently, so a screen that speaks one
+     * language must not pay for the other ten: Word details keeps its hero speaker disabled until
+     * this resolves, and probing every engine language there made the button take seconds to wake.
      */
-    fun refreshAvailability() {
+    fun refreshAvailability(languages: Set<Language>) {
         // A newer refresh supersedes the running probe: a slow one must not outlive the state it
         // was probing, nor publish over the result of the refresh that replaced it.
         availabilityLoadJob?.cancel()
         availabilityLoadJob = scope.launch {
-            val languages = try {
+            val playable = try {
                 speechPlayer.getAvailableLanguages()
-                    .filter { it.isAvailable }
+                    .filter { it.isAvailable && it.language in languages }
                     .filter { voiceFilterHelper.hasPlayableVoice(speechPlayer, it) }
                     .map { it.language }
                     .toSet()
@@ -119,7 +125,7 @@ class RowAudioController(
                 emptySet()
             }
             if (!isActive) return@launch
-            uiState = uiState.copy(availableLanguages = languages)
+            uiState = uiState.copy(availableLanguages = playable)
         }
     }
 

@@ -49,9 +49,10 @@ data class RowAudioUiState(
     /** Non-null while the first-run voice setup sheet should be shown for this language. */
     val voiceSetupLanguage: Language? = null,
     /**
-     * Languages the TTS engine can speak with at least one enabled voice. Null until availability
-     * resolves; empty means no playable language (e.g. Desktop, or every voice disabled in
-     * Settings). Drives whether a row shows the speaker at all.
+     * Languages, among those the last [RowAudioController.refreshAvailability] probed, that the
+     * TTS engine can speak with at least one enabled voice. Null until availability resolves; empty
+     * means no playable language (e.g. Desktop, or every voice disabled in Settings). Drives
+     * whether a row shows the speaker at all.
      */
     val availableLanguages: Set<Language>? = null,
 ) {
