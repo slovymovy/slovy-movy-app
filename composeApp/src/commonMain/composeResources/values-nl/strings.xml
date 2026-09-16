@@ -212,6 +212,7 @@
     <string name="word_details_title">Woorddetails</string>
     <string name="word_details_action_stop">Stop</string>
     <string name="word_details_action_play_word">Speel woord af</string>
+    <string name="word_details_action_play_example">Speel voorbeeld af</string>
     <string name="word_details_feedback_title">Een correctie voorstellen</string>
     <string name="word_details_feedback_placeholder">Wat moet er worden gecorrigeerd?</string>
     <string name="word_details_no_entries">Geen items beschikbaar.</string>
@@ -703,6 +704,7 @@
     <string name="study_chip_recall">Herinner %1$s</string>
     <string name="guess_by_context">Raad op basis van de context</string>
     <string name="study_play_word_audio">Speel woord af</string>
+    <string name="study_play_example_audio">Speel voorbeeld af</string>
     <string name="study_play_prompt_audio">Speel opdracht af</string>
     <string name="study_stop_audio">Stop audio</string>
     <string name="study_hint_show">Hint</string>

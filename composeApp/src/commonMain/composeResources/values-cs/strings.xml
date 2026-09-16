@@ -212,6 +212,7 @@
     <string name="word_details_title">Detail slova</string>
     <string name="word_details_action_stop">Zastavit</string>
     <string name="word_details_action_play_word">Přehrát slovo</string>
+    <string name="word_details_action_play_example">Přehrát příklad</string>
     <string name="word_details_feedback_title">Navrhnout opravu</string>
     <string name="word_details_feedback_placeholder">Co je potřeba opravit?</string>
     <string name="word_details_no_entries">Žádné dostupné položky.</string>
@@ -703,6 +704,7 @@
     <string name="study_prompt_translate_to">Přelož do %1$s</string>
     <string name="guess_by_context">Hádej z kontextu</string>
     <string name="study_play_word_audio">Přehrát zvuk slova</string>
+    <string name="study_play_example_audio">Přehrát zvuk příkladu</string>
     <string name="study_play_prompt_audio">Přehrát zvuk zadání</string>
     <string name="study_stop_audio">Zastavit zvuk</string>
     <string name="study_hint_show">Nápověda</string>

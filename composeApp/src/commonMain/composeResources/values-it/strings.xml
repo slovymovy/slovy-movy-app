@@ -212,6 +212,7 @@
     <string name="word_details_title">Dettagli della parola</string>
     <string name="word_details_action_stop">Ferma</string>
     <string name="word_details_action_play_word">Riproduci parola</string>
+    <string name="word_details_action_play_example">Riproduci esempio</string>
     <string name="word_details_feedback_title">Suggerisci una correzione</string>
     <string name="word_details_feedback_placeholder">Cosa c'è da correggere?</string>
     <string name="word_details_no_entries">Nessuna voce disponibile.</string>
@@ -703,6 +704,7 @@
     <string name="study_prompt_translate_to">Traduci in %1$s</string>
     <string name="guess_by_context">Indovina dal contesto</string>
     <string name="study_play_word_audio">Riproduci audio della parola</string>
+    <string name="study_play_example_audio">Riproduci esempio</string>
     <string name="study_play_prompt_audio">Riproduci audio della richiesta</string>
     <string name="study_stop_audio">Ferma l'audio</string>
     <string name="study_hint_show">Suggerimento</string>

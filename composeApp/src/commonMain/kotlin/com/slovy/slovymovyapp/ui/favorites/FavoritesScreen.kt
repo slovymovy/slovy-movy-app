@@ -82,7 +82,9 @@ fun FavoritesScreen(
         viewModel.rowAudio.refreshAvailability()
         viewModel.loadFavorites()
         onRefreshReviewState()
-        onPauseOrDispose { }
+        // This view model is app-scoped, so nothing else stops its audio when the user leaves:
+        // onCleared does not run on a tab switch.
+        onPauseOrDispose { viewModel.rowAudio.stopForPause() }
     }
 
     LaunchedEffect(viewModel.scrollState.isScrollInProgress) {
@@ -393,6 +395,14 @@ fun FavoritesScreenContent(
                                                     language = item.targetLang,
                                                     actions = rowAudioActions,
                                                 ),
+                                                exampleAudio = { index ->
+                                                    rowAudio.controlForExample(
+                                                        senseId = item.senseId,
+                                                        index = index,
+                                                        language = item.targetLang,
+                                                        actions = rowAudioActions,
+                                                    )
+                                                },
                                             )
                                         }
                                     }

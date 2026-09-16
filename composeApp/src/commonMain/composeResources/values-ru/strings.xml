@@ -212,6 +212,7 @@
     <string name="word_details_title">О слове</string>
     <string name="word_details_action_stop">Стоп</string>
     <string name="word_details_action_play_word">Прослушать</string>
+    <string name="word_details_action_play_example">Прослушать пример</string>
     <string name="word_details_feedback_title">Нашли ошибку?</string>
     <string name="word_details_feedback_placeholder">Что именно не так?</string>
     <string name="word_details_no_entries">Информация не найдена</string>
@@ -703,6 +704,7 @@
     <string name="study_chip_recall">Вспомни %1$s</string>
     <string name="guess_by_context">По контексту</string>
     <string name="study_play_word_audio">Воспроизвести слово</string>
+    <string name="study_play_example_audio">Прослушать пример</string>
     <string name="study_play_prompt_audio">Воспроизвести задание</string>
     <string name="study_stop_audio">Остановить аудио</string>
     <string name="study_hint_show">Подсказка</string>

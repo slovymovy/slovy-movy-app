@@ -97,6 +97,7 @@ class ListDetailViewModel(
 
     val rowAudioActions = RowAudioActions(
         onToggle = ::toggleAudio,
+        onToggleExample = ::toggleExampleAudio,
         onOpenVoiceSettings = rowAudio::openVoiceSettings,
         onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
         onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
@@ -104,7 +105,18 @@ class ListDetailViewModel(
 
     fun toggleAudio(senseId: String) {
         val item = findItem(senseId) ?: return
-        rowAudio.toggle(senseId, item.lemma, language)
+        rowAudio.toggleLemma(senseId, item.lemma, language)
+    }
+
+    /**
+     * Plays the source sentence of the example at [index]. Examples only render once the sense is
+     * loaded and expanded, so a missing one means the row changed under the tap — ignore it rather
+     * than speaking the wrong sentence.
+     */
+    fun toggleExampleAudio(senseId: String, index: Int) {
+        val item = findItem(senseId) ?: return
+        val example = item.sense?.examples?.getOrNull(index) ?: return
+        rowAudio.toggleExample(senseId, index, example.text, language)
     }
 
     override fun onCleared() {
@@ -315,6 +327,7 @@ class ListDetailViewModel(
     private fun findItem(senseId: String): ListWordItem? = state.items.find { it.senseId == senseId }
 
     fun toggleSense(senseId: String) {
+        rowAudio.stopExamplesOf(senseId)
         val item = findItem(senseId) ?: return
         val wasExpanded = item.expanded
         val shouldLoad = !wasExpanded && item.sense == null && !item.loading && item.error == null

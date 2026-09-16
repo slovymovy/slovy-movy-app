@@ -30,9 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -40,7 +38,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.ui.components.vibrantColorsForList
 import com.slovy.slovymovyapp.data.lists.WordList
 import com.slovy.slovymovyapp.i18n.resolve
-import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.AudioControl
 import com.slovy.slovymovyapp.speech.RowAudioActions
 import com.slovy.slovymovyapp.speech.RowAudioUiState
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
@@ -73,14 +71,14 @@ fun ListDetailScreen(
     onBack: () -> Unit,
     onNavigateToWordDetail: (language: Language, lemma: String, senseId: String?) -> Unit,
 ) {
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    LaunchedEffect(lifecycle) {
-        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            // Same on-visible trigger as My words: don't touch the TTS engine until the user can
-            // see a speaker.
-            viewModel.rowAudio.refreshAvailability()
-            viewModel.reloadFavorites()
-        }
+    LifecycleResumeEffect(viewModel) {
+        // Same on-visible trigger as My words: don't touch the TTS engine until the user can
+        // see a speaker.
+        viewModel.rowAudio.refreshAvailability()
+        viewModel.reloadFavorites()
+        // Leaving the screen must silence it: this entry survives on the back stack while another
+        // destination is shown, so onCleared cannot be relied on to stop playback.
+        onPauseOrDispose { viewModel.rowAudio.stopForPause() }
     }
     val list = viewModel.list
     when {
@@ -291,6 +289,14 @@ fun ListDetailContent(
                             language = language,
                             actions = rowAudioActions,
                         ),
+                        exampleAudio = { index ->
+                            rowAudio.controlForExample(
+                                senseId = item.senseId,
+                                index = index,
+                                language = language,
+                                actions = rowAudioActions,
+                            )
+                        },
                     )
                 }
             }
@@ -308,7 +314,8 @@ private fun ListWordSenseCard(
     onFavoriteToggle: () -> Unit,
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit,
-    lemmaAudio: LemmaAudioControl?,
+    lemmaAudio: AudioControl?,
+    exampleAudio: (index: Int) -> AudioControl?,
 ) {
     SenseCard(
         data = SenseCardData(
@@ -337,6 +344,7 @@ private fun ListWordSenseCard(
         onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas,
         lemmaAudio = lemmaAudio,
+        exampleAudio = exampleAudio,
     )
 }
 

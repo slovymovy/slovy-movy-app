@@ -211,6 +211,7 @@
     <string name="word_details_title">O słowie</string>
     <string name="word_details_action_stop">Zatrzymaj</string>
     <string name="word_details_action_play_word">Odtwórz</string>
+    <string name="word_details_action_play_example">Odtwórz przykład</string>
     <string name="word_details_feedback_title">Zaproponuj poprawkę</string>
     <string name="word_details_feedback_placeholder">Co wymaga poprawy?</string>
     <string name="word_details_no_entries">Brak informacji.</string>
@@ -702,6 +703,7 @@
     <string name="study_chip_recall">Przypomnij %1$s</string>
     <string name="guess_by_context">Z kontekstu</string>
     <string name="study_play_word_audio">Odtwórz słowo</string>
+    <string name="study_play_example_audio">Odtwórz przykład</string>
     <string name="study_play_prompt_audio">Odtwórz zadanie</string>
     <string name="study_stop_audio">Zatrzymaj audio</string>
     <string name="study_hint_show">Podpowiedź</string>

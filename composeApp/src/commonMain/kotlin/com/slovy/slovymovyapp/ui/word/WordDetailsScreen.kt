@@ -60,7 +60,6 @@ import com.slovy.slovymovyapp.ui.VoiceSetupBottomSheet
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterIsInstance
@@ -303,18 +302,6 @@ class WordDetailViewModel(
     var favoriteLemmas by mutableStateOf<Set<String>>(emptySet())
         private set
 
-    var isPlaying by mutableStateOf(false)
-        private set
-
-    var isPreparing by mutableStateOf(false)
-        private set
-
-    var availableVoices by mutableStateOf<List<Text2SpeechVoice>>(emptyList())
-        private set
-
-    var showVoiceSetupSheet by mutableStateOf(false)
-        private set
-
     val snackbarHostState = SnackbarHostState()
 
     var pendingIssueUrl by mutableStateOf<String?>(null)
@@ -326,8 +313,29 @@ class WordDetailViewModel(
         return url
     }
 
-    private val voiceSelector = RotatingVoiceSelector(ttsManager, voiceFilterHelper)
-    private var playJob: Job? = null
+    /**
+     * Owns every utterance this screen can start: the hero speaker and each example's speaker. One
+     * controller rather than two mechanisms is what keeps them mutually exclusive and keeps a single
+     * voice-setup sheet — a second owner would adopt the other's engine callbacks and light up both
+     * controls at once.
+     */
+    val rowAudio = RowAudioController(
+        speechPlayer = ttsManager,
+        voiceFilterHelper = voiceFilterHelper,
+        scope = viewModelScope,
+        analyticsSource = "word_detail",
+    )
+
+    val rowAudioActions = RowAudioActions(
+        onToggleExample = ::toggleExampleAudio,
+        onOpenVoiceSettings = rowAudio::openVoiceSettings,
+        onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
+        onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
+    )
+
+    /** Phase of the hero speaker, which reads [lemma]. */
+    fun wordAudioPhase(): RowAudioPhase = rowAudio.uiState.phaseFor(RowAudioKeys.word(lemma))
+
     private var hasScrolledToTarget = false
     private var requestedTranslationLanguages: List<Language> =
         translationLanguages?.distinctBy { it.code } ?: emptyList()
@@ -352,28 +360,6 @@ class WordDetailViewModel(
             }
         }
 
-    }
-
-    fun attachTtsListener() {
-        ttsManager.addOnStatusChangeListener(this) { status ->
-            when (status) {
-                TTSStatus.SPEAKING -> {
-                    isPreparing = false
-                    isPlaying = true
-                }
-
-                TTSStatus.IDLE -> {
-                    isPreparing = false
-                    isPlaying = false
-                }
-            }
-        }
-    }
-
-    fun detachTtsListener() {
-        ttsManager.removeOnStatusChangeListener(this)
-        isPlaying = false
-        isPreparing = false
     }
 
     private fun updateStateFromResult(result: WordResult) {
@@ -413,7 +399,7 @@ class WordDetailViewModel(
 
     fun reload() {
         loadFavorites()
-        loadVoices()
+        rowAudio.refreshAvailability()
     }
 
     fun refreshFromPull() {
@@ -508,33 +494,6 @@ class WordDetailViewModel(
         }
     }
 
-    /**
-     * Loads the voices this screen can play with; an empty result leaves the play button disabled.
-     * Also called on resume, to pick up voices or a TTS engine the user changed while away. This
-     * list is the button's signal only — [playWord] resolves the voice it speaks with itself.
-     */
-    fun loadVoices() {
-        viewModelScope.launch {
-            availableVoices = voiceSelector.loadVoices(dictionaryLanguage)
-        }
-    }
-
-    fun dismissVoiceSetup() {
-        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
-        showVoiceSetupSheet = false
-    }
-
-    fun dismissVoiceSetupAndPlay() {
-        dismissVoiceSetup()
-        launchPlay(gateOnVoiceSetup = false)
-    }
-
-    fun openVoiceSettings() {
-        viewModelScope.launch { voiceFilterHelper.markVoiceSetupShown(dictionaryLanguage) }
-        showVoiceSetupSheet = false
-        ttsManager.openSettings()
-    }
-
     fun isSenseFavorite(senseId: String): Boolean {
         return senseId in favoriteSenses
     }
@@ -598,6 +557,7 @@ class WordDetailViewModel(
     }
 
     fun toggleSense(entryId: String, senseId: String) {
+        rowAudio.stopExamplesOf(senseId)
         val current = state
         if (current is WordDetailUiState.Content) {
             state = current.toggleSense(entryId, senseId)
@@ -683,75 +643,34 @@ class WordDetailViewModel(
     }
 
     fun playWord() {
-        Analytics.logEvent(
-            AnalyticsEvent.WORD_PLAY_CLICK,
-            mapOf("lang" to dictionaryLanguage.code, "source" to "word_detail"),
-        )
-        if (availableVoices.isEmpty()) return
-
-        launchPlay(gateOnVoiceSetup = true)
+        rowAudio.toggleWord(lemma, dictionaryLanguage)
     }
 
     /**
-     * Starts one play attempt. Taps while an attempt is still resolving voices are ignored rather
-     * than queued: on a freshly bound engine that read can take a moment, and a second utterance
-     * would only flush the first.
+     * Plays the source sentence of the example at [index] of [senseId]. Examples render only once
+     * the sense is loaded, so a missing one means the card changed under the tap — ignore it rather
+     * than speaking the wrong sentence.
      */
-    private fun launchPlay(gateOnVoiceSetup: Boolean) {
-        if (playJob?.isActive == true) return
-        playJob = viewModelScope.launch { prepareAndPlay(gateOnVoiceSetup) }
-    }
-
-    /**
-     * Resolves the voices to speak with and plays. Voices are re-read on every play, like row audio
-     * does: ids only work on the engine that reported them, so a list cached before the user changed
-     * voices or the default TTS engine cannot be handed to the engine.
-     */
-    private suspend fun prepareAndPlay(gateOnVoiceSetup: Boolean) {
-        val voices = voiceSelector.loadVoices(dictionaryLanguage)
-        availableVoices = voices
-        if (voices.isEmpty()) return
-        if (gateOnVoiceSetup && voiceFilterHelper.needsVoiceSetupPrompt(dictionaryLanguage, voices)) {
-            showVoiceSetupSheet = true
-            return
-        }
-        doPlayWord(voices)
-    }
-
-    private fun doPlayWord(voices: List<Text2SpeechVoice>) {
-        try {
-            val selectedVoice = voiceSelector.nextVoice(dictionaryLanguage, voices)
-            isPreparing = true
-            ttsManager.setVoice(selectedVoice)
-            ttsManager.speak(lemma)
-        } catch (e: Exception) {
-            AppLogger.warn(TAG, "Unable to play word detail audio for ${dictionaryLanguage.code}", e)
-            Analytics.logEvent(
-                AnalyticsEvent.TTS_PLAY_FAILED,
-                mapOf(
-                    "lang" to dictionaryLanguage.code,
-                    "source" to "word_detail",
-                    "error" to (e.message ?: e::class.simpleName ?: "unknown"),
-                ),
-            )
-            isPreparing = false
-        }
+    fun toggleExampleAudio(senseId: String, index: Int) {
+        val content = state as? WordDetailUiState.Content ?: return
+        val sense = content.card.entries
+            .firstNotNullOfOrNull { entry -> entry.senses.firstOrNull { it.senseId == senseId } }
+            ?: return
+        val example = sense.examples.getOrNull(index) ?: return
+        rowAudio.toggleExample(senseId, index, example.text, dictionaryLanguage)
     }
 
     fun stopPlayback() {
-        Analytics.logEvent(AnalyticsEvent.WORD_STOP_PLAY_CLICK)
-        ttsManager.stop()
+        rowAudio.stop()
     }
 
     override fun onCleared() {
         super.onCleared()
-        ttsManager.removeOnStatusChangeListener(this)
-        ttsManager.stop()
+        rowAudio.dispose()
     }
 
     fun dispose() {
-        ttsManager.removeOnStatusChangeListener(this)
-        ttsManager.stop()
+        rowAudio.dispose()
         viewModelScope.cancel()
     }
 
@@ -784,11 +703,6 @@ fun WordDetailScreen(
     onNavigateToWordDetail: (Language, String) -> Unit = { _, _ -> },
     hasFavoritesToReview: Boolean = false,
 ) {
-    DisposableEffect(viewModel) {
-        viewModel.attachTtsListener()
-        onDispose { viewModel.detachTtsListener() }
-    }
-
     LaunchedEffect(viewModel) {
         val loaded = snapshotFlow { viewModel.state }
             .filterIsInstance<WordDetailUiState.Content>()
@@ -804,8 +718,10 @@ fun WordDetailScreen(
     }
 
     LifecycleResumeEffect(viewModel) {
-        viewModel.loadVoices()
-        onPauseOrDispose { }
+        viewModel.rowAudio.refreshAvailability()
+        // Leaving the screen must silence it: this entry survives on the back stack, and the view
+        // model is kept in a bounded cache, so neither dispose nor onCleared runs on navigation.
+        onPauseOrDispose { viewModel.rowAudio.stopForPause() }
     }
 
     // Restore scroll position after process death
@@ -837,9 +753,17 @@ fun WordDetailScreen(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         snackbarHostState = viewModel.snackbarHostState,
-        isPlaying = viewModel.isPlaying,
-        isPreparing = viewModel.isPreparing,
-        canPlay = viewModel.availableVoices.isNotEmpty(),
+        isPlaying = viewModel.wordAudioPhase() == RowAudioPhase.PLAYING,
+        isPreparing = viewModel.wordAudioPhase() == RowAudioPhase.PREPARING,
+        canPlay = viewModel.rowAudio.uiState.isKnownPlayable(viewModel.dictionaryLanguage),
+        exampleAudio = { senseId, index ->
+            viewModel.rowAudio.uiState.controlForExample(
+                senseId = senseId,
+                index = index,
+                language = viewModel.dictionaryLanguage,
+                actions = viewModel.rowAudioActions,
+            )
+        },
         favoriteLemmas = viewModel.favoriteLemmas,
         onRefresh = { viewModel.refreshFromPull() },
         onBack = onBack,
@@ -850,10 +774,10 @@ fun WordDetailScreen(
         onPlayWord = { viewModel.playWord() },
         onStopWord = { viewModel.stopPlayback() },
         dictionaryLanguage = viewModel.dictionaryLanguage,
-        showVoiceSetupSheet = viewModel.showVoiceSetupSheet,
-        onOpenVoiceSettings = { viewModel.openVoiceSettings() },
-        onDismissVoiceSetup = { viewModel.dismissVoiceSetup() },
-        onLaterVoiceSetup = { viewModel.dismissVoiceSetupAndPlay() },
+        showVoiceSetupSheet = viewModel.rowAudio.uiState.voiceSetupLanguage != null,
+        onOpenVoiceSettings = { viewModel.rowAudio.openVoiceSettings() },
+        onDismissVoiceSetup = { viewModel.rowAudio.dismissVoiceSetup() },
+        onLaterVoiceSetup = { viewModel.rowAudio.dismissVoiceSetupAndPlay() },
         onOpenFeedback = { viewModel.openFeedbackDialog() },
         onDismissFeedback = { viewModel.dismissFeedbackDialog() },
         onFeedbackCommentChange = { viewModel.updateFeedbackComment(it) },
@@ -892,6 +816,8 @@ fun WordDetailScreenContent(
     onNavigateToSettings: () -> Unit = {},
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    // Inline speaker for the example at (senseId, index); null leaves that example silent.
+    exampleAudio: (senseId: String, index: Int) -> AudioControl? = { _, _ -> null },
     dictionaryLanguage: Language = Language.ENGLISH,
     showVoiceSetupSheet: Boolean = false,
     onOpenVoiceSettings: () -> Unit = {},
@@ -1030,6 +956,7 @@ fun WordDetailScreenContent(
                         canPlay = canPlay,
                         onPlayWord = onPlayWord,
                         onStopWord = onStopWord,
+                        exampleAudio = exampleAudio,
                         onFormsToggle = onFormsToggle,
                         onFormsViewSelect = onFormsViewSelect,
                         onSenseToggle = onSenseToggle,
@@ -1112,6 +1039,7 @@ private fun WordDetailContent(
     canPlay: Boolean = false,
     onPlayWord: () -> Unit = {},
     onStopWord: () -> Unit = {},
+    exampleAudio: (senseId: String, index: Int) -> AudioControl? = { _, _ -> null },
     onFormsToggle: (String) -> Unit,
     onFormsViewSelect: (String, String) -> Unit,
     onSenseToggle: (String, String) -> Unit,
@@ -1222,7 +1150,8 @@ private fun WordDetailContent(
                         onSenseFavoriteToggle = onSenseFavoriteToggle,
                         relatedWords = card.relatedWords,
                         onWordClick = onWordClick,
-                        favoriteLemmas = favoriteLemmas
+                        favoriteLemmas = favoriteLemmas,
+                        exampleAudio = exampleAudio
                     )
                 }
             }
