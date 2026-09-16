@@ -74,7 +74,7 @@ fun ListDetailScreen(
     LifecycleResumeEffect(viewModel) {
         // Same on-visible trigger as My words: don't touch the TTS engine until the user can
         // see a speaker.
-        viewModel.rowAudio.refreshAvailability()
+        viewModel.refreshAudioAvailability()
         viewModel.reloadFavorites()
         // Leaving the screen must silence it: this entry survives on the back stack while another
         // destination is shown, so onCleared cannot be relied on to stop playback.

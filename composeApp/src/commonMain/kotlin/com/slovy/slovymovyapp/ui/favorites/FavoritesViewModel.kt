@@ -151,6 +151,15 @@ class FavoritesViewModel(
         onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
     )
 
+    /**
+     * Rows can be in any language the user has saved words for, and the set is only known once
+     * favorites load, so every language is probed. Row speakers show optimistically while the
+     * probe runs, so its cost is never visible here the way it is on Word details.
+     */
+    fun refreshAudioAvailability() {
+        rowAudio.refreshAvailability(Language.entries.toSet())
+    }
+
     fun toggleAudio(senseId: String) {
         val item = findSense(senseId) ?: return
         rowAudio.toggleLemma(senseId, item.lemma, item.targetLang)

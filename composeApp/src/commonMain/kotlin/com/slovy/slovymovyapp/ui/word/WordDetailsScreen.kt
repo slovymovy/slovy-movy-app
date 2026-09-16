@@ -399,7 +399,16 @@ class WordDetailViewModel(
 
     fun reload() {
         loadFavorites()
-        rowAudio.refreshAvailability()
+        refreshAudioAvailability()
+    }
+
+    /**
+     * Everything this screen speaks — the headline word and its examples — is in
+     * [dictionaryLanguage], so only that language is probed. The hero speaker stays disabled until
+     * the probe lands, and it must land as fast as a single voice query allows.
+     */
+    fun refreshAudioAvailability() {
+        rowAudio.refreshAvailability(setOf(dictionaryLanguage))
     }
 
     fun refreshFromPull() {
@@ -718,7 +727,7 @@ fun WordDetailScreen(
     }
 
     LifecycleResumeEffect(viewModel) {
-        viewModel.rowAudio.refreshAvailability()
+        viewModel.refreshAudioAvailability()
         // Leaving the screen must silence it: this entry survives on the back stack, and the view
         // model is kept in a bounded cache, so neither dispose nor onCleared runs on navigation.
         onPauseOrDispose { viewModel.rowAudio.stopForPause() }
