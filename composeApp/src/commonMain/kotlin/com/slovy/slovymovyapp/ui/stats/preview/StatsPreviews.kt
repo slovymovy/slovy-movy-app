@@ -6,6 +6,9 @@ import com.slovy.slovymovyapp.ui.stats.initialStatsState
 import com.slovy.slovymovyapp.ui.stats.daysInMonth
 import com.slovy.slovymovyapp.ui.stats.rememberPipelineLabelLayout
 import com.slovy.slovymovyapp.ui.stats.PipelineStageLabel
+import com.slovy.slovymovyapp.ui.stats.EffortRowData
+import com.slovy.slovymovyapp.ui.stats.EffortRows
+import com.slovy.slovymovyapp.ui.stats.rememberEffortRowLayout
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -161,6 +164,56 @@ private fun PipelineStageLabelAutoSizePreview(
                                 .height(10.dp)
                                 .clip(RoundedCornerShape(5.dp))
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun EffortRowsLabelFitPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    val labelPairs = listOf(
+        "today" to "this week",
+        "сегодня" to "за неделю",
+        "oggi" to "questa settimana",
+        "dziś" to "w tym tygodniu",
+        "aujourd'hui" to "cette semaine",
+    )
+    val rowWidths = listOf(300.dp, 250.dp, 220.dp)
+    ThemedPreview(darkTheme = isDark) {
+        Surface {
+            val rowLayout = rememberEffortRowLayout(
+                cardsCounts = listOf("184", "1 000"),
+                cardsUnits = listOf("cards"),
+                durations = listOf("5 h 53 min"),
+            )
+            Column(
+                modifier = Modifier.padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
+            ) {
+                rowWidths.forEach { rowWidth ->
+                    labelPairs.forEach { (today, thisWeek) ->
+                        EffortRows(
+                            rows = listOf(
+                                EffortRowData(label = today, cards = 28, cardsUnit = "cards", minutes = 12),
+                                EffortRowData(
+                                    label = thisWeek,
+                                    cards = 184,
+                                    cardsUnit = "cards",
+                                    minutes = 5 * 60 + 53,
+                                ),
+                            ),
+                            isLoading = false,
+                            layout = rowLayout,
+                            modifier = Modifier
+                                .width(rowWidth)
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .padding(AppSpacing.sm),
                         )
                     }
                 }
