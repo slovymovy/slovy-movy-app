@@ -102,6 +102,20 @@ class SessionService(
     fun previewRatings(card: SessionCard): List<GradeOutcome> =
         scheduler.preview(card.card.scheduling, clock.now(), fuzzSeed = fuzzSeed(card.card))
 
+    /**
+     * The task families this sense has already unlocked, each with its card's current stability.
+     * A family is unlocked exactly when it has a card: [unlockNextFamilyIfEligible] inserts one
+     * the moment a review clears the gate, so this reads the same truth the scheduler works from.
+     * Suspended cards are left out, matching the query; suspension is per sense today, so the
+     * card on screen never has a suspended sibling.
+     */
+    suspend fun unlockedFamilyStability(card: SessionCard): Map<CardFamily, Duration> =
+        withContext(Dispatchers.IO) {
+            learning.selectCardsBySense(card.card.senseId, card.card.langCode)
+                .executeAsList()
+                .associate { row -> row.family to row.stability.toDuration(DurationUnit.DAYS) }
+        }
+
     suspend fun submitReview(
         card: SessionCard,
         outcome: GradeOutcome,

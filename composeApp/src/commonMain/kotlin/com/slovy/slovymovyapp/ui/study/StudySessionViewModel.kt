@@ -82,6 +82,17 @@ class StudySessionViewModel(
     var exitRequested by mutableStateOf(false)
         private set
 
+    /**
+     * The "How studying works" page, drawn over the session. It lives beside [state] rather than
+     * inside Active so the card underneath is left exactly as it was.
+     */
+    var explainer by mutableStateOf<StudyExplainerUiState?>(null)
+        private set
+
+    /** Scroll position of the open explainer; replaced on every opening so the page starts at the top. */
+    var explainerScrollState: ScrollState by mutableStateOf(ScrollState(0))
+        private set
+
     /** How the session ended, recorded at the point of truth rather than derived later. */
     private var completionArm: String? = null
     private var sessionEndLogged: Boolean = false
@@ -283,6 +294,43 @@ class StudySessionViewModel(
     fun dismissOverflowMenu() {
         val active = state as? StudySessionUiState.Active ?: return
         state = active.copy(isOverflowMenuOpen = false)
+    }
+
+    /** Opens "How studying works" from the actions menu, for the card on screen as it stands. */
+    fun openStudyExplainer() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview || !active.canOpenExplainer) return
+        val card = currentCard ?: return
+        state = active.copy(isOverflowMenuOpen = false)
+        viewModelScope.launch {
+            // Read what this word has unlocked so the rows show its real state. A failed read
+            // falls back to the positional ladder rather than to wrong locks.
+            val unlocked = try {
+                sessionService.unlockedFamilyStability(card)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to read unlocked families for the study explainer lang=$langCode", e)
+                null
+            }
+            // The learner may have rated the card while the read was in flight; the page is
+            // about the card on screen, so a stale one opens nothing.
+            if (isExitingSession || currentCard !== card) return@launch
+            val page = card.toStudyExplainerUiState(unlocked) ?: return@launch
+            explainerScrollState = ScrollState(0)
+            Analytics.logEvent(
+                AnalyticsEvent.STUDY_EXPLAINER_OPEN,
+                mapOf(
+                    "lang" to langCode,
+                    "variant" to card.variant.kind.name.lowercase(),
+                ),
+            )
+            explainer = page
+        }
+    }
+
+    fun dismissStudyExplainer() {
+        explainer = null
     }
 
     fun toggleAutoplay() {
@@ -867,6 +915,7 @@ class StudySessionViewModel(
             ratingOptions = emptyList(),
             viewedSenseId = uiCard.activeSenseId,
             isAutoplayEnabled = autoplayEnabled,
+            canOpenExplainer = sessionCard.hasStudyExplainer(),
         )
         if (autoplayEnabled) {
             autoplayFrontAudioText(uiCard)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
