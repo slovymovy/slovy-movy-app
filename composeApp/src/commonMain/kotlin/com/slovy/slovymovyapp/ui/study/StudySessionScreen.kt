@@ -258,7 +258,11 @@ fun StudySessionScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
+        // While the page covers the session, the session's controls must not stay reachable to
+        // screen readers: a card could be graded or the session closed from behind the page.
+        val sessionSemantics = if (explainer != null) Modifier.clearAndSetSemantics {} else Modifier
         StudySessionStateContent(
+            modifier = sessionSemantics,
             state = state,
             completeScrollState = completeScrollState,
             snackbarHostState = snackbarHostState,
@@ -296,6 +300,7 @@ fun StudySessionScreenContent(
 
 @Composable
 private fun StudySessionStateContent(
+    modifier: Modifier,
     state: StudySessionUiState,
     completeScrollState: ScrollState,
     snackbarHostState: SnackbarHostState,
@@ -323,7 +328,7 @@ private fun StudySessionStateContent(
             val progress = state.progress
             if (progress == null) {
                 StudySessionMessageScaffold(
-                    modifier = Modifier,
+                    modifier = modifier,
                     onClose = onCancel,
                     snackbarHostState = snackbarHostState,
                 ) {
@@ -334,13 +339,13 @@ private fun StudySessionStateContent(
                     progress = progress,
                     onClose = onCancel,
                     snackbarHostState = snackbarHostState,
-                    modifier = Modifier,
+                    modifier = modifier,
                 )
             }
         }
 
         StudySessionUiState.Empty -> StudySessionMessageScaffold(
-            modifier = Modifier,
+            modifier = modifier,
             onClose = onCancel,
             snackbarHostState = snackbarHostState,
         ) {
@@ -360,7 +365,7 @@ private fun StudySessionStateContent(
         }
 
         is StudySessionUiState.Error -> StudySessionMessageScaffold(
-            modifier = Modifier,
+            modifier = modifier,
             onClose = onCancel,
             snackbarHostState = snackbarHostState,
         ) {
@@ -405,7 +410,7 @@ private fun StudySessionStateContent(
             onConfirmRemoveFromLibrary = onConfirmRemoveFromLibrary,
             onOpenExplainer = onOpenExplainer,
             snackbarHostState = snackbarHostState,
-            modifier = Modifier,
+            modifier = modifier,
         )
 
         is StudySessionUiState.Complete -> StudySessionCompleteContent(
@@ -413,7 +418,7 @@ private fun StudySessionStateContent(
             scrollState = completeScrollState,
             onClose = onEnd,
             snackbarHostState = snackbarHostState,
-            modifier = Modifier,
+            modifier = modifier,
         )
     }
 }

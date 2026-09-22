@@ -317,6 +317,9 @@ class StudySessionViewModel(
             // about the card on screen, so a stale one opens nothing.
             if (isExitingSession || currentCard !== card) return@launch
             val page = card.toStudyExplainerUiState(unlocked) ?: return@launch
+            // The page covers every speaker control, so nothing may keep sounding, or start
+            // sounding once a pending play request resolves, behind it.
+            stopAudio()
             explainerScrollState = ScrollState(0)
             Analytics.logEvent(
                 AnalyticsEvent.STUDY_EXPLAINER_OPEN,
