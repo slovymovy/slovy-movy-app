@@ -160,12 +160,6 @@ class GeminiProvider : AIProvider {
                 reasoningType = ReasoningType.TOKENS
             ),
             ModelInfo(
-                GEMINI_3_1_FLASH_LITE, "Gemini 3.1 Flash Light", AIProviderType.GEMINI,
-                supportsTemperature = true,
-                supportsVerbosity = false,
-                reasoningType = ReasoningType.TOKENS
-            ),
-            ModelInfo(
                 GEMINI_3_5_FLASH_LITE, "Gemini 3.5 Flash Light", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,

@@ -10,7 +10,7 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import com.slovy.slovymovyapp.server.ServerJson
-import com.slovy.slovymovyapp.server.ai.GEMINI_3_1_FLASH_LITE
+import com.slovy.slovymovyapp.server.ai.GEMINI_3_8_FLASH
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.OpenAIProvider
 import com.slovy.slovymovyapp.server.ai.enhancer.*
@@ -634,7 +634,7 @@ private suspend fun enhanceWithAI(
             enhancer.enhance(
                 request = request,
                 provider = geminiProvider,
-                model = GEMINI_3_1_FLASH_LITE,
+                model = GEMINI_3_8_FLASH,
                 reasoningBudget = 1
             )
         },
@@ -860,7 +860,7 @@ private suspend fun translateInto(
                 provider = geminiProvider,
                 targetLanguageName = targetLangName,
                 targetLanguageNotes = targetLangNotes,
-                model = GEMINI_3_1_FLASH_LITE,
+                model = GEMINI_3_8_FLASH,
                 reasoningBudget = 1
             )
         },
