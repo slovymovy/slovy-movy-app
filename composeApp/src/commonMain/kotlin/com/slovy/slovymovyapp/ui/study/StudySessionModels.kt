@@ -29,6 +29,8 @@ sealed interface StudySessionUiState {
         val preparingAudioKey: String? = null,
         val viewedSenseId: String? = null,
         val isAutoplayEnabled: Boolean = false,
+        /** Whether a "How studying works" page exists for this card; false in a target-language-only setup. */
+        val canOpenExplainer: Boolean = true,
         val isOverflowMenuOpen: Boolean = false,
         val removeConfirmation: StudyRemoveConfirmationUiState? = null,
     ) : StudySessionUiState
