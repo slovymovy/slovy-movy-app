@@ -17,6 +17,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
+import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -832,6 +833,134 @@ class DictionaryRepositoryTest : BaseTest() {
             runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) {
                 platform.deleteFile(localDictPath)
+            }
+        }
+    }
+
+    @Test
+    fun search_finds_sharp_s_lemma_and_form_when_typed_with_ss() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking { mgr.deleteDictionary(Language.GERMAN) }
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+
+        try {
+            val q = localMgr.openLocalDictionary().dictionaryQueries
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            // Normalized exactly as ingestion does it, so ß stays in the normalized columns.
+            q.insertLemma(lemmaId, "de", "groß", stripAccents("groß"), 5.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.ADJECTIVE)
+            q.insertForm(Uuid.random(), lemmaPosId, "großen", stripAccents("großen"), FormSource.NATIVE)
+
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+
+            for (query in listOf("groß", "Groß", "gross", "GROSS")) {
+                val results = runBlocking {
+                    repo.search(query, dictionaryLanguage = Language.GERMAN, translationTargets = emptyList())
+                }
+                assertEquals(
+                    "groß",
+                    results.firstOrNull()?.lemma,
+                    "'$query' should find the lemma and display it with its stored ß spelling"
+                )
+            }
+
+            val formResults = runBlocking {
+                repo.search("grossen", dictionaryLanguage = Language.GERMAN, translationTargets = emptyList())
+            }
+            assertEquals(
+                "\"großen\" form of \"groß\"",
+                formResults.firstOrNull()?.display,
+                "'grossen' should find the ß form and display its stored spelling"
+            )
+        } finally {
+            runBlocking { localMgr.closeAll() }
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+        }
+    }
+
+    @Test
+    fun search_finds_sharp_s_translation_when_typed_with_ss() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            mgr.deleteTranslation(Language.ENGLISH, Language.GERMAN)
+        }
+        val localDictPath = platform.getDatabasePath(LocalDbManager.LOCAL_DICTIONARY_FILENAME)
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+        if (platform.fileExists(localDictPath)) {
+            platform.deleteFile(localDictPath)
+        }
+        if (platform.fileExists(localTransPath)) {
+            platform.deleteFile(localTransPath)
+        }
+
+        try {
+            val lemmaId = Uuid.random()
+            val lemmaPosId = Uuid.random()
+            val senseId = Uuid.random()
+
+            val q = localMgr.openLocalDictionary().dictionaryQueries
+            q.insertLemma(lemmaId, "en", "street", "street", 5.0, false)
+            q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.NOUN)
+            q.insertSense(
+                sense_id = senseId,
+                lemma_pos_id = lemmaPosId,
+                sense_definition = "A public road in a town",
+                learner_level = LearnerLevel.A1,
+                frequency = SenseFrequency.HIGH,
+                semantic_group_id = "road",
+                name_type = null
+            )
+            localMgr.openLocalTranslation().translationQueries.insertSenseTranslation(
+                sense_id = senseId,
+                from_lang_code = "en",
+                target_lang_code = "de",
+                idx = 0,
+                target_lang_word = "Straße",
+                target_lang_word_normalized = stripAccents("Straße"),
+                target_lang_sense_clarification = null,
+                lemma_id = lemmaId,
+                lemma_pos_id = lemmaPosId
+            )
+
+            val settingsRepo = settingsRepository()
+            runBlocking {
+                settingsRepo.insert(
+                    Setting(
+                        id = Setting.Name.LANGUAGE,
+                        value = JsonArray(listOf(JsonPrimitive("de")))
+                    )
+                )
+            }
+            val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepo)
+
+            for (query in listOf("straße", "strasse")) {
+                val results = runBlocking { repo.search(query, dictionaryLanguage = Language.ENGLISH) }
+                assertEquals(
+                    "\"Straße\" translation of \"street\"",
+                    results.firstOrNull()?.display,
+                    "'$query' should find the German translation with its stored ß spelling"
+                )
+            }
+        } finally {
+            runBlocking { localMgr.closeAll() }
+            if (platform.fileExists(localDictPath)) {
+                platform.deleteFile(localDictPath)
+            }
+            if (platform.fileExists(localTransPath)) {
+                platform.deleteFile(localTransPath)
             }
         }
     }

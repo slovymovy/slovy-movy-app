@@ -11,6 +11,7 @@ class UnaccentTest {
         assertEquals("cafe", stripAccents("Café"), "Should remove accent and lowercase")
         assertEquals("naive", stripAccents("naïve"), "Should strip diaeresis")
         assertEquals("aero", stripAccents("Ærø"), "æ->ae, ø->o, and lowercase")
+        assertEquals("großess", stripAccents("GroßeSS"), "No special transliteration for ß; only lowercase")
         assertEquals("creme brulee", stripAccents("Crème Brûlée"), "Common French accents should be stripped")
         assertEquals("oeuvre", stripAccents("Œuvre"), "œ ligature should map to oe")
         assertEquals("facade", stripAccents("façade"), "ç should unaccent to c")
@@ -21,14 +22,6 @@ class UnaccentTest {
         assertEquals("kamien", stripAccents("KAMIEŃ"), "Polish ń should unaccent to n")
         assertEquals("zolc", stripAccents("Żółć"), "Transliterate ł->l; strip accents; lowercase")
         assertEquals("lody", stripAccents("Łody"), "Ł -> l")
-    }
-
-    @Test
-    fun german_specifics() {
-        assertEquals("strasse", stripAccents("Straße"), "ß should transliterate to ss")
-        assertEquals("strasse", stripAccents("STRAẞE"), "Capital ẞ lowercases to ß and then to ss")
-        assertEquals("grosse", stripAccents("Größe"), "ß -> ss, and the umlaut is stripped")
-        assertEquals("schon", stripAccents("schön"), "Umlauts unaccent to their base vowel")
     }
 
     @Test
