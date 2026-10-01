@@ -43,7 +43,23 @@ enum class Language(
     RUSSIAN("ru", "Русский", "🇷🇺", "Russian", supportedForLearning = true),
     DUTCH("nl", "Nederlands", "🇳🇱", "Dutch", supportedForLearning = true),
     POLISH("pl", "Polski", "🇵🇱", "Polish", supportedForLearning = true),
-    GERMAN("de", "Deutsch", "🇩🇪", "German"),
+    GERMAN(
+        "de",
+        "Deutsch",
+        "🇩🇪",
+        "German",
+        supportedForLearning = true,
+        basePromptNotes = """
+            German capitalises every noun and name wherever it stands in a sentence. Keep that capital
+            in the examples and common phrases you write, and wrap the word in its <w> tag exactly as
+            it is written in the sentence: Ich wohne in einem großen <w>Haus</w>.
+
+            For separable verbs, tag the finite part and the separated prefix separately:
+            Der Film <w>fängt</w> um acht Uhr <w>an</w>.
+
+            Keep standard spelling with ß and umlauts; never substitute ss, ae, oe or ue for them.
+        """.trimIndent()
+    ),
     FRENCH("fr", "Français", "🇫🇷", "French"),
     ITALIAN("it", "Italiano", "🇮🇹", "Italian"),
     CZECH("cs", "Čeština", "🇨🇿", "Czech"),
