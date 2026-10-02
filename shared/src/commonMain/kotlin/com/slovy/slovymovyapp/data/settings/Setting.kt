@@ -22,6 +22,7 @@ data class Setting(
         FAVORITES_LANGUAGE,
         STATS_LANGUAGE,
         DEVELOPER_MODE,
-        LEGACY_VOICE_MIGRATION_DONE
+        LEGACY_VOICE_MIGRATION_DONE,
+        STUDY_AUTOPLAY
     }
 }

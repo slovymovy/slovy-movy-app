@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Audio automatisch afspelen</string>
     <string name="study_actions_autoplay_description">Speel uitspraak automatisch af</string>
     <string name="study_actions_autoplay_on">Audio automatisch afspelen aan</string>
+    <string name="study_autoplay_saved_on">Automatisch afspelen aan voor deze en toekomstige sessies</string>
+    <string name="study_autoplay_saved_off">Automatisch afspelen uit voor deze en toekomstige sessies</string>
     <string name="study_actions_suspend">Woord pauzeren</string>
     <string name="study_actions_suspend_description">Herhalingen 30 dagen pauzeren</string>
     <string name="study_suspend_message">"%1$s" is 30 dagen gepauzeerd</string>

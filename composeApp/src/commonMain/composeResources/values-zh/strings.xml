@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">自动播放</string>
     <string name="study_actions_autoplay_description">自动播放单词发音</string>
     <string name="study_actions_autoplay_on">已开启自动播放</string>
+    <string name="study_autoplay_saved_on">已开启自动播放，本次及未来学习生效</string>
+    <string name="study_autoplay_saved_off">已关闭自动播放，本次及未来学习生效</string>
     <string name="study_actions_suspend">暂停这个单词</string>
     <string name="study_actions_suspend_description">暂停复习 30 天</string>
     <string name="study_suspend_message">“%1$s”已暂停 30 天</string>

@@ -694,6 +694,7 @@ fun App(
                             intakeService = container.intakeService,
                             sessionService = container.sessionService,
                             statsService = container.statsService,
+                            settingsRepository = settingsRepository,
                             clock = Clock.System,
                             ttsManager = container.ttsManager,
                             voiceFilterHelper = container.voiceFilterHelper,

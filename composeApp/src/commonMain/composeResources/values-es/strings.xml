@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Reproducir audio automáticamente</string>
     <string name="study_actions_autoplay_description">Reproducir la pronunciación automáticamente</string>
     <string name="study_actions_autoplay_on">Reproducción automática de audio activada</string>
+    <string name="study_autoplay_saved_on">Reproducción automática activada para esta y futuras sesiones</string>
+    <string name="study_autoplay_saved_off">Reproducción automática desactivada para esta y futuras sesiones</string>
     <string name="study_actions_suspend">Pausar esta palabra</string>
     <string name="study_actions_suspend_description">Pausar los repasos durante 30 días</string>
     <string name="study_suspend_message">«%1$s» pausada durante 30 días</string>

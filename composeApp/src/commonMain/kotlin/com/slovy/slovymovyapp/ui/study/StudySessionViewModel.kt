@@ -26,6 +26,7 @@ import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.speech.RowAudioPhase
@@ -56,6 +57,7 @@ class StudySessionViewModel(
     private val intakeService: IntakeService,
     private val sessionService: SessionService,
     private val statsService: StatsService,
+    private val settingsRepository: SettingsRepository,
     private val clock: Clock,
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
@@ -118,6 +120,11 @@ class StudySessionViewModel(
     private var currentVoiceIndex: Int = 0
     private val gradeCounts = mutableMapOf<StudyRating, Int>()
     private var autoplayEnabled: Boolean = false
+
+    // The saved preference is read once, when the session first starts. A retried start must not
+    // read it again: a toggle whose write is still in flight would be undone on screen.
+    private var autoplayPreferenceLoaded: Boolean = false
+    private val autoplaySaveMutex = Mutex()
     private var pendingRemovalFavorite: Favorite? = null
     private var isPreparingRemoval: Boolean = false
     private var postponeListeningCardsForSession: Boolean = false
@@ -285,19 +292,44 @@ class StudySessionViewModel(
         state = active.copy(isOverflowMenuOpen = false)
     }
 
-    fun toggleAutoplay() {
+    /**
+     * Flips autoplay for this session and saves it as the preference every later session starts
+     * with. The matching message confirms the save; it is only shown once the write has landed.
+     */
+    fun toggleAutoplay(enabledMessage: String, disabledMessage: String) {
         val active = state as? StudySessionUiState.Active ?: return
         if (active.isSubmittingReview) return
         autoplayEnabled = !autoplayEnabled
+        val enabled = autoplayEnabled
         Analytics.logEvent(
             AnalyticsEvent.STUDY_AUTOPLAY_TOGGLED,
-            mapOf("lang" to langCode, "enabled" to autoplayEnabled.toString()),
+            mapOf("lang" to langCode, "enabled" to enabled.toString()),
         )
         state = active.copy(
-            isAutoplayEnabled = autoplayEnabled,
+            isAutoplayEnabled = enabled,
         )
-        if (autoplayEnabled) {
+        if (enabled) {
             autoplayFrontAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
+        }
+        viewModelScope.launch {
+            try {
+                // Saves the value this toggle chose, so the confirmation always describes what was
+                // written. The launch reaches the lock before suspending and Mutex is fair, so quick
+                // toggles save in tap order and the last one is what persists.
+                autoplaySaveMutex.withLock { settingsRepository.setStudyAutoplay(enabled) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLogger.warn(TAG, "Unable to save study autoplay preference", e)
+                return@launch
+            }
+            // A newer toggle already superseded this one and confirms its own value.
+            if (autoplayEnabled != enabled) return@launch
+            showStudySnackbar(
+                message = if (enabled) enabledMessage else disabledMessage,
+                actionLabel = null,
+                duration = SnackbarDuration.Short,
+            )
         }
     }
 
@@ -744,6 +776,10 @@ class StudySessionViewModel(
                 PerformanceMonitoring.startTrace("study_session_start").useWithResult {
                     putAttribute("lang", langCode)
                     try {
+                        if (!autoplayPreferenceLoaded) {
+                            autoplayEnabled = settingsRepository.getStudyAutoplay()
+                            autoplayPreferenceLoaded = true
+                        }
                         val intakeResult = intakeService.runIntake(langCode)
                         putMetric("cards_created", intakeResult.cardsCreated.toLong())
                         putMetric("activated_favorites", intakeResult.activated.size.toLong())

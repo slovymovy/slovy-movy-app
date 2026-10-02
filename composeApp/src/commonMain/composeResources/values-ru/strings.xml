@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Автовоспроизведение</string>
     <string name="study_actions_autoplay_description">Произношение включается автоматически</string>
     <string name="study_actions_autoplay_on">Автовоспроизведение включено</string>
+    <string name="study_autoplay_saved_on">Автовоспроизведение включено для этой и будущих сессий</string>
+    <string name="study_autoplay_saved_off">Автовоспроизведение выключено для этой и будущих сессий</string>
     <string name="study_actions_suspend">Повторять позже</string>
     <string name="study_actions_suspend_description">Отложить повторение на 30 дней</string>
     <string name="study_suspend_message">Слово «%1$s» отложено на 30 дней</string>
