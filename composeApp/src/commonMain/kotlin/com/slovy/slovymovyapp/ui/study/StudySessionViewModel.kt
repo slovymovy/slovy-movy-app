@@ -35,9 +35,11 @@ import com.slovy.slovymovyapp.speech.Text2SpeechVoice
 import com.slovy.slovymovyapp.speech.TextToSpeechManager
 import com.slovy.slovymovyapp.speech.VoiceFilterHelper
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -58,6 +60,8 @@ class StudySessionViewModel(
     private val sessionService: SessionService,
     private val statsService: StatsService,
     private val settingsRepository: SettingsRepository,
+    /** Outlives this screen, so a preference saved just before leaving the session still lands. */
+    private val appScope: CoroutineScope,
     private val clock: Clock,
     private val ttsManager: TextToSpeechManager,
     private val voiceFilterHelper: VoiceFilterHelper,
@@ -311,18 +315,22 @@ class StudySessionViewModel(
         if (enabled) {
             autoplayFrontAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
         }
-        viewModelScope.launch {
+        // Saves the value this toggle chose, so the confirmation always describes what was written.
+        // Saves start in tap order and Mutex is fair, so the last of several quick toggles is what
+        // persists. The failure is caught inside: an exception escaping async would cancel appScope.
+        val save = appScope.async {
             try {
-                // Saves the value this toggle chose, so the confirmation always describes what was
-                // written. The launch reaches the lock before suspending and Mutex is fair, so quick
-                // toggles save in tap order and the last one is what persists.
                 autoplaySaveMutex.withLock { settingsRepository.setStudyAutoplay(enabled) }
+                true
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to save study autoplay preference", e)
-                return@launch
+                false
             }
+        }
+        viewModelScope.launch {
+            if (!save.await()) return@launch
             // A newer toggle already superseded this one and confirms its own value.
             if (autoplayEnabled != enabled) return@launch
             showStudySnackbar(
