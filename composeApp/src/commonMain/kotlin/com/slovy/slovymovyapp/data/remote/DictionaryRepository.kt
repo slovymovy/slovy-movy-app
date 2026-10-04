@@ -417,7 +417,8 @@ class DictionaryRepository(
             val queries = translationQueries
             return queryInChunks(uuids) { chunk ->
                 queries.selectTranslationTargetLangCodesBySenseIds(chunk, src.code).executeAsList() +
-                        queries.selectDefinitionTargetLangCodesBySenseIds(chunk, src.code).executeAsList()
+                        queries.selectDefinitionTargetLangCodesBySenseIds(chunk, src.code).executeAsList() +
+                        queries.selectExampleTranslationTargetLangCodesBySenseIds(chunk, src.code).executeAsList()
             }
         }
 

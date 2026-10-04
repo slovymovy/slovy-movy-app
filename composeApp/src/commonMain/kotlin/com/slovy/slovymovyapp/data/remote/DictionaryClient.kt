@@ -196,11 +196,9 @@ class DictionaryClient(
                     }
                     // The fetched word replaces the device's copy, so ask for every language
                     // the device already has for it too.
+                    val localSenseIds = localCard.entries.flatMap { entry -> entry.senses.map { it.senseId } }
                     val requestTargets = (
-                        translationTargets + dictionaryRepository.translationTargetsOnDevice(
-                            language,
-                            localCard.entries.flatMap { entry -> entry.senses.map { it.senseId } },
-                        )
+                        translationTargets + dictionaryRepository.translationTargetsOnDevice(language, localSenseIds)
                     ).distinct()
                     streamFromServer(
                         measuredCollector,
@@ -208,6 +206,7 @@ class DictionaryClient(
                         lemma,
                         translationTargets,
                         requestTargets,
+                        localSenseIds.toSet(),
                         pushToRepo,
                         localCard.zipfFrequency.toDouble(),
                         localCard.online
@@ -320,6 +319,7 @@ class DictionaryClient(
         lemma: String,
         targets: List<Language>,
         requestTargets: List<Language>,
+        localSenseIds: Set<String>,
         push: Boolean,
         frequency: Double,
         localIsOnlineOnly: Boolean
@@ -370,6 +370,7 @@ class DictionaryClient(
                         language = language,
                         lemma = lemma,
                         translationTargets = targets,
+                        localSenseIds = localSenseIds,
                         hasMoreChunks = hasMoreChunks,
                         frequency = frequency,
                         localIsOnlineOnly = localIsOnlineOnly
@@ -387,6 +388,7 @@ class DictionaryClient(
         language: Language,
         lemma: String,
         translationTargets: List<Language>,
+        localSenseIds: Set<String>,
         hasMoreChunks: Boolean,
         frequency: Double,
         localIsOnlineOnly: Boolean
@@ -459,11 +461,12 @@ class DictionaryClient(
                 }
             }
 
-            // Re-read and emit updated card with loading state
+            // Re-read and emit updated card with loading state. The device's senses from before the
+            // fetch are invalidated too: a replacement drops the ones the new version lacks.
             val senseIdsToInvalidate = chunk.payload.entries
                 .flatMap { it.senses }
                 .map { it.senseId }
-                .toSet()
+                .toSet() + localSenseIds
             if (senseIdsToInvalidate.isNotEmpty()) {
                 dictionaryRepository.invalidateSenses(senseIdsToInvalidate)
             }

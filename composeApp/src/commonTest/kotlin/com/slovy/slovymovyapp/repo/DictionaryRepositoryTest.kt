@@ -1769,11 +1769,19 @@ class DictionaryRepositoryTest : BaseTest() {
                 lemma_pos_id = Uuid.random()
             )
 
+            // An Italian example translation with no other Italian rows.
+            localMgr.openLocalTranslation().translationQueries.insertExampleTranslation(
+                sense_id = Uuid.parse(firstSense.senseId),
+                from_lang_code = "en",
+                target_lang_code = "it",
+                example_id = 0,
+                translation = "esempio"
+            )
             val repo = DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
             assertEquals(
-                setOf(Language.RUSSIAN, Language.GERMAN),
+                setOf(Language.RUSSIAN, Language.GERMAN, Language.ITALIAN),
                 runBlocking { repo.translationTargetsOnDevice(Language.ENGLISH, listOf(firstSense.senseId)) },
-                "A fetch should ask for the downloaded Russian and the locally held German"
+                "A fetch should ask for the downloaded Russian and the locally held German and Italian"
             )
 
             // First replacement copies the raw data from the downloaded DB; the second rewrites
@@ -1867,6 +1875,24 @@ class DictionaryRepositoryTest : BaseTest() {
                 dictDb = localMgr.openLocalDictionary(),
             )
             assertShows("fourth")
+
+            // A later version can bring a POS the local copy was created without.
+            deleteLocalDictionary(platform, localMgr)
+            val fifth = revisedVersion("fifth")
+            assertTrue(fifth.entries.size >= 2, "'$lemma' should have senses in two POS")
+            replaceWith(fifth.copy(entries = fifth.entries.take(1)))
+            replaceWith(fifth)
+            assertShows("fifth")
+            val shownSenseIds = runBlocking {
+                DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+                    .also { it.clearSenseCache() }
+                    .getLanguageCard(Language.ENGLISH, lemma, listOf(Language.RUSSIAN))
+            }?.entries?.flatMap { it.senses }?.map { it.senseId }?.toSet()
+            assertEquals(
+                fifth.entries.flatMap { it.senses }.map { it.senseId }.toSet(),
+                shownSenseIds,
+                "Senses of the POS added by the later version should be shown"
+            )
         } finally {
             runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
             deleteLocalDictionary(platform, localMgr)

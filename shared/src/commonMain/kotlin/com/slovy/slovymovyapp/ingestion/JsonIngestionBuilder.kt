@@ -232,10 +232,9 @@ class JsonIngestionBuilder(
      * Replaces the processed content of [word] in the writable [dictDb] with [processedJson], so a
      * newer version of the word takes over from the one already on the device.
      *
-     * Raw data (lemma, lemma_pos, forms, routing hints) is kept when [dictDb] already has the
-     * lemma; otherwise it is first copied from [rawSourceDb], limited to the POS in
-     * [processedJson]. Senses, examples and the rest of the processed data are rebuilt from
-     * [processedJson].
+     * Raw data (lemma, lemma_pos, forms, routing hints) for the POS in [processedJson] is copied
+     * from [rawSourceDb] when [dictDb] lacks it, and what [dictDb] already has is kept. Senses,
+     * examples and the rest of the processed data are rebuilt from [processedJson].
      *
      * Translations in [translationDb] follow the examples, because example translations are keyed
      * by example position. For a sense whose examples differ from the version the device showed
@@ -271,6 +270,7 @@ class JsonIngestionBuilder(
 
         val (skippedPos, translationOps, previousSenseIds, previousExamples) = dictDb.transactionWithResult {
             val dictQ = dictDb.dictionaryQueries
+            val posFilter = processed.entries.map { it.pos }.toSet()
             if (dictQ.selectLemmasById(lemmaId).executeAsOneOrNull() == null) {
                 requireNotNull(rawSourceDb) { "Lemma '$word' not found in database" }
                 copyRawDataToLocal(
@@ -279,8 +279,12 @@ class JsonIngestionBuilder(
                     sourceDb = rawSourceDb,
                     targetDb = dictDb,
                     frequency = frequency,
-                    posFilter = processed.entries.map { it.pos }.toSet()
+                    posFilter = posFilter
                 )
+            } else if (rawSourceDb != null) {
+                // The local copy holds only the POS of earlier versions; a newer one can bring a
+                // POS whose cluster is still only in the source.
+                copyMissingLemmaPos(lemmaId, posFilter, rawSourceDb.dictionaryQueries, dictQ)
             }
             val previousSenseIds = dictQ.selectSenseIdsByLemmaId(lemmaId).executeAsList()
             // The examples the device showed: the local copy's, or the downloaded ones before the
@@ -964,37 +968,60 @@ class JsonIngestionBuilder(
             } else {
                 allLemmaPosEntries
             }
-            lemmaPosEntries.forEach { lp ->
-                targetQ.insertLemmaPos(
-                    id = lp.id,
-                    lemma_id = lemmaId,
-                    pos = lp.pos
-                )
+            lemmaPosEntries.forEach { lp -> copyLemmaPos(lp.id, lp.pos, lemmaId, sourceQ, targetQ) }
+        }
+    }
 
-                // Copy forms for this lemma_pos
-                val forms = sourceQ.selectFormsWithIdByLemmaPosId(lp.id).executeAsList()
-                forms.forEach { form ->
-                    targetQ.insertForm(
-                        form_id = form.form_id,
-                        lemma_pos_id = lp.id,
-                        form = form.form,
-                        form_normalized = stripAccents(form.form),
-                        source = form.source
-                    )
+    /** Copies the clusters of [lemmaId] whose POS is in [posFilter] and that [targetQ] lacks. */
+    private fun copyMissingLemmaPos(
+        lemmaId: Uuid,
+        posFilter: Set<String>,
+        sourceQ: DictionaryQueries,
+        targetQ: DictionaryQueries,
+    ) {
+        val posEnumFilter = posFilter.mapNotNull { mapPos(it) }.toSet()
+        val existingIds = targetQ.selectLemmaPosByLemmaId(lemmaId).executeAsList().map { it.id }.toSet()
+        sourceQ.selectLemmaPosByLemmaId(lemmaId).executeAsList()
+            .filter { lp -> lp.pos in posEnumFilter && lp.id !in existingIds }
+            .forEach { lp -> copyLemmaPos(lp.id, lp.pos, lemmaId, sourceQ, targetQ) }
+    }
 
-                    // Copy form tags
-                    val tags = sourceQ.selectFormTagsByFormId(form.form_id).executeAsList()
-                    tags.forEach { tagRow ->
-                        targetQ.insertFormTag(form_id = form.form_id, tag = tagRow.tag)
-                    }
-                }
+    /** Copies one lemma_pos cluster with its forms, form tags and sense routing hints. */
+    private fun copyLemmaPos(
+        lemmaPosId: Uuid,
+        pos: DictionaryPos,
+        lemmaId: Uuid,
+        sourceQ: DictionaryQueries,
+        targetQ: DictionaryQueries,
+    ) {
+        targetQ.insertLemmaPos(
+            id = lemmaPosId,
+            lemma_id = lemmaId,
+            pos = pos
+        )
 
-                // Copy sense routing hints for this lemma_pos (pos-filter scoped by loop)
-                val hints = sourceQ.selectLemmaPosHintsByLemmaPosId(lp.id).executeAsList()
-                hints.forEach { hint ->
-                    targetQ.insertLemmaPosHint(hint.sense_id, hint.lemma_pos_id)
-                }
+        // Copy forms for this lemma_pos
+        val forms = sourceQ.selectFormsWithIdByLemmaPosId(lemmaPosId).executeAsList()
+        forms.forEach { form ->
+            targetQ.insertForm(
+                form_id = form.form_id,
+                lemma_pos_id = lemmaPosId,
+                form = form.form,
+                form_normalized = stripAccents(form.form),
+                source = form.source
+            )
+
+            // Copy form tags
+            val tags = sourceQ.selectFormTagsByFormId(form.form_id).executeAsList()
+            tags.forEach { tagRow ->
+                targetQ.insertFormTag(form_id = form.form_id, tag = tagRow.tag)
             }
+        }
+
+        // Copy sense routing hints for this lemma_pos
+        val hints = sourceQ.selectLemmaPosHintsByLemmaPosId(lemmaPosId).executeAsList()
+        hints.forEach { hint ->
+            targetQ.insertLemmaPosHint(hint.sense_id, hint.lemma_pos_id)
         }
     }
 

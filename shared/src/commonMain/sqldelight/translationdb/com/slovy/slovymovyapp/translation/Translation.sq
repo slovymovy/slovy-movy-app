@@ -125,6 +125,9 @@ SELECT DISTINCT target_lang_code FROM sense_translation WHERE sense_id IN ? AND 
 selectDefinitionTargetLangCodesBySenseIds:
 SELECT DISTINCT target_lang_code FROM sense_target_definition WHERE sense_id IN ? AND from_lang_code = ?;
 
+selectExampleTranslationTargetLangCodesBySenseIds:
+SELECT DISTINCT target_lang_code FROM example_translation WHERE sense_id IN ? AND from_lang_code = ?;
+
 -- Search translations by normalized word prefix, filtered to specific sense_ids
 selectSenseIdsByTranslationWordPrefix:
 SELECT DISTINCT sense_id
