@@ -52,6 +52,26 @@ insertExampleTranslation:
 INSERT OR REPLACE INTO example_translation(sense_id, from_lang_code, target_lang_code, example_id, translation)
 VALUES (?, ?, ?, ?, ?);
 
+-- Removal of every target language's rows for a set of senses
+deleteDefinitionsBySenseIds:
+DELETE FROM sense_target_definition WHERE sense_id IN ? AND from_lang_code = ?;
+
+deleteSenseTranslationsBySenseIds:
+DELETE FROM sense_translation WHERE sense_id IN ? AND from_lang_code = ?;
+
+deleteExampleTranslationsBySenseIds:
+DELETE FROM example_translation WHERE sense_id IN ? AND from_lang_code = ?;
+
+-- Removal of one target language's rows for a set of senses
+deleteDefinitionsBySenseIdsForTarget:
+DELETE FROM sense_target_definition WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;
+
+deleteSenseTranslationsBySenseIdsForTarget:
+DELETE FROM sense_translation WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;
+
+deleteExampleTranslationsBySenseIdsForTarget:
+DELETE FROM example_translation WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;
+
 -- Selectors
 selectDefinitionsBySense:
 SELECT definition
@@ -98,6 +118,12 @@ ORDER BY sense_id, idx;
 selectExampleTranslationsBySenseIds:
 SELECT sense_id, example_id, translation FROM example_translation
 WHERE sense_id IN ? AND from_lang_code = ? AND target_lang_code = ?;
+
+selectTranslationTargetLangCodesBySenseIds:
+SELECT DISTINCT target_lang_code FROM sense_translation WHERE sense_id IN ? AND from_lang_code = ?;
+
+selectDefinitionTargetLangCodesBySenseIds:
+SELECT DISTINCT target_lang_code FROM sense_target_definition WHERE sense_id IN ? AND from_lang_code = ?;
 
 -- Search translations by normalized word prefix, filtered to specific sense_ids
 selectSenseIdsByTranslationWordPrefix:

@@ -351,6 +351,62 @@ UPDATE lemma SET online_only = ? WHERE id = ?;
 selectLemmaPosByLemmaId:
 SELECT id, pos FROM lemma_pos WHERE lemma_id = ?;
 
+-- Processed-data removal for replacing a word's senses with a newer version.
+-- Raw data (lemma, lemma_pos, forms, routing hints) is kept.
+selectSenseIdsByLemmaId:
+SELECT sense.sense_id FROM sense
+JOIN lemma_pos ON sense.lemma_pos_id = lemma_pos.id
+WHERE lemma_pos.lemma_id = ?;
+
+deleteSenseExamplesByLemmaId:
+DELETE FROM sense_example WHERE sense_id IN (
+  SELECT sense.sense_id FROM sense JOIN lemma_pos ON sense.lemma_pos_id = lemma_pos.id WHERE lemma_pos.lemma_id = ?
+);
+
+deleteSenseSynonymsByLemmaId:
+DELETE FROM sense_synonym WHERE sense_id IN (
+  SELECT sense.sense_id FROM sense JOIN lemma_pos ON sense.lemma_pos_id = lemma_pos.id WHERE lemma_pos.lemma_id = ?
+);
+
+deleteSenseAntonymsByLemmaId:
+DELETE FROM sense_antonym WHERE sense_id IN (
+  SELECT sense.sense_id FROM sense JOIN lemma_pos ON sense.lemma_pos_id = lemma_pos.id WHERE lemma_pos.lemma_id = ?
+);
+
+deleteSenseCommonPhrasesByLemmaId:
+DELETE FROM sense_common_phrase WHERE sense_id IN (
+  SELECT sense.sense_id FROM sense JOIN lemma_pos ON sense.lemma_pos_id = lemma_pos.id WHERE lemma_pos.lemma_id = ?
+);
+
+deleteSenseTraitsByLemmaId:
+DELETE FROM sense_trait WHERE sense_id IN (
+  SELECT sense.sense_id FROM sense JOIN lemma_pos ON sense.lemma_pos_id = lemma_pos.id WHERE lemma_pos.lemma_id = ?
+);
+
+deleteSensesByLemmaId:
+DELETE FROM sense WHERE lemma_pos_id IN (SELECT id FROM lemma_pos WHERE lemma_id = ?);
+
+deleteWordFamilyByLemmaId:
+DELETE FROM lemma_word_family WHERE lemma_id = ?;
+
+-- Raw-data removal, run after the processed data is gone.
+deleteFormTagsByLemmaId:
+DELETE FROM form_tag WHERE form_id IN (
+  SELECT form.form_id FROM form JOIN lemma_pos ON form.lemma_pos_id = lemma_pos.id WHERE lemma_pos.lemma_id = ?
+);
+
+deleteFormsByLemmaId:
+DELETE FROM form WHERE lemma_pos_id IN (SELECT id FROM lemma_pos WHERE lemma_id = ?);
+
+deleteLemmaPosHintsByLemmaId:
+DELETE FROM lemma_pos_sense_hint WHERE lemma_pos_id IN (SELECT id FROM lemma_pos WHERE lemma_id = ?);
+
+deleteLemmaPosByLemmaId:
+DELETE FROM lemma_pos WHERE lemma_id = ?;
+
+deleteLemmaById:
+DELETE FROM lemma WHERE id = ?;
+
 selectFormTagsByFormIds:
 SELECT form_id, tag FROM form_tag WHERE form_id IN ?;
 

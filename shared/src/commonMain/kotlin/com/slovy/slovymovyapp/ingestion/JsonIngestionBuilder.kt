@@ -8,6 +8,7 @@ import com.slovy.slovymovyapp.dictionary.DictionaryDatabase
 import com.slovy.slovymovyapp.dictionary.DictionaryQueries
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
+import com.slovy.slovymovyapp.util.MAX_SQL_IN_VARIABLES
 import com.slovy.slovymovyapp.util.md5
 import com.slovy.slovymovyapp.util.queryInChunks
 import com.slovy.slovymovyapp.util.stripAccents
@@ -190,7 +191,8 @@ class JsonIngestionBuilder(
      * Adds translations to an already processed word (with senses).
      *
      * This method is used when a word already has full processed data (online_only=false)
-     * and needs additional translations for new target languages.
+     * and needs additional translations for new target languages. For every target language
+     * [processedJson] carries, the existing rows of its senses are replaced, not merged.
      *
      * @param processedJson JSON string containing the processed LanguageCardResponse with translations
      * @param word The lemma word (used to generate deterministic ID)
@@ -208,14 +210,165 @@ class JsonIngestionBuilder(
 
         val translationOpsByTarget =
             ingestTranslationsOnlyInternal(processed, word, langCode, dictDb.dictionaryQueries)
+        val senseIds = processed.entries.flatMap { it.senses }.map { uuidParse(it.senseId) }.distinct()
 
         translationOpsByTarget.forEach { (target, actions) ->
             val trDb = translationDbProvider(langCode, target)
             val trQ = trDb.translationQueries
             trDb.transaction {
+                // Rows are keyed by index, so an earlier, longer list for this language would
+                // otherwise keep its tail entries next to the new ones.
+                senseIds.chunked(MAX_SQL_IN_VARIABLES).forEach { chunk ->
+                    trQ.deleteDefinitionsBySenseIdsForTarget(chunk, langCode, target)
+                    trQ.deleteSenseTranslationsBySenseIdsForTarget(chunk, langCode, target)
+                    trQ.deleteExampleTranslationsBySenseIdsForTarget(chunk, langCode, target)
+                }
                 actions.forEach { op -> trQ.op() }
             }
         }
+    }
+
+    /**
+     * Replaces the processed content of [word] in the writable [dictDb] with [processedJson], so a
+     * newer version of the word takes over from the one already on the device.
+     *
+     * Raw data (lemma, lemma_pos, forms, routing hints) is kept when [dictDb] already has the
+     * lemma; otherwise it is first copied from [rawSourceDb], limited to the POS in
+     * [processedJson]. Senses, examples and the rest of the processed data are rebuilt from
+     * [processedJson].
+     *
+     * Translations in [translationDb] follow the examples, because example translations are keyed
+     * by example position. For a sense whose examples differ from the version the device showed
+     * (the local copy, or [rawSourceDb] before there was one), every target language is replaced
+     * by what [processedJson] carries. For a sense whose examples are unchanged, only the languages
+     * [processedJson] carries are replaced and the others are kept. [translationDb] is used for all
+     * target languages instead of [translationDbProvider], since the removal has to reach languages
+     * [processedJson] does not carry.
+     *
+     * The two databases cannot share a transaction. If the translation write fails, the processed
+     * data written to [dictDb] is removed again: the whole local lemma when [rawSourceDb] has it,
+     * so the device falls back to the downloaded version; otherwise the lemma is left raw and
+     * online_only, so the next request fetches it again.
+     *
+     * @param frequency Zipf frequency recorded if the lemma is copied from [rawSourceDb]
+     * @return List of POS entries that were skipped because the lemma has no lemma_pos for them
+     * @throws IllegalArgumentException if the lemma is in neither [dictDb] nor [rawSourceDb], or if
+     *   none of the senses in [processedJson] fit the lemma's POS; [dictDb] is left unchanged
+     */
+    fun replaceProcessedWord(
+        processedJson: String,
+        word: String,
+        langCode: String,
+        frequency: Double,
+        dictDb: DictionaryDatabase,
+        rawSourceDb: DictionaryDatabase?,
+        translationDb: TranslationDatabase,
+    ): List<String> {
+        val processed = json.decodeFromString(LanguageCardResponse.serializer(), processedJson)
+        val lemmaId = generateLemmaId(word)
+        val incomingSenses = processed.entries.flatMap { it.senses }
+        val incomingSenseIds = incomingSenses.map { uuidParse(it.senseId) }
+
+        val (skippedPos, translationOps, previousSenseIds, previousExamples) = dictDb.transactionWithResult {
+            val dictQ = dictDb.dictionaryQueries
+            if (dictQ.selectLemmasById(lemmaId).executeAsOneOrNull() == null) {
+                requireNotNull(rawSourceDb) { "Lemma '$word' not found in database" }
+                copyRawDataToLocal(
+                    word = word,
+                    langCode = langCode,
+                    sourceDb = rawSourceDb,
+                    targetDb = dictDb,
+                    frequency = frequency,
+                    posFilter = processed.entries.map { it.pos }.toSet()
+                )
+            }
+            val previousSenseIds = dictQ.selectSenseIdsByLemmaId(lemmaId).executeAsList()
+            // The examples the device showed: the local copy's, or the downloaded ones before the
+            // word had a local copy.
+            val previousExamplesDb = if (previousSenseIds.isNotEmpty()) dictDb else rawSourceDb
+            val previousExamples = previousExamplesDb?.let { db ->
+                exampleTextsBySense(db.dictionaryQueries, previousSenseIds.ifEmpty { incomingSenseIds })
+            }.orEmpty()
+            deleteProcessedData(lemmaId, dictQ)
+            dictQ.updateLemmaOnlineOnly(online_only = true, id = lemmaId)
+            val (skipped, ops) = ingestProcessedOverRawInternal(processed, word, langCode, dictQ)
+            // Every POS skipped would leave a processed lemma without senses that hides the
+            // version the device already shows; failing rolls the replacement back.
+            require(dictQ.selectSenseIdsByLemmaId(lemmaId).executeAsList().isNotEmpty()) {
+                "No senses of '$word' could be placed; skipped POS: ${skipped.joinToString()}"
+            }
+            // Stays online_only until the translations are written too; see the cleanup below.
+            dictQ.updateLemmaOnlineOnly(online_only = true, id = lemmaId)
+            ReplacedProcessedData(skipped, ops, previousSenseIds, previousExamples)
+        }
+
+        val unchangedSenseIds = incomingSenses
+            .filter { sense -> previousExamples[uuidParse(sense.senseId)].orEmpty() == sense.examples.map { it.text } }
+            .map { uuidParse(it.senseId) }
+            .toSet()
+        val changedSenseIds = (previousSenseIds + incomingSenseIds).distinct().filter { it !in unchangedSenseIds }
+        val trQ = translationDb.translationQueries
+        try {
+            translationDb.transaction {
+                changedSenseIds.chunked(MAX_SQL_IN_VARIABLES).forEach { chunk ->
+                    trQ.deleteDefinitionsBySenseIds(chunk, langCode)
+                    trQ.deleteSenseTranslationsBySenseIds(chunk, langCode)
+                    trQ.deleteExampleTranslationsBySenseIds(chunk, langCode)
+                }
+                unchangedSenseIds.chunked(MAX_SQL_IN_VARIABLES).forEach { chunk ->
+                    translationOps.keys.forEach { target ->
+                        trQ.deleteDefinitionsBySenseIdsForTarget(chunk, langCode, target)
+                        trQ.deleteSenseTranslationsBySenseIdsForTarget(chunk, langCode, target)
+                        trQ.deleteExampleTranslationsBySenseIdsForTarget(chunk, langCode, target)
+                    }
+                }
+                translationOps.values.forEach { actions -> actions.forEach { op -> trQ.op() } }
+            }
+        } catch (e: Throwable) {
+            dictDb.transaction {
+                val dictQ = dictDb.dictionaryQueries
+                deleteProcessedData(lemmaId, dictQ)
+                if (rawSourceDb?.dictionaryQueries?.selectLemmasById(lemmaId)?.executeAsOneOrNull() != null) {
+                    deleteLemma(lemmaId, dictQ)
+                }
+            }
+            throw e
+        }
+        dictDb.dictionaryQueries.updateLemmaOnlineOnly(online_only = false, id = lemmaId)
+        return skippedPos
+    }
+
+    private data class ReplacedProcessedData(
+        val skippedPos: List<String>,
+        val translationOps: Map<String, List<TranslationQueries.() -> Unit>>,
+        val previousSenseIds: List<Uuid>,
+        val previousExamples: Map<Uuid, List<String>>,
+    )
+
+    /** Example texts of each of [senseIds] that has examples, in example order. */
+    private fun exampleTextsBySense(dictQ: DictionaryQueries, senseIds: List<Uuid>): Map<Uuid, List<String>> =
+        queryInChunks(senseIds) { chunk -> dictQ.selectSenseExamplesBySenseIds(chunk).executeAsList() }
+            .groupBy { it.sense_id }
+            .mapValues { (_, rows) -> rows.sortedBy { it.example_id }.map { it.text } }
+
+    /** Removes the raw data of [lemmaId] and the lemma itself; its processed data must be gone. */
+    private fun deleteLemma(lemmaId: Uuid, dictQ: DictionaryQueries) {
+        dictQ.deleteFormTagsByLemmaId(lemmaId)
+        dictQ.deleteFormsByLemmaId(lemmaId)
+        dictQ.deleteLemmaPosHintsByLemmaId(lemmaId)
+        dictQ.deleteLemmaPosByLemmaId(lemmaId)
+        dictQ.deleteLemmaById(lemmaId)
+    }
+
+    /** Removes the senses of [lemmaId] with their related rows, and its word family. */
+    private fun deleteProcessedData(lemmaId: Uuid, dictQ: DictionaryQueries) {
+        dictQ.deleteSenseExamplesByLemmaId(lemmaId)
+        dictQ.deleteSenseSynonymsByLemmaId(lemmaId)
+        dictQ.deleteSenseAntonymsByLemmaId(lemmaId)
+        dictQ.deleteSenseCommonPhrasesByLemmaId(lemmaId)
+        dictQ.deleteSenseTraitsByLemmaId(lemmaId)
+        dictQ.deleteSensesByLemmaId(lemmaId)
+        dictQ.deleteWordFamilyByLemmaId(lemmaId)
     }
 
     private data class ParsedIngestionInput(

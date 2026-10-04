@@ -194,11 +194,20 @@ class DictionaryClient(
                             emitMeasured(value)
                         }
                     }
+                    // The fetched word replaces the device's copy, so ask for every language
+                    // the device already has for it too.
+                    val requestTargets = (
+                        translationTargets + dictionaryRepository.translationTargetsOnDevice(
+                            language,
+                            localCard.entries.flatMap { entry -> entry.senses.map { it.senseId } },
+                        )
+                    ).distinct()
                     streamFromServer(
                         measuredCollector,
                         language,
                         lemma,
                         translationTargets,
+                        requestTargets,
                         pushToRepo,
                         localCard.zipfFrequency.toDouble(),
                         localCard.online
@@ -264,40 +273,6 @@ class DictionaryClient(
     }
 
     /**
-     * Copies raw data from downloaded DB to local DB for online_only words.
-     * This version takes the localDb and downloadedDb as parameters for use within an existing transaction.
-     *
-     * @param posFilter If provided, only copies raw data for these POS (to avoid empty entries)
-     * Idempotent - skips if lemma already exists in local DB.
-     */
-    private fun copyRawDataIfNeeded(
-        ingestionBuilder: JsonIngestionBuilder,
-        language: Language,
-        lemma: String,
-        frequency: Double,
-        targetDb: DictionaryDatabase,
-        sourceDb: DictionaryDatabase,
-        posFilter: Set<String>? = null
-    ) {
-        val lemmaId = JsonIngestionBuilder.generateLemmaId(lemma)
-
-        // Skip if already in local DB
-        if (targetDb.dictionaryQueries.selectLemmasById(lemmaId).executeAsOneOrNull() != null) {
-            return
-        }
-
-        // Copy from downloaded DB
-        ingestionBuilder.copyRawDataToLocal(
-            word = lemma,
-            langCode = language.code,
-            sourceDb = sourceDb,
-            targetDb = targetDb,
-            frequency = frequency,
-            posFilter = posFilter
-        )
-    }
-
-    /**
      * Finds the dictionary DB that contains the fully processed word (with senses).
      * Tries local DB first (word may have been just ingested), then downloaded DB.
      *
@@ -344,6 +319,7 @@ class DictionaryClient(
         language: Language,
         lemma: String,
         targets: List<Language>,
+        requestTargets: List<Language>,
         push: Boolean,
         frequency: Double,
         localIsOnlineOnly: Boolean
@@ -359,7 +335,7 @@ class DictionaryClient(
             )
             var chunkCount = 0L
             try {
-                val url = buildUrl(language, lemma, targets, push)
+                val url = buildUrl(language, lemma, requestTargets, push)
                 val response = httpClient.get(url)
                 putMetric("status_code", response.status.value.toLong())
                 if (!response.status.isSuccess()) {
@@ -381,10 +357,11 @@ class DictionaryClient(
 
                     val haveRequiredTranslations = chunk.payload.entries.any {
                         it.senses.any { s ->
-                            s.translations.keys.containsAll(targets.map { k -> k.code })
+                            s.translations.keys.containsAll(requestTargets.map { k -> k.code })
                         }
                     }
-                    // After base, we expect translated if translations were requested
+                    // After base, we expect translated if translations were requested; the
+                    // request includes the device's own languages, which can arrive there too
                     val hasMoreChunks = isBaseStage && !haveRequiredTranslations
 
                     processChunk(
@@ -449,38 +426,23 @@ class DictionaryClient(
                                 )
                             }
 
-                            if (localIsOnlineOnly) {
-                                // Online-only word - copy raw data to local DB first, then ingest
-                                // processed data over it. The downloaded DB lease covers the whole
-                                // transaction so a concurrent delete cannot unlink it mid-write.
-                                // Existence is checked inside the IfExists lease (no TOCTOU).
-                                dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
-                                    localDictDb.transaction {
-                                        if (downloadedDb != null) {
-                                            val posFilter = chunk.payload.entries.map { it.pos }.toSet()
-                                            copyRawDataIfNeeded(
-                                                ingestionBuilder = ingestionBuilder,
-                                                language = language,
-                                                lemma = lemma,
-                                                frequency = frequency,
-                                                targetDb = localDictDb,
-                                                sourceDb = downloadedDb,
-                                                posFilter = posFilter
-                                            )
-                                        }
-                                        ingestionBuilder.ingestProcessedOverRaw(
-                                            responseJson, lemma, language.code, localDictDb
-                                        )
-                                    }
-                                }
-                            } else {
-                                // Offline word - find dictionary DB with the processed word,
-                                // add translations only (translations go to local translation DB)
-                                withDictionaryDbContainingWord(language, lemma) { dictDbForReading ->
-                                    ingestionBuilder.ingestTranslationsOnly(
-                                        responseJson, lemma, language.code, dictDbForReading
-                                    )
-                                }
+                            // The base chunk is the server's current version of the whole word,
+                            // so it replaces whatever the device has, including a processed word from
+                            // the downloaded DB. Taking only its translations would pair them with
+                            // the device's examples, which can be an older version: example
+                            // translations are keyed by example position, not by text.
+                            // The downloaded DB lease covers the whole write so a concurrent delete
+                            // cannot unlink the raw-data source mid-copy.
+                            dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
+                                ingestionBuilder.replaceProcessedWord(
+                                    processedJson = responseJson,
+                                    word = lemma,
+                                    langCode = language.code,
+                                    frequency = frequency,
+                                    dictDb = localDictDb,
+                                    rawSourceDb = downloadedDb,
+                                    translationDb = localTransDb,
+                                )
                             }
                         }
 
