@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Audio automatisch abspielen</string>
     <string name="study_actions_autoplay_description">Aussprache automatisch abspielen</string>
     <string name="study_actions_autoplay_on">Automatische Audiowiedergabe an</string>
+    <string name="study_autoplay_saved_on">Automatische Audiowiedergabe für diese und zukünftige Sitzungen aktiviert</string>
+    <string name="study_autoplay_saved_off">Automatische Audiowiedergabe für diese und zukünftige Sitzungen deaktiviert</string>
     <string name="study_actions_suspend">Dieses Wort pausieren</string>
     <string name="study_actions_suspend_description">Wiederholungen für 30 Tage pausieren</string>
     <string name="study_suspend_message">„%1$s“ für 30 Tage pausiert</string>

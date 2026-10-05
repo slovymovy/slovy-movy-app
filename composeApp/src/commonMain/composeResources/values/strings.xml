@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Autoplay audio</string>
     <string name="study_actions_autoplay_description">Play pronunciation automatically</string>
     <string name="study_actions_autoplay_on">Autoplay audio on</string>
+    <string name="study_autoplay_saved_on">Autoplay on for this and future sessions</string>
+    <string name="study_autoplay_saved_off">Autoplay off for this and future sessions</string>
     <string name="study_actions_suspend">Pause this word</string>
     <string name="study_actions_suspend_description">Pause reviews for 30 days</string>
     <string name="study_suspend_message">"%1$s" paused for 30 days</string>

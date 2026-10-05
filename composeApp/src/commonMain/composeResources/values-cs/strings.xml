@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Automatické přehrávání zvuku</string>
     <string name="study_actions_autoplay_description">Přehrávat výslovnost automaticky</string>
     <string name="study_actions_autoplay_on">Automatické přehrávání zapnuto</string>
+    <string name="study_autoplay_saved_on">Automatické přehrávání zapnuto pro tuto a budoucí relace</string>
+    <string name="study_autoplay_saved_off">Automatické přehrávání vypnuto pro tuto a budoucí relace</string>
     <string name="study_actions_suspend">Pozastavit toto slovo</string>
     <string name="study_actions_suspend_description">Pozastavit opakování na 30 dní</string>
     <string name="study_suspend_message">„%1$s“ pozastaveno na 30 dní</string>

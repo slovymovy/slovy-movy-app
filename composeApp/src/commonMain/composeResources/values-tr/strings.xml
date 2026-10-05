@@ -615,6 +615,8 @@
     <string name="study_actions_autoplay">Sesi otomatik oynat</string>
     <string name="study_actions_autoplay_description">Telaffuzu otomatik oynat</string>
     <string name="study_actions_autoplay_on">Otomatik ses açık</string>
+    <string name="study_autoplay_saved_on">Otomatik ses bu ve gelecekteki oturumlar için açıldı</string>
+    <string name="study_autoplay_saved_off">Otomatik ses bu ve gelecekteki oturumlar için kapatıldı</string>
     <string name="study_actions_suspend">Bu kelimeyi duraklat</string>
     <string name="study_actions_suspend_description">Tekrarları 30 gün duraklat</string>
     <string name="study_suspend_message">“%1$s” 30 gün duraklatıldı</string>
