@@ -324,6 +324,9 @@ Persisted enum/protocol invariants:
 - Native raw entries drive POS/form clustering. Equivalent native form sets are merged; other entries are assigned to
   the best matching cluster, and `lemma_pos_sense_hint` records the resulting sense route.
 - Forms are deduplicated by form, normalized form, tags, and source; do not silently collapse source-specific forms.
+- `FormFilter.forLanguage` may narrow what is stored per language: `GermanFormFilter` keeps one row per table cell
+  (verbs: simple tenses, imperative, infinitive, participles; adjectives: base forms and strong declension; nouns:
+  the native cells with articles plus one bare row per word) and never merges tags, so every searchable word stays.
 - Raw-only online lemmas can be ingested first, processed data can later overlay them, and translations-only ingestion
   is supported only after the base senses exist.
 

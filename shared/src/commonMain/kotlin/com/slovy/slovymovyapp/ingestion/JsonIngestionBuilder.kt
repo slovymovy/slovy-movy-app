@@ -465,7 +465,8 @@ class JsonIngestionBuilder(
 
         val lemmaPosIdToForms = buildLemmaPosIdToForms(
             entriesSelection.entriesForForms,
-            lemmaPosMapping.entryIdToLemmaPosId
+            lemmaPosMapping.entryIdToLemmaPosId,
+            FormFilter.forLanguage(langCode)
         )
         insertForms(dictQ, lemmaPosIdToForms)
 
@@ -895,23 +896,30 @@ class JsonIngestionBuilder(
 
     private fun buildLemmaPosIdToForms(
         entries: List<EntryWithSource>,
-        entryIdToLemmaPosId: Map<Uuid, Uuid>
+        entryIdToLemmaPosId: Map<Uuid, Uuid>,
+        formFilter: FormFilter?
     ): Map<Uuid, List<Pair<ExtractedWordForm, FormSource>>> {
         val lemmaPosIdToForms =
             mutableMapOf<Uuid, MutableMap<FormKey, Pair<ExtractedWordForm, FormSource>>>()
+        val lemmaPosIdToEntryPos = mutableMapOf<Uuid, String>()
         entries.forEach { (entry, source) ->
             val entryId = uuidParse(entry.entryId.toString())
             val lemmaPosId = entryIdToLemmaPosId[entryId] ?: return@forEach
 
             val formsMap = lemmaPosIdToForms.getOrPut(lemmaPosId) { mutableMapOf() }
-            ingestibleForms(entry).forEach { f ->
+            lemmaPosIdToEntryPos.getOrPut(lemmaPosId) { entry.pos }
+            ingestibleForms(entry).forEach { raw ->
+                val f = if (formFilter == null) raw else formFilter.select(entry, raw) ?: return@forEach
                 val key = FormKey(f.form, stripAccents(f.form), f.tags.toSet(), source)
                 if (!formsMap.containsKey(key)) {
                     formsMap[key] = Pair(f, source)
                 }
             }
         }
-        return lemmaPosIdToForms.mapValues { (_, formsMap) -> formsMap.values.toList() }
+        return lemmaPosIdToForms.mapValues { (lemmaPosId, formsMap) ->
+            val forms = formsMap.values.toList()
+            formFilter?.dropRepeated(lemmaPosIdToEntryPos.getValue(lemmaPosId), forms) ?: forms
+        }
     }
 
     private fun insertForms(
