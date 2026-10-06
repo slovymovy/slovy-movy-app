@@ -82,7 +82,7 @@ fun LanguageSetupScreenContent(
 ) {
     val canGoNext = state.learningLanguage != null && (state.nativeLanguages.isNotEmpty() || state.noTranslationSelected)
     val translateIntoEnabled = state.learningLanguage != null
-    val translationLanguages = Language.entries
+    val translationLanguages = Language.translationTargets
         .filter { it != state.learningLanguage }
         .sortedBy { it.selfName }
 

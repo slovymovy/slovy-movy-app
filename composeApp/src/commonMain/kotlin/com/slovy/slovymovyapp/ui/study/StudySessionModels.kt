@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.ui.study
 
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.speech.RowAudioPhase
 
 data class FirstLetterHint(val letter: Char, val letterCount: Int, val dotCount: Int)
 
@@ -22,8 +23,10 @@ sealed interface StudySessionUiState {
         val side: StudyCardSide,
         val ratingOptions: List<StudyRatingUiState> = emptyList(),
         val isSubmittingReview: Boolean = false,
-        val isPlayingAudio: Boolean = false,
-        val isPreparingAudio: Boolean = false,
+        /** Speaker currently sounding, by [StudyAudioKeys]. Null when nothing plays. */
+        val playingAudioKey: String? = null,
+        /** Speaker whose audio is being prepared. Null when nothing is preparing. */
+        val preparingAudioKey: String? = null,
         val viewedSenseId: String? = null,
         val isAutoplayEnabled: Boolean = false,
         val isOverflowMenuOpen: Boolean = false,
@@ -33,6 +36,30 @@ sealed interface StudySessionUiState {
     data class Complete(
         val reward: StudySessionCompleteUiState,
     ) : StudySessionUiState
+}
+
+/**
+ * Addresses of the speakers one study card can show. Only one sounds at a time, so a single key on
+ * [StudySessionUiState.Active] makes them mutually exclusive: starting one releases the other's
+ * control, the same way the sense cards behave.
+ */
+object StudyAudioKeys {
+    /** The card's word: the front prompt and the back headline are the same speaker. */
+    const val WORD: String = "word"
+
+    fun example(senseAudioKey: String, index: Int): String = "$senseAudioKey#ex$index"
+
+    /**
+     * The filled cloze sentence on a back. It is the studied word in context and, on a
+     * CLOZE_SOURCE back, the only sentence there — that back carries no examples.
+     */
+    fun cloze(senseAudioKey: String): String = "$senseAudioKey#cloze"
+}
+
+fun StudySessionUiState.Active.audioPhase(key: String): RowAudioPhase = when (key) {
+    playingAudioKey -> RowAudioPhase.PLAYING
+    preparingAudioKey -> RowAudioPhase.PREPARING
+    else -> RowAudioPhase.IDLE
 }
 
 data class StudySessionProgressUiState(

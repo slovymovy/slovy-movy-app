@@ -9,6 +9,25 @@ enum class Language(
     val flag: String,
     val englishName: String,
     /**
+     * Whether the corpus is generated *for* this language, so it can be studied. That needs a
+     * Wiktextract source mapping and a frequency list, which is why it is the narrower set: it is
+     * exactly the keys of [com.slovy.slovymovyapp.ingestion.LANG_TO_SOURCE_FILE].
+     *
+     * The default is `false` because a language joins as a translation target first; learning
+     * support arrives later, with the data.
+     */
+    val supportedForLearning: Boolean = false,
+    /**
+     * Whether the corpus is translated *into* this language, so it can be picked as a translation
+     * target and requested from `/word`.
+     *
+     * Defaults to `true`: an entry exists in this enum because something is generated for it, and
+     * a target is what a new language is added as. Set it to `false` while a language is being
+     * prepared - the extract imported and the prompt notes being iterated - so that nothing offers
+     * it before its corpus exists.
+     */
+    val supportedForTranslation: Boolean = true,
+    /**
      * Extra guidance appended to the AI base-processing prompt for this language, substituted for
      * its `$INPUT_NOTES` placeholder. Describes what the Wiktextract input for this language can
      * actually look like, where that differs from what the generic prompt assumes.
@@ -20,10 +39,10 @@ enum class Language(
     /** The same, for the AI translation prompt. See [basePromptNotes]. */
     val translationPromptNotes: String = ""
 ) {
-    ENGLISH("en", "English", "🇬🇧", "English"),
-    RUSSIAN("ru", "Русский", "🇷🇺", "Russian"),
-    DUTCH("nl", "Nederlands", "🇳🇱", "Dutch"),
-    POLISH("pl", "Polski", "🇵🇱", "Polish"),
+    ENGLISH("en", "English", "🇬🇧", "English", supportedForLearning = true),
+    RUSSIAN("ru", "Русский", "🇷🇺", "Russian", supportedForLearning = true),
+    DUTCH("nl", "Nederlands", "🇳🇱", "Dutch", supportedForLearning = true),
+    POLISH("pl", "Polski", "🇵🇱", "Polish", supportedForLearning = true),
     GERMAN("de", "Deutsch", "🇩🇪", "German"),
     FRENCH("fr", "Français", "🇫🇷", "French"),
     ITALIAN("it", "Italiano", "🇮🇹", "Italian"),
@@ -124,7 +143,31 @@ enum class Language(
             - Transliterate foreign names so that they still read as foreign; 韦 is an ordinary
               Chinese surname and cannot stand in for a foreign one.
         """.trimIndent()
-    );
+    ),
+
+    /*
+     * Declared, not yet offered. Their extracts are imported (see kaikki-parser's
+     * ExtractionUtils.langToSourceFile), so their translations already enrich the languages being
+     * generated, but no corpus has been generated in them: supportedForTranslation stays false
+     * until one has, and translationPromptNotes are written and measured. See
+     * docs/ADDING_A_LANGUAGE.md in kaikki-parser.
+     *
+     * englishName is the sole input to the translation prompt's $TARGET_LANG, so for the two below
+     * whose extract covers more than one variety it is the thing to settle before generating:
+     * Portuguese is European or Brazilian, and Kurdish is Kurmanji or Sorani. Both currently carry
+     * the neutral name, which is only safe while nothing generates from it.
+     */
+    GREEK("el", "Ελληνικά", "🇬🇷", "Greek", supportedForTranslation = false),
+    INDONESIAN("id", "Bahasa Indonesia", "🇮🇩", "Indonesian", supportedForTranslation = false),
+    JAPANESE("ja", "日本語", "🇯🇵", "Japanese", supportedForTranslation = false),
+    KOREAN("ko", "한국어", "🇰🇷", "Korean", supportedForTranslation = false),
+
+    /** No country flag exists for Kurdish, and every neighbouring one would be wrong. */
+    KURDISH("ku", "Kurdî", "🌍", "Kurdish", supportedForTranslation = false),
+    MALAY("ms", "Bahasa Melayu", "🇲🇾", "Malay", supportedForTranslation = false),
+    PORTUGUESE("pt", "Português", "🇵🇹", "Portuguese", supportedForTranslation = false),
+    THAI("th", "ไทย", "🇹🇭", "Thai", supportedForTranslation = false),
+    VIETNAMESE("vi", "Tiếng Việt", "🇻🇳", "Vietnamese", supportedForTranslation = false);
 
     /**
      * Separator for enumerating words written in this language, such as the translation glosses
@@ -141,6 +184,12 @@ enum class Language(
         }
 
     companion object {
+        /** The languages that can be studied. See [supportedForLearning]. */
+        val learningLanguages: List<Language> get() = entries.filter { it.supportedForLearning }
+
+        /** The languages that can be picked as a translation target. See [supportedForTranslation]. */
+        val translationTargets: List<Language> get() = entries.filter { it.supportedForTranslation }
+
         fun fromCode(code: String): Language {
             return entries.find { it.code == code }
                 ?: throw IllegalArgumentException("Unknown language code: $code")

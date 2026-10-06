@@ -5,7 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.i18n.resolve
-import com.slovy.slovymovyapp.speech.LemmaAudioControl
+import com.slovy.slovymovyapp.speech.AudioControl
 import com.slovy.slovymovyapp.ui.word.SenseCard
 import com.slovy.slovymovyapp.ui.word.SenseCardData
 import com.slovy.slovymovyapp.ui.word.SenseUiState
@@ -22,7 +22,8 @@ internal fun FavoriteSenseCard(
     onViewFullDetails: () -> Unit,
     onWordClick: (String) -> Unit = {},
     favoriteLemmas: Set<String> = emptySet(),
-    lemmaAudio: LemmaAudioControl? = null,
+    lemmaAudio: AudioControl? = null,
+    exampleAudio: (index: Int) -> AudioControl? = { null },
 ) {
     val senseState = SenseUiState(
         senseId = item.senseId,
@@ -52,6 +53,7 @@ internal fun FavoriteSenseCard(
         onWordClick = onWordClick,
         favoriteLemmas = favoriteLemmas,
         lemmaAudio = lemmaAudio,
+        exampleAudio = exampleAudio,
     )
 }
 
