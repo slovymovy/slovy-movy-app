@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">İndirme iptal edildi</string>
     <string name="download_state_completed">İndirme tamamlandı</string>
 
-    <string name="favorites_title">Kelimelerim</string>
     <string name="favorites_loading">Yükleniyor...</string>
-    <string name="favorites_search_placeholder">Bir kelime yaz...</string>
+    <string name="favorites_search_placeholder">Kelimelerim'de ara</string>
     <string name="favorites_empty_title">Öğrenme listen burada başlıyor.</string>
     <string name="favorites_empty_description_before_heart_icon">Herhangi bir kelimeyi ara ve&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;simgesine dokunarak daha sonra çalışmak üzere buraya kaydet.</string>
@@ -212,6 +211,7 @@
     <string name="word_details_title">Kelime Detayları</string>
     <string name="word_details_action_stop">Durdur</string>
     <string name="word_details_action_play_word">Kelimeyi seslendir</string>
+    <string name="word_details_action_play_example">Örneği seslendir</string>
     <string name="word_details_feedback_title">Düzeltme öner</string>
     <string name="word_details_feedback_placeholder">Neyin düzeltilmesi gerekiyor?</string>
     <string name="word_details_no_entries">Kayıt bulunamadı.</string>
@@ -614,6 +614,8 @@
     <string name="study_actions_autoplay">Sesi otomatik oynat</string>
     <string name="study_actions_autoplay_description">Telaffuzu otomatik oynat</string>
     <string name="study_actions_autoplay_on">Otomatik ses açık</string>
+    <string name="study_autoplay_saved_on">Otomatik ses bu ve gelecekteki oturumlar için açıldı</string>
+    <string name="study_autoplay_saved_off">Otomatik ses bu ve gelecekteki oturumlar için kapatıldı</string>
     <string name="study_actions_suspend">Bu kelimeyi duraklat</string>
     <string name="study_actions_suspend_description">Tekrarları 30 gün duraklat</string>
     <string name="study_suspend_message">“%1$s” 30 gün duraklatıldı</string>
@@ -703,6 +705,7 @@
     <string name="study_prompt_translate_to">%1$s diline çevir</string>
     <string name="guess_by_context">Bağlamdan tahmin et</string>
     <string name="study_play_word_audio">Kelime sesini oynat</string>
+    <string name="study_play_example_audio">Örneği seslendir</string>
     <string name="study_play_prompt_audio">Soru sesini oynat</string>
     <string name="study_stop_audio">Sesi durdur</string>
     <string name="study_hint_show">İpucu</string>
@@ -734,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">sonraki tekrara kadar</string>
     <string name="favorites_study_done_review_more">Biraz daha tekrar et</string>
     <string name="favorites_study_done_study_new">Yeni kelimeler çalış</string>
+    <string name="favorites_study_done_more">Daha fazla çalış</string>
     <string name="favorites_study_done_region">Tekrar tamamlandı</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d saat</item>
@@ -749,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d sa %2$d dk</string>
     <string name="favorites_study_done_next_review_a11y">Sonraki tekrar: %1$s sonra</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Metni incele</string>

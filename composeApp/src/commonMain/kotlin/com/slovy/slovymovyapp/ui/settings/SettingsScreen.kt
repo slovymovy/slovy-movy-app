@@ -292,7 +292,7 @@ fun SettingsScreenContent(
                             }
                             item {
                                 TranslationLanguageSection(
-                                    allLanguages = Language.entries.sortedBy { it.selfName },
+                                    allLanguages = Language.translationTargets.sortedBy { it.selfName },
                                     selectedLanguages = state.translationLanguages,
                                     isExpanded = state.isTranslationLanguagesExpanded,
                                     onToggleExpanded = onToggleTranslationLanguagesExpanded,

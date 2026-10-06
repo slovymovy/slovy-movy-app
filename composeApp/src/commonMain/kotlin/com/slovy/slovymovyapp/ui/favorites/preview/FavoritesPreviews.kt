@@ -17,7 +17,39 @@ import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.favorites.FavoritesScreenContent
 import com.slovy.slovymovyapp.ui.favorites.FavoritesStudyDoneAction
 import com.slovy.slovymovyapp.ui.favorites.FavoritesStudyDoneUiState
+import com.slovy.slovymovyapp.ui.favorites.FavoritesStudyUiState
 import com.slovy.slovymovyapp.ui.favorites.FavoritesUiState
+
+private val dutchSampleSenses = listOf(
+    createSenseItem(
+        senseId = "sleep-1",
+        lemma = "slapen",
+        sense = createMockSense("sleep-1", "to sleep", LearnerLevel.A1, SenseFrequency.HIGH),
+        pos = PartOfSpeech.VERB
+    ),
+    createSenseItem(
+        senseId = "gezelligheid-1",
+        lemma = "gezelligheid",
+        sense = createMockSense(
+            "gezelligheid-1",
+            "coziness, togetherness",
+            LearnerLevel.B2,
+            SenseFrequency.MIDDLE
+        ),
+        pos = PartOfSpeech.NOUN
+    ),
+    createSenseItem(
+        senseId = "uitzonderlijk-1",
+        lemma = "uitzonderlijk",
+        sense = createMockSense(
+            "uitzonderlijk-1",
+            "exceptional, remarkable",
+            LearnerLevel.C1,
+            SenseFrequency.LOW
+        ),
+        pos = PartOfSpeech.ADJECTIVE
+    )
+)
 
 @Preview
 @Composable
@@ -75,41 +107,29 @@ fun PreviewFavoritesScreenCollapsed(
 
 @Preview
 @Composable
+fun PreviewFavoritesScreenStudyDue(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val state = FavoritesUiState.Content(
+            senses = dutchSampleSenses,
+            hasAnyFavorites = true,
+            availableLanguages = listOf(Language.DUTCH, Language.ENGLISH),
+            selectedLanguage = Language.DUTCH,
+            study = FavoritesStudyUiState(language = Language.DUTCH, dueCount = 219),
+        )
+        FavoritesScreenContent(state = state)
+    }
+}
+
+@Preview
+@Composable
 fun PreviewFavoritesScreenStudyDone(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
 ) {
     ThemedPreview(darkTheme = isDark) {
         val state = FavoritesUiState.Content(
-            senses = listOf(
-                createSenseItem(
-                    senseId = "sleep-1",
-                    lemma = "slapen",
-                    sense = createMockSense("sleep-1", "to sleep", LearnerLevel.A1, SenseFrequency.HIGH),
-                    pos = PartOfSpeech.VERB
-                ),
-                createSenseItem(
-                    senseId = "gezelligheid-1",
-                    lemma = "gezelligheid",
-                    sense = createMockSense(
-                        "gezelligheid-1",
-                        "coziness, togetherness",
-                        LearnerLevel.B2,
-                        SenseFrequency.MIDDLE
-                    ),
-                    pos = PartOfSpeech.NOUN
-                ),
-                createSenseItem(
-                    senseId = "uitzonderlijk-1",
-                    lemma = "uitzonderlijk",
-                    sense = createMockSense(
-                        "uitzonderlijk-1",
-                        "exceptional, remarkable",
-                        LearnerLevel.C1,
-                        SenseFrequency.LOW
-                    ),
-                    pos = PartOfSpeech.ADJECTIVE
-                )
-            ),
+            senses = dutchSampleSenses,
             hasAnyFavorites = true,
             availableLanguages = listOf(Language.DUTCH),
             selectedLanguage = Language.DUTCH,
@@ -122,6 +142,33 @@ fun PreviewFavoritesScreenStudyDone(
                     args = listOf(4),
                 ),
                 action = FavoritesStudyDoneAction.REVIEW_MORE,
+                nextReviewAtEpochMs = 0L,
+            ),
+        )
+        FavoritesScreenContent(state = state)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewFavoritesScreenStudyDoneNothingMore(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        val state = FavoritesUiState.Content(
+            senses = dutchSampleSenses,
+            hasAnyFavorites = true,
+            availableLanguages = listOf(Language.DUTCH),
+            selectedLanguage = Language.DUTCH,
+            studyDone = FavoritesStudyDoneUiState(
+                language = Language.DUTCH,
+                nextReviewLabel = ShortDuration.uiText(totalMinutes = 7 * 60),
+                nextReviewAccessibilityValue = UiText.Plural(
+                    Res.plurals.favorites_study_done_duration_hours,
+                    quantity = 7,
+                    args = listOf(7),
+                ),
+                action = null,
                 nextReviewAtEpochMs = 0L,
             ),
         )

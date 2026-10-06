@@ -145,15 +145,35 @@ class FavoritesViewModel(
 
     val rowAudioActions = RowAudioActions(
         onToggle = ::toggleAudio,
+        onToggleExample = ::toggleExampleAudio,
         onOpenVoiceSettings = rowAudio::openVoiceSettings,
         onDismissVoiceSetup = rowAudio::dismissVoiceSetup,
         onDismissVoiceSetupAndPlay = rowAudio::dismissVoiceSetupAndPlay,
     )
 
+    /**
+     * Rows can be in any language the user has saved words for, and the set is only known once
+     * favorites load, so every language is probed. Row speakers show optimistically while the
+     * probe runs, so its cost is never visible here the way it is on Word details.
+     */
+    fun refreshAudioAvailability() {
+        rowAudio.refreshAvailability(Language.entries.toSet())
+    }
+
     fun toggleAudio(senseId: String) {
-        val content = state as? FavoritesUiState.Content ?: return
-        val item = content.senses.firstOrNull { it.senseId == senseId } ?: return
-        rowAudio.toggle(senseId, item.lemma, item.targetLang)
+        val item = findSense(senseId) ?: return
+        rowAudio.toggleLemma(senseId, item.lemma, item.targetLang)
+    }
+
+    /**
+     * Plays the source sentence of the example at [index]. Examples only render once the sense is
+     * loaded and expanded, so a missing one means the row changed under the tap — ignore it rather
+     * than speaking the wrong sentence.
+     */
+    fun toggleExampleAudio(senseId: String, index: Int) {
+        val item = findSense(senseId) ?: return
+        val example = item.sense?.examples?.getOrNull(index) ?: return
+        rowAudio.toggleExample(senseId, index, example.text, item.targetLang)
     }
 
     override fun onCleared() {
@@ -574,6 +594,7 @@ class FavoritesViewModel(
     }
 
     fun toggleSense(senseId: String) {
+        rowAudio.stopExamplesOf(senseId)
         val item = findSense(senseId) ?: return
         val wasExpanded = item.expanded
         val shouldLoad = !wasExpanded && item.sense == null && !item.loading && item.error == null

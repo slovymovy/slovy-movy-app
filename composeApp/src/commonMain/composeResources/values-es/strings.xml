@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">Descarga cancelada</string>
     <string name="download_state_completed">Descarga completada</string>
 
-    <string name="favorites_title">Mis palabras</string>
     <string name="favorites_loading">Cargando...</string>
-    <string name="favorites_search_placeholder">Escribe una palabra...</string>
+    <string name="favorites_search_placeholder">Busca en Mis palabras</string>
     <string name="favorites_empty_title">Tu lista de aprendizaje empieza aquí.</string>
     <string name="favorites_empty_description_before_heart_icon">Busca cualquier palabra y toca el&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;para guardarla aquí y estudiarla más tarde.</string>
@@ -212,6 +211,7 @@
     <string name="word_details_title">Detalles de la palabra</string>
     <string name="word_details_action_stop">Detener</string>
     <string name="word_details_action_play_word">Reproducir palabra</string>
+    <string name="word_details_action_play_example">Reproducir ejemplo</string>
     <string name="word_details_feedback_title">Sugerir una corrección</string>
     <string name="word_details_feedback_placeholder">¿Qué hay que corregir?</string>
     <string name="word_details_no_entries">No hay entradas disponibles.</string>
@@ -614,6 +614,8 @@
     <string name="study_actions_autoplay">Reproducir audio automáticamente</string>
     <string name="study_actions_autoplay_description">Reproducir la pronunciación automáticamente</string>
     <string name="study_actions_autoplay_on">Reproducción automática de audio activada</string>
+    <string name="study_autoplay_saved_on">Reproducción automática activada para esta y futuras sesiones</string>
+    <string name="study_autoplay_saved_off">Reproducción automática desactivada para esta y futuras sesiones</string>
     <string name="study_actions_suspend">Pausar esta palabra</string>
     <string name="study_actions_suspend_description">Pausar los repasos durante 30 días</string>
     <string name="study_suspend_message">«%1$s» pausada durante 30 días</string>
@@ -703,6 +705,7 @@
     <string name="study_prompt_translate_to">Traduce a %1$s</string>
     <string name="guess_by_context">Adivina por el contexto</string>
     <string name="study_play_word_audio">Reproducir audio de la palabra</string>
+    <string name="study_play_example_audio">Reproducir ejemplo</string>
     <string name="study_play_prompt_audio">Reproducir audio del enunciado</string>
     <string name="study_stop_audio">Detener audio</string>
     <string name="study_hint_show">Pista</string>
@@ -734,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">hasta el próximo repaso</string>
     <string name="favorites_study_done_review_more">Repasar un poco más</string>
     <string name="favorites_study_done_study_new">Estudiar palabras nuevas</string>
+    <string name="favorites_study_done_more">Estudiar más</string>
     <string name="favorites_study_done_region">Repaso completado</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d hora</item>
@@ -749,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Próximo repaso en %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Consultar un texto</string>
