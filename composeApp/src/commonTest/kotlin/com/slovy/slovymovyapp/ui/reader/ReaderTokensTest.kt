@@ -52,15 +52,6 @@ class ReaderTokensTest {
     }
 
     @Test
-    fun normalizeApostrophes_maps_typographic_variants_to_ascii() {
-        assertEquals("don't", normalizeApostrophes("don’t"))
-        assertEquals("l'homme", normalizeApostrophes("l’homme"))
-        assertEquals("'quote'", normalizeApostrophes("‘quote’"))
-        assertEquals("don't", normalizeApostrophes("donʼt"))
-        assertEquals("plain", normalizeApostrophes("plain"))
-    }
-
-    @Test
     fun groupTokensForRendering_puts_at_most_one_word_per_group() {
         val tokens = tokenize("https://example.com/some/long/path stad")
         val groups = groupTokensForRendering(tokens)

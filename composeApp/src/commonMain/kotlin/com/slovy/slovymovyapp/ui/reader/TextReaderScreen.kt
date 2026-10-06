@@ -134,12 +134,12 @@ class TextReaderViewModel(
                     state = state.copy(isAnalyzing = false, isTooLong = true)
                     return@launch
                 }
-                val words = tokens.filter { it.isWord }.map { normalizeApostrophes(it.text) }.distinct()
+                val words = tokens.filter { it.isWord }.map { it.text }.distinct()
                 val results = repository.lookupTokens(words, language)
                 val resolvedTokens = tokens.map { token ->
                     if (!token.isWord) token
                     else {
-                        val result = results[normalizeApostrophes(token.text)]
+                        val result = results[token.text]
                         token.copy(
                             lemma = result?.lemma,
                             lemmaId = result?.lemmaId,
@@ -186,6 +186,16 @@ class TextReaderViewModel(
         if (autoPasteAttempted || state.hasResults || state.isAnalyzing) return false
         autoPasteAttempted = true
         return true
+    }
+
+    /**
+     * Analyzes text the platform handed to the app (a text-selection action or share). It
+     * replaces the clipboard auto-paste for this reader instance: the passage is already
+     * known, so reading the clipboard would only overwrite it or raise the iOS paste prompt.
+     */
+    fun analyzeExternalText(text: String) {
+        autoPasteAttempted = true
+        analyzeText(text)
     }
 }
 

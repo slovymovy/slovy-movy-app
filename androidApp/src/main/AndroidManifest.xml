@@ -29,11 +29,29 @@
         <activity
                 android:exported="true"
                 android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
-                android:name="com.slovy.slovymovyapp.MainActivity">
+                android:name="com.slovy.slovymovyapp.MainActivity"
+                android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!--
+              Text-selection toolbar entry: selecting text in any app and choosing OpenWords
+              hands the selection to MainActivity (see AndroidSharedTextIntent). singleTask
+              above routes it to the running instance through onNewIntent instead of stacking
+              a second copy of the app inside the calling app's task.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+            <!-- Share sheet entry for plain text. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
         <service

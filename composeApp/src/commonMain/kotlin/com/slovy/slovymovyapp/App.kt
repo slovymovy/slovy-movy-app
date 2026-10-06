@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import coil3.ImageLoader
@@ -25,6 +26,9 @@ import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
+import com.slovy.slovymovyapp.share.SharedTextReceiver
+import com.slovy.slovymovyapp.share.SharedTextRoute
+import com.slovy.slovymovyapp.share.SharedTextRouter
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.favorites.*
 import com.slovy.slovymovyapp.ui.settings.*
@@ -73,6 +77,9 @@ fun App(
     platform: PlatformDbSupport,
     appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
+    // Text handed over by the platform (Android text-selection action / share sheet).
+    // Null on platforms without such an entry point.
+    sharedTextReceiver: SharedTextReceiver? = null,
 ) {
     // Word-list icons arrive from the server as SVG text; Coil needs the SVG decoder
     // registered to render them (see WordListIcon).
@@ -82,6 +89,10 @@ fun App(
             .build()
     }
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
+    // Shared passages waiting for their Text Reader entry to compose, keyed by request serial.
+    // Keyed rather than a single slot: while a share replaces an open reader, the outgoing
+    // entry is still composed and must not pick up the passage meant for the incoming one.
+    val pendingReaderTexts = remember { mutableMapOf<Long, String>() }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
     val container = rememberAppContainer(
@@ -272,6 +283,75 @@ fun App(
     }
 
     val resolvedStart = startDestination ?: return
+
+    // Deliver platform-shared text once one of the main screens is showing. Anything else
+    // (welcome, setup, download, data-version, error, and a running study session) holds the
+    // request instead of dropping it: a share that cold-starts a not-yet-configured app lands
+    // after setup, and a share during study does not tear the session down. An allow-list so
+    // a future blocking screen holds by default.
+    val sharedTextRequest = sharedTextReceiver?.pending
+    val currentDestination = navBackStackEntry?.destination
+    val readyForSharedText = currentDestination != null && (
+            currentDestination.hasRoute<AppDestination.Search>() ||
+                    currentDestination.hasRoute<AppDestination.Favorites>() ||
+                    currentDestination.hasRoute<AppDestination.Stats>() ||
+                    currentDestination.hasRoute<AppDestination.Settings>() ||
+                    currentDestination.hasRoute<AppDestination.Developer>() ||
+                    currentDestination.hasRoute<AppDestination.WordDetail>() ||
+                    currentDestination.hasRoute<AppDestination.ListDetail>() ||
+                    currentDestination.hasRoute<AppDestination.TextReader>()
+            )
+    LaunchedEffect(sharedTextRequest, readyForSharedText, dictionaryLanguage) {
+        val request = sharedTextRequest ?: return@LaunchedEffect
+        if (!readyForSharedText) return@LaunchedEffect
+        // The lookup runs in the language Search is set to, so resolve it the way
+        // SearchViewModel does: the persisted search language when its dictionary is
+        // installed, else the active learning language, else any installed dictionary.
+        val installed = container.dictionaryRepository.installedDictionaries()
+        val savedSearchLanguage = settingsRepository.getById(Setting.Name.SEARCH_LANGUAGE)
+            ?.value?.jsonPrimitive?.content?.let { Language.fromCodeOrNull(it) }
+        val language = savedSearchLanguage?.takeIf { it in installed }
+            ?: dictionaryLanguage?.takeIf { it in installed }
+            ?: installed.firstOrNull()
+            ?: return@LaunchedEffect
+        val route = SharedTextRouter.route(request.text)
+        sharedTextReceiver.consume(request)
+        if (route == null) return@LaunchedEffect
+        logEvent(
+            AnalyticsEvent.SHARED_TEXT_RECEIVED,
+            buildMap {
+                put("lang", language.code)
+                put("source", request.source.analyticsValue)
+                put(
+                    "route",
+                    when (route) {
+                        is SharedTextRoute.Search -> "search"
+                        is SharedTextRoute.Reader -> "reader"
+                    },
+                )
+                put("char_count", request.text.length.toLong())
+                // Absent for oversized passages, which are never tokenized.
+                SharedTextRouter.wordCount(request.text)?.let { put("word_count", it.toLong()) }
+            },
+        )
+        // Land on Search first (same pattern as Favorites' "search in dictionary"), so the
+        // shared result sits directly above the app's root rather than above whatever the
+        // user had open. popBackStack pops nothing when Search is already on top, so skip it.
+        if (!currentDestination.hasRoute<AppDestination.Search>() &&
+            !navController.popBackStack(AppDestination.Search, inclusive = false)
+        ) {
+            navController.navigate(AppDestination.Search)
+        }
+        when (route) {
+            is SharedTextRoute.Search -> pendingSearchQuery = route.query
+            is SharedTextRoute.Reader -> {
+                pendingReaderTexts[request.serial] = route.text
+                navController.navigate(
+                    AppDestination.TextReader(languageCode = language.code, sharedTextSerial = request.serial)
+                )
+            }
+        }
+    }
 
     AppTheme {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -536,7 +616,9 @@ fun App(
                                 navController.navigate(AppDestination.Settings)
                         },
                         onNavigateToTextReader = { language ->
-                            navController.navigate(AppDestination.TextReader(language.code))
+                            navController.navigate(
+                                AppDestination.TextReader(languageCode = language.code, sharedTextSerial = null)
+                            )
                         },
                         hasFavoritesToReview = hasFavoritesToReview,
                         onListClick = { list ->
@@ -870,6 +952,13 @@ fun App(
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         TextReaderViewModel(container.dictionaryRepository, container.favoritesRepository, language)
+                    }
+                    // Runs before TextReaderScreen's own entry effect, so a shared passage wins
+                    // over the clipboard auto-paste. After process death the map is empty and
+                    // the entry falls back to the clipboard like a manually opened reader.
+                    LaunchedEffect(Unit) {
+                        val text = args.sharedTextSerial?.let { pendingReaderTexts.remove(it) } ?: return@LaunchedEffect
+                        viewModel.analyzeExternalText(text)
                     }
                     TextReaderScreen(
                         viewModel = viewModel,

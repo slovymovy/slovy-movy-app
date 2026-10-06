@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ingestion
 
+import com.slovy.slovymovyapp.util.normalizeApostrophes
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,5 +33,14 @@ class StringUtilsTest {
     fun cyrillic_should_remain_lowercased_only() {
         assertEquals("программа", stripAccents("Программа"), "Cyrillic should not be transliterated, only lowercased")
         assertEquals("еж", stripAccents("Ёж"), "Cyrillic should not be transliterated, only lowercased")
+    }
+
+    @Test
+    fun normalizeApostrophes_maps_typographic_variants_to_ascii() {
+        assertEquals("don't", normalizeApostrophes("don’t"))
+        assertEquals("l'homme", normalizeApostrophes("l’homme"))
+        assertEquals("'quote'", normalizeApostrophes("‘quote’"))
+        assertEquals("don't", normalizeApostrophes("donʼt"))
+        assertEquals("plain", normalizeApostrophes("plain"))
     }
 }
