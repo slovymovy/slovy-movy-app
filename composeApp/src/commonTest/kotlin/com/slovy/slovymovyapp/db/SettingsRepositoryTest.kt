@@ -7,6 +7,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 open class SettingsRepositoryTest : BaseTest() {
 
@@ -31,5 +33,24 @@ open class SettingsRepositoryTest : BaseTest() {
 
         val foundAfterDelete = repo.getById(Setting.Name.TEST_PROPERTY)
         assertEquals(null, foundAfterDelete)
+    }
+
+    @Test
+    fun study_autoplay_is_off_until_saved_and_survives_a_new_repository() = runBlocking {
+        val database = testAppDatabaseHolder().database
+        val repo = SettingsRepository(database)
+        assertFalse(repo.getStudyAutoplay(), "Autoplay must default to off before the user turns it on")
+
+        repo.setStudyAutoplay(true)
+        assertTrue(
+            SettingsRepository(database).getStudyAutoplay(),
+            "A saved autoplay preference must be read back by the next session's repository",
+        )
+
+        repo.setStudyAutoplay(false)
+        assertFalse(
+            SettingsRepository(database).getStudyAutoplay(),
+            "Turning autoplay off must be saved as well",
+        )
     }
 }
