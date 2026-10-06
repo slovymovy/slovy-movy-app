@@ -31,6 +31,7 @@ import com.slovy.slovymovyapp.data.remote.LanguageCardPosEntry
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.RelatedWord
 import com.slovy.slovymovyapp.i18n.UiText
+import com.slovy.slovymovyapp.speech.AudioControl
 import com.slovy.slovymovyapp.ui.components.PartOfSpeechIndicator
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
@@ -516,6 +517,8 @@ internal fun EntryCard(
     onSenseFavoriteToggle: (String) -> Unit = {},
     relatedWords: Map<String, RelatedWord> = emptyMap(),
     onWordClick: (String) -> Unit = {},
+    // Inline speaker for the example at (senseId, index); null leaves that example silent.
+    exampleAudio: (senseId: String, index: Int) -> AudioControl? = { _, _ -> null },
     lemma: String,
     favoriteLemmas: Set<String> = emptySet()
 ) {
@@ -627,7 +630,8 @@ internal fun EntryCard(
                         onFavoriteToggle = { onSenseFavoriteToggle(sense.senseId) },
                         relatedWords = relatedWords,
                         onWordClick = onWordClick,
-                        favoriteLemmas = favoriteLemmas
+                        favoriteLemmas = favoriteLemmas,
+                        exampleAudio = { index -> exampleAudio(sense.senseId, index) }
                     )
                 }
             }

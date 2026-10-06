@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">Скачивание отменено</string>
     <string name="download_state_completed">Скачивание завершено</string>
 
-    <string name="favorites_title">Мои слова</string>
     <string name="favorites_loading">Загрузка...</string>
-    <string name="favorites_search_placeholder">Найти слово...</string>
+    <string name="favorites_search_placeholder">Поиск в Моих словах</string>
     <string name="favorites_empty_title">Ваш список слов начинается здесь.</string>
     <string name="favorites_empty_description_before_heart_icon">Найдите нужное слово и нажмите на&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">, чтобы сохранить его для изучения.</string>
@@ -212,6 +211,7 @@
     <string name="word_details_title">О слове</string>
     <string name="word_details_action_stop">Стоп</string>
     <string name="word_details_action_play_word">Прослушать</string>
+    <string name="word_details_action_play_example">Прослушать пример</string>
     <string name="word_details_feedback_title">Нашли ошибку?</string>
     <string name="word_details_feedback_placeholder">Что именно не так?</string>
     <string name="word_details_no_entries">Информация не найдена</string>
@@ -614,6 +614,8 @@
     <string name="study_actions_autoplay">Автовоспроизведение</string>
     <string name="study_actions_autoplay_description">Произношение включается автоматически</string>
     <string name="study_actions_autoplay_on">Автовоспроизведение включено</string>
+    <string name="study_autoplay_saved_on">Автовоспроизведение включено для этой и будущих сессий</string>
+    <string name="study_autoplay_saved_off">Автовоспроизведение выключено для этой и будущих сессий</string>
     <string name="study_actions_suspend">Повторять позже</string>
     <string name="study_actions_suspend_description">Отложить повторение на 30 дней</string>
     <string name="study_suspend_message">Слово «%1$s» отложено на 30 дней</string>
@@ -703,6 +705,7 @@
     <string name="study_chip_recall">Вспомни %1$s</string>
     <string name="guess_by_context">По контексту</string>
     <string name="study_play_word_audio">Воспроизвести слово</string>
+    <string name="study_play_example_audio">Прослушать пример</string>
     <string name="study_play_prompt_audio">Воспроизвести задание</string>
     <string name="study_stop_audio">Остановить аудио</string>
     <string name="study_hint_show">Подсказка</string>
@@ -734,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">до следующего повторения</string>
     <string name="favorites_study_done_review_more">Повторить ещё немного</string>
     <string name="favorites_study_done_study_new">Учить новые слова</string>
+    <string name="favorites_study_done_more">Учить ещё</string>
     <string name="favorites_study_done_region">Повторение завершено</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d час</item>
@@ -749,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d ч %2$d мин</string>
     <string name="favorites_study_done_next_review_a11y">Следующее повторение через %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Разбор текста</string>

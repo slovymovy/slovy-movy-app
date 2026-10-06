@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -66,58 +67,134 @@ internal fun EffortCard(state: StatsUiState) {
         shape = RoundedCornerShape(16.dp),
         padding = PaddingValues(horizontal = AppSpacing.lg, vertical = AppSpacing.mdPlus),
     ) {
-        Column(
+        EffortRows(
+            rows = listOf(
+                EffortRowData(
+                    label = stringResource(Res.string.stats_today_label),
+                    cards = state.reviewsToday,
+                    cardsUnit = todayCardsUnit,
+                    minutes = state.minutesToday,
+                ),
+                EffortRowData(
+                    label = stringResource(Res.string.stats_this_week_label),
+                    cards = state.reviewsWeek,
+                    cardsUnit = weekCardsUnit,
+                    minutes = state.minutesWeek,
+                ),
+            ),
+            isLoading = state.isLoading,
+            layout = rowLayout,
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
-        ) {
-            EffortRow(
-                label = stringResource(Res.string.stats_today_label),
-                cards = state.reviewsToday,
-                cardsUnit = todayCardsUnit,
-                minutes = state.minutesToday,
-                isLoading = state.isLoading,
-                layout = rowLayout,
-            )
-            EffortRow(
-                label = stringResource(Res.string.stats_this_week_label),
-                cards = state.reviewsWeek,
-                cardsUnit = weekCardsUnit,
-                minutes = state.minutesWeek,
-                isLoading = state.isLoading,
-                layout = rowLayout,
-            )
+        )
+    }
+}
+
+internal data class EffortRowData(
+    val label: String,
+    val cards: Int,
+    val cardsUnit: String,
+    val minutes: Int,
+)
+
+/**
+ * Lays out the effort card's rows: a label on the left and the fixed-width value columns on the right.
+ *
+ * The value columns keep their measured widths, so the labels get whatever is left. When every word of
+ * every label fits in that space, labels sit inline beside their values and wrap onto further lines as
+ * needed. When any label has a word that would be clipped, which happens on narrow phones and larger
+ * font scales with labels like "за неделю" or "questa settimana", all rows switch together to a
+ * stacked form with the values below the label. One decision covers the whole card so the rows keep
+ * the same structure, and no label is ever cut off.
+ *
+ * The layout relies on the default intrinsic measurements of `Layout`, which report the stacked
+ * height; no ancestor queries intrinsics today.
+ */
+@Composable
+internal fun EffortRows(
+    rows: List<EffortRowData>,
+    isLoading: Boolean,
+    layout: EffortRowLayout,
+    modifier: Modifier = Modifier,
+) {
+    val inlineGap = AppSpacing.md
+    val stackedGap = AppSpacing.xs
+    val rowSpacing = AppSpacing.md
+    val slots = rows.flatMap { row ->
+        listOf<@Composable () -> Unit>(
+            { EffortLabel(text = row.label) },
+            {
+                EffortValues(
+                    cards = row.cards,
+                    cardsUnit = row.cardsUnit,
+                    minutes = row.minutes,
+                    isLoading = isLoading,
+                    layout = layout,
+                )
+            },
+        )
+    }
+    Layout(contents = slots, modifier = modifier) { slotMeasurables, constraints ->
+        check(constraints.hasBoundedWidth) { "EffortRows needs a bounded width" }
+        val rowWidth = constraints.maxWidth
+        val inlineGapPx = inlineGap.roundToPx()
+        val stackedGapPx = stackedGap.roundToPx()
+        val rowSpacingPx = rowSpacing.roundToPx()
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val labelMeasurables = slotMeasurables.filterIndexed { index, _ -> index % 2 == 0 }.map { it.single() }
+        val valuePlaceables = slotMeasurables.filterIndexed { index, _ -> index % 2 == 1 }
+            .map { it.single().measure(loose) }
+        val valuesWidth = valuePlaceables.maxOfOrNull { it.width } ?: 0
+        val inlineLabelWidth = rowWidth - valuesWidth - inlineGapPx
+        val stacked = labelMeasurables.any { label ->
+            label.minIntrinsicWidth(constraints.maxHeight) > inlineLabelWidth
+        }
+        val labelMaxWidth = if (stacked) rowWidth else inlineLabelWidth
+        val labelPlaceables = labelMeasurables.map { it.measure(loose.copy(maxWidth = labelMaxWidth)) }
+        val rowHeights = labelPlaceables.zip(valuePlaceables) { label, values ->
+            if (stacked) label.height + stackedGapPx + values.height else maxOf(label.height, values.height)
+        }
+        val totalHeight = rowHeights.sum() + rowSpacingPx * (rowHeights.size - 1).coerceAtLeast(0)
+        layout(rowWidth, totalHeight) {
+            var top = 0
+            rowHeights.forEachIndexed { index, rowHeight ->
+                val label = labelPlaceables[index]
+                val values = valuePlaceables[index]
+                if (stacked) {
+                    label.placeRelative(0, top)
+                    values.placeRelative(rowWidth - values.width, top + label.height + stackedGapPx)
+                } else {
+                    label.placeRelative(0, top + (rowHeight - label.height) / 2)
+                    values.placeRelative(rowWidth - values.width, top + (rowHeight - values.height) / 2)
+                }
+                top += rowHeight + rowSpacingPx
+            }
         }
     }
 }
 
 @Composable
-private fun EffortRow(
-    label: String,
+private fun EffortLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall.copy(
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontStyle = MaterialTheme.uiItalic,
+            fontSize = 13.5.sp,
+            lineHeight = 18.sp,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun EffortValues(
     cards: Int,
     cardsUnit: String,
     minutes: Int,
     isLoading: Boolean,
     layout: EffortRowLayout,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontFamily = MaterialTheme.serifFontFamily,
-                fontStyle = MaterialTheme.uiItalic,
-                fontSize = 13.5.sp,
-                lineHeight = 18.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            softWrap = false,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = AppSpacing.md),
-        )
+    Row(verticalAlignment = Alignment.CenterVertically) {
         CountText(
             text = formatCount(cards, isLoading),
             style = effortNumberTextStyle(),
@@ -157,14 +234,14 @@ private fun EffortRow(
     }
 }
 
-private data class EffortRowLayout(
+internal data class EffortRowLayout(
     val cardsNumberWidth: Dp,
     val cardsUnitWidth: Dp,
     val durationWidth: Dp,
 )
 
 @Composable
-private fun rememberEffortRowLayout(
+internal fun rememberEffortRowLayout(
     cardsCounts: List<String>,
     cardsUnits: List<String>,
     durations: List<String>,

@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">下载已取消</string>
     <string name="download_state_completed">下载完成</string>
 
-    <string name="favorites_title">我的单词</string>
     <string name="favorites_loading">加载中…</string>
-    <string name="favorites_search_placeholder">输入单词…</string>
+    <string name="favorites_search_placeholder">在我的单词中搜索</string>
     <string name="favorites_empty_title">你的单词本从这里开始。</string>
     <string name="favorites_empty_description_before_heart_icon">搜索任意单词，点击&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;就能保存到这里，留着以后学。</string>
@@ -212,6 +211,7 @@
     <string name="word_details_title">单词详情</string>
     <string name="word_details_action_stop">停止</string>
     <string name="word_details_action_play_word">朗读单词</string>
+    <string name="word_details_action_play_example">朗读例句</string>
     <string name="word_details_feedback_title">提交纠错</string>
     <string name="word_details_feedback_placeholder">哪里需要更正？</string>
     <string name="word_details_no_entries">暂无内容。</string>
@@ -614,6 +614,8 @@
     <string name="study_actions_autoplay">自动播放</string>
     <string name="study_actions_autoplay_description">自动播放单词发音</string>
     <string name="study_actions_autoplay_on">已开启自动播放</string>
+    <string name="study_autoplay_saved_on">已开启自动播放，本次及未来学习生效</string>
+    <string name="study_autoplay_saved_off">已关闭自动播放，本次及未来学习生效</string>
     <string name="study_actions_suspend">暂停这个单词</string>
     <string name="study_actions_suspend_description">暂停复习 30 天</string>
     <string name="study_suspend_message">“%1$s”已暂停 30 天</string>
@@ -703,6 +705,7 @@
     <string name="study_prompt_translate_to">翻译成 %1$s</string>
     <string name="guess_by_context">根据上下文猜词</string>
     <string name="study_play_word_audio">播放单词发音</string>
+    <string name="study_play_example_audio">朗读例句</string>
     <string name="study_play_prompt_audio">播放题目发音</string>
     <string name="study_stop_audio">停止播放</string>
     <string name="study_hint_show">提示</string>
@@ -734,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">下次复习</string>
     <string name="favorites_study_done_review_more">再多复习一点</string>
     <string name="favorites_study_done_study_new">学习新单词</string>
+    <string name="favorites_study_done_more">继续学习</string>
     <string name="favorites_study_done_region">复习已完成</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d 小时</item>
@@ -749,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d 小时 %2$d 分钟</string>
     <string name="favorites_study_done_next_review_a11y">%1$s后进行下次复习</string>
+    <string name="favorites_study_done_bar_a11y">%1$s，%2$s，%3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">查询一段文本</string>

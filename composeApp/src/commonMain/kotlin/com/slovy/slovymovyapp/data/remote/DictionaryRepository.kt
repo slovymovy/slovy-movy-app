@@ -231,38 +231,44 @@ class DictionaryRepository(
         }
     }
 
+    /** The two translation sources for one (source, target) pair, either of which may be absent. */
+    private class TranslationSources(
+        val downloaded: TranslationDatabase?,
+        val local: TranslationDatabase?,
+    )
+
     /**
-     * Runs [block] with translation databases for ([src], [tgt]) in priority order. Both the
-     * downloaded RO translation and the local writable translation are leased for the duration.
+     * Runs [block] with the translation sources for ([src], [tgt]). Both the downloaded RO
+     * translation and the local writable translation are leased for the duration.
      */
-    private suspend fun <T> withTranslationDatabases(
+    private suspend fun <T> withTranslationSources(
         src: Language,
         tgt: Language,
-        block: suspend (List<TranslationDatabase>) -> T,
+        block: suspend (TranslationSources) -> T,
     ): T = localDbManager.withLocalTranslationIfExists { localDb ->
         dataDbManager.withTranslationReadOnlyIfExists(src, tgt) { downloadedDb ->
-            block(listOfNotNull(downloadedDb, localDb))
+            block(TranslationSources(downloaded = downloadedDb, local = localDb))
         }
     }
 
     /**
      * Recursively acquires translation-database leases for each target language in [targets] and
-     * invokes [block] with a map from each target language to its priority-ordered list of
-     * databases. All leases stay held for the entire [block].
+     * invokes [block] with a map from each target language to its sources. All leases stay held
+     * for the entire [block].
      */
-    private suspend fun <T> withTranslationDatabasesForTargets(
+    private suspend fun <T> withTranslationSourcesForTargets(
         src: Language,
         targets: List<Language>,
-        block: suspend (Map<Language, List<TranslationDatabase>>) -> T,
+        block: suspend (Map<Language, TranslationSources>) -> T,
     ): T {
         suspend fun acquireRemaining(
             remaining: List<Language>,
-            acquired: Map<Language, List<TranslationDatabase>>,
+            acquired: Map<Language, TranslationSources>,
         ): T {
             if (remaining.isEmpty()) return block(acquired)
             val tgt = remaining.first()
-            return withTranslationDatabases(src, tgt) { dbs ->
-                acquireRemaining(remaining.drop(1), acquired + (tgt to dbs))
+            return withTranslationSources(src, tgt) { sources ->
+                acquireRemaining(remaining.drop(1), acquired + (tgt to sources))
             }
         }
         return acquireRemaining(targets, emptyMap())
@@ -717,15 +723,18 @@ class DictionaryRepository(
     ): LanguageCard? = withContext(Dispatchers.IO) {
         val resolvedTranslationTargets = translationTargets ?: defaultTranslationTargets(language)
         try {
-            withDictionaryDatabases(language) { dictDatabases ->
-                withTranslationDatabasesForTargets(language, resolvedTranslationTargets) { translationDbsMap ->
-                    computeLanguageCard(
-                        language = language,
-                        lemma = lemma,
-                        senseIds = senseIds,
-                        dictDatabases = dictDatabases,
-                        translationDbsMap = translationDbsMap,
-                    )
+            localDbManager.withLocalDictionaryIfExists { localDict ->
+                dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDict ->
+                    withTranslationSourcesForTargets(language, resolvedTranslationTargets) { translationSources ->
+                        computeLanguageCard(
+                            language = language,
+                            lemma = lemma,
+                            senseIds = senseIds,
+                            downloadedDict = downloadedDict,
+                            localDict = localDict,
+                            translationSources = translationSources,
+                        )
+                    }
                 }
             }
         } catch (e: CancellationException) {
@@ -745,12 +754,15 @@ class DictionaryRepository(
         language: Language,
         lemma: String,
         senseIds: Set<String>?,
-        dictDatabases: List<DictionaryDatabase>,
-        translationDbsMap: Map<Language, List<TranslationDatabase>>,
+        downloadedDict: DictionaryDatabase?,
+        localDict: DictionaryDatabase?,
+        translationSources: Map<Language, TranslationSources>,
     ): LanguageCard? {
         val senseIdFilter = senseIds?.takeIf { it.isNotEmpty() }
+        val dictDatabases = listOfNotNull(downloadedDict, localDict)
 
-        // Lookup lemma, trying databases in order
+        // Lookup lemma. A processed copy in the local DB wins over the downloaded one: it is the
+        // version fetched from the server.
         var lemmaId: Uuid? = null
         var onlineOnly = false
         var zipfFrequency = 0f
@@ -763,12 +775,13 @@ class DictionaryRepository(
                 .selectLemmasByWord(language.code, normalizedLemma)
                 .executeAsList()
                 .firstOrNull()
-            if (result != null) {
+            // dictDatabases is ordered downloaded, then local: a later processed hit replaces an
+            // earlier one, and an online-only hit never replaces a processed one.
+            if (result != null && (sourceDb == null || onlineOnly || !result.online_only)) {
                 lemmaId = result.id
                 onlineOnly = result.online_only
                 zipfFrequency = result.zipf_frequency.toFloat()
                 sourceDb = db
-                if (!onlineOnly) break
             }
         }
 
@@ -894,6 +907,17 @@ class DictionaryRepository(
             traitsMap = emptyMap()
             examplesMap = emptyMap()
         }
+
+        // Translation sources per target, in priority order. A word fetched from the server lives
+        // in the local DB and outranks the downloaded dictionary; its translations come only from
+        // the local DB, fetched for the same version. Downloaded example translations are keyed by
+        // the position of the downloaded examples, so they could sit next to other sentences. A
+        // language missing locally reads as missing and gets fetched.
+        val translationDbsMap: Map<Language, List<TranslationDatabase>> =
+            translationSources.mapValues { (_, sources) ->
+                if (sourceDb === localDict) listOfNotNull(sources.local)
+                else listOfNotNull(sources.downloaded, sources.local)
+            }
 
         // Batch load translation data per target language
         data class TranslationData(

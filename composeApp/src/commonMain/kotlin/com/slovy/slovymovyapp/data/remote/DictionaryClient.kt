@@ -264,7 +264,7 @@ class DictionaryClient(
     }
 
     /**
-     * Copies raw data from downloaded DB to local DB for online_only words.
+     * Copies raw data from downloaded DB to local DB before the first fetch of a word is ingested.
      * This version takes the localDb and downloadedDb as parameters for use within an existing transaction.
      *
      * @param posFilter If provided, only copies raw data for these POS (to avoid empty entries)
@@ -449,13 +449,28 @@ class DictionaryClient(
                                 )
                             }
 
-                            if (localIsOnlineOnly) {
-                                // Online-only word - copy raw data to local DB first, then ingest
-                                // processed data over it. The downloaded DB lease covers the whole
-                                // transaction so a concurrent delete cannot unlink it mid-write.
-                                // Existence is checked inside the IfExists lease (no TOCTOU).
-                                dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
-                                    localDictDb.transaction {
+                            // The first fetch of a word, online-only or processed in the downloaded
+                            // dictionary alike, copies its raw data to the local DB and ingests the
+                            // processed data over it. The local copy outranks the downloaded
+                            // dictionary, so the word and the translations fetched with it are
+                            // always shown from the same version. Once the local DB holds the word,
+                            // only its translations are added.
+                            // The downloaded DB lease covers the whole transaction so a concurrent
+                            // delete cannot unlink it mid-write. Existence is checked inside the
+                            // IfExists lease (no TOCTOU), and whether the word was fetched before is
+                            // checked inside the transaction, so a parallel fetch of the same word
+                            // that committed first is seen.
+                            dataDbManager.withDictionaryReadOnlyIfExists(language) { downloadedDb ->
+                                localDictDb.transaction {
+                                    val fetchedBefore = localDictDb.dictionaryQueries
+                                        .selectLemmasById(JsonIngestionBuilder.generateLemmaId(lemma))
+                                        .executeAsOneOrNull()
+                                        ?.online_only == false
+                                    if (fetchedBefore) {
+                                        ingestionBuilder.ingestTranslationsOnly(
+                                            responseJson, lemma, language.code, localDictDb
+                                        )
+                                    } else {
                                         if (downloadedDb != null) {
                                             val posFilter = chunk.payload.entries.map { it.pos }.toSet()
                                             copyRawDataIfNeeded(
@@ -472,14 +487,6 @@ class DictionaryClient(
                                             responseJson, lemma, language.code, localDictDb
                                         )
                                     }
-                                }
-                            } else {
-                                // Offline word - find dictionary DB with the processed word,
-                                // add translations only (translations go to local translation DB)
-                                withDictionaryDbContainingWord(language, lemma) { dictDbForReading ->
-                                    ingestionBuilder.ingestTranslationsOnly(
-                                        responseJson, lemma, language.code, dictDbForReading
-                                    )
                                 }
                             }
                         }

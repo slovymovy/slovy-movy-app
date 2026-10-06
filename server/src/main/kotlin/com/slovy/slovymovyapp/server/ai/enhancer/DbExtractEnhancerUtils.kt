@@ -74,14 +74,19 @@ object DbExtractEnhancerUtils {
         )
     }
 
-    fun targetLanguageName(langCode: String): String {
-        return Language.fromCodeOrNull(langCode)?.englishName
-            ?: error("Unsupported language code: $langCode")
-    }
+    fun targetLanguageName(langCode: String): String = translationTarget(langCode).englishName
 
-    fun targetLanguageNotes(langCode: String): String {
-        return Language.fromCodeOrNull(langCode)?.translationPromptNotes
-            ?: error("Unsupported language code: $langCode")
+    fun targetLanguageNotes(langCode: String): String = translationTarget(langCode).translationPromptNotes
+
+    /**
+     * These two accessors are also where the `/word` route validates the translation codes it was
+     * asked for, so a language that is in the enum but not yet a target has to be rejected here
+     * rather than quietly generated for. See [Language.supportedForTranslation].
+     */
+    private fun translationTarget(langCode: String): Language {
+        val language = Language.fromCodeOrNull(langCode) ?: error("Unsupported language code: $langCode")
+        require(language.supportedForTranslation) { "Language is not a translation target: $langCode" }
+        return language
     }
 
     private fun ExtractedWordEntry.toRequestEntry(): LanguageCardEntry {
