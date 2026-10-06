@@ -160,12 +160,6 @@ class GeminiProvider : AIProvider {
                 reasoningType = ReasoningType.TOKENS
             ),
             ModelInfo(
-                GEMINI_3_1_FLASH_LITE, "Gemini 3.1 Flash Light", AIProviderType.GEMINI,
-                supportsTemperature = true,
-                supportsVerbosity = false,
-                reasoningType = ReasoningType.TOKENS
-            ),
-            ModelInfo(
                 GEMINI_3_5_FLASH_LITE, "Gemini 3.5 Flash Light", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,
@@ -173,6 +167,12 @@ class GeminiProvider : AIProvider {
             ),
             ModelInfo(
                 GEMINI_3_6_FLASH, "Gemini 3.6 Flash", AIProviderType.GEMINI,
+                supportsTemperature = true,
+                supportsVerbosity = false,
+                reasoningType = ReasoningType.TOKENS
+            ),
+            ModelInfo(
+                GEMINI_3_8_FLASH, "Gemini 3.8 Flash", AIProviderType.GEMINI,
                 supportsTemperature = true,
                 supportsVerbosity = false,
                 reasoningType = ReasoningType.TOKENS
@@ -207,3 +207,4 @@ const val GEMINI_3_1_PRO_PREVIEW = "gemini-3.1-pro-preview"
 const val GEMINI_3_1_FLASH_LITE = "gemini-3.1-flash-lite"
 const val GEMINI_3_5_FLASH_LITE = "gemini-3.5-flash-lite"
 const val GEMINI_3_6_FLASH = "gemini-3.6-flash"
+const val GEMINI_3_8_FLASH = "gemini-3.8-flash"
