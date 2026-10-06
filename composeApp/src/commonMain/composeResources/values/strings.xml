@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">Download cancelled</string>
     <string name="download_state_completed">Download completed</string>
 
-    <string name="favorites_title">My words</string>
     <string name="favorites_loading">Loading...</string>
-    <string name="favorites_search_placeholder">Type a word...</string>
+    <string name="favorites_search_placeholder">Search in My words</string>
     <string name="favorites_empty_title">Your learning list starts here.</string>
     <string name="favorites_empty_description_before_heart_icon">Search for any word and tap the&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;to save it here for later study.</string>
@@ -738,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">until next review</string>
     <string name="favorites_study_done_review_more">Review a bit more</string>
     <string name="favorites_study_done_study_new">Study new words</string>
+    <string name="favorites_study_done_more">Study more</string>
     <string name="favorites_study_done_region">Review complete</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d hour</item>
@@ -753,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Next review in %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Look up a text</string>

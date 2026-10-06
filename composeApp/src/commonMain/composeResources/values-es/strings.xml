@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">Descarga cancelada</string>
     <string name="download_state_completed">Descarga completada</string>
 
-    <string name="favorites_title">Mis palabras</string>
     <string name="favorites_loading">Cargando...</string>
-    <string name="favorites_search_placeholder">Escribe una palabra...</string>
+    <string name="favorites_search_placeholder">Busca en Mis palabras</string>
     <string name="favorites_empty_title">Tu lista de aprendizaje empieza aquí.</string>
     <string name="favorites_empty_description_before_heart_icon">Busca cualquier palabra y toca el&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;para guardarla aquí y estudiarla más tarde.</string>
@@ -738,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">hasta el próximo repaso</string>
     <string name="favorites_study_done_review_more">Repasar un poco más</string>
     <string name="favorites_study_done_study_new">Estudiar palabras nuevas</string>
+    <string name="favorites_study_done_more">Estudiar más</string>
     <string name="favorites_study_done_region">Repaso completado</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d hora</item>
@@ -753,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Próximo repaso en %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Consultar un texto</string>
