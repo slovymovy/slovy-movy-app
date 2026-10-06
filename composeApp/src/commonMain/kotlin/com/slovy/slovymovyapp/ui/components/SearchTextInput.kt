@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 internal fun PlatformSearchTextInput(
@@ -41,7 +42,9 @@ internal fun PlatformSearchTextInput(
         placeholder = {
             androidx.compose.material3.Text(
                 text = placeholder,
-                style = textStyle
+                style = textStyle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
         leadingIcon = leadingIcon,

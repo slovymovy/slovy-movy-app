@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">Stahování zrušeno</string>
     <string name="download_state_completed">Stahování dokončeno</string>
 
-    <string name="favorites_title">Moje slova</string>
     <string name="favorites_loading">Načítání...</string>
-    <string name="favorites_search_placeholder">Napiš slovo...</string>
+    <string name="favorites_search_placeholder">Hledej v Mých slovech</string>
     <string name="favorites_empty_title">Tady začíná tvůj seznam učení.</string>
     <string name="favorites_empty_description_before_heart_icon">Vyhledej jakékoli slovo a klepni na&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;a ulož si ho sem k pozdějšímu učení.</string>
@@ -738,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">do dalšího opakování</string>
     <string name="favorites_study_done_review_more">Opakovat ještě chvíli</string>
     <string name="favorites_study_done_study_new">Učit se nová slova</string>
+    <string name="favorites_study_done_more">Učit se dál</string>
     <string name="favorites_study_done_region">Opakování dokončeno</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d hodina</item>
@@ -753,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d h %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Další opakování za %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Rozbor textu</string>

@@ -140,7 +140,6 @@ fun FavoritesScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreenContent(
     state: FavoritesUiState,
@@ -167,19 +166,6 @@ fun FavoritesScreenContent(
     val resolvedEmptyStateScrollState = emptyStateScrollState ?: remember { ScrollState(0) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        stringResource(Res.string.favorites_title),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontFamily = MaterialTheme.serifFontFamily,
-                            fontWeight = FontWeight.Medium
-                        )
-                    )
-                }
-            )
-        },
         bottomBar = {
             AppNavigationBar(
                 currentScreen = AppScreen.FAVORITES,
@@ -220,7 +206,8 @@ fun FavoritesScreenContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = AppSpacing.lg),
+                                .padding(horizontal = AppSpacing.lg)
+                                .padding(top = AppSpacing.lg),
                             horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -241,7 +228,6 @@ fun FavoritesScreenContent(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
                     }
 
                     Box(
@@ -306,6 +292,9 @@ fun FavoritesScreenContent(
                             else -> {
                                 Column(modifier = Modifier.fillMaxSize()) {
                                     val words = state.senses.distinctBy { it.lemma }
+                                    val studyBarModifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = AppSpacing.lg, top = AppSpacing.lg, end = AppSpacing.lg)
                                     state.study?.let { study ->
                                         StudyDueCard(
                                             study = study,
@@ -320,9 +309,7 @@ fun FavoritesScreenContent(
                                                 )
                                                 onStartStudy(study.language)
                                             },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
+                                            modifier = studyBarModifier,
                                         )
                                     } ?: state.studyDone?.let { studyDone ->
                                         StudyDoneCard(
@@ -346,9 +333,7 @@ fun FavoritesScreenContent(
                                                     onContinueStudyingNow(studyDone.language, action)
                                                 }
                                             },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm),
+                                            modifier = studyBarModifier,
                                         )
                                     }
                                     Text(
@@ -361,8 +346,8 @@ fun FavoritesScreenContent(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(
                                             start = AppSpacing.lg,
-                                            top = AppSpacing.sm,
-                                            bottom = AppSpacing.sm,
+                                            top = AppSpacing.lg,
+                                            bottom = AppSpacing.smPlus,
                                         )
                                     )
 

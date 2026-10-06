@@ -153,9 +153,8 @@
     <string name="download_state_cancelled">Download geannuleerd</string>
     <string name="download_state_completed">Download voltooid</string>
 
-    <string name="favorites_title">Mijn woorden</string>
     <string name="favorites_loading">Laden...</string>
-    <string name="favorites_search_placeholder">Typ een woord...</string>
+    <string name="favorites_search_placeholder">Zoek in Mijn lijst</string>
     <string name="favorites_empty_title">Je eigen woordenlijst begint hier.</string>
     <string name="favorites_empty_description_before_heart_icon">Zoek een woord en tik op&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">&#32;om het op te slaan voor later.</string>
@@ -738,6 +737,7 @@
     <string name="favorites_study_done_until_next_review">tot de volgende herhaling</string>
     <string name="favorites_study_done_review_more">Nog even herhalen</string>
     <string name="favorites_study_done_study_new">Leer nieuwe woorden</string>
+    <string name="favorites_study_done_more">Leer verder</string>
     <string name="favorites_study_done_region">Herhaling voltooid</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d uur</item>
@@ -753,6 +753,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d u %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Volgende herhaling over %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Tekst verkennen</string>
