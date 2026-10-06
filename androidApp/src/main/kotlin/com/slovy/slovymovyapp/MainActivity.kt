@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,8 +18,14 @@ import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvid
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.logging.FirebaseCrashlyticsAppLogSink
+import com.slovy.slovymovyapp.share.AndroidSharedTextIntent
+import com.slovy.slovymovyapp.share.SharedTextReceiver
 
 class MainActivity : ComponentActivity() {
+    // Text handed over by ACTION_PROCESS_TEXT / ACTION_SEND. Owned by the activity so both
+    // the creating intent and later onNewIntent deliveries reach the same composition.
+    private val sharedTextReceiver = SharedTextReceiver()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             enableEdgeToEdge()
@@ -28,6 +35,11 @@ class MainActivity : ComponentActivity() {
         Analytics.logger = FirebaseAnalyticsLogger()
         PerformanceMonitoring.monitor = FirebasePerformanceMonitor()
         AppLogger.remoteLogger = FirebaseCrashlyticsAppLogSink()
+        // Only a fresh launch carries the shared text; after a process restart the restored
+        // activity would otherwise re-deliver the original selection on every recreation.
+        if (savedInstanceState == null) {
+            offerSharedText(intent)
+        }
 
         setContent {
             val platform = PlatformDbSupport(this)
@@ -40,7 +52,18 @@ class MainActivity : ComponentActivity() {
                 isDebug = BuildConfig.DEBUG,
                 applicationId = BuildConfig.APPLICATION_ID
             )
-            App(settingRepo, dataDbManager, platform, buildConfig, this)
+            App(settingRepo, dataDbManager, platform, buildConfig, this, sharedTextReceiver)
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        offerSharedText(intent)
+    }
+
+    private fun offerSharedText(intent: Intent?) {
+        val (text, source) = AndroidSharedTextIntent.read(intent) ?: return
+        sharedTextReceiver.offer(text, source)
     }
 }
