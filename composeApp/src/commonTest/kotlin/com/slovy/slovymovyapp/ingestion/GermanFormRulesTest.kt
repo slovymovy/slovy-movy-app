@@ -130,6 +130,126 @@ class GermanFormRulesTest {
         assertSame(genitive, GermanFormRules.select(haus, genitive), "noun forms with articles are kept")
     }
 
+    private fun pronoun(word: String, vararg forms: ExtractedWordForm) = ExtractedWordEntry(
+        entryId = entryId, word = word, pos = "pron", langCode = "de",
+        forms = forms.toMutableList(), senses = mutableListOf(), translations = mutableListOf(), wordLinkages = mutableListOf()
+    )
+
+    private fun kept(entry: ExtractedWordEntry) = entry.forms.mapNotNull { GermanFormRules.select(entry, it) }.map { it.form }
+
+    @Test
+    fun select_keepsTheOwnRowOfANativePersonalPronounTable() {
+        // The German edition omits the headword's own cell: "er" lacks nominative masculine singular.
+        val er = pronoun(
+            "er",
+            form("sie", "nominative", "singular", "feminine"), form("es", "nominative", "singular", "neuter"),
+            form("sie", "nominative", "plural"), form("seiner", "genitive", "singular", "masculine"),
+            form("ihrer", "genitive", "singular", "feminine"), form("seiner", "genitive", "singular", "neuter"),
+            form("ihrer", "genitive", "plural"), form("ihm", "dative", "singular", "masculine"),
+            form("ihr", "dative", "singular", "feminine"), form("ihm", "dative", "singular", "neuter"),
+            form("ihnen", "dative", "plural"), form("ihn", "accusative", "singular", "masculine"),
+            form("sie", "accusative", "singular", "feminine"), form("es", "accusative", "singular", "neuter"),
+            form("sie", "accusative", "plural"),
+        )
+        assertEquals(listOf("seiner", "ihm", "ihn"), kept(er), "er keeps its masculine singular row")
+
+        val ich = pronoun(
+            "ich",
+            form("wir", "nominative", "plural"), form("meiner", "genitive", "singular"), form("unser", "genitive", "plural"),
+            form("mir", "dative", "singular"), form("uns", "dative", "plural"), form("mich", "accusative", "singular"),
+            form("uns", "accusative", "plural"),
+        )
+        assertEquals(listOf("meiner", "mir", "mich"), kept(ich), "ich keeps its singular row, not wir's")
+    }
+
+    @Test
+    fun select_keepsTheOwnRowOfTheEnglishPersonalPronounTable() {
+        val table = arrayOf(
+            form("ich", "first-person", "nominative", "singular"), form("du", "nominative", "singular"),
+            form("-e", "nominative", "singular"),
+            form("er", "masculine", "nominative", "singular", "third-person"),
+            form("sie", "feminine", "nominative", "singular", "third-person"),
+            form("wir", "first-person", "nominative", "plural"),
+            form("sie", "nominative", "plural", "third-person"),
+            form("mich", "accusative", "first-person", "singular"), form("dich", "accusative", "singular"),
+            form("ihn", "accusative", "masculine", "singular", "third-person"),
+            form("ihm", "dative", "masculine", "singular", "third-person"),
+            form("ihr", "dative", "feminine", "singular", "third-person"),
+            form("ihnen", "dative", "plural", "third-person"),
+        )
+        assertEquals(listOf("er", "ihn", "ihm"), kept(pronoun("er", *table)), "er: third person masculine singular")
+        assertEquals(listOf("ich", "mich"), kept(pronoun("ich", *table)), "ich: first person singular, not du")
+        assertEquals(listOf("du", "dich"), kept(pronoun("du", *table)), "du: the untagged second person, no clitics")
+        assertEquals(
+            listOf("sie", "sie", "ihr", "ihnen"), kept(pronoun("sie", *table)),
+            "sie is both feminine singular and plural"
+        )
+    }
+
+    @Test
+    fun select_keepsAllFormsOfPronounsDeclinedOnTheHeadword() {
+        val mein = pronoun(
+            "mein",
+            form("meine", "nominative", "singular", "feminine"), form("meines", "genitive", "singular", "masculine"),
+            form("meinem", "dative", "singular", "masculine"), form("meinen", "accusative", "singular", "masculine"),
+            form("meine", "nominative", "plural"),
+        )
+        assertEquals(mein.forms.map { it.form }, kept(mein), "possessives decline in every gender and number")
+    }
+
+    @Test
+    fun select_dropsGrammarThatDoesNotBelongToThePartOfSpeech() {
+        listOf(
+            // the verb's Flexion page copied onto the adjective and the numeral sharing its spelling
+            entry("verlegen", "adj") to form("ich verlege", "active", "first-person", "indicative", "present"),
+            entry("verlegen", "adj") to form("verleg!", "active", "imperative", "present", "second-person"),
+            entry("sieben", "num") to form("gesiebt zu haben", "active", "extended", "infinitive"),
+            // and the adjective's declension onto the verb (weak and mixed rows) and the adverb
+            entry("verlegen", "verb") to form("der verlegene", "definite", "nominative", "feminine", "singular", "weak"),
+            entry("auffallend", "adv") to form("auffallender", "strong", "without-article", "nominative", "masculine"),
+            entry("auffallend", "adv") to form("er ist auffallend", "predicative"),
+            // example phrases, article declension of pronoun-like words, unparsed rows, notes
+            entry("neun", "num") to form("die neun Dinge", "definite"),
+            entry("solch", "pron") to form("keine solchen", "includes-article", "indefinite", "mixed"),
+            entry("anderer", "pron") to form("der andre", "definite", "includes-article", "weak"),
+            entry("jeglicher", "det") to form("ein jeglicher", "indefinite", "with-article"),
+            entry("in", "prep") to form("worin", "error-unrecognized-form"),
+            entry("jeder", "pron") to form("Im adjektivischen Gebrauch ist im Genitiv auch die Form jeden möglich.", "variant"),
+        ).forEach { (e, f) ->
+            assertNull(GermanFormRules.select(e, f), "'${f.form}' ${f.tags} does not belong to ${e.word} (${e.pos})")
+        }
+    }
+
+    @Test
+    fun select_keepsComparisonAndVariantsOfUninflectedWords() {
+        listOf(
+            entry("gut", "adv") to form("besser", "comparative"),
+            entry("gut", "adv") to form("am besten", "superlative"),
+            entry("andererseits", "adv") to form("anderseits", "variant"),
+            entry("zehnte", "num") to form("zehnter", "strong", "without-article", "nominative", "masculine"),
+            entry("Spindoktor", "noun") to form("Spindoktorin", "feminine"),
+            // the strong declension of a participle is often recorded only under its verb
+            entry("entlassen", "verb") to form("entlassener", "masculine", "nominative", "positive", "singular", "strong"),
+        ).forEach { (e, f) ->
+            assertSame(f, GermanFormRules.select(e, f), "'${f.form}' ${f.tags} of ${e.word} (${e.pos}) is kept")
+        }
+    }
+
+    @Test
+    fun select_dropsAbbreviationsAndSymbolsOfEveryPartOfSpeech() {
+        listOf(
+            entry("Amtsanwalt", "noun") to form("AA", "abbreviation"),
+            entry("Eritrea", "name") to form("ER", "abbreviation"),
+            entry("Haus", "noun") to form("H.", "abbreviation"),
+            entry("Erbium", "noun") to form("Er", "symbol"),
+            entry("kaufen", "verb") to form("kfn.", "abbreviation"),
+        ).forEach { (e, f) ->
+            assertNull(GermanFormRules.select(e, f), "'${f.form}' of ${e.word} is an abbreviation or symbol, not a form")
+        }
+        val variant = form("Aa", "variant")
+        assertSame(variant, GermanFormRules.select(entry("Ache", "noun"), variant), "spelling variants are kept")
+    }
+
     @Test
     fun dropRepeated_keepsOneVerbRowPerCell() {
         val native1sg = form("kaufe", "active", "first-person", "indicative", "present", "singular") to FormSource.NATIVE

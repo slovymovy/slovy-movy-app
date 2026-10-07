@@ -334,8 +334,9 @@ Persisted enum/protocol invariants:
   `LanguageFormRules` per language, applied once per entry so POS clustering and storage use the same forms. Put new
   per-language form rules there, not in `JsonIngestionBuilder`. `DutchFormRules` drops numeral notations;
   `GermanFormRules` keeps one row per table cell (verbs: simple tenses, imperative, infinitive, participles;
-  adjectives: base forms and strong declension; nouns: the native cells with articles plus one bare row per word)
-  and never merges tags, so every searchable word stays.
+  adjectives: base forms and strong declension; nouns: the native cells with articles plus one bare row per word;
+  personal pronouns: their own row of the pronoun table) and never merges tags. It drops abbreviations, symbols,
+  unparsed rows and grammar that does not fit the part of speech; inflected words a learner can meet all stay.
 - Raw-only online lemmas can be ingested first, processed data can later overlay them, and translations-only ingestion
   is supported only after the base senses exist.
 

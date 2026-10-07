@@ -97,17 +97,123 @@ object DutchFormRules : LanguageFormRules {
  * of separable verbs ("fängt an"). Adjectives keep one row per cell of the three base forms
  * ("gut", "besser", "am besten") and the strong declension, which holds every declined word.
  * Nouns keep the native cells with their articles plus one bare row per word for search.
+ * Personal pronouns keep the forms of their own row of the pronoun table ("er": ihn, ihm, seiner).
+ * Abbreviations, symbols, unparsed rows and grammar that does not belong to the part of speech are
+ * dropped for every part of speech; related words (gender counterparts, variants, diminutives) stay.
  */
 object GermanFormRules : LanguageFormRules {
 
     private const val VERB = "verb"
     private const val ADJECTIVE = "adj"
     private const val NOUN = "noun"
+    private const val PRONOUN = "pron"
+    private const val DETERMINER = "det"
+    private const val NUMERAL = "num"
+    private val uninflected = setOf("adv", "intj", "prep", "conj")
 
-    override fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm? = when (entry.pos) {
-        VERB -> selectVerbForm(entry.word, form)
-        ADJECTIVE -> form.takeUnless { isDroppedAdjectiveCell(it.tags) }
-        else -> form
+    // The German edition lists a word's abbreviations, number-plate and ISO codes and symbols as its
+    // forms ("AA" of Amtsanwalt, "ER" of Eritrea, "BB" of Böblingen, "Er" of Erbium, "H." of Haus).
+    // They are not inflections and match unrelated short words in search ("er"). Rows the extractor
+    // could not parse ("worin" of the preposition "in") are not forms either.
+    private val notInflectionTags = setOf("abbreviation", "symbol", "error-unrecognized-form", "error-unknown-tag")
+
+    // Verb grammar. A word's Flexion page is copied onto every entry of the word, so an adjective or
+    // numeral sharing its spelling with a verb ("verlegen", "sieben") carries the verb's conjugation.
+    private val verbGrammarTags = setOf(
+        "present", "past", "preterite", "subjunctive-i", "subjunctive-ii", "imperative", "infinitive",
+        "perfect", "pluperfect", "future-i", "future-ii", "processual-passive", "statal-passive",
+        "gerundive", "extended"
+    )
+
+    // Adjective declension, which the same copying puts under adverbs ("auffallender", "der auffallende").
+    private val declensionTags = setOf("strong", "weak", "mixed", "positive", "predicative")
+    private val caseTags = setOf("nominative", "genitive", "dative", "accusative")
+    private val articleTags = setOf("definite", "indefinite", "includes-article", "with-article")
+
+    override fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm? {
+        val tags = form.tags
+        if (tags.any { it in notInflectionTags }) return null
+        // a usage note or sentence filed as a form
+        if (form.form.trim().count { it == ' ' } >= 5) return null
+        if (entry.pos != VERB && tags.any { it in verbGrammarTags }) return null
+        return when (entry.pos) {
+            // the strong declension of the participle ("entlassener", "entlassene") is often its only record
+            VERB -> form.takeUnless { isDroppedAdjectiveCell(tags) }?.let { selectVerbForm(entry.word, it) }
+            ADJECTIVE -> form.takeUnless { isDroppedAdjectiveCell(tags) }
+            PRONOUN -> form.takeIf { !isArticleDeclension(it) && isOwnPronounRow(entry, it) }
+            DETERMINER -> form.takeUnless { isArticleDeclension(it) }
+            // "die neun Dinge", "meine neun Dinge": example phrases, not forms of the numeral
+            NUMERAL -> form.takeUnless { isMultiWord(it.form) || isArticleDeclension(it) }
+            // adverbs, interjections, prepositions and conjunctions do not decline; comparison and variants stay
+            in uninflected -> form.takeUnless { f -> f.tags.any { it in declensionTags || it in caseTags || it in articleTags } }
+            else -> form
+        }
+    }
+
+    /** The weak and mixed declensions, or any row written with its article ("der andre", "keine solchen"). */
+    private fun isArticleDeclension(form: ExtractedWordForm) =
+        form.tags.any { it == "weak" || it == "mixed" } || (isMultiWord(form.form) && form.tags.any { it in articleTags })
+
+    // --- pronouns
+
+    private val personTags = setOf("first-person", "second-person", "third-person")
+    private val numberTags = setOf("singular", "plural")
+    private val genderTags = setOf("masculine", "feminine", "neuter")
+
+    /** Person, number and gender of a pronoun form; null where the form carries no such tag. */
+    private data class PronounRow(val person: String?, val number: String?, val gender: String?)
+
+    private fun rowOf(tags: List<String>) = PronounRow(
+        person = tags.firstOrNull { it in personTags },
+        number = tags.firstOrNull { it in numberTags },
+        gender = tags.firstOrNull { it in genderTags }
+    )
+
+    /**
+     * Both editions file a whole pronoun table under each personal pronoun: the English edition the
+     * same 49 forms of every person under "ich", "er", "wir", ...; the German edition every number
+     * and gender of one person ("er": sie, es, seiner, ihm, ihr, ihnen, ...). A form is kept when it
+     * belongs to the pronoun's own row:
+     * - when the table holds the pronoun itself (the English edition), its row is that form's person,
+     *   number and gender;
+     * - when it does not (the German edition omits the headword's cell), its row is the number and
+     *   gender whose cells are missing from the table: "er" lacks nominative masculine singular.
+     * Declined pronouns whose forms are built on the headword ("mein": meine, meines; possessive "ihr":
+     * ihre, ihres) are not personal pronouns and keep all their forms, as do tables without these tags.
+     */
+    private fun isOwnPronounRow(entry: ExtractedWordEntry, form: ExtractedWordForm): Boolean {
+        if (form.form.startsWith("-")) return false // clitics of the English table ("-e", "-se")
+        val table = entry.forms.filterNot { it.form.startsWith("-") }
+        val lemma = entry.word
+        val ownRows = table.filter { it.form == lemma }.map { rowOf(it.tags) }
+        if (ownRows.isNotEmpty()) {
+            val tablePersons = table.any { f -> f.tags.any { it in personTags } }
+            val row = rowOf(form.tags)
+            return ownRows.any { own ->
+                (!tablePersons || own.person == row.person) && own.number == row.number &&
+                    (own.gender == null || own.gender == row.gender)
+            }
+        }
+        val builtOnHeadword = table.count { it.form.startsWith(lemma, ignoreCase = true) } * 2 >= table.size
+        if (builtOnHeadword) return true
+        val ownCombos = missingNumberGenders(table) ?: return true
+        val row = rowOf(form.tags)
+        return row.number == null || PronounRow(null, row.number, row.gender) in ownCombos
+    }
+
+    /**
+     * The number/gender combinations with a case cell missing from [table], or null when nothing
+     * (or everything) is missing: those are the headword's own cells.
+     */
+    private fun missingNumberGenders(table: List<ExtractedWordForm>): Set<PronounRow>? {
+        val cells = table.mapNotNull { f ->
+            val case = f.tags.firstOrNull { it in caseTags } ?: return@mapNotNull null
+            val row = rowOf(f.tags).takeIf { it.number != null } ?: return@mapNotNull null
+            case to PronounRow(null, row.number, row.gender)
+        }.toSet()
+        val combos = cells.mapTo(mutableSetOf()) { it.second }
+        val missing = combos.filterTo(mutableSetOf()) { combo -> caseTags.any { (it to combo) !in cells } }
+        return missing.takeIf { it.isNotEmpty() && it != combos }
     }
 
     override fun dropRepeated(
