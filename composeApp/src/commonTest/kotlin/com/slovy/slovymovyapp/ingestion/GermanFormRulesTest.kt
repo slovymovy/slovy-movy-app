@@ -7,7 +7,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.uuid.Uuid
 
-class GermanFormFilterTest {
+class GermanFormRulesTest {
 
     private val entryId = Uuid.random()
 
@@ -23,25 +23,17 @@ class GermanFormFilterTest {
     private val anfangen = entry("anfangen", "verb")
 
     @Test
-    fun forLanguage_appliesOnlyToGerman() {
-        assertSame(GermanFormFilter, FormFilter.forLanguage("de"), "German forms are filtered")
-        listOf("en", "ru", "nl", "pl").forEach { code ->
-            assertNull(FormFilter.forLanguage(code), "$code forms are stored unfiltered")
-        }
-    }
-
-    @Test
     fun select_stripsVerbPronounAndExclamationMarkButKeepsTags() {
         val withPronoun = form("ich kaufe", "active", "first-person", "indicative", "present", "singular")
-        val selected = GermanFormFilter.select(kaufen, withPronoun)
+        val selected = GermanFormRules.select(kaufen, withPronoun)
         assertEquals("kaufe", selected?.form, "the pronoun is not part of the form")
         assertEquals(withPronoun.tags, selected?.tags, "tags stay as they are")
         assertEquals(withPronoun.formId, selected?.formId, "the form keeps its id")
 
-        assertEquals("kauf", GermanFormFilter.select(kaufen, form("kauf!", "imperative", "singular"))?.form, "imperative without '!'")
+        assertEquals("kauf", GermanFormRules.select(kaufen, form("kauf!", "imperative", "singular"))?.form, "imperative without '!'")
         assertEquals(
             "kauft",
-            GermanFormFilter.select(kaufen, form("er/sie/es kauft", "indicative", "present", "singular", "third-person"))?.form,
+            GermanFormRules.select(kaufen, form("er/sie/es kauft", "indicative", "present", "singular", "third-person"))?.form,
             "the 'er/sie/es' cell"
         )
     }
@@ -57,7 +49,7 @@ class GermanFormFilterTest {
             form("anzufangende", "gerundive", "participle"),
             form("angefangen", "participle", "perfect"),
         ).forEach { f ->
-            val selected = GermanFormFilter.select(anfangen, f)
+            val selected = GermanFormRules.select(anfangen, f)
             assertEquals(
                 f.form.removePrefix("ich ").removePrefix("er/sie/es ").removeSuffix("!"), selected?.form,
                 "'${f.form}' is a cell of anfangen"
@@ -81,10 +73,10 @@ class GermanFormFilterTest {
             form("zu kaufende", "gerundive", "participle"),
             form("gekauft zu haben", "active", "extended", "infinitive"),
         ).forEach { f ->
-            assertNull(GermanFormFilter.select(kaufen, f), "'${f.form}' ${f.tags} is not stored")
+            assertNull(GermanFormRules.select(kaufen, f), "'${f.form}' ${f.tags} is not stored")
         }
         assertNull(
-            GermanFormFilter.select(entry("siegen", "verb"), form("siegen Sie!", "honorific", "imperative", "present")),
+            GermanFormRules.select(entry("siegen", "verb"), form("siegen Sie!", "honorific", "imperative", "present")),
             "'Sie' is never a separated prefix, even when the verb starts with it"
         )
     }
@@ -100,7 +92,7 @@ class GermanFormFilterTest {
             form("guten", "accusative", "masculine", "positive", "singular", "strong"),
             form("besserem", "comparative", "dative", "masculine", "singular", "strong"),
         ).forEach { f ->
-            assertSame(f, GermanFormFilter.select(gut, f), "'${f.form}' ${f.tags} is a base form or strong cell")
+            assertSame(f, GermanFormRules.select(gut, f), "'${f.form}' ${f.tags} is a base form or strong cell")
         }
     }
 
@@ -114,7 +106,7 @@ class GermanFormFilterTest {
             form("gut", "feminine", "predicative", "singular"),
             form("am besten", "masculine", "predicative", "singular", "superlative"),
         ).forEach { f ->
-            assertNull(GermanFormFilter.select(gut, f), "'${f.form}' ${f.tags} repeats a base form or strong cell")
+            assertNull(GermanFormRules.select(gut, f), "'${f.form}' ${f.tags} repeats a base form or strong cell")
         }
     }
 
@@ -126,7 +118,7 @@ class GermanFormFilterTest {
         val otherCell = form("guter", "feminine", "genitive", "positive", "singular", "strong") to FormSource.NATIVE
         val comparative = form("besserer", "comparative", "masculine", "nominative", "singular", "strong") to FormSource.EN
 
-        val result = GermanFormFilter.dropRepeated("adj", listOf(native, english, englishHeadword, otherCell, comparative))
+        val result = GermanFormRules.dropRepeated("adj", listOf(native, english, englishHeadword, otherCell, comparative))
 
         assertEquals(listOf(native, otherCell, comparative), result, "each cell keeps one row, native first")
     }
@@ -135,7 +127,7 @@ class GermanFormFilterTest {
     fun select_leavesOtherPartsOfSpeechAlone() {
         val haus = entry("Haus", "noun")
         val genitive = form("des Hauses", "genitive", "singular")
-        assertSame(genitive, GermanFormFilter.select(haus, genitive), "noun forms with articles are kept")
+        assertSame(genitive, GermanFormRules.select(haus, genitive), "noun forms with articles are kept")
     }
 
     @Test
@@ -154,7 +146,7 @@ class GermanFormFilterTest {
         val subjunctiveFormalRare =
             form("kaufte", "first-person", "formal", "rare", "singular", "subjunctive", "subjunctive-ii") to FormSource.EN
 
-        val result = GermanFormFilter.dropRepeated(
+        val result = GermanFormRules.dropRepeated(
             "verb",
             listOf(native1sg, english1sg, summary, imperativeVague, imperative, participleNative, participleEnglish,
                 past1sg, past3sg, pastEnglish, subjunctive1sg, subjunctiveFormalRare)
@@ -192,7 +184,7 @@ class GermanFormFilterTest {
             form("Spindoktoren", "accusative", "definite", "plural"),
         ).map { it to FormSource.EN }
 
-        val result = GermanFormFilter.dropRepeated(
+        val result = GermanFormRules.dropRepeated(
             "noun",
             native + listOf(summaryGenitive, summaryPlural, feminine, bareNominative, bareNominativePlural, bareGenitive) + bareRepeats
         )
@@ -212,7 +204,7 @@ class GermanFormFilterTest {
             form("Spindoktor", "accusative", "singular"),
         ).map { it to FormSource.EN }
 
-        assertEquals(english, GermanFormFilter.dropRepeated("noun", english), "bare cells are the table when nothing else fills them")
+        assertEquals(english, GermanFormRules.dropRepeated("noun", english), "bare cells are the table when nothing else fills them")
     }
 
     @Test
@@ -230,7 +222,7 @@ class GermanFormFilterTest {
             form("Spindoktorin", "feminine") to FormSource.EN,
         )
 
-        val result = GermanFormFilter.dropRepeated("name", native + coveredEnglish + keptEnglish)
+        val result = GermanFormRules.dropRepeated("name", native + coveredEnglish + keptEnglish)
 
         assertEquals(native + keptEnglish, result, "English forms whose text and grammar the native edition has are dropped")
     }
@@ -240,7 +232,7 @@ class GermanFormFilterTest {
         val native = listOf(form("die Spindoktoren", "nominative", "plural") to FormSource.NATIVE)
         val english = listOf(form("Spindoktoren", "nominative", "plural") to FormSource.EN)
 
-        val result = GermanFormFilter.dropRepeated("name", native + english)
+        val result = GermanFormRules.dropRepeated("name", native + english)
 
         assertEquals(native + english, result, "a bare word stays searchable when the native edition only has it with an article")
     }

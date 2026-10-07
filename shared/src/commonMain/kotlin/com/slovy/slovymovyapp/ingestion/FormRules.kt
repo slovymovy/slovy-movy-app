@@ -4,20 +4,64 @@ package com.slovy.slovymovyapp.ingestion
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.dictionary.FormSource
+import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.uuid.ExperimentalUuidApi
 
 /**
- * Language-specific rules for which raw forms are stored in the dictionary DB.
+ * Every rule deciding which raw forms of a word are ingested: the rules shared by all languages plus
+ * the [LanguageFormRules] of the word's language. Ingestion sees forms only through this class, so
+ * POS clustering and storage work on the same forms.
  *
- * Wiktionary editions differ in how much of a paradigm they write out; a filter keeps one row per
- * table cell and every word a learner can type or meet in text, and drops the rest.
+ * Wiktionary editions differ in how much of a paradigm they write out; the language rules keep one
+ * row per table cell and every word a learner can type or meet in text, and drop the rest.
  */
-interface FormFilter {
+class IngestibleForms private constructor(private val language: LanguageFormRules) {
+
+    /** The forms of [entry] that are ingested, rewritten where the language rules say so. */
+    fun of(entry: ExtractedWordEntry): List<ExtractedWordForm> =
+        entry.forms.mapNotNull { language.select(entry, it) }
+
     /**
-     * The form of [entry] as it is stored, or null to drop it. May rewrite the text
+     * The forms stored for one lemma_pos, from the ingestible forms of all its entries in insertion
+     * order (native-edition forms first). [entryPos] is the raw part of speech of the lemma_pos.
+     *
+     * A form repeating another with the same text, normalized text, tags and source is dropped
+     * first; source-specific forms are never collapsed. The language rules then drop forms that
+     * repeat another table cell.
+     */
+    fun merge(
+        entryPos: String,
+        forms: List<Pair<ExtractedWordForm, FormSource>>
+    ): List<Pair<ExtractedWordForm, FormSource>> {
+        val unique = forms.distinctBy { (f, source) -> FormKey(f.form, stripAccents(f.form), f.tags.toSet(), source) }
+        return language.dropRepeated(entryPos, unique)
+    }
+
+    private data class FormKey(
+        val form: String,
+        val formNormalized: String,
+        val tags: Set<String>,
+        val source: FormSource
+    )
+
+    companion object {
+        fun forLanguage(langCode: String): IngestibleForms = IngestibleForms(
+            when (langCode) {
+                Language.GERMAN.code -> GermanFormRules
+                Language.DUTCH.code -> DutchFormRules
+                else -> LanguageFormRules.None
+            }
+        )
+    }
+}
+
+/** One language's rules for which raw forms are ingested. The defaults keep every form. */
+interface LanguageFormRules {
+    /**
+     * The form of [entry] as it is ingested, or null to drop it. May rewrite the text
      * (e.g. "ich kaufe" -> "kaufe"); the tags are never changed.
      */
-    fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm?
+    fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm? = form
 
     /**
      * Removes forms of one lemma_pos that repeat another of its forms, given in insertion order
@@ -26,14 +70,21 @@ interface FormFilter {
     fun dropRepeated(
         entryPos: String,
         forms: List<Pair<ExtractedWordForm, FormSource>>
-    ): List<Pair<ExtractedWordForm, FormSource>>
+    ): List<Pair<ExtractedWordForm, FormSource>> = forms
 
-    companion object {
-        fun forLanguage(langCode: String): FormFilter? = when (langCode) {
-            Language.GERMAN.code -> GermanFormFilter
-            else -> null
-        }
-    }
+    /** A language whose forms are all ingested as extracted. */
+    object None : LanguageFormRules
+}
+
+/**
+ * The Dutch Wiktionary lists the binary, hexadecimal and Roman spellings of numerals as forms
+ * ("1010" of tien), marking them with a note; they are notations, not words.
+ */
+object DutchFormRules : LanguageFormRules {
+    private val notationNotes = setOf("binair", "hexadecimaal", "romeins")
+
+    override fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm? =
+        form.takeUnless { form.note?.trim()?.lowercase() in notationNotes }
 }
 
 /**
@@ -47,7 +98,7 @@ interface FormFilter {
  * ("gut", "besser", "am besten") and the strong declension, which holds every declined word.
  * Nouns keep the native cells with their articles plus one bare row per word for search.
  */
-object GermanFormFilter : FormFilter {
+object GermanFormRules : LanguageFormRules {
 
     private const val VERB = "verb"
     private const val ADJECTIVE = "adj"
