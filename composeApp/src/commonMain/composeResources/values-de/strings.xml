@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Aktiviere ausstehende Favoriten für jede installierte Lernsprache.</string>
     <string name="developer_intake_daily">Täglich</string>
     <string name="developer_intake_continue_now">Jetzt fortfahren</string>
+    <string name="developer_study_title">Lernen</string>
+    <string name="developer_typed_playground_button">Getippte Karte ausprobieren</string>
+    <string name="developer_typed_playground_description">Öffnet die getippte Karte mit ein paar Beispielwörtern. Keine Lerndaten, nichts wird gespeichert.</string>
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Lösche lokal zwischengespeicherte Serverdaten; sie werden bei der nächsten Synchronisierung neu geladen.</string>
     <string name="developer_clear_lists_cache">Wortlisten-Cache leeren</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">Nur %1$s</string>
     <string name="study_chip_fill_in">Ausfüllen</string>
     <string name="study_chip_listen">Hören</string>
+    <string name="study_chip_type">Tippen</string>
+    <string name="study_typed_placeholder">Grundform</string>
+    <string name="study_typed_check">Prüfen</string>
+    <string name="study_typed_show_answer">Zeig mir einfach die Antwort</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Hinweis: nächsten Buchstaben aufdecken</string>
+    <string name="study_typed_you_typed">Deine Eingabe</string>
+    <string name="study_typed_correct_spelling">Richtige Schreibweise</string>
     <string name="study_prompt_recall_word">Erinnere dich an das Wort</string>
     <string name="study_chip_recall">%1$s abrufen</string>
     <string name="study_prompt_translate_to">Übersetze auf %1$s</string>

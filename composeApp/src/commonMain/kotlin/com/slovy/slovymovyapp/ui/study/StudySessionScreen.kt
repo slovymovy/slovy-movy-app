@@ -20,8 +20,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -31,15 +34,24 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.slovy.slovymovyapp.ui.SpeakerVector
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Keyboard
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
@@ -50,6 +62,7 @@ import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -74,15 +87,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -90,9 +117,19 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -102,8 +139,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slovy.slovymovyapp.data.learning.spelling.SpellingChecker
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.speech.AudioControl
@@ -111,6 +150,7 @@ import com.slovy.slovymovyapp.speech.RowAudioPhase
 import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.SpeakerOffVector
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
+import com.slovy.slovymovyapp.ui.rememberReduceMotion
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.components.ExampleSpeakerGlyphSize
 import com.slovy.slovymovyapp.ui.components.LemmaSpeakerGlyphSize
@@ -149,6 +189,14 @@ import slovymovyapp.composeapp.generated.resources.study_empty_title
 import slovymovyapp.composeapp.generated.resources.study_error_title
 import slovymovyapp.composeapp.generated.resources.study_chip_fill_in
 import slovymovyapp.composeapp.generated.resources.study_chip_listen
+import slovymovyapp.composeapp.generated.resources.study_chip_type
+import slovymovyapp.composeapp.generated.resources.study_typed_check
+import slovymovyapp.composeapp.generated.resources.study_typed_correct_spelling
+import slovymovyapp.composeapp.generated.resources.study_typed_hint_description
+import slovymovyapp.composeapp.generated.resources.study_typed_hint_more
+import slovymovyapp.composeapp.generated.resources.study_typed_placeholder
+import slovymovyapp.composeapp.generated.resources.study_typed_show_answer
+import slovymovyapp.composeapp.generated.resources.study_typed_you_typed
 import slovymovyapp.composeapp.generated.resources.study_cant_listen_now
 import slovymovyapp.composeapp.generated.resources.study_listening_postponed_message
 import slovymovyapp.composeapp.generated.resources.study_loading
@@ -178,6 +226,21 @@ import slovymovyapp.composeapp.generated.resources.word_details_synonyms
 
 private val MultiSenseFrontHintTopSpacing = 20.dp
 private val ListeningFrontStackGap = 28.dp
+private val TypedFieldHeight = 56.dp
+private val TypedCheckButtonHeight = 52.dp
+private val TypedShowAnswerHeight = 48.dp
+private val TypedFieldToCheckGap = 20.dp
+private val TypedCheckToShowAnswerGap = 10.dp
+private val TypedComparisonGap = 18.dp
+private val TypedLengthSlotWidth = 11.dp
+private val TypedLengthSlotHeight = 2.dp
+private val TypedLengthSlotGap = 6.dp
+private val TypedMissUnderlineHeight = 3.dp
+private const val TypedPromptMaxLines = 3
+private val TypedFieldMinFontSize = 14.sp
+private val TypedLengthSlotMinWidth = 3.dp
+private val TypedCheckMinSize = 18.dp
+private val TypedCheckMaxSize = 30.dp
 
 @Composable
 fun StudySessionScreen(
@@ -207,6 +270,10 @@ fun StudySessionScreen(
         onReveal = viewModel::reveal,
         onRevealFirstLetterHint = viewModel::revealFirstLetterHint,
         onRevealTranslationHint = viewModel::revealTranslationHint,
+        onTypedInputChange = viewModel::updateTypedInput,
+        onRevealTypedHint = viewModel::revealTypedHint,
+        onCheckTypedAnswer = viewModel::checkTypedAnswer,
+        onShowTypedAnswer = viewModel::showTypedAnswer,
         onRate = viewModel::rate,
         onToggleAudio = viewModel::toggleAudio,
         onPostponeListeningCards = viewModel::postponeListeningCards,
@@ -232,6 +299,10 @@ fun StudySessionScreenContent(
     onReveal: () -> Unit = {},
     onRevealFirstLetterHint: () -> Unit = {},
     onRevealTranslationHint: () -> Unit = {},
+    onTypedInputChange: (TextFieldValue) -> Unit = {},
+    onRevealTypedHint: () -> Unit = {},
+    onCheckTypedAnswer: () -> Unit = {},
+    onShowTypedAnswer: () -> Unit = {},
     onRate: (StudyRating) -> Unit = {},
     onToggleAudio: (key: String, text: String) -> Unit = { _, _ -> },
     onPostponeListeningCards: (String) -> Unit = {},
@@ -320,6 +391,10 @@ fun StudySessionScreenContent(
             onReveal = onReveal,
             onRevealFirstLetterHint = onRevealFirstLetterHint,
             onRevealTranslationHint = onRevealTranslationHint,
+            onTypedInputChange = onTypedInputChange,
+            onRevealTypedHint = onRevealTypedHint,
+            onCheckTypedAnswer = onCheckTypedAnswer,
+            onShowTypedAnswer = onShowTypedAnswer,
             onRate = onRate,
             onToggleAudio = onToggleAudio,
             onPostponeListeningCards = onPostponeListeningCards,
@@ -461,6 +536,10 @@ private fun StudySessionActiveContent(
     onReveal: () -> Unit,
     onRevealFirstLetterHint: () -> Unit,
     onRevealTranslationHint: () -> Unit,
+    onTypedInputChange: (TextFieldValue) -> Unit,
+    onRevealTypedHint: () -> Unit,
+    onCheckTypedAnswer: () -> Unit,
+    onShowTypedAnswer: () -> Unit,
     onRate: (StudyRating) -> Unit,
     onToggleAudio: (key: String, text: String) -> Unit,
     onPostponeListeningCards: (String) -> Unit,
@@ -494,10 +573,15 @@ private fun StudySessionActiveContent(
             containerColor = MaterialTheme.colorScheme.background,
             snackbarHost = { StudySessionSnackbarHost(hostState = snackbarHostState) },
         ) { innerPadding ->
+            // The typed card raises the keyboard; the column shrinks above it instead of being
+            // covered. consumeWindowInsets keeps the navigation bar, already in innerPadding, from
+            // being added a second time by imePadding.
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .imePadding()
                     .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
             ) {
                 StudySessionTopBar(
@@ -520,31 +604,41 @@ private fun StudySessionActiveContent(
                     onReveal = onReveal,
                     onRevealFirstLetterHint = onRevealFirstLetterHint,
                     onRevealTranslationHint = onRevealTranslationHint,
+                    onTypedInputChange = onTypedInputChange,
+                    onRevealTypedHint = onRevealTypedHint,
+                    onCheckTypedAnswer = onCheckTypedAnswer,
+                    onShowTypedAnswer = onShowTypedAnswer,
                     viewedSenseId = viewedSenseId,
                     onViewedSenseChange = onViewedSenseChange,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                 )
-                Spacer(Modifier.height(AppSpacing.md))
-                Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                    if (state.side == StudyCardSide.BACK) {
-                        if (isOnOriginalSense) {
-                            StudyRatingRow(
-                                ratings = state.ratingOptions,
-                                enabled = !state.isSubmittingReview,
-                                onRate = onRate,
-                                modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(Res.string.study_swipe_back_to_rate),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontStyle = MaterialTheme.uiItalic,
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                            )
+                // The rating slot stays reserved so the card keeps its height when it flips. The
+                // typed front is the exception: its controls sit above the keyboard, where that
+                // empty slot would cost the prompt its room.
+                val reserveRatingSlot = !(state.card is StudyCardUiState.Typed && state.side == StudyCardSide.FRONT)
+                if (reserveRatingSlot) {
+                    Spacer(Modifier.height(AppSpacing.md))
+                    Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
+                        if (state.side == StudyCardSide.BACK) {
+                            if (isOnOriginalSense) {
+                                StudyRatingRow(
+                                    ratings = state.ratingOptions,
+                                    enabled = !state.isSubmittingReview,
+                                    onRate = onRate,
+                                    modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                                )
+                            } else {
+                                Text(
+                                    text = stringResource(Res.string.study_swipe_back_to_rate),
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontStyle = MaterialTheme.uiItalic,
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
                         }
                     }
                 }
@@ -575,6 +669,7 @@ private fun StudyCardUiState.studyWord(): String =
         is StudyCardUiState.Production -> back.headline
         is StudyCardUiState.Cloze -> back.headline
         is StudyCardUiState.Listening -> back.headline
+        is StudyCardUiState.Typed -> lemma
     }
 
 @Composable
@@ -976,10 +1071,15 @@ private fun StudyCardSurface(
     onReveal: () -> Unit,
     onRevealFirstLetterHint: () -> Unit,
     onRevealTranslationHint: () -> Unit,
+    onTypedInputChange: (TextFieldValue) -> Unit,
+    onRevealTypedHint: () -> Unit,
+    onCheckTypedAnswer: () -> Unit,
+    onShowTypedAnswer: () -> Unit,
     viewedSenseId: String?,
     onViewedSenseChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val typedResult = (card as? StudyCardUiState.Typed)?.result
     val flipLabel = stringResource(
         if (card is StudyCardUiState.Recognition) Res.string.study_tap_to_flip else Res.string.study_tap_to_check,
     )
@@ -996,7 +1096,20 @@ private fun StudyCardSurface(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)),
         tonalElevation = 0.dp,
     ) {
-        if (side == StudyCardSide.FRONT) {
+        if (side == StudyCardSide.FRONT && card is StudyCardUiState.Typed) {
+            // Fixed layout, no scroll and no tap-to-check footer: the field, Check and Show answer
+            // are pinned to the bottom edge, right above the keyboard.
+            TypedFront(
+                card = card,
+                onInputChange = onTypedInputChange,
+                onRevealHint = onRevealTypedHint,
+                onCheck = onCheckTypedAnswer,
+                onShowAnswer = onShowTypedAnswer,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = AppSpacing.xl, top = AppSpacing.xl, end = AppSpacing.xl, bottom = AppSpacing.sm),
+            )
+        } else if (side == StudyCardSide.FRONT) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(
                     modifier = Modifier
@@ -1054,6 +1167,7 @@ private fun StudyCardSurface(
             if (card.hasMultiSense) {
                 MultiSenseBack(
                     card = card,
+                    typedResult = typedResult,
                     viewedSenseId = viewedSenseId,
                     onViewedSenseChange = onViewedSenseChange,
                     audioPhaseFor = audioPhaseFor,
@@ -1066,13 +1180,14 @@ private fun StudyCardSurface(
                         .verticalScroll(rememberScrollState())
                         .padding(AppSpacing.xl),
                 ) {
-                    StudyChip(label = card.chipLabel)
+                    StudyChip(label = card.chipLabel, icon = card.chipIcon)
                     Spacer(Modifier.height(AppSpacing.xl))
                     StudyCardBackContent(
                         back = card.back,
                         senseAudioKey = "back",
                         audioPhaseFor = audioPhaseFor,
                         onToggleAudio = onToggleAudio,
+                        typedResult = typedResult,
                     )
                 }
             }
@@ -1083,6 +1198,8 @@ private fun StudyCardSurface(
 @Composable
 private fun MultiSenseBack(
     card: StudyCardUiState,
+    // The typed comparison belongs to the sense that was studied; the other pages are plain backs.
+    typedResult: StudyTypedResultUiState?,
     viewedSenseId: String?,
     onViewedSenseChange: (String) -> Unit,
     audioPhaseFor: (key: String) -> RowAudioPhase,
@@ -1115,7 +1232,7 @@ private fun MultiSenseBack(
                 .fillMaxSize()
                 .padding(AppSpacing.xl),
         ) {
-            StudyChip(label = card.chipLabel)
+            StudyChip(label = card.chipLabel, icon = card.chipIcon)
             Spacer(Modifier.height(AppSpacing.md))
             HorizontalPager(
                 state = pagerState,
@@ -1134,6 +1251,7 @@ private fun MultiSenseBack(
                         audioPhaseFor = audioPhaseFor,
                         onToggleAudio = onToggleAudio,
                         headlineEmphasized = true,
+                        typedResult = typedResult.takeIf { senses[page].id == card.activeSenseId },
                     )
                 }
             }
@@ -1157,9 +1275,14 @@ private fun MultiSenseBack(
     }
 }
 
+/** The glyph a card's chip carries before its label; only the typed card has one. */
+private val StudyCardUiState.chipIcon: ImageVector?
+    get() = if (this is StudyCardUiState.Typed) Icons.Outlined.Keyboard else null
+
 @Composable
 private fun StudyChip(
     label: UiText,
+    icon: ImageVector? = null,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -1168,12 +1291,25 @@ private fun StudyChip(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
-        StudyTaggedText(
-            text = label.resolve(),
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+        Row(
             modifier = Modifier.padding(horizontal = AppSpacing.sm, vertical = AppSpacing.xs),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+        ) {
+            icon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+            StudyTaggedText(
+                text = label.resolve(),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
     }
 }
 
@@ -1188,6 +1324,10 @@ private fun StudyCardFront(
     modifier: Modifier = Modifier,
 ) {
     when (card) {
+        // The typed front is not a scrolling prompt with a tap-to-check footer; StudyCardSurface
+        // lays it out itself and never routes it here.
+        is StudyCardUiState.Typed -> Unit
+
         is StudyCardUiState.Recognition -> RecognitionFront(
             card = card,
             audioPhaseFor = audioPhaseFor,
@@ -1281,14 +1421,7 @@ private fun ProductionFront(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            text = card.promptLabel.resolve().uppercase(),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.4.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        StudyEyebrow(text = card.promptLabel.resolve(), textAlign = TextAlign.Center)
         Spacer(Modifier.height(AppSpacing.md))
         StudyTaggedText(
             text = card.promptText,
@@ -1324,13 +1457,7 @@ private fun ClozeFront(
         Column(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
-            Text(
-                text = stringResource(Res.string.guess_by_context).uppercase(),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.4.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            StudyEyebrow(text = stringResource(Res.string.guess_by_context), textAlign = TextAlign.Start)
             StudyClozeText(
                 cloze = card.prompt,
                 style = MaterialTheme.typography.headlineSmall.copy(
@@ -1360,6 +1487,509 @@ private fun ClozeFront(
             }
         }
     }
+}
+
+@Composable
+private fun TypedFront(
+    card: StudyCardUiState.Typed,
+    onInputChange: (TextFieldValue) -> Unit,
+    onRevealHint: () -> Unit,
+    onCheck: () -> Unit,
+    onShowAnswer: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        StudyChip(label = card.chipLabel, icon = card.chipIcon)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(vertical = AppSpacing.sm)
+                .clipToBounds(),
+            contentAlignment = Alignment.Center,
+        ) {
+            // The size must not depend on the height: that follows the keyboard as it slides
+            // up, and a prompt sized to it visibly shrinks frame by frame. So the ceiling comes
+            // from the text's length, width-based auto-sizing handles long words, and a few lines
+            // at those sizes fit above the keyboard on a phone. The box clips the rest.
+            val promptTypography = typedPromptTypography(card)
+            StudyTaggedText(
+                text = card.promptText,
+                style = promptTypography.copy(fontFamily = MaterialTheme.serifFontFamily),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = TypedPromptMaxLines,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 16.sp,
+                    maxFontSize = promptTypography.fontSize,
+                    stepSize = 1.sp,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(unbounded = true),
+            )
+        }
+        TypedAnswerField(
+            card = card,
+            onInputChange = onInputChange,
+            onRevealHint = onRevealHint,
+            onCheck = onCheck,
+        )
+        Spacer(Modifier.height(TypedFieldToCheckGap))
+        Button(
+            onClick = onCheck,
+            enabled = card.canCheck,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(TypedCheckButtonHeight),
+        ) {
+            Text(
+                text = stringResource(Res.string.study_typed_check),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Spacer(Modifier.height(TypedCheckToShowAnswerGap))
+        TextButton(
+            onClick = onShowAnswer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(TypedShowAnswerHeight),
+        ) {
+            // One line always: at large font scales the label shrinks rather than wraps into a
+            // second line the button's height would cut off.
+            Text(
+                text = stringResource(Res.string.study_typed_show_answer),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 12.sp,
+                    maxFontSize = MaterialTheme.typography.titleMedium.fontSize,
+                    stepSize = 1.sp,
+                ),
+            )
+        }
+    }
+}
+
+/** A ceiling for the prompt's size by its length: the longer the cue, the smaller it starts. */
+@Composable
+private fun typedPromptTypography(card: StudyCardUiState.Typed): TextStyle {
+    val length = card.promptText.length
+    val typography = MaterialTheme.typography
+    return when {
+        !card.isDefinitionPrompt && length <= 24 -> typography.displaySmall
+        length <= 48 -> typography.headlineMedium
+        length <= 90 -> typography.headlineSmall
+        else -> typography.titleLarge
+    }
+}
+
+/**
+ * The spelling field. Hint letters keep the primary colour as the learner types on; after the
+ * first hint, one slot per letter still to type trails the text. The keyboard is asked for the
+ * studied language, no autocorrection and a Go key that checks, which stays inert while Check is.
+ */
+@Composable
+private fun TypedAnswerField(
+    card: StudyCardUiState.Typed,
+    onInputChange: (TextFieldValue) -> Unit,
+    onRevealHint: () -> Unit,
+    onCheck: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val focusRequester = remember { FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+    var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    LaunchedEffect(card.id) {
+        focusRequester.requestFocus()
+    }
+    val hintColor = MaterialTheme.colorScheme.primary
+    val slotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+    val underlineColor = if (isFocused) hintColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+    val textStyle = MaterialTheme.typography.headlineSmall.copy(
+        fontFamily = MaterialTheme.serifFontFamily,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+    val slots = card.remainingSlots
+    val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(TypedFieldHeight)
+            .clip(RoundedCornerShape(14.dp))
+            .drawBehind {
+                val stroke = 2.dp.toPx()
+                drawRect(
+                    color = underlineColor,
+                    topLeft = Offset(0f, size.height - stroke),
+                    size = Size(size.width, stroke),
+                )
+            }
+            .clickable(interactionSource = null, indication = null) { focusRequester.requestFocus() },
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = AppSpacing.lg, end = AppSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        ) {
+            BoxWithConstraints(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                // A single-line field scrolls to keep the caret in view, which pushes the start
+                // of a long word out of the box. Shrink the text instead so the whole word, plus
+                // the room its remaining slots need, always fits.
+                val availablePx = with(density) { maxWidth.toPx() }
+                val reservedForSlotsPx = with(density) {
+                    (slots * (TypedLengthSlotMinWidth + TypedLengthSlotGap).toPx())
+                }
+                val text = card.input.value.text
+                val fittedStyle = remember(text, textStyle, availablePx, reservedForSlotsPx) {
+                    val naturalPx = if (text.isEmpty()) 0f else textMeasurer.measure(text, textStyle).size.width.toFloat()
+                    val room = (availablePx - reservedForSlotsPx).coerceAtLeast(1f)
+                    if (naturalPx <= room) {
+                        textStyle
+                    } else {
+                        val scaled = textStyle.fontSize * (room / naturalPx)
+                        textStyle.copy(fontSize = if (scaled < TypedFieldMinFontSize) TypedFieldMinFontSize else scaled)
+                    }
+                }
+                if (text.isEmpty()) {
+                    Text(
+                        text = card.partOfSpeech?.resolve() ?: stringResource(Res.string.study_typed_placeholder),
+                        style = textStyle,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        maxLines = 1,
+                    )
+                }
+                BasicTextField(
+                    value = card.input.value,
+                    onValueChange = onInputChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { isFocused = it.isFocused }
+                        .drawBehind {
+                            if (slots == 0) return@drawBehind
+                            val layout = textLayout ?: return@drawBehind
+                            val textEnd = if (layout.lineCount == 0) 0f else layout.getLineRight(0)
+                            val gap = TypedLengthSlotGap.toPx()
+                            // Slots share whatever is left after the text, down to a sliver each.
+                            val room = size.width - textEnd - gap
+                            val slotWidth = (room / slots - gap)
+                                .coerceAtMost(TypedLengthSlotWidth.toPx())
+                                .coerceAtLeast(TypedLengthSlotMinWidth.toPx())
+                            val slotHeight = TypedLengthSlotHeight.toPx()
+                            val baseline = size.height * 0.72f
+                            var x = textEnd + gap
+                            repeat(slots) {
+                                if (x + slotWidth > size.width) return@drawBehind
+                                drawRect(
+                                    color = slotColor,
+                                    topLeft = Offset(x, baseline),
+                                    size = Size(slotWidth, slotHeight),
+                                )
+                                x += slotWidth + gap
+                            }
+                        },
+                    textStyle = fittedStyle,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrectEnabled = false,
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Go,
+                        hintLocales = LocaleList(Locale(card.languageCode)),
+                    ),
+                    keyboardActions = KeyboardActions(onGo = { if (card.canCheck) onCheck() }),
+                    visualTransformation = remember(card.input.hintedPositions, hintColor) {
+                        HintedLettersTransformation(card.input.hintedPositions, hintColor)
+                    },
+                    onTextLayout = { textLayout = it },
+                    cursorBrush = SolidColor(hintColor),
+                )
+            }
+            // Always present so the text area keeps its width: removing the bulb near the end of
+            // a long word would let the shrunken text grow back. It only goes inert.
+            TypedHintButton(
+                hintsUsed = card.input.hintsUsed,
+                // What a screen reader is told the word starts with: the part of the field that
+                // already matches, so it grows with each hint rather than staying at one letter.
+                revealedPrefix = card.input.value.text.take(
+                    SpellingChecker.matchingPrefixLength(card.input.value.text, card.lemma),
+                ),
+                // The same count the length slots are drawn from.
+                letterCount = card.lemma.length,
+                enabled = card.canHint,
+                onRevealHint = onRevealHint,
+            )
+        }
+    }
+}
+
+/** Colours the letters a hint revealed; the text itself is untouched, so offsets map one to one. */
+private class HintedLettersTransformation(
+    private val hintedPositions: Set<Int>,
+    private val color: Color,
+) : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val styled = buildAnnotatedString {
+            append(text)
+            hintedPositions
+                .filter { it < text.length }
+                .forEach { addStyle(SpanStyle(color = color), it, it + 1) }
+        }
+        return TransformedText(styled, OffsetMapping.Identity)
+    }
+}
+
+/**
+ * The lightbulb at the field's trailing edge: an outlined circle until the first hint, then a
+ * tonal "+1" pill. It carries no text so its width does not depend on the locale. Disabled, not
+ * hidden, once the whole word is in the field.
+ */
+@Composable
+private fun TypedHintButton(
+    hintsUsed: Int,
+    revealedPrefix: String,
+    letterCount: Int,
+    enabled: Boolean,
+    onRevealHint: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val inertAlpha = if (enabled) 1f else 0.38f
+    val description = stringResource(Res.string.study_typed_hint_description)
+    if (hintsUsed == 0) {
+        val outline = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.28f)
+        Box(
+            modifier = modifier
+                .size(40.dp)
+                .alpha(inertAlpha)
+                .clip(CircleShape)
+                .drawBehind {
+                    drawCircle(
+                        color = outline,
+                        style = Stroke(width = 1.dp.toPx()),
+                    )
+                }
+                .clickable(enabled = enabled, role = Role.Button, onClickLabel = description) { onRevealHint() },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Lightbulb,
+                contentDescription = description,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
+    // What is in the field now, or just the action when the learner typed over the hints.
+    val revealedDescription = if (revealedPrefix.isEmpty()) {
+        description
+    } else {
+        pluralStringResource(Res.plurals.study_hint_starts_with, letterCount, revealedPrefix, letterCount)
+    }
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = modifier
+            .height(36.dp)
+            .alpha(inertAlpha)
+            .clip(CircleShape)
+            .semantics(mergeDescendants = true) {
+                contentDescription = revealedDescription
+            }
+            .clickable(enabled = enabled, role = Role.Button, onClickLabel = description) { onRevealHint() },
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = AppSpacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Lightbulb,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+            )
+            Text(
+                text = stringResource(Res.string.study_typed_hint_more),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+/**
+ * The check beside a correctly typed word: a heavy stroke, with a green glow that flashes once
+ * as the back appears and fades away. A glow that stays reads as a smudge, so under reduced
+ * motion there is none at all.
+ */
+@Composable
+private fun TypedCorrectCheck(
+    checkSize: Dp,
+    modifier: Modifier = Modifier,
+) {
+    val color = colorsForRating(StudyRating.GOOD).second
+    val reduceMotion = rememberReduceMotion()
+    val glow = remember { Animatable(0f) }
+    LaunchedEffect(reduceMotion) {
+        if (reduceMotion) {
+            glow.snapTo(0f)
+        } else {
+            glow.snapTo(0f)
+            glow.animateTo(1f, tween(durationMillis = 260))
+            glow.animateTo(0f, tween(durationMillis = 700))
+        }
+    }
+    val strokeWidth = checkSize * 0.11f
+    Canvas(modifier = modifier.size(checkSize)) {
+        if (glow.value > 0f) {
+            val glowRadius = size.minDimension * 0.95f
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(color.copy(alpha = 0.5f * glow.value), color.copy(alpha = 0f)),
+                    center = center,
+                    radius = glowRadius,
+                ),
+                radius = glowRadius,
+                center = center,
+            )
+        }
+        val w = size.width
+        val h = size.height
+        val check = Path().apply {
+            moveTo(w * 0.24f, h * 0.53f)
+            lineTo(w * 0.43f, h * 0.72f)
+            lineTo(w * 0.78f, h * 0.32f)
+        }
+        drawPath(
+            path = check,
+            color = color,
+            style = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+    }
+}
+
+/** The small uppercase caption above a prompt or a typed-result line. */
+@Composable
+private fun StudyEyebrow(
+    text: String,
+    textAlign: TextAlign,
+) {
+    Text(
+        text = text.uppercase(),
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 1.4.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = textAlign,
+    )
+}
+
+@Composable
+private fun typedResultLineStyle(): TextStyle =
+    MaterialTheme.typography.displaySmall.copy(fontFamily = MaterialTheme.serifFontFamily)
+
+/**
+ * "You typed" over the attempt exactly as entered, then "Correct spelling" over the lemma with the
+ * letters the attempt missed or changed in the primary colour and underlined. No verdict text: the
+ * comparison carries it.
+ */
+@Composable
+private fun TypedComparisonBlock(
+    result: StudyTypedResultUiState.Incorrect,
+    lemma: String,
+    speaker: @Composable () -> Unit,
+) {
+    val style = typedResultLineStyle()
+    val autoSize = TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = style.fontSize, stepSize = 1.sp)
+    Column(verticalArrangement = Arrangement.spacedBy(TypedComparisonGap)) {
+        val missColor = MaterialTheme.colorScheme.primary
+        val accentColor = MaterialTheme.colorScheme.tertiary
+        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
+            StudyEyebrow(text = stringResource(Res.string.study_typed_you_typed), textAlign = TextAlign.Start)
+            // Letters the lemma has no place for are struck through here: there is nothing on the
+            // lemma line to point at for them.
+            Text(
+                text = buildAnnotatedString {
+                    append(result.attempt)
+                    result.extraPositions.filter { it < result.attempt.length }.forEach { index ->
+                        addStyle(
+                            SpanStyle(color = missColor, textDecoration = TextDecoration.LineThrough),
+                            index,
+                            index + 1,
+                        )
+                    }
+                },
+                style = style,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                autoSize = autoSize,
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
+            StudyEyebrow(text = stringResource(Res.string.study_typed_correct_spelling), textAlign = TextAlign.Start)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        append(markedWord(word = lemma, positions = result.missedPositions, color = missColor, underline = true))
+                        // Right letter, wrong accent: a second colour so it reads as a near miss.
+                        result.accentOnlyPositions.filter { it < lemma.length }.forEach { index ->
+                            addStyle(
+                                SpanStyle(color = accentColor, textDecoration = TextDecoration.Underline),
+                                index,
+                                index + 1,
+                            )
+                        }
+                    },
+                    style = style,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    autoSize = autoSize,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                speaker()
+            }
+        }
+    }
+    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+}
+
+/** [word] with the characters at [positions] in [color], underlined when asked. */
+private fun markedWord(
+    word: String,
+    positions: Set<Int>,
+    color: Color,
+    underline: Boolean,
+): AnnotatedString = buildAnnotatedString {
+    append(word)
+    positions
+        .filter { it < word.length }
+        .forEach { index ->
+            addStyle(
+                SpanStyle(
+                    color = color,
+                    textDecoration = if (underline) TextDecoration.Underline else null,
+                ),
+                index,
+                index + 1,
+            )
+        }
 }
 
 @Composable
@@ -1513,11 +2143,30 @@ private fun StudyCardBackContent(
     // bare index would make example 0 of every sense the same speaker.
     senseAudioKey: String,
     headlineEmphasized: Boolean = false,
+    // The spelling card's comparison, laid over the headline of the sense it tested.
+    typedResult: StudyTypedResultUiState?,
 ) {
+    val speaker: @Composable () -> Unit = {
+        back.audioText?.let { audioText ->
+            StudySpeakerButton(
+                phase = audioPhaseFor(StudyAudioKeys.WORD),
+                playContentDescription = stringResource(Res.string.study_play_word_audio),
+                stopContentDescription = stringResource(Res.string.study_stop_audio),
+                onToggle = { onToggleAudio(StudyAudioKeys.WORD, audioText) },
+            )
+        }
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
+        if (typedResult is StudyTypedResultUiState.Incorrect) {
+            TypedComparisonBlock(
+                result = typedResult,
+                lemma = back.headline,
+                speaker = speaker,
+            )
+        }
         back.cloze?.let { cloze ->
             Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)) {
                 StudyClozeText(
@@ -1539,10 +2188,19 @@ private fun StudyCardBackContent(
         }
 
         val headlineIsLemma = back.isLemmaHeadline
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // The comparison block above already carries the lemma, so this headline would repeat it.
+        val showHeadline = typedResult !is StudyTypedResultUiState.Incorrect
+        if (showHeadline) Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            // A correct typed answer is a one-line lemma with a check and the speaker beside it;
+            // those sit on the text's centre line, which may have shrunk to make room for them.
+            var headlineLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = if (typedResult is StudyTypedResultUiState.Correct) {
+                    Alignment.CenterVertically
+                } else {
+                    Alignment.Top
+                },
             ) {
                 val headlineTypography = if (back.isMultiLanguageHeadline) {
                     MaterialTheme.typography.headlineMedium
@@ -1550,31 +2208,53 @@ private fun StudyCardBackContent(
                     MaterialTheme.typography.headlineLarge
                 }
                 val emphasizeHeadline = headlineEmphasized && !back.isMultiLanguageHeadline
-                StudyTaggedText(
-                    text = back.headline,
-                    style = headlineTypography.copy(
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontSize = if (emphasizeHeadline) 30.sp else headlineTypography.fontSize,
-                        lineHeight = if (emphasizeHeadline) 33.sp else headlineTypography.lineHeight,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Start,
-                    maxLines = if (headlineIsLemma) 1 else Int.MAX_VALUE,
-                    autoSize = if (headlineIsLemma) TextAutoSize.StepBased(
-                        minFontSize = 14.sp,
-                        maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                        stepSize = 1.sp,
-                    ) else null,
-                    modifier = Modifier.weight(1f, fill = false),
+                val headlineStyle = headlineTypography.copy(
+                    fontFamily = MaterialTheme.serifFontFamily,
+                    fontSize = if (emphasizeHeadline) 30.sp else headlineTypography.fontSize,
+                    lineHeight = if (emphasizeHeadline) 33.sp else headlineTypography.lineHeight,
                 )
-                back.audioText?.let { audioText ->
-                    StudySpeakerButton(
-                        phase = audioPhaseFor(StudyAudioKeys.WORD),
-                        playContentDescription = stringResource(Res.string.study_play_word_audio),
-                        stopContentDescription = stringResource(Res.string.study_stop_audio),
-                        onToggle = { onToggleAudio(StudyAudioKeys.WORD, audioText) },
+                val headlineAutoSize = if (headlineIsLemma) TextAutoSize.StepBased(
+                    minFontSize = 14.sp,
+                    maxFontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    stepSize = 1.sp,
+                ) else null
+                if (typedResult is StudyTypedResultUiState.Correct) {
+                    // Hint letters keep their colour so the learner sees what they were given.
+                    Text(
+                        text = markedWord(
+                            word = back.headline,
+                            positions = typedResult.hintedPositions,
+                            color = MaterialTheme.colorScheme.primary,
+                            underline = false,
+                        ),
+                        style = headlineStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Start,
+                        maxLines = 1,
+                        autoSize = headlineAutoSize,
+                        onTextLayout = { headlineLayout = it },
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    // Scaled to the line the lemma actually rendered at, so a long word that
+                    // shrank gets a check in proportion rather than one that dwarfs it.
+                    val lineHeight = with(LocalDensity.current) {
+                        (headlineLayout?.size?.height ?: 0).toDp()
+                    }
+                    TypedCorrectCheck(
+                        checkSize = (lineHeight * 0.72f).coerceIn(TypedCheckMinSize, TypedCheckMaxSize),
+                    )
+                } else {
+                    StudyTaggedText(
+                        text = back.headline,
+                        style = headlineStyle,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Start,
+                        maxLines = if (headlineIsLemma) 1 else Int.MAX_VALUE,
+                        autoSize = headlineAutoSize,
+                        modifier = Modifier.weight(1f, fill = false),
                     )
                 }
+                speaker()
             }
             // Same slot as `translations` on a lemma-headline back — the other-language line
             // directly under the headline — so it carries that slot's size. Serif because it is
@@ -2467,6 +3147,22 @@ private fun productionCard() = StudyCardUiState.Production(
     ),
 )
 
+private fun typedCard() = StudyCardUiState.Typed(
+    id = "typed",
+    chipLabel = UiText.Resource(Res.string.study_chip_type),
+    promptText = "cosy, sociable",
+    partOfSpeech = UiText.Plain("adjective"),
+    lemma = "gezellig",
+    languageCode = "nl",
+    back = productionCard().back,
+)
+
+private fun typedInput(text: String, hintedPositions: Set<Int>, hintsUsed: Int) = StudyTypedInputUiState(
+    value = TextFieldValue(text = text, selection = TextRange(text.length)),
+    hintedPositions = hintedPositions,
+    hintsUsed = hintsUsed,
+)
+
 private fun clozeCard() = StudyCardUiState.Cloze(
     id = "cloze",
     chipLabel = UiText.Resource(Res.string.study_chip_fill_in),
@@ -2766,6 +3462,134 @@ private fun StudySessionProductionBackPreview(
     ThemedPreview(darkTheme = isDark) {
         StudySessionScreenContent(
             state = activeState(productionCard(), StudyCardSide.BACK, current = 5),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedFrontEmptyPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(typedCard(), StudyCardSide.FRONT, current = 6),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedFrontHintRevealedPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(input = typedInput("g", hintedPositions = setOf(0), hintsUsed = 1)),
+                StudyCardSide.FRONT,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedFrontTypingAfterHintsPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(input = typedInput("gezel", hintedPositions = setOf(0, 1), hintsUsed = 2)),
+                StudyCardSide.FRONT,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedBackExactPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(result = StudyTypedResultUiState.Correct(hintedPositions = emptySet())),
+                StudyCardSide.BACK,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedBackExactWithHintsPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(result = StudyTypedResultUiState.Correct(hintedPositions = setOf(0, 1))),
+                StudyCardSide.BACK,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedBackTypoPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(
+                    result = StudyTypedResultUiState.Incorrect(
+                        attempt = "gezeelig",
+                        missedPositions = setOf(5),
+                        extraPositions = setOf(4),
+                    ),
+                ),
+                StudyCardSide.BACK,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedBackShowAnswerPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(result = StudyTypedResultUiState.Shown),
+                StudyCardSide.BACK,
+                current = 6,
+            ),
             onCancel = {},
             onEnd = {},
         )

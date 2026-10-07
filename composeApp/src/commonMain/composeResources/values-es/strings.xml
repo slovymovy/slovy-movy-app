@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Activa los favoritos pendientes para cada idioma de aprendizaje instalado.</string>
     <string name="developer_intake_daily">Diaria</string>
     <string name="developer_intake_continue_now">Continuar ahora</string>
+    <string name="developer_study_title">Estudio</string>
+    <string name="developer_typed_playground_button">Probar tarjeta escrita</string>
+    <string name="developer_typed_playground_description">Abre la tarjeta escrita con unas palabras de ejemplo. Sin datos de aprendizaje, no se guarda nada.</string>
     <string name="developer_caches_title">Cachés</string>
     <string name="developer_caches_description">Borra los datos del servidor en caché local; se vuelven a obtener en la próxima sincronización.</string>
     <string name="developer_clear_lists_cache">Borrar caché de listas de palabras</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">Solo %1$s</string>
     <string name="study_chip_fill_in">Completar</string>
     <string name="study_chip_listen">Escuchar</string>
+    <string name="study_chip_type">Escribir</string>
+    <string name="study_typed_placeholder">Forma base</string>
+    <string name="study_typed_check">Comprobar</string>
+    <string name="study_typed_show_answer">Solo muéstrame la respuesta</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Pista: revelar la siguiente letra</string>
+    <string name="study_typed_you_typed">Escribiste</string>
+    <string name="study_typed_correct_spelling">Ortografía correcta</string>
     <string name="study_prompt_recall_word">Recuerda la palabra</string>
     <string name="study_chip_recall">Recordar %1$s</string>
     <string name="study_prompt_translate_to">Traduce a %1$s</string>

@@ -1,5 +1,8 @@
 package com.slovy.slovymovyapp.ui.study
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import com.slovy.slovymovyapp.data.learning.spelling.SpellingChecker
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.speech.RowAudioPhase
 
@@ -133,6 +136,116 @@ sealed interface StudyCardUiState {
         override val activeSenseId: String? = null,
         override val back: StudyCardBackUiState,
     ) : StudyCardUiState
+
+    /**
+     * The spelling card: the learner types the word from its translation. [lemma] is the expected
+     * answer and the headline of [back]; [languageCode] is the studied language, handed to the
+     * keyboard as a hint locale.
+     */
+    data class Typed(
+        override val id: String,
+        override val chipLabel: UiText,
+        val promptText: String,
+        /** A definition in the studied language cues the word instead of a translation; shown smaller. */
+        val isDefinitionPrompt: Boolean = false,
+        /** Shown as the field's placeholder, so the learner knows which form to type. */
+        val partOfSpeech: UiText?,
+        val lemma: String,
+        val languageCode: String,
+        val input: StudyTypedInputUiState = StudyTypedInputUiState(),
+        val result: StudyTypedResultUiState? = null,
+        override val senses: List<StudyCardSenseUiState> = emptyList(),
+        override val activeSenseId: String? = null,
+        override val back: StudyCardBackUiState,
+    ) : StudyCardUiState {
+        /** Check needs at least one character the learner typed; hint letters alone do not count. */
+        val canCheck: Boolean
+            get() = SpellingChecker.hasLearnerInput(input.value.text, input.hintedPositions)
+
+        /** The hint control goes inert once the field holds the whole word. */
+        val canHint: Boolean
+            get() = SpellingChecker.canHint(input.value.text, lemma)
+
+        /** Length slots after the caret, one per letter not yet typed; shown only after the first hint. */
+        val remainingSlots: Int
+            get() = if (input.hintsUsed == 0) 0 else (lemma.length - input.value.text.length).coerceAtLeast(0)
+
+        /** The learner edited the field. Hints the edit destroyed stop being hints. */
+        fun withInput(value: TextFieldValue): Typed = copy(
+            input = input.copy(
+                value = value,
+                hintedPositions = SpellingChecker.hintedPositionsAfterEdit(value.text, lemma, input.hintedPositions),
+            ),
+        )
+
+        /** Reveals the next letter, discarding a wrong tail first. Null when no hint is possible. */
+        fun withNextLetterHint(): Typed? {
+            val hint = SpellingChecker.applyHint(input.value.text, lemma, input.hintedPositions) ?: return null
+            return copy(
+                input = StudyTypedInputUiState(
+                    value = TextFieldValue(text = hint.value, selection = TextRange(hint.value.length)),
+                    hintedPositions = hint.hintedPositions,
+                    hintsUsed = input.hintsUsed + 1,
+                ),
+            )
+        }
+
+        /** Compares the field with the word and records the outcome for the back. Null when Check is disabled. */
+        fun checked(): Typed? {
+            if (!canCheck) return null
+            return copy(result = evaluate())
+        }
+
+        /**
+         * The learner gives up on typing. Whatever they typed is still compared, so an attempt is
+         * never thrown away. A field holding nothing of their own, empty or hint letters only,
+         * shows the word alone, the same rule that keeps Check disabled.
+         */
+        fun answerShown(): Typed = copy(
+            result = if (canCheck) evaluate() else StudyTypedResultUiState.Shown,
+        )
+
+        private fun evaluate(): StudyTypedResultUiState {
+            val attempt = input.value.text
+            if (SpellingChecker.isCorrect(attempt, lemma)) {
+                return StudyTypedResultUiState.Correct(hintedPositions = input.hintedPositions)
+            }
+            val diff = SpellingChecker.diff(attempt, lemma)
+            return StudyTypedResultUiState.Incorrect(
+                attempt = attempt.trim(),
+                missedPositions = diff.missed,
+                accentOnlyPositions = diff.accentOnly,
+                extraPositions = diff.extra,
+            )
+        }
+    }
+}
+
+data class StudyTypedInputUiState(
+    val value: TextFieldValue = TextFieldValue(),
+    /** Indices in [value] that a hint revealed and the learner has not edited since. */
+    val hintedPositions: Set<Int> = emptySet(),
+    val hintsUsed: Int = 0,
+)
+
+sealed interface StudyTypedResultUiState {
+    /** The attempt matched; [hintedPositions] keep their hint colour in the lemma on the back. */
+    data class Correct(val hintedPositions: Set<Int>) : StudyTypedResultUiState
+
+    /**
+     * [attempt] is the field trimmed, otherwise as typed. [missedPositions] and
+     * [accentOnlyPositions] index the lemma: letters to underline as wrong, and letters right but
+     * for the accent. [extraPositions] index [attempt]: letters the lemma has no place for.
+     */
+    data class Incorrect(
+        val attempt: String,
+        val missedPositions: Set<Int>,
+        val accentOnlyPositions: Set<Int> = emptySet(),
+        val extraPositions: Set<Int> = emptySet(),
+    ) : StudyTypedResultUiState
+
+    /** The learner gave up; the back shows the lemma alone. */
+    data object Shown : StudyTypedResultUiState
 }
 
 enum class StudyRecognitionMode {

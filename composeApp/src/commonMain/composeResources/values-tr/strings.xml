@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Kurulu her öğrenme dili için bekleyen favorileri etkinleştirir.</string>
     <string name="developer_intake_daily">Günlük</string>
     <string name="developer_intake_continue_now">Şimdi devam et</string>
+    <string name="developer_study_title">Çalışma</string>
+    <string name="developer_typed_playground_button">Yazılan kartı dene</string>
+    <string name="developer_typed_playground_description">Yazılan kartı birkaç örnek sözcükle açar. Öğrenme verisi yok, hiçbir şey kaydedilmez.</string>
     <string name="developer_caches_title">Önbellekler</string>
     <string name="developer_caches_description">Yerelde önbelleğe alınan sunucu verilerini temizler; sonraki eşitlemede yeniden indirilir.</string>
     <string name="developer_clear_lists_cache">Kelime listeleri önbelleğini temizle</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">Yalnızca %1$s</string>
     <string name="study_chip_fill_in">Boşluğu doldur</string>
     <string name="study_chip_listen">Dinle</string>
+    <string name="study_chip_type">Yaz</string>
+    <string name="study_typed_placeholder">Temel biçim</string>
+    <string name="study_typed_check">Kontrol et</string>
+    <string name="study_typed_show_answer">Bana cevabı göster</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">İpucu: sonraki harfi göster</string>
+    <string name="study_typed_you_typed">Yazdığın</string>
+    <string name="study_typed_correct_spelling">Doğru yazım</string>
     <string name="study_prompt_recall_word">Kelimeyi hatırla</string>
     <string name="study_chip_recall">Hatırla: %1$s</string>
     <string name="study_prompt_translate_to">%1$s diline çevir</string>

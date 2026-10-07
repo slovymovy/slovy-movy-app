@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Active les favoris en attente pour chaque langue d'apprentissage installée.</string>
     <string name="developer_intake_daily">Quotidien</string>
     <string name="developer_intake_continue_now">Continuer maintenant</string>
+    <string name="developer_study_title">Étude</string>
+    <string name="developer_typed_playground_button">Essayer la carte saisie</string>
+    <string name="developer_typed_playground_description">Ouvre la carte saisie sur quelques mots d’exemple. Sans données d’apprentissage, rien n’est enregistré.</string>
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Efface les données serveur en cache local ; elles seront rechargées à la prochaine synchro.</string>
     <string name="developer_clear_lists_cache">Effacer le cache des listes de mots</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">%1$s uniquement</string>
     <string name="study_chip_fill_in">À compléter</string>
     <string name="study_chip_listen">Écoute</string>
+    <string name="study_chip_type">Saisie</string>
+    <string name="study_typed_placeholder">Forme de base</string>
+    <string name="study_typed_check">Vérifier</string>
+    <string name="study_typed_show_answer">Montre-moi simplement la réponse</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Indice : révéler la lettre suivante</string>
+    <string name="study_typed_you_typed">Tu as écrit</string>
+    <string name="study_typed_correct_spelling">Orthographe correcte</string>
     <string name="study_prompt_recall_word">Retrouve le mot</string>
     <string name="study_chip_recall">Rappel %1$s</string>
     <string name="study_prompt_translate_to">Traduis en %1$s</string>

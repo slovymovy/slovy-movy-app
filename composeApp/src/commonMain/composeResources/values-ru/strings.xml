@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Активировать ожидающие избранные слова для каждого установленного языка обучения.</string>
     <string name="developer_intake_daily">Ежедневно</string>
     <string name="developer_intake_continue_now">Продолжить сейчас</string>
+    <string name="developer_study_title">Учёба</string>
+    <string name="developer_typed_playground_button">Попробовать карточку с вводом</string>
+    <string name="developer_typed_playground_description">Открывает карточку с вводом на нескольких примерах слов. Без данных обучения, ничего не сохраняется.</string>
     <string name="developer_caches_title">Кэши</string>
     <string name="developer_caches_description">Очистить локально кэшированные данные сервера; они будут загружены заново при следующей синхронизации.</string>
     <string name="developer_clear_lists_cache">Очистить кэш списков слов</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">только %1$s</string>
     <string name="study_chip_fill_in">Пропуск</string>
     <string name="study_chip_listen">Аудирование</string>
+    <string name="study_chip_type">Ввод</string>
+    <string name="study_typed_placeholder">Начальная форма</string>
+    <string name="study_typed_check">Проверить</string>
+    <string name="study_typed_show_answer">Просто показать ответ</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Подсказка: открыть следующую букву</string>
+    <string name="study_typed_you_typed">Вы ввели</string>
+    <string name="study_typed_correct_spelling">Правильное написание</string>
     <string name="study_prompt_recall_word">Вспомните слово</string>
     <string name="study_prompt_translate_to">Переведите на %1$s</string>
     <string name="study_chip_recall">Вспомни %1$s</string>

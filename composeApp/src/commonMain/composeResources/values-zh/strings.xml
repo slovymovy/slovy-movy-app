@@ -308,6 +308,9 @@
     <string name="developer_intake_description">为每种已安装的学习语言激活“我的单词”中待学的词条。</string>
     <string name="developer_intake_daily">每日</string>
     <string name="developer_intake_continue_now">立即继续</string>
+    <string name="developer_study_title">学习</string>
+    <string name="developer_typed_playground_button">试用拼写卡片</string>
+    <string name="developer_typed_playground_description">用几个示例单词打开拼写卡片。不涉及学习数据，不会保存任何内容。</string>
     <string name="developer_caches_title">缓存</string>
     <string name="developer_caches_description">清除本地缓存的服务器数据，下次同步时会重新获取。</string>
     <string name="developer_clear_lists_cache">清除词单缓存</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">仅 %1$s</string>
     <string name="study_chip_fill_in">填空</string>
     <string name="study_chip_listen">听力</string>
+    <string name="study_chip_type">拼写</string>
+    <string name="study_typed_placeholder">原形</string>
+    <string name="study_typed_check">检查</string>
+    <string name="study_typed_show_answer">直接显示答案</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">提示：揭示下一个字母</string>
+    <string name="study_typed_you_typed">你输入的</string>
+    <string name="study_typed_correct_spelling">正确拼写</string>
     <string name="study_prompt_recall_word">回忆这个词</string>
     <string name="study_chip_recall">回忆 %1$s</string>
     <string name="study_prompt_translate_to">翻译成 %1$s</string>

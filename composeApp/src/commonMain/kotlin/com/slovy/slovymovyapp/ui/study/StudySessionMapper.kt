@@ -26,10 +26,10 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
 
     val cardData = wordResult.card ?: return null
     val sourceLanguage = Language.fromCodeOrNull(card.langCode) ?: return null
-    val sense = cardData.entries
-        .flatMap { it.senses }
-        .firstOrNull { it.senseId == senseId }
+    val entry = cardData.entries
+        .firstOrNull { entry -> entry.senses.any { it.senseId == senseId } }
         ?: return null
+    val sense = entry.senses.first { it.senseId == senseId }
     val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
     val lemma = cardData.lemma
 

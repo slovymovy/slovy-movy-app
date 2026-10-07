@@ -307,6 +307,9 @@
     <string name="developer_intake_description">Aktywuj oczekujące ulubione dla każdego zainstalowanego języka nauki.</string>
     <string name="developer_intake_daily">Codziennie</string>
     <string name="developer_intake_continue_now">Kontynuuj teraz</string>
+    <string name="developer_study_title">Nauka</string>
+    <string name="developer_typed_playground_button">Wypróbuj pisaną kartę</string>
+    <string name="developer_typed_playground_description">Otwiera pisaną kartę na kilku przykładowych słowach. Bez danych nauki, nic nie jest zapisywane.</string>
     <string name="developer_caches_title">Pamięć podręczna</string>
     <string name="developer_caches_description">Wyczyść lokalnie zapisane dane z serwera; zostaną pobrane ponownie przy następnej synchronizacji.</string>
     <string name="developer_clear_lists_cache">Wyczyść pamięć podręczną list słów</string>
@@ -699,6 +702,14 @@
     <string name="study_chip_source_only">tylko %1$s</string>
     <string name="study_chip_fill_in">Uzupełnij</string>
     <string name="study_chip_listen">Słuchanie</string>
+    <string name="study_chip_type">Pisanie</string>
+    <string name="study_typed_placeholder">Forma podstawowa</string>
+    <string name="study_typed_check">Sprawdź</string>
+    <string name="study_typed_show_answer">Po prostu pokaż odpowiedź</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Podpowiedź: odkryj następną literę</string>
+    <string name="study_typed_you_typed">Twoja odpowiedź</string>
+    <string name="study_typed_correct_spelling">Poprawna pisownia</string>
     <string name="study_prompt_recall_word">Przypomnij sobie słowo</string>
     <string name="study_prompt_translate_to">Przetłumacz na %1$s</string>
     <string name="study_chip_recall">Przypomnij %1$s</string>

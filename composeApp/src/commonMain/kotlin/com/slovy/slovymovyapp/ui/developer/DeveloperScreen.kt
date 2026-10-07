@@ -92,6 +92,7 @@ fun DeveloperOptionsCard(onClick: () -> Unit) {
 fun DeveloperScreen(
     viewModel: DeveloperViewModel,
     isDebugBuild: Boolean,
+    onOpenTypedPlayground: () -> Unit,
     onBack: () -> Unit = {},
 ) {
     DeveloperScreenContent(
@@ -106,6 +107,7 @@ fun DeveloperScreen(
         onShiftTimeBack = viewModel::shiftTimeBack,
         onRunIntake = viewModel::runIntake,
         onClearListsCache = viewModel::clearListsCache,
+        onOpenTypedPlayground = onOpenTypedPlayground,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -129,6 +131,7 @@ fun DeveloperScreenContent(
     onShiftTimeBack: (TimeShiftOption) -> Unit = {},
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onClearListsCache: () -> Unit = {},
+    onOpenTypedPlayground: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -230,6 +233,16 @@ fun DeveloperScreenContent(
                         isBusy = state.isBusy,
                         onRun = onRunIntake,
                     )
+                }
+
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.developer_study_title),
+                        modifier = Modifier.padding(top = AppSpacing.sm),
+                    )
+                }
+                item {
+                    DeveloperStudyCard(onOpenTypedPlayground = onOpenTypedPlayground)
                 }
 
                 item {

@@ -7,6 +7,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
@@ -642,9 +643,14 @@ class StudySessionViewModel(
     }
 
     fun reveal() {
-        if (isExitingSession) return
-        val active = state as? StudySessionUiState.Active ?: return
-        if (active.side == StudyCardSide.BACK) return
+        startReveal()
+    }
+
+    /** Turns the card over. False when nothing was started: the session is closing or the back is already up. */
+    private fun startReveal(): Boolean {
+        if (isExitingSession) return false
+        val active = state as? StudySessionUiState.Active ?: return false
+        if (active.side == StudyCardSide.BACK) return false
 
         viewModelScope.launch {
             val card = currentCard ?: return@launch
@@ -657,6 +663,7 @@ class StudySessionViewModel(
                 autoplayBackAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
             }
         }
+        return true
     }
 
     fun revealFirstLetterHint() {
@@ -678,6 +685,62 @@ class StudySessionViewModel(
 
         state = active.copy(card = updatedCard)
         logHintRevealed(updatedCard.id, updatedCard.back.headline, hintKind = "first_letter")
+    }
+
+    /** The learner edited the spelling field. */
+    fun updateTypedInput(value: TextFieldValue) {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.side != StudyCardSide.FRONT) return
+        val card = active.card as? StudyCardUiState.Typed ?: return
+        state = active.copy(card = card.withInput(value))
+    }
+
+    /** Reveals the next letter of the word, discarding a wrong tail first. */
+    fun revealTypedHint() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.side != StudyCardSide.FRONT) return
+        val card = active.card as? StudyCardUiState.Typed ?: return
+        val hinted = card.withNextLetterHint() ?: return
+        state = active.copy(card = hinted)
+        logHintRevealed(card.id, card.lemma, hintKind = "next_letter")
+    }
+
+    /** Compares the field with the word and turns the card over with the comparison on its back. */
+    fun checkTypedAnswer() {
+        val card = typedCardAwaitingAnswer() ?: return
+        val checked = card.checked() ?: return
+        revealTyped(card, checked)
+    }
+
+    /** The learner gives up on typing; the back shows the word, with the comparison if they typed. */
+    fun showTypedAnswer() {
+        val card = typedCardAwaitingAnswer() ?: return
+        revealTyped(card, card.answerShown())
+    }
+
+    /**
+     * Writes [answered] and turns the card over. The result goes in first so a second trigger in
+     * the same frame is refused; if the reveal does not start, the result comes out again so the
+     * card is not left on its front with Check inert.
+     */
+    private fun revealTyped(card: StudyCardUiState.Typed, answered: StudyCardUiState.Typed) {
+        val active = state as? StudySessionUiState.Active ?: return
+        state = active.copy(card = answered)
+        if (!startReveal()) {
+            state = active.copy(card = card)
+        }
+    }
+
+    /**
+     * The typed card on the front with no result yet. The result is written before [reveal] turns
+     * the card over in its coroutine, so it is the guard that stops a Go key and a Check tap in the
+     * same frame, or a Show answer racing a Check, from revealing twice.
+     */
+    private fun typedCardAwaitingAnswer(): StudyCardUiState.Typed? {
+        val active = state as? StudySessionUiState.Active ?: return null
+        if (active.side != StudyCardSide.FRONT) return null
+        val card = active.card as? StudyCardUiState.Typed ?: return null
+        return card.takeIf { it.result == null }
     }
 
     fun revealTranslationHint() {
@@ -935,6 +998,7 @@ class StudySessionViewModel(
             is StudyCardUiState.Listening -> card.promptAudioText
             is StudyCardUiState.Production,
             is StudyCardUiState.Cloze,
+            is StudyCardUiState.Typed,
                 -> null
         }
 

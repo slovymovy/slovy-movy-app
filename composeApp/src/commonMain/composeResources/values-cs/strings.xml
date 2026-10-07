@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Aktivuje čekající oblíbená slova pro každý nainstalovaný jazyk učení.</string>
     <string name="developer_intake_daily">Denní</string>
     <string name="developer_intake_continue_now">Pokračovat teď</string>
+    <string name="developer_study_title">Studium</string>
+    <string name="developer_typed_playground_button">Vyzkoušet psanou kartu</string>
+    <string name="developer_typed_playground_description">Otevře psanou kartu na několika ukázkových slovech. Bez dat učení, nic se neukládá.</string>
     <string name="developer_caches_title">Mezipaměti</string>
     <string name="developer_caches_description">Smaže lokálně uložená data ze serveru; při další synchronizaci se stáhnou znovu.</string>
     <string name="developer_clear_lists_cache">Smazat mezipaměť seznamů slov</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">Pouze %1$s</string>
     <string name="study_chip_fill_in">Doplň</string>
     <string name="study_chip_listen">Poslech</string>
+    <string name="study_chip_type">Psaní</string>
+    <string name="study_typed_placeholder">Základní tvar</string>
+    <string name="study_typed_check">Zkontrolovat</string>
+    <string name="study_typed_show_answer">Prostě mi ukaž odpověď</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Nápověda: odkrýt další písmeno</string>
+    <string name="study_typed_you_typed">Tvoje odpověď</string>
+    <string name="study_typed_correct_spelling">Správný pravopis</string>
     <string name="study_prompt_recall_word">Vybav si slovo</string>
     <string name="study_chip_recall">Vybav si %1$s</string>
     <string name="study_prompt_translate_to">Přelož do %1$s</string>

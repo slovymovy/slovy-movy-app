@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Attiva i preferiti in sospeso per ogni lingua di apprendimento installata.</string>
     <string name="developer_intake_daily">Giornaliera</string>
     <string name="developer_intake_continue_now">Continua ora</string>
+    <string name="developer_study_title">Studio</string>
+    <string name="developer_typed_playground_button">Prova la carta scritta</string>
+    <string name="developer_typed_playground_description">Apre la carta scritta su alcune parole di esempio. Nessun dato di apprendimento, nulla viene salvato.</string>
     <string name="developer_caches_title">Cache</string>
     <string name="developer_caches_description">Cancella i dati del server memorizzati localmente; vengono recuperati di nuovo alla prossima sincronizzazione.</string>
     <string name="developer_clear_lists_cache">Cancella la cache degli elenchi di parole</string>
@@ -700,6 +703,14 @@
     <string name="study_chip_source_only">Solo %1$s</string>
     <string name="study_chip_fill_in">Completa</string>
     <string name="study_chip_listen">Ascolta</string>
+    <string name="study_chip_type">Scrivi</string>
+    <string name="study_typed_placeholder">Forma base</string>
+    <string name="study_typed_check">Verifica</string>
+    <string name="study_typed_show_answer">Mostrami la risposta e basta</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Suggerimento: rivela la lettera successiva</string>
+    <string name="study_typed_you_typed">Hai scritto</string>
+    <string name="study_typed_correct_spelling">Ortografia corretta</string>
     <string name="study_prompt_recall_word">Ricorda la parola</string>
     <string name="study_chip_recall">Ricorda %1$s</string>
     <string name="study_prompt_translate_to">Traduci in %1$s</string>

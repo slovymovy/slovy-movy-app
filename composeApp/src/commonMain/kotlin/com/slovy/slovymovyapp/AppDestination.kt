@@ -62,6 +62,10 @@ internal sealed interface AppDestination {
     @Serializable
     data object Developer : AppDestination
 
+    /** Developer-only: the typed spelling card on sample words, with no learning data behind it. */
+    @Serializable
+    data object TypedCardPlayground : AppDestination
+
     @Serializable
     data class TextReader(val languageCode: String) : AppDestination
 
