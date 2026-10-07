@@ -832,7 +832,17 @@ fun App(
                     DeveloperScreen(
                         viewModel = viewModel,
                         isDebugBuild = buildConfig.isDebug,
+                        onOpenTypedPlayground = { navController.navigate(AppDestination.TypedCardPlayground) },
                         onBack = { navController.popBackStack() },
+                    )
+                }
+                screens.screen<AppDestination.TypedCardPlayground>(interruptibleByShare = true) { backStackEntry ->
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        TypedCardPlaygroundViewModel()
+                    }
+                    TypedCardPlaygroundScreen(
+                        viewModel = viewModel,
+                        onClose = { navController.popBackStack() },
                     )
                 }
                 screens.screen<AppDestination.WordDetail>(interruptibleByShare = true) { backStackEntry ->

@@ -93,6 +93,7 @@ fun DeveloperOptionsCard(onClick: () -> Unit) {
 fun DeveloperScreen(
     viewModel: DeveloperViewModel,
     isDebugBuild: Boolean,
+    onOpenTypedPlayground: () -> Unit,
     onBack: () -> Unit = {},
 ) {
     val clipboard = LocalClipboard.current
@@ -109,6 +110,7 @@ fun DeveloperScreen(
         onRunIntake = viewModel::runIntake,
         onClearListsCache = viewModel::clearListsCache,
         onClearClipboard = { viewModel.clearClipboard(clipboard) },
+        onOpenTypedPlayground = onOpenTypedPlayground,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -133,6 +135,7 @@ fun DeveloperScreenContent(
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onClearListsCache: () -> Unit = {},
     onClearClipboard: () -> Unit = {},
+    onOpenTypedPlayground: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -234,6 +237,16 @@ fun DeveloperScreenContent(
                         isBusy = state.isBusy,
                         onRun = onRunIntake,
                     )
+                }
+
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.developer_study_title),
+                        modifier = Modifier.padding(top = AppSpacing.sm),
+                    )
+                }
+                item {
+                    DeveloperStudyCard(onOpenTypedPlayground = onOpenTypedPlayground)
                 }
 
                 item {

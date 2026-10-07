@@ -308,6 +308,39 @@ internal fun IntakeCard(
 }
 
 @Composable
+internal fun DeveloperStudyCard(
+    onOpenTypedPlayground: () -> Unit,
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        ) {
+            Text(
+                text = stringResource(Res.string.developer_typed_playground_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FilledTonalButton(
+                onClick = onOpenTypedPlayground,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(Res.string.developer_typed_playground_button))
+            }
+        }
+    }
+}
+
+@Composable
 internal fun DeveloperCachesCard(
     isBusy: Boolean,
     onClearListsCache: () -> Unit,
