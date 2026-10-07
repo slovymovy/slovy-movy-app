@@ -42,7 +42,6 @@ enum class Language(
     ENGLISH("en", "English", "🇬🇧", "English", supportedForLearning = true),
     RUSSIAN("ru", "Русский", "🇷🇺", "Russian", supportedForLearning = true),
     DUTCH("nl", "Nederlands", "🇳🇱", "Dutch", supportedForLearning = true),
-    POLISH("pl", "Polski", "🇵🇱", "Polish", supportedForLearning = true),
     GERMAN(
         "de",
         "Deutsch",
@@ -60,9 +59,28 @@ enum class Language(
             Keep standard spelling with ß and umlauts; never substitute ss, ae, oe or ue for them.
         """.trimIndent()
     ),
+    POLISH(
+        "pl", "Polski", "🇵🇱", "Polish", supportedForLearning = true,
+        translationPromptNotes = """
+            Write Polish in the Latin alphabet only. Never use a Russian word in place of a Polish one,
+            neither whole nor with its first letters in Latin. No Cyrillic letter in any translation,
+            definition, clarification or example, except the source headword cited in a definition
+            about that word. If Polish has no word for the sense, leave the declared translation empty
+            and paraphrase in the example.
+        """.trimIndent()
+    ),
     FRENCH("fr", "Français", "🇫🇷", "French"),
     ITALIAN("it", "Italiano", "🇮🇹", "Italian"),
-    CZECH("cs", "Čeština", "🇨🇿", "Czech"),
+    CZECH(
+        "cs", "Čeština", "🇨🇿", "Czech",
+        translationPromptNotes = """
+            Write Czech in the Latin alphabet only. Never use a Russian word in place of a Czech one,
+            neither whole nor with its first letters in Latin. No Cyrillic letter in any translation,
+            definition, clarification or example, except the source headword cited in a definition
+            about that word. If Czech has no word for the sense, leave the declared translation empty
+            and paraphrase in the example.
+        """.trimIndent()
+    ),
     TURKISH("tr", "Türkçe", "🇹🇷", "Turkish"),
     SPANISH("es", "Español", "🇪🇸", "Spanish"),
 

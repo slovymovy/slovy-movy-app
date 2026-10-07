@@ -132,6 +132,8 @@ import slovymovyapp.composeapp.generated.resources.study_action_retry
 import slovymovyapp.composeapp.generated.resources.study_actions_autoplay
 import slovymovyapp.composeapp.generated.resources.study_actions_autoplay_description
 import slovymovyapp.composeapp.generated.resources.study_actions_autoplay_on
+import slovymovyapp.composeapp.generated.resources.study_autoplay_saved_off
+import slovymovyapp.composeapp.generated.resources.study_autoplay_saved_on
 import slovymovyapp.composeapp.generated.resources.study_actions_menu
 import slovymovyapp.composeapp.generated.resources.study_actions_remove
 import slovymovyapp.composeapp.generated.resources.study_actions_suspend
@@ -237,7 +239,7 @@ fun StudySessionScreenContent(
     onViewedSenseChange: (String) -> Unit = {},
     onOpenOverflowMenu: () -> Unit = {},
     onDismissOverflowMenu: () -> Unit = {},
-    onToggleAutoplay: () -> Unit = {},
+    onToggleAutoplay: (String, String) -> Unit = { _, _ -> },
     onSuspendWord: (String, String) -> Unit = { _, _ -> },
     onRequestRemoveFromLibrary: () -> Unit = {},
     onDismissRemoveConfirmation: () -> Unit = {},
@@ -465,7 +467,7 @@ private fun StudySessionActiveContent(
     onViewedSenseChange: (String) -> Unit,
     onOpenOverflowMenu: () -> Unit,
     onDismissOverflowMenu: () -> Unit,
-    onToggleAutoplay: () -> Unit,
+    onToggleAutoplay: (String, String) -> Unit,
     onSuspendWord: (String, String) -> Unit,
     onRequestRemoveFromLibrary: () -> Unit,
     onDismissRemoveConfirmation: () -> Unit,
@@ -483,6 +485,8 @@ private fun StudySessionActiveContent(
     )
     val suspendedUndoLabel = stringResource(Res.string.study_suspend_undo)
     val listeningPostponedMessage = stringResource(Res.string.study_listening_postponed_message)
+    val autoplaySavedOnMessage = stringResource(Res.string.study_autoplay_saved_on)
+    val autoplaySavedOffMessage = stringResource(Res.string.study_autoplay_saved_off)
 
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
@@ -549,7 +553,7 @@ private fun StudySessionActiveContent(
         if (state.isOverflowMenuOpen) {
             StudySessionOverflowSheet(
                 autoplayEnabled = state.isAutoplayEnabled,
-                onToggleAutoplay = onToggleAutoplay,
+                onToggleAutoplay = { onToggleAutoplay(autoplaySavedOnMessage, autoplaySavedOffMessage) },
                 onSuspendWord = { onSuspendWord(suspendedMessage, suspendedUndoLabel) },
                 onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
                 onDismiss = onDismissOverflowMenu,

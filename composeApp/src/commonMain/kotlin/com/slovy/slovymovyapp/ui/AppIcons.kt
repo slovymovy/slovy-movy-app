@@ -91,3 +91,21 @@ internal val StatsOutlineVector: ImageVector = ImageVector.Builder(
         strokeLineJoin = StrokeJoin.Round
     )
 }.build()
+
+internal val ChevronRightVector: ImageVector = ImageVector.Builder(
+    name = "ChevronRight",
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f,
+    autoMirror = true
+).apply {
+    addPath(
+        pathData = parsePathNodes("M9 6l6 6-6 6"),
+        fill = null,
+        stroke = strokeRound,
+        strokeLineWidth = 2.2f,
+        strokeLineCap = StrokeCap.Round,
+        strokeLineJoin = StrokeJoin.Round
+    )
+}.build()

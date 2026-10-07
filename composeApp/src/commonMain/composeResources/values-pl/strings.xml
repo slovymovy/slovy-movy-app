@@ -152,9 +152,8 @@
     <string name="download_state_cancelled">Pobieranie anulowane</string>
     <string name="download_state_completed">Pobieranie zakończone</string>
 
-    <string name="favorites_title">Moje słowa</string>
     <string name="favorites_loading">Ładowanie...</string>
-    <string name="favorites_search_placeholder">Wyszukaj słowo...</string>
+    <string name="favorites_search_placeholder">Szukaj w Moich słowach</string>
     <string name="favorites_empty_title">Twoja lista słówek zaczyna się tutaj.</string>
     <string name="favorites_empty_description_before_heart_icon">Wyszukaj dowolne słowo i kliknij&#32;</string>
     <string name="favorites_empty_description_after_heart_icon">, aby zapisać je do nauki.</string>
@@ -614,6 +613,8 @@
     <string name="study_actions_autoplay">Autoodtwarzanie audio</string>
     <string name="study_actions_autoplay_description">Automatycznie odtwarzaj wymowę</string>
     <string name="study_actions_autoplay_on">Autoodtwarzanie audio włączone</string>
+    <string name="study_autoplay_saved_on">Autoodtwarzanie włączone dla tej i przyszłych sesji</string>
+    <string name="study_autoplay_saved_off">Autoodtwarzanie wyłączone dla tej i przyszłych sesji</string>
     <string name="study_actions_suspend">Wstrzymaj to słowo</string>
     <string name="study_actions_suspend_description">Wstrzymaj powtórki na 30 dni</string>
     <string name="study_suspend_message">Wstrzymano słowo „%1$s” na 30 dni</string>
@@ -735,6 +736,7 @@
     <string name="favorites_study_done_until_next_review">do następnej powtórki</string>
     <string name="favorites_study_done_review_more">Powtórz jeszcze trochę</string>
     <string name="favorites_study_done_study_new">Ucz się nowych słów</string>
+    <string name="favorites_study_done_more">Ucz się dalej</string>
     <string name="favorites_study_done_region">Powtórka zakończona</string>
     <plurals name="favorites_study_done_duration_hours">
         <item quantity="one">%1$d godzinę</item>
@@ -750,6 +752,7 @@
     </plurals>
     <string name="favorites_study_done_duration_hours_minutes">%1$d godz. %2$d min</string>
     <string name="favorites_study_done_next_review_a11y">Następna powtórka za %1$s</string>
+    <string name="favorites_study_done_bar_a11y">%1$s, %2$s, %3$s</string>
 
     <!-- Text reader (paste-to-highlight) -->
     <string name="reader_title">Sprawdź tekst</string>

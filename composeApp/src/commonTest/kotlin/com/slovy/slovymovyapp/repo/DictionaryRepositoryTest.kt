@@ -14,11 +14,18 @@ import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
+import com.slovy.slovymovyapp.ingestion.LanguageCardExample as ProcessedExample
+import com.slovy.slovymovyapp.ingestion.LanguageCardPosEntry as ProcessedPosEntry
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponse as ProcessedCard
+import com.slovy.slovymovyapp.ingestion.LanguageCardResponseSense as ProcessedSense
+import com.slovy.slovymovyapp.ingestion.LanguageCardTranslation as ProcessedTranslation
 import com.slovy.slovymovyapp.test.BaseTest
 import com.slovy.slovymovyapp.test.IgnoreIos
 import com.slovy.slovymovyapp.test.testPlatformDbSupport
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.*
@@ -1749,6 +1756,126 @@ class DictionaryRepositoryTest : BaseTest() {
         } finally {
             runBlocking { localMgr.closeAll() }
             if (platform.fileExists(localDictPath)) platform.deleteFile(localDictPath)
+            if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+        }
+    }
+
+    /**
+     * A word processed in the downloaded dictionary and fetched from the server is copied into the
+     * local DB the same way as an online-only word. The local copy then outranks the downloaded
+     * one, so its examples and the translations fetched with them are shown together.
+     */
+    @Test
+    fun fetched_downloaded_word_is_shown_from_local_copy_with_its_translations() {
+        val platform = testPlatformDbSupport()
+        val mgr = testDataDbManager()
+        val localMgr = testLocalDbManager()
+        val localTransPath = platform.getDatabasePath(LocalDbManager.LOCAL_TRANSLATION_FILENAME)
+
+        runBlocking {
+            mgr.deleteDictionary(Language.ENGLISH)
+            localMgr.closeAll()
+        }
+        deleteLocalDictionary(platform, localMgr)
+        if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
+
+        runBlocking {
+            mgr.ensureDictionary(Language.ENGLISH)
+            mgr.ensureTranslation(Language.ENGLISH, Language.RUSSIAN)
+        }
+
+        try {
+            val lemma = "haircut"
+            runBlocking {
+                mgr.withDictionaryReadOnly(Language.ENGLISH) { roDb ->
+                    val q = roDb.dictionaryQueries
+                    val lemmaRow = assertNotNull(
+                        q.selectLemmasByWord("en", lemma).executeAsList().firstOrNull(),
+                        "'$lemma' should be in the downloaded dictionary"
+                    )
+                    assertFalse(lemmaRow.online_only, "'$lemma' should be processed in the downloaded dictionary")
+                    // The downloaded senses with revised examples, as the server would return them.
+                    val revised = ProcessedCard(
+                        entries = q.selectLemmaPosByLemmaId(lemmaRow.id).executeAsList().map { lp ->
+                            ProcessedPosEntry(
+                                pos = lp.pos.name,
+                                senses = q.selectSensesByLemmaPosId(lp.id).executeAsList().map { sense ->
+                                    ProcessedSense(
+                                        senseId = sense.sense_id.toString(),
+                                        senseDefinition = sense.sense_definition,
+                                        learnerLevel = sense.learner_level.name,
+                                        frequency = sense.frequency.name.replace("_", ""),
+                                        semanticGroupId = sense.semantic_group_id,
+                                        examples = listOf(
+                                            ProcessedExample(
+                                                text = "Revised example ${sense.sense_id}",
+                                                targetLangTranslations = mapOf("ru" to "Новый пример ${sense.sense_id}")
+                                            ),
+                                            ProcessedExample(text = "Revised untranslated example ${sense.sense_id}")
+                                        ),
+                                        translations = mapOf("ru" to listOf(ProcessedTranslation("новый перевод")))
+                                    )
+                                }
+                            )
+                        }.filter { it.senses.isNotEmpty() }
+                    )
+
+                    // What DictionaryClient does on the first fetch of a word.
+                    val localDictDb = localMgr.openLocalDictionary()
+                    val builder = JsonIngestionBuilder(
+                        translationDbProvider = { _, _ -> localMgr.openLocalTranslation() },
+                        frequencyMap = mapOf(lemma to 4.0)
+                    )
+                    localDictDb.transaction {
+                        builder.copyRawDataToLocal(
+                            word = lemma,
+                            langCode = "en",
+                            sourceDb = roDb,
+                            targetDb = localDictDb,
+                            frequency = 4.0,
+                            posFilter = revised.entries.map { it.pos }.toSet()
+                        )
+                        builder.ingestProcessedOverRaw(
+                            Json.encodeToString(ProcessedCard.serializer(), revised), lemma, "en", localDictDb
+                        )
+                    }
+                }
+            }
+
+            val card = assertNotNull(
+                runBlocking {
+                    DictionaryRepository(mgr, localMgr, favoritesRepository(), settingsRepository())
+                        .getLanguageCard(Language.ENGLISH, lemma, listOf(Language.RUSSIAN))
+                },
+                "Card for '$lemma' should load"
+            )
+            val senses = card.entries.flatMap { it.senses }
+            assertTrue(senses.isNotEmpty(), "'$lemma' should have senses")
+            senses.forEach { sense ->
+                assertEquals(
+                    listOf("Revised example ${sense.senseId}", "Revised untranslated example ${sense.senseId}"),
+                    sense.examples.map { it.text },
+                    "Sense ${sense.senseId} should show the fetched examples"
+                )
+                assertEquals(
+                    mapOf(Language.RUSSIAN to "Новый пример ${sense.senseId}"),
+                    sense.examples[0].targetLangTranslations,
+                    "Sense ${sense.senseId} should show the example translation fetched with it"
+                )
+                assertEquals(
+                    emptyMap(),
+                    sense.examples[1].targetLangTranslations,
+                    "Sense ${sense.senseId} should not take a downloaded example translation by position"
+                )
+                assertEquals(
+                    listOf("новый перевод"),
+                    sense.translations[Language.RUSSIAN]?.map { it.targetLangWord },
+                    "Sense ${sense.senseId} should show the fetched translation over the downloaded one"
+                )
+            }
+        } finally {
+            runBlocking { mgr.deleteDictionary(Language.ENGLISH) }
+            deleteLocalDictionary(platform, localMgr)
             if (platform.fileExists(localTransPath)) platform.deleteFile(localTransPath)
         }
     }

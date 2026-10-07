@@ -729,8 +729,9 @@ class JsonIngestionBuilder(
     }
 
     /**
-     * Copies raw data (lemma, lemma_pos, forms) from source database to target database.
-     * Used to replicate downloaded DB data into local DB before ingesting processed data.
+     * Copies raw data (lemma, lemma_pos, forms) from source database to target database, marking
+     * the copied lemma online_only. Used to replicate downloaded DB data into local DB before
+     * ingesting processed data.
      *
      * This method is idempotent - if the lemma already exists in the target DB, it does nothing.
      *
@@ -759,19 +760,20 @@ class JsonIngestionBuilder(
             return
         }
 
-        // Look up lemma in source DB
-        val sourceLemma = sourceQ.selectLemmasById(lemmaId).executeAsOneOrNull()
-            ?: throw IllegalArgumentException("Lemma '$word' not found in source database")
+        requireNotNull(sourceQ.selectLemmasById(lemmaId).executeAsOneOrNull()) {
+            "Lemma '$word' not found in source database"
+        }
 
         targetDb.transaction {
-            // Copy lemma entry (preserve online_only status from source)
+            // Copy lemma entry. Only raw data is copied, so the copy is online_only even when the
+            // source lemma is processed; ingestProcessedOverRaw adds the processed data.
             targetQ.insertLemma(
                 id = lemmaId,
                 lang_code = langCode,
                 lemma = word,
                 lemma_normalized = lemmaNormalized,
                 zipf_frequency = frequency,
-                online_only = sourceLemma.online_only
+                online_only = true
             )
 
             // Copy lemma_pos entries (filter by posFilter if provided)

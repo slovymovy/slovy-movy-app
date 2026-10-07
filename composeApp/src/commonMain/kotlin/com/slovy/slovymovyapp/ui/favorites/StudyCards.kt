@@ -3,30 +3,29 @@ package com.slovy.slovymovyapp.ui.favorites
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.i18n.resolve
+import com.slovy.slovymovyapp.ui.ChevronRightVector
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
 import com.slovy.slovymovyapp.ui.theme.uiItalic
@@ -35,6 +34,71 @@ import kotlinx.coroutines.flow.*
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import slovymovyapp.composeapp.generated.resources.*
+
+private val StudyBarShape = RoundedCornerShape(20.dp)
+private val StudyBarVerticalPadding = 18.dp
+
+@Composable
+private fun StudyBarHeading(
+    text: String,
+    color: Color,
+) {
+    Text(
+        text = text,
+        fontSize = 10.5.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 1.4.sp,
+        lineHeight = 14.sp,
+        color = color,
+    )
+}
+
+@Composable
+private fun StudyBarChevron(tint: Color) {
+    Icon(
+        imageVector = ChevronRightVector,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+        tint = tint,
+    )
+}
+
+/**
+ * The bar's headline value with its caption on the same baseline. A caption that does not fit beside the
+ * value (long translations, large font scales) moves below it as a whole instead of being squeezed.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StudyBarValueLine(
+    value: String,
+    valueColor: Color,
+    valueLetterSpacing: TextUnit,
+    caption: String,
+    captionColor: Color,
+    valueModifier: Modifier = Modifier,
+) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+        Text(
+            text = value,
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = valueLetterSpacing,
+            lineHeight = 24.sp,
+            color = valueColor,
+            modifier = valueModifier.alignByBaseline(),
+        )
+        Text(
+            text = caption,
+            fontFamily = MaterialTheme.serifFontFamily,
+            fontSize = 13.sp,
+            fontStyle = MaterialTheme.uiItalic,
+            lineHeight = 16.sp,
+            color = captionColor,
+            modifier = Modifier.alignByBaseline(),
+        )
+    }
+}
 
 @Composable
 internal fun StudyDoneCard(
@@ -51,6 +115,7 @@ internal fun StudyDoneCard(
             },
         )
     }
+    val title = stringResource(Res.string.favorites_study_done_title)
     val nextReviewAccessibilityLabel = stringResource(
         Res.string.favorites_study_done_next_review_a11y,
         studyDone.nextReviewAccessibilityValue.resolve()
@@ -65,11 +130,6 @@ internal fun StudyDoneCard(
         animationSpec = tween(durationMillis = 240),
         label = "studyDoneCard"
     )
-    val checkProgress by animateFloatAsState(
-        targetValue = if (visible) 1f else 0.6f,
-        animationSpec = tween(durationMillis = 280, delayMillis = 40),
-        label = "studyDoneCheck"
-    )
     val slidePx = with(LocalDensity.current) { 6.dp.toPx() }
 
     Surface(
@@ -79,106 +139,78 @@ internal fun StudyDoneCard(
                 translationY = slidePx * (1f - cardProgress)
             }
             .semantics { contentDescription = regionLabel },
-        shape = RoundedCornerShape(20.dp),
+        shape = StudyBarShape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)),
     ) {
-        Column(
-            modifier = Modifier.padding(AppSpacing.lg),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.xs),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.favorites_study_done_title),
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.4.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-                        verticalAlignment = Alignment.Bottom,
-                    ) {
-                        Text(
-                            text = studyDone.nextReviewLabel.resolve(),
-                            fontFamily = MaterialTheme.serifFontFamily,
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Medium,
-                            letterSpacing = 0.sp,
-                            lineHeight = 27.3.sp,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .alignByBaseline()
-                                .semantics { contentDescription = nextReviewAccessibilityLabel },
+        // With an extra session on offer the whole bar starts it, like the due bar.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(
+                    if (continueLabel != null) {
+                        // Merged, the value's own description would be all a screen reader announces.
+                        val barAccessibilityLabel = stringResource(
+                            Res.string.favorites_study_done_bar_a11y,
+                            title,
+                            nextReviewAccessibilityLabel,
+                            stringResource(Res.string.favorites_study_done_more),
                         )
-                        Text(
-                            text = stringResource(Res.string.favorites_study_done_until_next_review),
-                            fontFamily = MaterialTheme.serifFontFamily,
-                            fontSize = 13.sp,
-                            fontStyle = MaterialTheme.uiItalic,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.alignByBaseline(),
-                        )
+                        Modifier
+                            .clickable(
+                                onClickLabel = continueLabel,
+                                role = Role.Button,
+                                onClick = onContinueStudyingNow,
+                            )
+                            .clearAndSetSemantics {
+                                contentDescription = barAccessibilityLabel
+                            }
+                    } else {
+                        Modifier
                     }
-                }
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .graphicsLayer {
-                            scaleX = checkProgress
-                            scaleY = checkProgress
-                        }
-                        .background(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            shape = CircleShape,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(
+                        start = AppSpacing.lgPlus,
+                        top = StudyBarVerticalPadding,
+                        end = if (continueLabel == null) AppSpacing.lg else 0.dp,
+                        bottom = StudyBarVerticalPadding,
+                    ),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+            ) {
+                StudyBarHeading(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                StudyBarValueLine(
+                    value = studyDone.nextReviewLabel.resolve(),
+                    valueColor = MaterialTheme.colorScheme.primary,
+                    valueLetterSpacing = 0.sp,
+                    caption = stringResource(Res.string.favorites_study_done_until_next_review),
+                    captionColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    valueModifier = Modifier.semantics { contentDescription = nextReviewAccessibilityLabel },
+                )
             }
             if (continueLabel != null) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(top = AppSpacing.md, bottom = AppSpacing.smPlus),
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-                )
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            onClickLabel = continueLabel,
-                            role = Role.Button,
-                            onClick = onContinueStudyingNow,
-                        ),
+                    modifier = Modifier.padding(horizontal = AppSpacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.xxs),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = continueLabel,
+                        text = stringResource(Res.string.favorites_study_done_more),
                         fontFamily = MaterialTheme.serifFontFamily,
                         fontSize = 13.5.sp,
                         fontStyle = MaterialTheme.uiItalic,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
                     )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(15.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    )
+                    StudyBarChevron(tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
                 }
             }
         }
@@ -197,7 +229,7 @@ internal fun StudyDueCard(
         modifier = modifier.semantics {
             onClick(label = actionLabel, action = null)
         },
-        shape = MaterialTheme.shapes.large,
+        shape = StudyBarShape,
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
@@ -205,51 +237,35 @@ internal fun StudyDueCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppSpacing.lg),
+                .padding(
+                    start = AppSpacing.lgPlus,
+                    top = StudyBarVerticalPadding,
+                    end = AppSpacing.lg,
+                    bottom = StudyBarVerticalPadding,
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.xxs),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             ) {
-                Text(
+                StudyBarHeading(
                     text = stringResource(Res.string.favorites_study_due_title),
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.4.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.smPlus)) {
-                    Text(
-                        text = pluralStringResource(
-                            Res.plurals.favorites_study_due_count,
-                            study.dueCount,
-                            study.dueCount
-                        ),
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = (-0.3).sp,
-                        lineHeight = 27.3.sp,
-                        modifier = Modifier.alignByBaseline(),
-                    )
-                    Text(
-                        text = stringResource(Res.string.favorites_study_due_subtitle, study.estimatedMinutes),
-                        fontFamily = MaterialTheme.serifFontFamily,
-                        fontSize = 13.sp,
-                        fontStyle = MaterialTheme.uiItalic,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
-                        modifier = Modifier.alignByBaseline(),
-                    )
-                }
+                StudyBarValueLine(
+                    value = pluralStringResource(
+                        Res.plurals.favorites_study_due_count,
+                        study.dueCount,
+                        study.dueCount
+                    ),
+                    valueColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    valueLetterSpacing = (-0.3).sp,
+                    caption = stringResource(Res.string.favorites_study_due_subtitle, study.estimatedMinutes),
+                    captionColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                )
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                modifier = Modifier.size(22.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-            )
+            StudyBarChevron(tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
         }
     }
 }
-
