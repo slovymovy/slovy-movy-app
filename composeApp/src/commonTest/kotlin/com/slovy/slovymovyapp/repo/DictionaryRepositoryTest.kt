@@ -860,7 +860,7 @@ class DictionaryRepositoryTest : BaseTest() {
             val q = localMgr.openLocalDictionary().dictionaryQueries
             val lemmaId = Uuid.random()
             val lemmaPosId = Uuid.random()
-            // Normalized exactly as ingestion does it, so ß stays in the normalized columns.
+            // Normalized exactly as ingestion does it, so ß is folded to ss in the normalized columns.
             q.insertLemma(lemmaId, "de", "groß", stripAccents("groß"), 5.0, false)
             q.insertLemmaPos(lemmaPosId, lemmaId, DictionaryPos.ADJECTIVE)
             q.insertForm(Uuid.random(), lemmaPosId, "großen", stripAccents("großen"), FormSource.NATIVE)
@@ -894,6 +894,7 @@ class DictionaryRepositoryTest : BaseTest() {
         }
     }
 
+    // TODO(data-version): delete with legacySharpSSpellings; it covers data normalized before ß was folded.
     @Test
     fun search_finds_sharp_s_translation_when_typed_with_ss() {
         val platform = testPlatformDbSupport()
@@ -936,7 +937,8 @@ class DictionaryRepositoryTest : BaseTest() {
                 target_lang_code = "de",
                 idx = 0,
                 target_lang_word = "Straße",
-                target_lang_word_normalized = stripAccents("Straße"),
+                // As the shipped v15 translation_*_de.db files hold it: normalized before ß was folded.
+                target_lang_word_normalized = "straße",
                 target_lang_sense_clarification = null,
                 lemma_id = lemmaId,
                 lemma_pos_id = lemmaPosId

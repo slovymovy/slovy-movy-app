@@ -11,7 +11,7 @@ class UnaccentTest {
         assertEquals("cafe", stripAccents("Café"), "Should remove accent and lowercase")
         assertEquals("naive", stripAccents("naïve"), "Should strip diaeresis")
         assertEquals("aero", stripAccents("Ærø"), "æ->ae, ø->o, and lowercase")
-        assertEquals("großess", stripAccents("GroßeSS"), "No special transliteration for ß; only lowercase")
+        assertEquals("grossess", stripAccents("GroßeSS"), "ß folds to ss")
         assertEquals("creme brulee", stripAccents("Crème Brûlée"), "Common French accents should be stripped")
         assertEquals("oeuvre", stripAccents("Œuvre"), "œ ligature should map to oe")
         assertEquals("facade", stripAccents("façade"), "ç should unaccent to c")

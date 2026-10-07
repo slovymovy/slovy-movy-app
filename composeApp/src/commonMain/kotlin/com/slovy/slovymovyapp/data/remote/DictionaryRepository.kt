@@ -14,8 +14,8 @@ import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
+import com.slovy.slovymovyapp.util.legacySharpSSpellings
 import com.slovy.slovymovyapp.util.queryInChunks
-import com.slovy.slovymovyapp.util.sharpSSearchVariants
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -1397,10 +1397,11 @@ class DictionaryRepository(
         }
     }
 
-    /** Half-open `[start, end)` ranges covering every [sharpSSearchVariants] spelling of [prefix]. */
+    /** Half-open `[start, end)` ranges covering every [legacySharpSSpellings] spelling of [prefix]. */
     private fun prefixRanges(prefix: String): List<Pair<String, String>> {
         if (prefix.isEmpty()) return listOf("" to "\uFFFF")
-        return sharpSSearchVariants(prefix).map { it to it + '\uFFFF' }
+        // TODO(data-version): use listOf(prefix) once legacySharpSSpellings is deleted at the next VERSION bump.
+        return legacySharpSSpellings(prefix).map { it to it + '\uFFFF' }
     }
 
     private fun collectAllRelatedWords(
