@@ -915,8 +915,9 @@ class JsonIngestionBuilder(
 
         /**
          * Generates a deterministic lemma ID from just the lemma.
-         * Automatically normalizes using stripAccents, not normalizeForLookup: persisted
-         * `card.lemma_id` values depend on this hash staying unchanged.
+         * Automatically normalizes using stripAccents, not normalizeForLookup. A data-version
+         * bump does not touch app.db, so persisted `card.lemma_id` must keep matching the IDs
+         * computed here for new cards and stats; otherwise one lemma splits into two.
          */
         fun generateLemmaId(lemma: String): Uuid =
             generateLemmaId(lemma, stripAccents(lemma))
