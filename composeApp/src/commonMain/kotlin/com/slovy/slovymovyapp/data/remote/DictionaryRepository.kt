@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.dictionary.*
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
+import com.slovy.slovymovyapp.util.legacySharpSSpellings
 import com.slovy.slovymovyapp.util.queryInChunks
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
@@ -422,8 +423,7 @@ class DictionaryRepository(
     ): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
-        val normalizedPrefix = stripAccents(trimmed)
-        val (prefixStart, prefixEnd) = prefixRange(normalizedPrefix)
+        val prefixRanges = prefixRanges(stripAccents(trimmed))
 
         val languages = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
         if (languages.isEmpty()) {
@@ -604,8 +604,12 @@ class DictionaryRepository(
                 // 3) Prefix lemma matches across all databases
                 for (db in databases) {
                     val q = db.dictionaryQueries
-                    val lemmaNormLike: List<SelectLemmasNormalizedLike> =
-                        q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong()).executeAsList()
+                    val lemmaNormLike: List<SelectLemmasNormalizedLike> = prefixRanges
+                        .flatMap { (prefixStart, prefixEnd) ->
+                            q.selectLemmasNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
+                                .executeAsList()
+                        }
+                        .sortedByDescending { it.zipf_frequency }
                     lemmaNormLike.forEach { addLemma(it.id, it.lemma, it.zipf_frequency.toFloat(), it.online_only) }
                     if (shouldEarlyReturn(q)) {
                         done = true
@@ -617,9 +621,12 @@ class DictionaryRepository(
                 // 4) Prefix form matches across all databases
                 for (db in databases) {
                     val q = db.dictionaryQueries
-                    val formNormLike: List<SelectLemmasFromFormsNormalizedLike> =
-                        q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
-                            .executeAsList()
+                    val formNormLike: List<SelectLemmasFromFormsNormalizedLike> = prefixRanges
+                        .flatMap { (prefixStart, prefixEnd) ->
+                            q.selectLemmasFromFormsNormalizedLike(lang.code, prefixStart, prefixEnd, maxItems.toLong())
+                                .executeAsList()
+                        }
+                        .sortedByDescending { it.zipf_frequency }
                     formNormLike.forEach { addForm(it.id, it.lemma, it.form, it.zipf_frequency.toFloat(), it.online_only) }
                     if (shouldEarlyReturn(q)) {
                         done = true
@@ -638,9 +645,10 @@ class DictionaryRepository(
                     fun processPair(tdb: TranslationDatabase, dictDb: DictionaryDatabase): Boolean {
                         val tq = tdb.translationQueries
                         val dq = dictDb.dictionaryQueries
-                        val trRows =
+                        val trRows = prefixRanges.flatMap { (prefixStart, prefixEnd) ->
                             tq.selectSenseTranslationsByNormalizedPrefix(lang.code, tgt.code, prefixStart, prefixEnd)
                                 .executeAsList()
+                        }
                         val lemmaRows =
                             queryInChunks(trRows.map { it.lemma_id }) { chunk ->
                                 dq.selectLemmasByIds(chunk).executeAsList()
@@ -1318,8 +1326,7 @@ class DictionaryRepository(
     ): Set<String> = withContext(Dispatchers.IO) {
         if (senseIds.isEmpty() || query.isBlank()) return@withContext emptySet()
 
-        val normalizedQuery = stripAccents(query.trim().lowercase())
-        val (prefixStart, prefixEnd) = prefixRange(normalizedQuery)
+        val prefixRanges = prefixRanges(stripAccents(query.trim().lowercase()))
 
         // Convert string sense IDs to UUIDs for the query
         val senseUuids = senseIds.mapNotNull { id ->
@@ -1343,8 +1350,7 @@ class DictionaryRepository(
                     val results = searchSensesByTranslations(
                         transDb.translationQueries,
                         sourceLanguage,
-                        prefixStart,
-                        prefixEnd,
+                        prefixRanges,
                         senseUuids,
                     )
                     matchingSenseIds.addAll(results.map { it.toString() })
@@ -1361,8 +1367,7 @@ class DictionaryRepository(
                 val results = searchSensesByTranslations(
                     localTransDb.translationQueries,
                     sourceLanguage,
-                    prefixStart,
-                    prefixEnd,
+                    prefixRanges,
                     senseUuids,
                 )
                 matchingSenseIds.addAll(results.map { it.toString() })
@@ -1374,26 +1379,29 @@ class DictionaryRepository(
     private fun searchSensesByTranslations(
         translationQueries: TranslationQueries,
         sourceLanguage: Language,
-        prefixStart: String,
-        prefixEnd: String,
+        prefixRanges: List<Pair<String, String>>,
         senseUuids: List<Uuid>
     ): List<Uuid> {
         // sqlite limit for IN()
-        return senseUuids.chunked(999).flatMap { chunk ->
-            translationQueries
-                .selectSenseIdsByTranslationWordPrefix(
-                    sourceLanguage.code,
-                    prefixStart,
-                    prefixEnd,
-                    chunk
-                )
-                .executeAsList()
+        return prefixRanges.flatMap { (prefixStart, prefixEnd) ->
+            senseUuids.chunked(999).flatMap { chunk ->
+                translationQueries
+                    .selectSenseIdsByTranslationWordPrefix(
+                        sourceLanguage.code,
+                        prefixStart,
+                        prefixEnd,
+                        chunk
+                    )
+                    .executeAsList()
+            }
         }
     }
 
-    private fun prefixRange(prefix: String): Pair<String, String> {
-        if (prefix.isEmpty()) return "" to "\uFFFF"
-        return prefix to prefix + '\uFFFF'
+    /** Half-open `[start, end)` ranges covering every [legacySharpSSpellings] spelling of [prefix]. */
+    private fun prefixRanges(prefix: String): List<Pair<String, String>> {
+        if (prefix.isEmpty()) return listOf("" to "\uFFFF")
+        // TODO(data-version): use listOf(prefix) once legacySharpSSpellings is deleted at the next VERSION bump.
+        return legacySharpSSpellings(prefix).map { it to it + '\uFFFF' }
     }
 
     private fun collectAllRelatedWords(

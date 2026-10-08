@@ -6,9 +6,12 @@ package com.slovy.slovymovyapp.util
  * This function is deterministic and produces identical output across all platforms.
  * It handles:
  * - Latin ligatures: æ -> ae, œ -> oe
- * - Special Latin letters: ø -> o, ł -> l
+ * - Special Latin letters: ø -> o, ł -> l, ß -> ss (capital ẞ lowercases to ß first)
  * - Diacritical marks on Latin characters (café -> cafe)
  * - Cyrillic text is only lowercased, not transliterated
+ *
+ * Data normalized before ß was folded still holds ß; lookups reach it through
+ * [legacySharpSSpellings] until the next data-version bump.
  *
  * @param s The input string
  * @return The normalized string with accents stripped and lowercase
@@ -23,6 +26,7 @@ fun stripAccents(s: String): String {
         .replace("œ", "oe")
         .replace("ø", "o")
         .replace("ł", "l")
+        .replace("ß", "ss")
 
     // Use NFD normalization to decompose accented characters,
     // then remove combining diacritical marks (Unicode block 0300-036F)

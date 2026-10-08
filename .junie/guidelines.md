@@ -324,6 +324,15 @@ Persisted enum/protocol invariants:
 - Native raw entries drive POS/form clustering. Equivalent native form sets are merged; other entries are assigned to
   the best matching cluster, and `lemma_pos_sense_hint` records the resulting sense route.
 - Forms are deduplicated by form, normalized form, tags, and source; do not silently collapse source-specific forms.
+- `stripAccents` folds ß to "ss" in every normalized column and query. v15 DBs built before that (all `translation_*_de.db`)
+  keep ß, so prefix search also tries each "ss" as "ß" via `legacySharpSSpellings`; delete it at the next data-version bump.
+- Ingestion sees raw forms only through `IngestibleForms.forLanguage` (`FormRules.kt`): common rules plus one
+  `LanguageFormRules` per language, applied once per entry so POS clustering and storage use the same forms. Put new
+  per-language form rules there, not in `JsonIngestionBuilder`. `DutchFormRules` drops numeral notations;
+  `GermanFormRules` keeps one row per table cell (verbs: simple tenses, imperative, infinitive, participles;
+  adjectives: base forms and strong declension; nouns: the native cells with articles plus one bare row per word;
+  personal pronouns: their own row of the pronoun table) and never merges tags. It drops abbreviations, symbols,
+  unparsed rows and grammar that does not fit the part of speech; inflected words a learner can meet all stay.
 - Raw-only online lemmas can be ingested first, processed data can later overlay them, and translations-only ingestion
   is supported only after the base senses exist.
 

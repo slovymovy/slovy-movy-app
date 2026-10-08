@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ingestion
 
+import com.slovy.slovymovyapp.util.legacySharpSSpellings
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,10 +16,16 @@ class StringUtilsTest {
         assertEquals("cafe", stripAccents("Café"), "Should remove accent and lowercase")
         assertEquals("naive", stripAccents("naïve"), "Should strip diaeresis")
         assertEquals("aero", stripAccents("Ærø"), "æ->ae, ø->o, and lowercase")
-        assertEquals("großess", stripAccents("GroßeSS"), "No special transliteration for ß; only lowercase")
         assertEquals("creme brulee", stripAccents("Crème Brûlée"), "Common French accents should be stripped")
         assertEquals("oeuvre", stripAccents("Œuvre"), "œ ligature should map to oe")
         assertEquals("facade", stripAccents("façade"), "ç should unaccent to c")
+    }
+
+    @Test
+    fun sharp_s_folds_to_ss() {
+        assertEquals("grossess", stripAccents("GroßeSS"), "ß folds to ss, like a typed ss")
+        assertEquals("strasse", stripAccents("STRAẞE"), "capital ẞ lowercases to ß and folds to ss")
+        assertEquals(stripAccents("Strasse"), stripAccents("Straße"), "both spellings normalize alike")
     }
 
     @Test
@@ -32,5 +39,21 @@ class StringUtilsTest {
     fun cyrillic_should_remain_lowercased_only() {
         assertEquals("программа", stripAccents("Программа"), "Cyrillic should not be transliterated, only lowercased")
         assertEquals("еж", stripAccents("Ёж"), "Cyrillic should not be transliterated, only lowercased")
+    }
+
+    @Test
+    fun legacy_sharp_s_spellings_expand_each_ss() {
+        assertEquals(listOf("haus"), legacySharpSSpellings("haus"), "A query without ss has no other spelling")
+        assertEquals(listOf("gross", "groß"), legacySharpSSpellings("gross"), "ss also tries ß, query first")
+        assertEquals(
+            listOf("schlossstrasse", "schloßstrasse", "schlossstraße", "schloßstraße"),
+            legacySharpSSpellings("schlossstrasse"),
+            "Each non-overlapping ss is expanded independently"
+        )
+        assertEquals(
+            8,
+            legacySharpSSpellings("ssassassassa").size,
+            "Expansion stops after three occurrences to bound the number of lookups"
+        )
     }
 }
