@@ -1,6 +1,8 @@
 package com.slovy.slovymovyapp.ingestion
 
 import com.slovy.slovymovyapp.util.legacySharpSSpellings
+import com.slovy.slovymovyapp.util.normalizeApostrophes
+import com.slovy.slovymovyapp.util.normalizeForLookup
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,5 +57,20 @@ class StringUtilsTest {
             legacySharpSSpellings("ssassassassa").size,
             "Expansion stops after three occurrences to bound the number of lookups"
         )
+    }
+
+    @Test
+    fun normalizeApostrophes_maps_typographic_variants_to_ascii() {
+        assertEquals("don't", normalizeApostrophes("don’t"), "Right single quote becomes ASCII")
+        assertEquals("'quote'", normalizeApostrophes("‘quote’"), "Left and right single quotes become ASCII")
+        assertEquals("don't", normalizeApostrophes("donʼt"), "Modifier letter apostrophe becomes ASCII")
+        assertEquals("plain", normalizeApostrophes("plain"), "Text without apostrophes is unchanged")
+    }
+
+    @Test
+    fun normalizeForLookup_strips_accents_and_unifies_apostrophes() {
+        assertEquals("о'коннор", normalizeForLookup("О’Ко́ннор"), "Cyrillic is only lowercased; the stress mark and apostrophe are normalized")
+        assertEquals("l'ete", normalizeForLookup("L’Été"), "Accents are stripped and the apostrophe is ASCII")
+        assertEquals(stripAccents("can't"), normalizeForLookup("can’t"), "Curly and ASCII spellings share one lookup key")
     }
 }

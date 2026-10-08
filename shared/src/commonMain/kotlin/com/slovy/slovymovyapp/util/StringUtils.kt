@@ -35,6 +35,35 @@ fun stripAccents(s: String): String {
 }
 
 /**
+ * Apostrophe-like characters that appear inside words ("don’t", "l’homme", "о’коннор"). The
+ * `*_normalized` columns hold the ASCII apostrophe; see [normalizeApostrophes].
+ */
+const val APOSTROPHES = "'‘’ʼ"
+
+/** Replaces typographic apostrophes with the canonical ASCII apostrophe. */
+fun normalizeApostrophes(text: String): String =
+    if (text.any { it in APOSTROPHES && it != '\'' }) {
+        buildString(text.length) { text.forEach { append(if (it in APOSTROPHES) '\'' else it) } }
+    } else {
+        text
+    }
+
+/**
+ * The value stored in, and queried against, the `*_normalized` dictionary/translation columns:
+ * [stripAccents] plus [normalizeApostrophes], so "can’t", "can't" and "canʼt" share one key.
+ * Ingestion and lookups must both go through this function.
+ *
+ * Lemma IDs keep hashing plain [stripAccents] (see `JsonIngestionBuilder.generateLemmaId`), so
+ * persisted `card.lemma_id` values stay valid.
+ *
+ * Ship this only together with a DataDbManager.VERSION bump: v15 DBs and the local caches filled
+ * from them still hold the source apostrophe (`о’коннор`, `let’s`) in their normalized columns, so
+ * ASCII lookup keys miss those rows until every dictionary and translation DB is rebuilt with this
+ * function and the version bump wipes the local caches.
+ */
+fun normalizeForLookup(s: String): String = stripAccents(normalizeApostrophes(s))
+
+/**
  * Platform-specific implementation of Unicode NFD normalization and accent stripping.
  *
  * Decomposes characters to base + combining marks form (NFD), then removes

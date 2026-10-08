@@ -10,6 +10,7 @@ import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.md5
 import com.slovy.slovymovyapp.util.queryInChunks
+import com.slovy.slovymovyapp.util.normalizeForLookup
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -402,11 +403,11 @@ class JsonIngestionBuilder(
         val zipfFrequency = frequencyMap[lemmaWord]
             ?: throw IllegalArgumentException("Lemma '$lemmaWord' not found in frequency map")
 
-        val lemmaNormalized = stripAccents(lemmaWord)
+        val lemmaNormalized = normalizeForLookup(lemmaWord)
         val ingestibleForms = IngestibleForms.forLanguage(langCode)
         val entriesSelection = selectEntries(raw, ingestibleForms)
 
-        val baseLemmaId = generateLemmaId(lemmaWord, lemmaNormalized)
+        val baseLemmaId = generateLemmaId(lemmaWord)
 
         val selectLemmasById = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
         if (selectLemmasById != null) {
@@ -469,8 +470,7 @@ class JsonIngestionBuilder(
         langCode: String,
         dictQ: DictionaryQueries
     ): Pair<List<String>, Map<String, List<TranslationQueries.() -> Unit>>> {
-        val lemmaNormalized = stripAccents(word)
-        val baseLemmaId = generateLemmaId(word, lemmaNormalized)
+        val baseLemmaId = generateLemmaId(word)
 
         // Verify lemma exists and is online_only
         val existingLemma = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
@@ -520,8 +520,7 @@ class JsonIngestionBuilder(
         langCode: String,
         dictQ: DictionaryQueries
     ): Map<String, List<TranslationQueries.() -> Unit>> {
-        val lemmaNormalized = stripAccents(word)
-        val baseLemmaId = generateLemmaId(word, lemmaNormalized)
+        val baseLemmaId = generateLemmaId(word)
 
         // Verify lemma exists and has processed data
         val existingLemma = dictQ.selectLemmasById(baseLemmaId).executeAsOneOrNull()
@@ -605,7 +604,7 @@ class JsonIngestionBuilder(
                                 trg,
                                 idx.toLong(),
                                 t.targetLangWord,
-                                stripAccents(t.targetLangWord),
+                                normalizeForLookup(t.targetLangWord),
                                 t.targetLangSenseClarification,
                                 baseLemmaId,
                                 lemmaPosIdForSense
@@ -749,8 +748,8 @@ class JsonIngestionBuilder(
         frequency: Double,
         posFilter: Set<String>? = null
     ) {
-        val lemmaNormalized = stripAccents(word)
-        val lemmaId = generateLemmaId(word, lemmaNormalized)
+        val lemmaNormalized = normalizeForLookup(word)
+        val lemmaId = generateLemmaId(word)
 
         val sourceQ = sourceDb.dictionaryQueries
         val targetQ = targetDb.dictionaryQueries
@@ -799,7 +798,7 @@ class JsonIngestionBuilder(
                         form_id = form.form_id,
                         lemma_pos_id = lp.id,
                         form = form.form,
-                        form_normalized = stripAccents(form.form),
+                        form_normalized = normalizeForLookup(form.form),
                         source = form.source
                     )
 
@@ -894,7 +893,7 @@ class JsonIngestionBuilder(
                     form_id = formId,
                     lemma_pos_id = lemmaPosId,
                     form = f.form,
-                    form_normalized = stripAccents(f.form),
+                    form_normalized = normalizeForLookup(f.form),
                     source = source
                 )
                 f.tags.forEach { tag ->
@@ -916,7 +915,8 @@ class JsonIngestionBuilder(
 
         /**
          * Generates a deterministic lemma ID from just the lemma.
-         * Automatically normalizes using stripAccents.
+         * Automatically normalizes using stripAccents, not normalizeForLookup: persisted
+         * `card.lemma_id` values depend on this hash staying unchanged.
          */
         fun generateLemmaId(lemma: String): Uuid =
             generateLemmaId(lemma, stripAccents(lemma))

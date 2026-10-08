@@ -16,7 +16,8 @@ import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.legacySharpSSpellings
 import com.slovy.slovymovyapp.util.queryInChunks
-import com.slovy.slovymovyapp.util.stripAccents
+import com.slovy.slovymovyapp.util.normalizeApostrophes
+import com.slovy.slovymovyapp.util.normalizeForLookup
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
 
@@ -373,7 +374,7 @@ class DictionaryRepository(
             return relatedWord(exact.lemma, exact.zipf_frequency, exact.online_only)
         }
 
-        val normalized = selectLemmasByFormNormalizedEquals(language.code, stripAccents(form), 1L)
+        val normalized = selectLemmasByFormNormalizedEquals(language.code, normalizeForLookup(form), 1L)
             .executeAsList()
             .firstOrNull()
             ?: return null
@@ -423,7 +424,7 @@ class DictionaryRepository(
     ): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
-        val prefixRanges = prefixRanges(stripAccents(trimmed))
+        val prefixRanges = prefixRanges(normalizeForLookup(trimmed))
 
         val languages = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
         if (languages.isEmpty()) {
@@ -1163,7 +1164,7 @@ class DictionaryRepository(
                 return@withDictionaryDatabases FavoriteSenseMissingReason.DICTIONARY_NOT_DOWNLOADED
             }
 
-            val normalizedLemma = stripAccents(lemma.trim().lowercase())
+            val normalizedLemma = normalizeForLookup(lemma.trim())
             var foundLemma = false
             var foundOnlineOnly = false
 
@@ -1326,7 +1327,7 @@ class DictionaryRepository(
     ): Set<String> = withContext(Dispatchers.IO) {
         if (senseIds.isEmpty() || query.isBlank()) return@withContext emptySet()
 
-        val prefixRanges = prefixRanges(stripAccents(query.trim().lowercase()))
+        val prefixRanges = prefixRanges(normalizeForLookup(query.trim()))
 
         // Convert string sense IDs to UUIDs for the query
         val senseUuids = senseIds.mapNotNull { id ->
@@ -1471,7 +1472,7 @@ class DictionaryRepository(
         language: Language
     ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
         if (words.isEmpty()) return@withContext emptyMap()
-        val wordsByNormalized = words.distinct().groupBy { stripAccents(it) }
+        val wordsByNormalized = words.distinct().groupBy { normalizeForLookup(it) }
 
         withDictionaryDatabases(language) { databases ->
             val best = mutableMapOf<String, RankedTokenResult>()
@@ -1491,7 +1492,7 @@ class DictionaryRepository(
                 }.forEach { row ->
                     val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
                     wordsByNormalized[row.form_normalized]?.forEach { word ->
-                        val exact = row.form.equals(word, ignoreCase = true)
+                        val exact = normalizeApostrophes(row.form).equals(normalizeApostrophes(word), ignoreCase = true)
                         offer(word, RankedTokenResult(if (exact) TokenMatchRank.FORM_EXACT else TokenMatchRank.FORM_NORMALIZED, result))
                     }
                 }
@@ -1501,7 +1502,7 @@ class DictionaryRepository(
                 }.forEach { row ->
                     val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
                     wordsByNormalized[row.lemma_normalized]?.forEach { word ->
-                        val exact = row.lemma.equals(word, ignoreCase = true)
+                        val exact = normalizeApostrophes(row.lemma).equals(normalizeApostrophes(word), ignoreCase = true)
                         offer(word, RankedTokenResult(if (exact) TokenMatchRank.LEMMA_EXACT else TokenMatchRank.LEMMA_NORMALIZED, result))
                     }
                 }

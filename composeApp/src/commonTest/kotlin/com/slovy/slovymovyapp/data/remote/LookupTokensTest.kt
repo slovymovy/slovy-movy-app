@@ -108,6 +108,32 @@ class LookupTokensTest : BaseTest() {
     }
 
     @Test
+    fun typographic_apostrophes_match_ascii_normalized_entries_exactly() {
+        insertLemma("en", "don't", "don't", 3.0)
+        insertLemma("en", "dont", "dont", 5.0)
+
+        val results = lookup(listOf("don’t", "donʼt"), Language.ENGLISH)
+        assertEquals("don't", results.getValue("don’t").lemma, "a right single quote must match the ASCII apostrophe")
+        assertEquals("don't", results.getValue("donʼt").lemma, "a modifier apostrophe must match the ASCII apostrophe")
+    }
+
+    @Test
+    fun ascii_apostrophe_reaches_a_form_whose_source_spelling_is_typographic() {
+        val lemmaId = insertLemma("en", "let", "let", 5.0)
+        insertForm(lemmaId, "let’s", "let's")
+
+        assertEquals("let", lookup(listOf("let's"), Language.ENGLISH)["let's"]?.lemma, "an ASCII query must find the curly-sourced form")
+    }
+
+    @Test
+    fun search_matches_typographic_apostrophes() {
+        insertLemma("en", "don't", "don't", 3.0)
+
+        val results = runBlocking { repository.search("Don’t", Language.ENGLISH) }
+        assertEquals("don't", results.firstOrNull()?.lemma, "a typed curly apostrophe must find the ASCII-normalized lemma")
+    }
+
+    @Test
     fun unknown_words_are_absent_from_the_result() {
         insertLemma("nl", "stad", "stad", 5.0)
 
