@@ -272,8 +272,11 @@ repopulates missing content for favorites and curated-list senses. Recovery item
 normalized lemma, and the controller keeps recovery alive with platform process-keepalive support.
 
 `DataDbManager.VERSION` is currently `v15`. Downloaded DB URLs are under that prefix in the `slovymovy` GCS bucket.
-Startup removes `.part`, undersized, or schema-invalid downloads before routing. Downloads check disk space, use a
-`.part` file plus atomic move, validate the expected schema, and only then record the installed data version.
+Remote and downloaded DB listings only contain dictionaries of `supportedForLearning` languages and translations
+into `supportedForTranslation` targets, so uploading a DB never offers a language before its `Language` flag does;
+startup also deletes downloaded DBs outside that set. Startup removes `.part`, undersized, or schema-invalid downloads
+before routing. Downloads check disk space, use a `.part` file plus atomic move, validate the expected schema, and
+only then record the installed data version.
 
 Read-only and local database managers coordinate active readers with leases/locks. Use their public suspending
 `withDictionary...` / `withTranslation...` helpers so deletion waits for readers and drivers are closed safely,
