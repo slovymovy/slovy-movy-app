@@ -1,7 +1,6 @@
 package com.slovy.slovymovyapp.ingestion
 
 import com.slovy.slovymovyapp.util.legacySharpSSpellings
-import com.slovy.slovymovyapp.util.normalizeApostrophes
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,14 +55,5 @@ class StringUtilsTest {
             legacySharpSSpellings("ssassassassa").size,
             "Expansion stops after three occurrences to bound the number of lookups"
         )
-    }
-
-    @Test
-    fun normalizeApostrophes_maps_typographic_variants_to_ascii() {
-        assertEquals("don't", normalizeApostrophes("don’t"))
-        assertEquals("l'homme", normalizeApostrophes("l’homme"))
-        assertEquals("'quote'", normalizeApostrophes("‘quote’"))
-        assertEquals("don't", normalizeApostrophes("donʼt"))
-        assertEquals("plain", normalizeApostrophes("plain"))
     }
 }
