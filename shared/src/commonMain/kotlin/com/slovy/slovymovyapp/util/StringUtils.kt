@@ -31,20 +31,6 @@ fun stripAccents(s: String): String {
 }
 
 /**
- * Apostrophe-like characters that appear inside words ("don’t", "l’homme"). The dictionary
- * stores the ASCII apostrophe; see [normalizeApostrophes].
- */
-const val APOSTROPHES = "'‘’ʼ"
-
-/** Replaces typographic apostrophes with the dictionary's canonical ASCII apostrophe. */
-fun normalizeApostrophes(text: String): String =
-    if (text.any { it in APOSTROPHES && it != '\'' }) {
-        buildString(text.length) { text.forEach { append(if (it in APOSTROPHES) '\'' else it) } }
-    } else {
-        text
-    }
-
-/**
  * Platform-specific implementation of Unicode NFD normalization and accent stripping.
  *
  * Decomposes characters to base + combining marks form (NFD), then removes

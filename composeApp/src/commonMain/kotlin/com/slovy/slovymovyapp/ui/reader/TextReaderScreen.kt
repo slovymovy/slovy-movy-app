@@ -134,12 +134,12 @@ class TextReaderViewModel(
                     state = state.copy(isAnalyzing = false, isTooLong = true)
                     return@launch
                 }
-                val words = tokens.filter { it.isWord }.map { it.text }.distinct()
+                val words = tokens.filter { it.isWord }.map { normalizeApostrophes(it.text) }.distinct()
                 val results = repository.lookupTokens(words, language)
                 val resolvedTokens = tokens.map { token ->
                     if (!token.isWord) token
                     else {
-                        val result = results[token.text]
+                        val result = results[normalizeApostrophes(token.text)]
                         token.copy(
                             lemma = result?.lemma,
                             lemmaId = result?.lemmaId,

@@ -1,9 +1,11 @@
 package com.slovy.slovymovyapp.ui.reader
 
-import com.slovy.slovymovyapp.util.APOSTROPHES
 import kotlin.uuid.Uuid
 
-// Words may contain any apostrophe variant; DictionaryRepository normalizes them on lookup.
+// Apostrophe-like characters accepted inside words ("don’t", "l’homme"). The dictionary
+// stores the ASCII apostrophe, so lookups go through [normalizeApostrophes].
+internal const val APOSTROPHES = "'‘’ʼ"
+
 private val TOKEN_REGEX = Regex("[\\p{L}\\p{M}\\-$APOSTROPHES]+|\\s+|[^\\p{L}\\p{M}\\-$APOSTROPHES\\s]+")
 
 private val EDGE_TRIM_CHARS = ("-$APOSTROPHES").toCharArray()
@@ -39,6 +41,14 @@ data class TextToken(
     val band: FreqBand? = null,
     val isWord: Boolean
 )
+
+/** Replaces typographic apostrophes with the dictionary's canonical ASCII apostrophe. */
+internal fun normalizeApostrophes(text: String): String =
+    if (text.any { it in APOSTROPHES && it != '\'' }) {
+        buildString(text.length) { text.forEach { append(if (it in APOSTROPHES) '\'' else it) } }
+    } else {
+        text
+    }
 
 internal fun tokenize(text: String): List<TextToken> {
     val result = mutableListOf<TextToken>()

@@ -15,7 +15,6 @@ import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.translation.TranslationDatabase
 import com.slovy.slovymovyapp.translation.TranslationQueries
 import com.slovy.slovymovyapp.util.queryInChunks
-import com.slovy.slovymovyapp.util.normalizeApostrophes
 import com.slovy.slovymovyapp.util.stripAccents
 import kotlinx.coroutines.*
 import kotlin.uuid.Uuid
@@ -417,7 +416,7 @@ class DictionaryRepository(
     ): List<SearchItem> {
         val trimmed = query.trim()
         if (trimmed.isEmpty()) return emptyList()
-        val normalizedPrefix = lookupKey(trimmed)
+        val normalizedPrefix = stripAccents(trimmed)
         val (prefixStart, prefixEnd) = prefixRange(normalizedPrefix)
 
         val languages = if (dictionaryLanguage != null) listOf(dictionaryLanguage) else installedDictionaries()
@@ -1295,7 +1294,7 @@ class DictionaryRepository(
     ): Set<String> = withContext(Dispatchers.IO) {
         if (senseIds.isEmpty() || query.isBlank()) return@withContext emptySet()
 
-        val normalizedQuery = lookupKey(query.trim())
+        val normalizedQuery = stripAccents(query.trim().lowercase())
         val (prefixStart, prefixEnd) = prefixRange(normalizedQuery)
 
         // Convert string sense IDs to UUIDs for the query
@@ -1367,12 +1366,6 @@ class DictionaryRepository(
                 .executeAsList()
         }
     }
-
-    /**
-     * The `*_normalized` column form of user-supplied text. Smart-punctuation keyboards and
-     * copied text use typographic apostrophes ("don’t"), but the dictionary stores ASCII ones.
-     */
-    private fun lookupKey(text: String): String = stripAccents(normalizeApostrophes(text))
 
     private fun prefixRange(prefix: String): Pair<String, String> {
         if (prefix.isEmpty()) return "" to "\uFFFF"
@@ -1446,7 +1439,7 @@ class DictionaryRepository(
         language: Language
     ): Map<String, TokenResult> = withContext(Dispatchers.IO) {
         if (words.isEmpty()) return@withContext emptyMap()
-        val wordsByNormalized = words.distinct().groupBy { lookupKey(it) }
+        val wordsByNormalized = words.distinct().groupBy { stripAccents(it) }
 
         withDictionaryDatabases(language) { databases ->
             val best = mutableMapOf<String, RankedTokenResult>()
@@ -1466,7 +1459,7 @@ class DictionaryRepository(
                 }.forEach { row ->
                     val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
                     wordsByNormalized[row.form_normalized]?.forEach { word ->
-                        val exact = row.form.equals(normalizeApostrophes(word), ignoreCase = true)
+                        val exact = row.form.equals(word, ignoreCase = true)
                         offer(word, RankedTokenResult(if (exact) TokenMatchRank.FORM_EXACT else TokenMatchRank.FORM_NORMALIZED, result))
                     }
                 }
@@ -1476,7 +1469,7 @@ class DictionaryRepository(
                 }.forEach { row ->
                     val result = TokenResult(row.lemma, row.lemma_id, row.zipf)
                     wordsByNormalized[row.lemma_normalized]?.forEach { word ->
-                        val exact = row.lemma.equals(normalizeApostrophes(word), ignoreCase = true)
+                        val exact = row.lemma.equals(word, ignoreCase = true)
                         offer(word, RankedTokenResult(if (exact) TokenMatchRank.LEMMA_EXACT else TokenMatchRank.LEMMA_NORMALIZED, result))
                     }
                 }
