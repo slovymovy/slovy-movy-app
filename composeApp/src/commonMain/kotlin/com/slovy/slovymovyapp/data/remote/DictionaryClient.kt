@@ -165,7 +165,6 @@ class DictionaryClient(
                         hasMissingTranslations(localCard, translationTargets)
                 putAttributes(
                     mapOf(
-                        "remote_fetch" to needsRemote,
                         "online_only" to localCard.online,
                         "needs_translations" to needsTranslations,
                     ),
