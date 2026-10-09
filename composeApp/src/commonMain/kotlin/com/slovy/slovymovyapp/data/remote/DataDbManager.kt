@@ -137,8 +137,7 @@ class DataDbManager(
 
     /**
      * Removes downloaded dictionary/translation DB files that are too small to be valid SQLite
-     * databases with our schema, any `.part` orphans from interrupted downloads, and databases for
-     * languages the app does not offer (see [offeredDictionaryLanguage]). Should be
+     * databases with our schema, plus any `.part` orphans from interrupted downloads. Should be
      * called at app startup, before any caller consults [hasDictionary]/[hasTranslation], so
      * routing can correctly send the user back through the download flow.
      */
@@ -148,7 +147,6 @@ class DataDbManager(
             var deletedPart = 0L
             var deletedSmall = 0L
             var deletedInvalidSchema = 0L
-            var deletedNotOffered = 0L
             try {
                 // Drain active leases on every cached DB, close drivers, then run the cleanup with new
                 // leases still blocked so we never race with a reader probing or growing a Pool.
@@ -167,20 +165,6 @@ class DataDbManager(
                         if (fileName.endsWith(PART_SUFFIX)) {
                             platform.deleteFile(file)
                             deletedPart += 1
-                            return@forEach
-                        }
-
-                        // A database for a language the app does not offer, e.g. downloaded by an older
-                        // build before the language was withdrawn. No screen lists it, so it could never
-                        // be used or deleted from Settings.
-                        if (fileName.endsWith(DB_EXTENSION) &&
-                            offeredDictionaryLanguage(fileName) == null && offeredTranslationPair(fileName) == null
-                        ) {
-                            listOf(fileName, "$fileName-wal", "$fileName-shm").forEach { name ->
-                                val path = platform.getDatabasePath(name)
-                                if (platform.fileExists(path)) platform.deleteFile(path)
-                            }
-                            deletedNotOffered += 1
                             return@forEach
                         }
 
@@ -205,17 +189,16 @@ class DataDbManager(
                         }
                     }
                 }
-                if (deletedPart + deletedSmall + deletedInvalidSchema + deletedNotOffered > 0L) {
+                if (deletedPart + deletedSmall + deletedInvalidSchema > 0L) {
                     markResult("cleaned")
                 }
             } finally {
-                val deleted = deletedPart + deletedSmall + deletedInvalidSchema + deletedNotOffered
+                val deleted = deletedPart + deletedSmall + deletedInvalidSchema
                 putMetric("downloaded_files_checked", checked)
                 putMetric("deleted_files", deleted)
                 putMetric("part_orphans_deleted", deletedPart)
                 putMetric("too_small_deleted", deletedSmall)
                 putMetric("invalid_schema_deleted", deletedInvalidSchema)
-                putMetric("not_offered_deleted", deletedNotOffered)
             }
         }
     }
@@ -478,6 +461,11 @@ class DataDbManager(
     /**
      * Fetches available languages with their dictionaries and translations grouped by source language.
      * Uses in-memory cache if available.
+     *
+     * Only dictionaries of [Language.supportedForLearning] languages and translations into
+     * [Language.supportedForTranslation] targets are offered, so a DB uploaded before its language is
+     * flagged (or a dictionary for a translation-only language) never becomes downloadable. DBs that
+     * are already downloaded are left alone; see [listDownloadedDatabases].
      */
     suspend fun fetchAvailableLanguages(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
         // Return cached value if available
@@ -499,12 +487,28 @@ class DataDbManager(
             val fileName = rf.name
             val size = rf.sizeBytes
 
-            offeredDictionaryLanguage(fileName)?.let { language ->
-                dictionaries[language] = size
-            }
-            offeredTranslationPair(fileName)?.let { (srcLang, tgtLang) ->
-                translations.getOrPut(srcLang) { mutableListOf() }
-                    .add(AvailableTranslationInfo(tgtLang, size))
+            when {
+                fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
+                    val language = Language.fromCodeOrNull(langCode)
+                    if (language != null && language.supportedForLearning) {
+                        dictionaries[language] = size
+                    }
+                }
+
+                fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
+                    if (parts.size == 2) {
+                        val srcLang = Language.fromCodeOrNull(parts[0])
+                        val tgtLang = Language.fromCodeOrNull(parts[1])
+                        if (srcLang != null && srcLang.supportedForLearning &&
+                            tgtLang != null && tgtLang.supportedForTranslation
+                        ) {
+                            translations.getOrPut(srcLang) { mutableListOf() }
+                                .add(AvailableTranslationInfo(tgtLang, size))
+                        }
+                    }
+                }
             }
         }
 
@@ -528,41 +532,24 @@ class DataDbManager(
         return files.mapNotNull { file ->
             val fileName = file.name
             val size = platform.getFileSize(file) ?: return@mapNotNull null
-            offeredDictionaryLanguage(fileName)?.let { return@mapNotNull DatabaseFileInfo.Dictionary(it, size) }
-            offeredTranslationPair(fileName)?.let { (srcLang, tgtLang) ->
-                return@mapNotNull DatabaseFileInfo.Translation(srcLang, tgtLang, size)
+            when {
+                fileName.startsWith(DICTIONARY_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
+                    val language = Language.fromCodeOrNull(langCode) ?: return@mapNotNull null
+                    DatabaseFileInfo.Dictionary(language, size)
+                }
+
+                fileName.startsWith(TRANSLATION_PREFIX) && fileName.endsWith(DB_EXTENSION) -> {
+                    val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
+                    if (parts.size != 2) return@mapNotNull null
+                    val srcLang = Language.fromCodeOrNull(parts[0]) ?: return@mapNotNull null
+                    val tgtLang = Language.fromCodeOrNull(parts[1]) ?: return@mapNotNull null
+                    DatabaseFileInfo.Translation(srcLang, tgtLang, size)
+                }
+
+                else -> null
             }
-            null
         }
-    }
-
-    /**
-     * The language of a `dictionary_{code}.db` file, or null when the name is not one or the app
-     * does not offer that language for study.
-     *
-     * A dictionary can be uploaded before its language is [Language.supportedForLearning], and a
-     * translation-only language can have one too; neither may surface as a learning language.
-     * Every listing of remote and downloaded dictionaries goes through here, so the flag in
-     * [Language] alone decides what Settings, onboarding and the download plans offer.
-     */
-    private fun offeredDictionaryLanguage(fileName: String): Language? {
-        if (!fileName.startsWith(DICTIONARY_PREFIX) || !fileName.endsWith(DB_EXTENSION)) return null
-        val langCode = fileName.removePrefix(DICTIONARY_PREFIX).removeSuffix(DB_EXTENSION)
-        return Language.fromCodeOrNull(langCode)?.takeIf { it.supportedForLearning }
-    }
-
-    /**
-     * The source and target of a `translation_{src}_{tgt}.db` file, or null when the name is not
-     * one or the app does not offer the pair: the source must be [Language.supportedForLearning]
-     * and the target [Language.supportedForTranslation]. See [offeredDictionaryLanguage].
-     */
-    private fun offeredTranslationPair(fileName: String): Pair<Language, Language>? {
-        if (!fileName.startsWith(TRANSLATION_PREFIX) || !fileName.endsWith(DB_EXTENSION)) return null
-        val parts = fileName.removePrefix(TRANSLATION_PREFIX).removeSuffix(DB_EXTENSION).split("_")
-        if (parts.size != 2) return null
-        val srcLang = Language.fromCodeOrNull(parts[0])?.takeIf { it.supportedForLearning } ?: return null
-        val tgtLang = Language.fromCodeOrNull(parts[1])?.takeIf { it.supportedForTranslation } ?: return null
-        return srcLang to tgtLang
     }
 
     private suspend fun ensureFile(

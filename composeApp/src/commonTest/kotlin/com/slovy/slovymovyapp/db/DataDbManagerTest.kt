@@ -5,7 +5,6 @@ import com.slovy.slovymovyapp.data.db.DatabaseProvider
 import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.remote.DataDbManager
-import com.slovy.slovymovyapp.data.remote.DatabaseFileInfo
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.RemoteDataProvider
 import com.slovy.slovymovyapp.data.remote.RemoteFile
@@ -732,69 +731,6 @@ class DataDbManagerTest : BaseTest() {
         } finally {
             appDriver.close()
             platform.deleteFile(appDbPath)
-        }
-    }
-
-    @Test
-    fun cleanupCorruptDownloadedDbs_removes_databases_of_languages_not_offered() {
-        val platform = testPlatformDbSupport()
-        val mgr = testDataDbManager()
-
-        platform.ensureDatabasesDir()
-        val offeredDict = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.POLISH))
-        val offeredTrans = platform.getDatabasePath(DataDbManager.translationFileName(Language.POLISH, Language.FRENCH))
-        val translationOnlyDict = platform.getDatabasePath(DataDbManager.dictionaryFileName(Language.FRENCH))
-        val unstudiableSource = platform.getDatabasePath(DataDbManager.translationFileName(Language.FRENCH, Language.POLISH))
-        val unofferedTarget = platform.getDatabasePath(DataDbManager.translationFileName(Language.POLISH, Language.GREEK))
-        val all = listOf(offeredDict, offeredTrans, translationOnlyDict, unstudiableSource, unofferedTarget)
-        all.forEach { if (platform.fileExists(it)) platform.deleteFile(it) }
-
-        try {
-            // Valid databases, so only the offered-language rule can remove them.
-            listOf(offeredDict, translationOnlyDict).forEach { writeDictionaryDb(platform, it) }
-            listOf(offeredTrans, unstudiableSource, unofferedTarget).forEach { writeTranslationDb(platform, it) }
-
-            assertEquals(
-                setOf(DataDbManager.dictionaryFileName(Language.POLISH)) +
-                    DataDbManager.translationFileName(Language.POLISH, Language.FRENCH),
-                mgr.listDownloadedDatabases().map {
-                    when (it) {
-                        is DatabaseFileInfo.Dictionary -> DataDbManager.dictionaryFileName(it.language)
-                        is DatabaseFileInfo.Translation -> DataDbManager.translationFileName(it.sourceLanguage, it.targetLanguage)
-                    }
-                }.filter { name -> all.any { it.name == name } }.toSet(),
-                "downloaded databases of languages not offered are not listed"
-            )
-
-            runBlocking { mgr.cleanupCorruptDownloadedDbs() }
-
-            assertTrue(platform.fileExists(offeredDict), "a dictionary of a learning language is kept")
-            assertTrue(platform.fileExists(offeredTrans), "a translation between offered languages is kept")
-            assertFalse(platform.fileExists(translationOnlyDict), "a dictionary of a translation-only language is removed")
-            assertFalse(platform.fileExists(unstudiableSource), "a translation from a language not studied is removed")
-            assertFalse(platform.fileExists(unofferedTarget), "a translation into a target not offered is removed")
-        } finally {
-            all.forEach { if (platform.fileExists(it)) platform.deleteFile(it) }
-        }
-    }
-
-    private fun writeDictionaryDb(platform: PlatformDbSupport, path: Path) {
-        val driver = platform.createDictionaryDataDriver(path, readOnly = false)
-        try {
-            DatabaseProvider.createDictionaryDatabase(driver).dictionaryQueries
-                .insertLemma(Uuid.random(), "pl", "test", "test", 0.0, false)
-        } finally {
-            driver.close()
-        }
-    }
-
-    private fun writeTranslationDb(platform: PlatformDbSupport, path: Path) {
-        val driver = platform.createTranslationDataDriver(path, readOnly = false)
-        try {
-            DatabaseProvider.createTranslationDatabase(driver).translationQueries
-                .insertSenseTargetDefinition(Uuid.random(), "pl", "fr", "test")
-        } finally {
-            driver.close()
         }
     }
 
