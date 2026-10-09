@@ -65,12 +65,10 @@ class LanguageSetupViewModel(
         viewModelScope.launch {
             state = state.copy(isLoading = true, errorMessage = null)
             try {
-                // A dictionary DB can be uploaded before the language is ready to be offered, so
-                // discovery is intersected with what the enum declares studiable.
+                // fetchAvailableLanguages lists dictionaries only for languages offered for study.
                 val available = dataDbManager.fetchAvailableLanguages()
                     .filter { it.dictionarySizeBytes != null }
                     .map { it.language }
-                    .filter { it.supportedForLearning }
 
                 state = state.copy(
                     isLoading = false,

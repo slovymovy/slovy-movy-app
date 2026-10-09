@@ -6,6 +6,8 @@ import com.slovy.slovymovyapp.data.dictionary.DictionaryPos
 import com.slovy.slovymovyapp.data.dictionary.FormSource
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
+import com.slovy.slovymovyapp.data.remote.RemoteDataProvider
+import com.slovy.slovymovyapp.data.remote.RemoteFile
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.test.BaseTest
@@ -688,6 +690,47 @@ class DataDbManagerTest : BaseTest() {
         } finally {
             if (platform.fileExists(dictPart)) platform.deleteFile(dictPart)
             if (platform.fileExists(transPart)) platform.deleteFile(transPart)
+        }
+    }
+
+    @Test
+    fun fetchAvailableLanguages_lists_only_offered_languages() = runBlocking {
+        val platform = testPlatformDbSupport()
+        val appDbPath = platform.getDatabasePath("test_offered_languages.db")
+        if (platform.fileExists(appDbPath)) platform.deleteFile(appDbPath)
+        val appDriver = platform.createAppDataDriver(appDbPath)
+        val remote = object : RemoteDataProvider {
+            override suspend fun listFiles(platform: PlatformDbSupport) = listOf(
+                RemoteFile("dictionary_en.db", 100),
+                RemoteFile("dictionary_fr.db", 100), // French is a translation target only
+                RemoteFile("dictionary_el.db", 100), // Greek is declared but not offered at all
+                RemoteFile("dictionary_xx.db", 100), // no such language
+                RemoteFile("translation_en_fr.db", 10),
+                RemoteFile("translation_en_el.db", 10), // target not offered yet
+                RemoteFile("translation_fr_en.db", 10), // source not studiable
+            )
+
+            override fun downloadUrlFor(fileName: String) = error("not downloaded in this test")
+            override fun headersForHttp() = emptyMap<String, String>()
+        }
+
+        try {
+            val mgr = DataDbManager(platform, SettingsRepository(DatabaseProvider.createAppDatabase(appDriver)), remote)
+            val available = mgr.fetchAvailableLanguages()
+
+            assertEquals(
+                listOf(Language.ENGLISH),
+                available.map { it.language },
+                "only languages supported for learning are listed, whatever dictionaries the bucket holds"
+            )
+            assertEquals(
+                listOf(Language.FRENCH),
+                available.single().availableTranslations.map { it.targetLanguage },
+                "translations are listed only into targets supported for translation"
+            )
+        } finally {
+            appDriver.close()
+            platform.deleteFile(appDbPath)
         }
     }
 
