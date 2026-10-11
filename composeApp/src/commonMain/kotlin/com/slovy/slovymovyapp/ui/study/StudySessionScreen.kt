@@ -1023,13 +1023,18 @@ private fun StudyCardSurface(
                             .heightIn(min = 360.dp),
                     )
                 }
+                // No ripple: it would paint the whole invisible strip; the flip is the feedback.
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(88.dp)
                         .align(Alignment.BottomCenter)
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .clickable(role = Role.Button, onClickLabel = flipLabel) { onReveal() },
+                        .clickable(
+                            interactionSource = null,
+                            indication = null,
+                            role = Role.Button,
+                            onClickLabel = flipLabel,
+                        ) { onReveal() },
                     contentAlignment = Alignment.Center,
                 ) {
                     Row(
