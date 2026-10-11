@@ -187,6 +187,16 @@ class TextReaderViewModel(
         autoPasteAttempted = true
         return true
     }
+
+    /**
+     * Analyzes text the platform handed to the app (a text-selection action or share). It
+     * replaces the clipboard auto-paste for this reader instance: the passage is already
+     * known, so reading the clipboard would only overwrite it or raise the iOS paste prompt.
+     */
+    fun analyzeExternalText(text: String) {
+        autoPasteAttempted = true
+        analyzeText(text)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

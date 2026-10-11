@@ -62,8 +62,13 @@ internal sealed interface AppDestination {
     @Serializable
     data object Developer : AppDestination
 
+    /**
+     * [sharedTextSerial] addresses a passage the platform handed to the app (see
+     * `SharedTextReceiver`); the entry picks it up from `App`'s pending map on first composition.
+     * Null for the reader opened from Search, which pastes from the clipboard instead.
+     */
     @Serializable
-    data class TextReader(val languageCode: String) : AppDestination
+    data class TextReader(val languageCode: String, val sharedTextSerial: Long?) : AppDestination
 
     @Serializable
     data class Error(val message: String) : AppDestination
