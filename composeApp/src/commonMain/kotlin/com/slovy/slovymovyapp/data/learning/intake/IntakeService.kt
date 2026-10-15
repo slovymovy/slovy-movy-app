@@ -63,8 +63,7 @@ class IntakeService(
 
     /**
      * Intake runs one at a time: a session start and the review coordinator can both ask for
-     * one, and two runs interleaving would race each other's re-entry inserts and the memo of
-     * unplayable senses.
+     * one, and two runs interleaving would race each other's re-entry inserts and cursor.
      */
     private val runMutex = Mutex()
 
@@ -279,12 +278,6 @@ class IntakeService(
     }
 
     /**
-     * Senses found unplayable in the studied families, per language and selection, so a run does
-     * not fetch their word data again. A fresh selection or process starts over.
-     */
-    private val unplayableSenses = mutableMapOf<String, MutableSet<Uuid>>()
-
-    /**
      * Where the last run's walk through the stranded senses stopped, per language and
      * selection, so the next run goes on from there instead of re-reading the same first pages;
      * a vocabulary whose first pages cannot be re-entered is still walked to its end.
@@ -293,11 +286,11 @@ class IntakeService(
 
     /**
      * Re-enters stranded senses, whose cards all belong to families the learner switched off,
-     * one at a time in the first family still studied: such a word could never be shown again,
+     * one at a time in the first studied family that can play it: such a word could never be shown again,
      * and the ladder, which only runs on a review, could never bring it back. The new card
      * inherits from the strongest one the way an unlock would, so what the word already earned
      * carries over; the cards it has keep their scheduling untouched. Word data is fetched once
-     * per lemma.
+     * per lemma and run.
      */
     private inner class Rerouter(
         private val langCode: String,
@@ -306,10 +299,8 @@ class IntakeService(
         private val formats: StudyFormatSelection,
         private val now: Long,
     ) {
-        private val target: CardFamily = formats.families.first()
         private val cardsByLemma = mutableMapOf<String, LanguageCard?>()
         private val key = "$langCode|${formats.enabled.sorted()}|${translationTargets.map { it.code }}"
-        private val unplayable: MutableSet<Uuid> = unplayableSenses.getOrPut(key) { mutableSetOf() }
 
         /**
          * Walks the stranded senses a page at a time, keyed on the last sense seen so the rows
@@ -361,7 +352,6 @@ class IntakeService(
         }
 
         private suspend fun reenter(source: DbCard): RerouteOutcome {
-            if (source.sense_id in unplayable) return RerouteOutcome.NOTHING_TO_DO
             val senseId = source.sense_id.toString()
             val favorite = learning.selectFavoriteWithActivation(senseId, langCode).executeAsOneOrNull()
             if (favorite == null) {
@@ -387,11 +377,16 @@ class IntakeService(
                 }
                 return RerouteOutcome.DATA_UNAVAILABLE
             }
-            if (buildTaskVariants(target, sense, translationTargets, formats).isEmpty()) {
+            // The first studied family that can play this sense; a sense that none can play is
+            // not remembered across runs, since the data it lacks may arrive with a fetch or a
+            // download, and the run after that must look again.
+            val target = formats.families.firstOrNull { family ->
+                buildTaskVariants(family, sense, translationTargets, formats).isNotEmpty()
+            }
+            if (target == null) {
                 AppLogger.debug(TAG, null) {
-                    "Intake reroute skipped: no playable variant lang=$langCode sense=$senseId family=$target"
+                    "Intake reroute skipped: no playable variant lang=$langCode sense=$senseId families=${formats.families}"
                 }
-                unplayable += source.sense_id
                 return RerouteOutcome.NOT_PLAYABLE
             }
             val scheduling = config.reentryScheduling(

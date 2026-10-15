@@ -2338,6 +2338,76 @@ class LearningE2ETest : BaseTest() {
         }
     }
 
+    @Test
+    fun reroute_takes_the_first_studied_family_that_can_play_the_sense() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            // Translation words and a tagged source example, but no translated definition: the
+            // word-to-translation variant cannot be built, while the source cloze can.
+            val fixture = env.seedSense(lemma = "clozeonlyword")
+            val q = env.translation!!.translationQueries
+            q.insertSenseTranslation(
+                sense_id = fixture.senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "слово",
+                target_lang_word_normalized = "слово",
+                target_lang_sense_clarification = null,
+                lemma_id = Uuid.random(),
+                lemma_pos_id = fixture.lemmaPosId,
+            )
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_VOICE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
+            )
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted, "The second studied family can play the sense, so it is used")
+            assertEquals(
+                listOf(CardFamily.PRODUCE_WORD_IN_CONTEXT, CardFamily.RECOGNIZE_VOICE),
+                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+            )
+        }
+    }
+
+    @Test
+    fun reroute_looks_again_once_missing_data_arrives() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "dataarriveslater")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_VOICE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val before = env.intake.runIntake("en")
+            assertEquals(0, before.rerouted, "No translation words yet, so production cannot be played")
+
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            // Every path that brings data in, ingestion or recovery, drops the cached sense.
+            env.dictionaryRepository.invalidateSenses(setOf(fixture.senseId.toString()))
+            env.clock.advance(1.days)
+            val after = env.intake.runIntake("en")
+
+            assertEquals(1, after.rerouted, "A sense rejected for missing data is looked at again once the data is there")
+        }
+    }
+
     private suspend fun withEnv(
         includeTranslation: Boolean,
         config: FsrsConfig = FsrsDefaults.config(),
@@ -2407,7 +2477,7 @@ class LearningE2ETest : BaseTest() {
                 learning = app.database.favoritesQueries,
                 clock = clock,
             )
-            block(Env(app.database, dictionary, translation, intake, session, stats, favorites, settings, studyFormats, clock))
+            block(Env(app.database, dictionary, translation, intake, session, stats, favorites, settings, studyFormats, dictionaryRepository, clock))
         } finally {
             dataDbManager.closeAllReadOnlyDatabases()
             localDbManager.deleteAll()
@@ -2636,6 +2706,7 @@ private data class Env(
     val favorites: FavoritesRepository,
     val settings: SettingsRepository,
     val studyFormats: StudyFormatsRepository,
+    val dictionaryRepository: DictionaryRepository,
     val clock: MutableClock,
 )
 
