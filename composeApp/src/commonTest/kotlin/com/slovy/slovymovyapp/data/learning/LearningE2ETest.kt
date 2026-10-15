@@ -1991,9 +1991,10 @@ class LearningE2ETest : BaseTest() {
             env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION)))
 
             val effective = env.studyFormats.get(Language.ENGLISH)
-            assertTrue(
-                StudyFormat.SOURCE_ONLY in effective.enabled,
-                "With no translation language the only playable format must stay on, or every word is stuck",
+            assertEquals(
+                setOf(StudyFormat.SOURCE_ONLY),
+                effective.enabled,
+                "With no translation language the only playable format is the whole selection: anything else would count families nothing can play",
             )
             assertEquals(
                 setOf(StudyFormat.WORD_TO_TRANSLATION),
@@ -2254,6 +2255,78 @@ class LearningE2ETest : BaseTest() {
         }
     }
 
+    @Test
+    fun without_translation_targets_a_listening_only_choice_hides_voice_cards_and_reenters_the_word() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.LISTEN)))
+            val fixture = env.seedSense(lemma = "listeningonlyword")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_VOICE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+
+            val families = env.studyFormats.get(Language.ENGLISH).families
+            assertFalse(CardFamily.RECOGNIZE_VOICE in families, "Nothing can play listening without a translation")
+            assertEquals(0, env.stats.dueNow("en", families), "A due card nobody can play is not due")
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted, "The word comes back in a family the source-only format can play")
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.RECOGNIZE_VOICE),
+                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+            )
+        }
+    }
+
+    @Test
+    fun a_card_in_a_studied_family_the_formats_cannot_play_is_reentered_by_the_session() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            // The definition reveals the answer, so with only the source-only format on the
+            // production family has no variant, while recognition can still be played.
+            val fixture = env.seedSense(lemma = "revealed", definition = "to have <w>revealed</w> something")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            val production = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                difficulty = 5.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY)))
+
+            val served = env.nextLoadedCard("en")
+
+            assertEquals(CardFamily.RECOGNIZE_SENSE, served.card.family, "The session re-enters the word where it can be played")
+            assertEquals(CardKind.WORD_TO_SOURCE_DEFINITION, served.variant.kind)
+            val factor = config.crossFamilyCreditFactor(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_SENSE, Rating.GOOD)!!
+            assertEquals(10.0 * factor, served.card.scheduling.stability, absoluteTolerance = 1e-9)
+            val buried = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
+            assertEquals(
+                (start + config.buryUnplayableUnderFormatsFor).toEpochMilliseconds(),
+                buried.available_after,
+                "The unplayable card rests; its scheduling is otherwise untouched",
+            )
+            assertEquals(production.stability, buried.stability)
+
+            // Grading the new card does not create a second recognition card next time.
+            env.session.submitReview(served, env.session.previewRatings(served).first { it.rating == Rating.GOOD }, 1.seconds.inWholeMilliseconds)
+            assertEquals(
+                2,
+                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size,
+            )
+        }
+    }
+
     private suspend fun withEnv(
         includeTranslation: Boolean,
         config: FsrsConfig = FsrsDefaults.config(),
@@ -2331,7 +2404,11 @@ class LearningE2ETest : BaseTest() {
         }
     }
 
-    private fun Env.seedSense(lemma: String, includeExamples: Boolean = true): SenseFixture {
+    private fun Env.seedSense(
+        lemma: String,
+        includeExamples: Boolean = true,
+        definition: String = "to learn something",
+    ): SenseFixture {
         val lemmaId = Uuid.random()
         val lemmaPosId = Uuid.random()
         val senseId = Uuid.random()
@@ -2342,7 +2419,7 @@ class LearningE2ETest : BaseTest() {
         q.insertSense(
             sense_id = senseId,
             lemma_pos_id = lemmaPosId,
-            sense_definition = "to learn something",
+            sense_definition = definition,
             learner_level = LearnerLevel.A1,
             frequency = SenseFrequency.HIGH,
             semantic_group_id = "sg",

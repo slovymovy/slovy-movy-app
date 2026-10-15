@@ -12,11 +12,7 @@ import com.slovy.slovymovyapp.data.learning.Rating
 import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
-import com.slovy.slovymovyapp.data.learning.fsrs.backwardCreditDelay
-import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
-import com.slovy.slovymovyapp.data.learning.fsrs.forwardCreditDelay
-import com.slovy.slovymovyapp.data.learning.fsrs.inheritedStability
-import com.slovy.slovymovyapp.data.learning.fsrs.ladderCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.reentryScheduling
 import com.slovy.slovymovyapp.data.learning.session.buildTaskVariants
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.LanguageCard
@@ -33,11 +29,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
-import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
-import kotlin.time.toDuration
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -386,28 +379,17 @@ class IntakeService(
                 unplayable += source.sense_id
                 return RerouteOutcome.NOT_PLAYABLE
             }
-            // Forward along the ladder, or back from a family further up; the delay follows the
-            // direction the way sibling credit does.
-            val forward = target.ordinal > source.family.ordinal
-            val factor = if (forward) {
-                config.ladderCreditFactor(source.family, target, Rating.GOOD)
-            } else {
-                config.crossFamilyCreditFactor(source.family, target, Rating.GOOD)
-            }
-            val inherited = if (source.state == CardState.NEW || factor == null) {
-                null
-            } else {
-                config.inheritedStability(source.stability, factor)
-            }
-            val delay = when {
-                inherited == null -> Duration.ZERO
-                forward -> config.forwardCreditDelay(inherited)
-                else -> config.backwardCreditDelay(inherited)
-            }
-            val due = now + delay.inWholeMilliseconds
+            val scheduling = config.reentryScheduling(
+                sourceFamily = source.family,
+                sourceState = source.state,
+                sourceStability = source.stability,
+                sourceDifficulty = source.difficulty,
+                targetFamily = target,
+            )
+            val due = now + scheduling.delay.inWholeMilliseconds
             AppLogger.debug(TAG, null) {
                 "Intake rerouting sense lang=$langCode sense=$senseId from=${source.family} " +
-                    "to=$target inheritedStability=${inherited ?: 0.0} dueIn=${(due - now).toDuration(DurationUnit.MILLISECONDS)}"
+                    "to=$target inheritedStability=${scheduling.stability} dueIn=${scheduling.delay}"
             }
             // The query already leaves out senses with any card in a studied family; the check
             // inside the transaction is for a card another writer inserted since that read.
@@ -425,9 +407,9 @@ class IntakeService(
                     lemma_id = source.lemma_id,
                     lang_code = langCode,
                     family = target,
-                    state = if (inherited == null) CardState.NEW else CardState.LEARNING,
-                    stability = inherited ?: 0.0,
-                    difficulty = if (inherited == null) 0.0 else source.difficulty,
+                    state = scheduling.state,
+                    stability = scheduling.stability,
+                    difficulty = scheduling.difficulty,
                     due = due,
                     last_review = null,
                     reps = 0,

@@ -9,9 +9,10 @@ import kotlinx.coroutines.sync.withLock
  * The one place the learner's study formats are read from and written to.
  *
  * Reads resolve the stored choice against the language's translation targets: without any, the
- * source-only format is the only one that can be played, so it is forced on whatever was stored.
- * That keeps a language studiable after its last translation language is removed, when the page
- * to switch the format back on is hidden. The stored choice itself is left alone and applies
+ * source-only format is the only one that can be played, so the effective selection is that
+ * format alone, whatever was stored. That keeps a language studiable after its last translation
+ * language is removed, when the page to switch the format back on is hidden, and keeps families
+ * nothing can play out of the due counts. The stored choice itself is left alone and applies
  * again once a translation language returns.
  *
  * Writes are serialised: the setting is one JSON object for every language, so two quick toggles
@@ -23,14 +24,17 @@ class StudyFormatsRepository(
 ) {
     private val writeMutex = Mutex()
 
+    private companion object {
+        val SOURCE_ONLY_ALONE = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY))
+    }
+
     suspend fun get(language: Language): StudyFormatSelection =
         get(language, translationTargets(language))
 
     /** As [get], for a caller that has already resolved the language's translation targets. */
     suspend fun get(language: Language, translationTargets: List<Language>): StudyFormatSelection {
-        val stored = settingsRepository.getStudyFormats(language)
-        val hasTargets = translationTargets.any { it != language }
-        return if (hasTargets) stored else stored.with(StudyFormat.SOURCE_ONLY, enabled = true) ?: stored
+        if (!hasChoice(language, translationTargets)) return SOURCE_ONLY_ALONE
+        return settingsRepository.getStudyFormats(language)
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.slovy.slovymovyapp.data.learning.fsrs
 
 import com.slovy.slovymovyapp.data.learning.CardFamily
+import com.slovy.slovymovyapp.data.learning.CardState
 import com.slovy.slovymovyapp.data.learning.Rating
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -126,6 +127,47 @@ fun FsrsConfig.unlockStabilityGate(sourceFamily: CardFamily, targetFamily: CardF
                 CardFamily.RECOGNIZE_VOICE -> Duration.INFINITE
             }
         }
+}
+
+/** What a card re-entered in another family starts with; see [FsrsConfig.reentryScheduling]. */
+data class ReentryScheduling(
+    val state: CardState,
+    val stability: Double,
+    val difficulty: Double,
+    /** How long before the new card is first presented. */
+    val delay: Duration,
+)
+
+/**
+ * The scheduling of a card that re-enters a sense in [targetFamily] from its strongest existing
+ * card, the way an unlock would: forward along the ladder it inherits through the chained credit
+ * and waits the forward delay, back from a family further up it inherits through that pair's
+ * credit and waits the backward delay. A source never reviewed, or a pair without credit, starts
+ * the new card fresh.
+ */
+fun FsrsConfig.reentryScheduling(
+    sourceFamily: CardFamily,
+    sourceState: CardState,
+    sourceStability: Double,
+    sourceDifficulty: Double,
+    targetFamily: CardFamily,
+): ReentryScheduling {
+    val forward = targetFamily.ordinal > sourceFamily.ordinal
+    val factor = if (forward) {
+        ladderCreditFactor(sourceFamily, targetFamily, Rating.GOOD)
+    } else {
+        crossFamilyCreditFactor(sourceFamily, targetFamily, Rating.GOOD)
+    }
+    if (sourceState == CardState.NEW || factor == null) {
+        return ReentryScheduling(CardState.NEW, 0.0, 0.0, Duration.ZERO)
+    }
+    val stability = inheritedStability(sourceStability, factor)
+    return ReentryScheduling(
+        state = CardState.LEARNING,
+        stability = stability,
+        difficulty = sourceDifficulty,
+        delay = if (forward) forwardCreditDelay(stability) else backwardCreditDelay(stability),
+    )
 }
 
 /** The stability a card inherits from a source at [stabilityDays] through a credit [factor]. */
