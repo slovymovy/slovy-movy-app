@@ -2215,6 +2215,45 @@ class LearningE2ETest : BaseTest() {
         }
     }
 
+    @Test
+    fun reroute_paging_is_not_shifted_by_its_own_inserts() = runBlocking {
+        // Page size equals the budget: three playable senses and one unplayable one need a
+        // second page, and the rows inserted from the first page must not move it.
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 3)
+        withEnv(includeTranslation = true, config = config) { env ->
+            fun stranded(lemma: String, withTranslation: Boolean): SenseFixture {
+                val fixture = env.seedSense(lemma = lemma)
+                if (withTranslation) env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+                return fixture
+            }
+            val playable = listOf("pageone", "pagetwo", "pagethree").map { stranded(it, withTranslation = true) }
+            val unplayable = stranded("pagenone", withTranslation = false)
+            (playable + unplayable).forEach { fixture ->
+                env.addFavorite(fixture)
+                env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+                env.insertTask(
+                    fixture = fixture,
+                    family = CardFamily.RECOGNIZE_SENSE,
+                    state = CardState.REVIEW,
+                    stability = 10.0,
+                    createdAt = (start - 2.days).toEpochMilliseconds(),
+                )
+            }
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(3, result.rerouted, "Every playable sense is reached within the budget, whatever page it falls on")
+            playable.forEach { fixture ->
+                assertEquals(
+                    listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
+                    env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+                    fixture.lemma,
+                )
+            }
+        }
+    }
+
     private suspend fun withEnv(
         includeTranslation: Boolean,
         config: FsrsConfig = FsrsDefaults.config(),

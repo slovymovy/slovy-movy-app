@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.data.learning.StudyFormatsEditor
 import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 class StudyFormatsViewModel(
     private val language: Language,
     studyFormatsRepository: StudyFormatsRepository,
+    /** Outlives this screen, so a toggle made just before leaving the page still lands. */
+    appScope: CoroutineScope,
     /** Called after a change is stored, so review counts and intake caches can follow. */
     onChanged: (Language) -> Unit,
 ) : ViewModel() {
@@ -38,7 +41,7 @@ class StudyFormatsViewModel(
     private val editor = StudyFormatsEditor(
         repository = studyFormatsRepository,
         language = language,
-        scope = viewModelScope,
+        scope = appScope,
         analyticsSource = "settings",
         onSelectionChanged = { selection -> state = studyFormatsUiState(language, selection) },
         onStored = { onChanged(language) },

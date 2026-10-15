@@ -21,6 +21,7 @@ import kotlin.coroutines.coroutineContext
 class StudyFormatsEditor(
     private val repository: StudyFormatsRepository,
     private val language: Language,
+    /** Must outlive the screen: a toggle made just before leaving still has to be stored. */
     private val scope: CoroutineScope,
     private val analyticsSource: String,
     private val onSelectionChanged: (StudyFormatSelection) -> Unit,

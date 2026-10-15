@@ -782,6 +782,7 @@ fun App(
                         StudyFormatsViewModel(
                             language = language,
                             studyFormatsRepository = container.studyFormatsRepository,
+                            appScope = appCoroutineScope,
                             onChanged = { changed ->
                                 // Intake re-enters words in the formats still studied, and the
                                 // review badge counts only those, so both must be recomputed.

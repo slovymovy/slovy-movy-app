@@ -231,7 +231,7 @@ class SessionService(
     }
 
     suspend fun putCardForLater(card: SessionCard) = withContext(Dispatchers.IO) {
-        setCardAvailableAfter(card.card)
+        setCardAvailableAfter(card.card, unplayableUnderFormats = false)
     }
 
     suspend fun suspendWord(card: SessionCard, duration: Duration): List<CardScheduleSnapshot> =
@@ -338,7 +338,7 @@ class SessionService(
         isWordLoading || isTranslationLoading
 
     @OptIn(ExperimentalTime::class)
-    private fun setCardAvailableAfter(card: Card, unplayableUnderFormats: Boolean = false) {
+    private fun setCardAvailableAfter(card: Card, unplayableUnderFormats: Boolean) {
         val delay = if (unplayableUnderFormats) config.buryUnplayableUnderFormatsFor else config.buryFailedSessionCardsFor
         if (delay <= Duration.ZERO) {
             AppLogger.debug(TAG, null) {

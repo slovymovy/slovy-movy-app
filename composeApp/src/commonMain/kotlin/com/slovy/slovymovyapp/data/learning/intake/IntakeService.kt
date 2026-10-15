@@ -26,6 +26,8 @@ import com.slovy.slovymovyapp.ingestion.JsonIngestionBuilder
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -57,14 +59,21 @@ class IntakeService(
     @OptIn(ExperimentalTime::class)
     override suspend fun runIntake(langCode: String): IntakeResult =
         withContext(Dispatchers.IO) {
-            runAndLog(langCode, IntakeRunMode.DAILY)
+            runMutex.withLock { runAndLog(langCode, IntakeRunMode.DAILY) }
         }
 
     @OptIn(ExperimentalTime::class)
     override suspend fun continueWithPendingFavoritesNow(langCode: String): IntakeResult =
         withContext(Dispatchers.IO) {
-            runAndLog(langCode, IntakeRunMode.CONTINUE_NOW)
+            runMutex.withLock { runAndLog(langCode, IntakeRunMode.CONTINUE_NOW) }
         }
+
+    /**
+     * Intake runs one at a time: a session start and the review coordinator can both ask for
+     * one, and two runs interleaving would race each other's re-entry inserts and the memo of
+     * unplayable senses.
+     */
+    private val runMutex = Mutex()
 
     @OptIn(ExperimentalTime::class)
     private suspend fun runAndLog(langCode: String, mode: IntakeRunMode): IntakeResult =
@@ -205,14 +214,19 @@ class IntakeService(
         // asking for the pending words by name, and the pause rules protect them from new words,
         // not from the words they already know. Known words come back before new ones start,
         // so a toggle re-enters a large vocabulary over days rather than in one session.
-        var remainingDailyBudget: Int? = if (mode == IntakeRunMode.DAILY) remainingDailyBudget(langCode, startOfToday) else null
-        if (mode == IntakeRunMode.DAILY && formats.excludedFamilies.isNotEmpty()) {
-            val reroute = Rerouter(langCode, language, translationTargets, formats, now)
-            val outcome = reroute.reenterStranded(remainingDailyBudget)
-            rerouted += outcome.inserted
-            cardsCreated += outcome.inserted
-            repeat(outcome.notPlayable) { skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE }
-            remainingDailyBudget = remainingDailyBudget?.minus(outcome.inserted)
+        var remainingDailyBudget: Int? = null
+        if (mode == IntakeRunMode.DAILY) {
+            val dailyBudget = remainingDailyBudget(langCode, startOfToday)
+            remainingDailyBudget = dailyBudget
+            if (formats.excludedFamilies.isNotEmpty()) {
+                val reroute = Rerouter(langCode, language, translationTargets, formats, now)
+                val outcome = reroute.reenterStranded(dailyBudget)
+                rerouted += outcome.inserted
+                cardsCreated += outcome.inserted
+                repeat(outcome.notPlayable) { skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE }
+                repeat(outcome.dataUnavailable) { skipped += SkipReason.CARD_DATA_UNAVAILABLE }
+                remainingDailyBudget = dailyBudget - outcome.inserted
+            }
         }
 
         if (newcomers.isNotEmpty()) {
@@ -299,37 +313,43 @@ class IntakeService(
         ) { mutableSetOf() }
 
         /**
-         * Walks the stranded senses a page at a time until [budget] is spent or the pages run
-         * out, so senses that cannot be re-entered never hold the ones behind them back.
+         * Walks the stranded senses a page at a time, keyed on the last sense seen so the rows
+         * it inserts along the way cannot shift the next page, until [budget] is spent or the
+         * pages run out. Senses that cannot be re-entered never hold the ones behind them back.
          */
-        suspend fun reenterStranded(budget: Int?): RerouteSummary {
+        suspend fun reenterStranded(budget: Int): RerouteSummary {
             var inserted = 0
             var notPlayable = 0
-            var offset = 0L
+            var dataUnavailable = 0
+            var scanned = 0
+            var after = Uuid.NIL
             val pageSize = config.dailyNewTaskFamilyBudget.toLong()
             for (page in 0 until MAX_REROUTE_PAGES) {
-                if (budget != null && inserted >= budget) break
+                if (inserted >= budget) break
                 val rows = learning.selectStrongestCardOfSensesWithoutFamilies(
                     lang_code = langCode,
                     allowed_families = formats.families,
+                    after_sense_id = after,
                     limit = pageSize,
-                    offset = offset,
                 ).executeAsList()
                 if (rows.isEmpty()) break
-                offset += rows.size
+                after = rows.last().sense_id
+                scanned += rows.size
                 for (source in rows) {
-                    if (budget != null && inserted >= budget) break
+                    if (inserted >= budget) break
                     when (reenter(source)) {
                         RerouteOutcome.INSERTED -> inserted += 1
                         RerouteOutcome.NOT_PLAYABLE -> notPlayable += 1
+                        RerouteOutcome.DATA_UNAVAILABLE -> dataUnavailable += 1
                         RerouteOutcome.NOTHING_TO_DO -> Unit
                     }
                 }
             }
             AppLogger.debug(TAG, null) {
-                "Intake reroute done lang=$langCode inserted=$inserted notPlayable=$notPlayable scanned=$offset"
+                "Intake reroute done lang=$langCode inserted=$inserted notPlayable=$notPlayable " +
+                    "dataUnavailable=$dataUnavailable scanned=$scanned"
             }
-            return RerouteSummary(inserted, notPlayable)
+            return RerouteSummary(inserted, notPlayable, dataUnavailable)
         }
 
         private suspend fun reenter(source: DbCard): RerouteOutcome {
@@ -338,15 +358,6 @@ class IntakeService(
             val favorite = learning.selectFavoriteWithActivation(senseId, langCode).executeAsOneOrNull()
             if (favorite == null) {
                 AppLogger.debug(TAG, null) { "Intake reroute skipped: favorite missing lang=$langCode sense=$senseId" }
-                return RerouteOutcome.NOTHING_TO_DO
-            }
-            // The query already leaves out senses with any card in a studied family; this guard
-            // is for a card inserted between that read and this write.
-            val existing = learning.selectCardBySenseAndFamily(source.sense_id, langCode, target).executeAsOneOrNull()
-            if (existing != null) {
-                AppLogger.debug(TAG, null) {
-                    "Intake reroute skipped: card exists lang=$langCode sense=$senseId family=$target card=${existing.id}"
-                }
                 return RerouteOutcome.NOTHING_TO_DO
             }
             // Fetched once per lemma, a missing card included, so a lemma without data is not
@@ -360,7 +371,15 @@ class IntakeService(
                 )
             }
             val sense = cardsByLemma[favorite.lemma]?.entries?.flatMap { it.senses }?.firstOrNull { it.senseId == senseId }
-            if (sense == null || buildTaskVariants(target, sense, translationTargets, formats).isEmpty()) {
+            if (sense == null) {
+                // Not remembered: the data may arrive with a download or a recovery pass, and
+                // the next run must look again, as activation does.
+                AppLogger.debug(TAG, null) {
+                    "Intake reroute skipped: card data unavailable lang=$langCode sense=$senseId"
+                }
+                return RerouteOutcome.DATA_UNAVAILABLE
+            }
+            if (buildTaskVariants(target, sense, translationTargets, formats).isEmpty()) {
                 AppLogger.debug(TAG, null) {
                     "Intake reroute skipped: no playable variant lang=$langCode sense=$senseId family=$target"
                 }
@@ -390,36 +409,48 @@ class IntakeService(
                 "Intake rerouting sense lang=$langCode sense=$senseId from=${source.family} " +
                     "to=$target inheritedStability=${inherited ?: 0.0} dueIn=${(due - now).toDuration(DurationUnit.MILLISECONDS)}"
             }
-            learning.insertCard(
-                id = Uuid.random(),
-                sense_id = source.sense_id,
-                lemma_id = source.lemma_id,
-                lang_code = langCode,
-                family = target,
-                state = if (inherited == null) CardState.NEW else CardState.LEARNING,
-                stability = inherited ?: 0.0,
-                difficulty = if (inherited == null) 0.0 else source.difficulty,
-                due = due,
-                last_review = null,
-                reps = 0,
-                lapses = 0,
-                created_at = now,
-                // A paused word stays paused in its new family.
-                available_after = source.available_after,
-                answer_key = source.answer_key,
-                suspended = false,
-            )
-            return RerouteOutcome.INSERTED
+            // The query already leaves out senses with any card in a studied family; the check
+            // inside the transaction is for a card another writer inserted since that read.
+            return learning.transactionWithResult {
+                val existing = learning.selectCardBySenseAndFamily(source.sense_id, langCode, target).executeAsOneOrNull()
+                if (existing != null) {
+                    AppLogger.debug(TAG, null) {
+                        "Intake reroute skipped: card exists lang=$langCode sense=$senseId family=$target card=${existing.id}"
+                    }
+                    return@transactionWithResult RerouteOutcome.NOTHING_TO_DO
+                }
+                learning.insertCard(
+                    id = Uuid.random(),
+                    sense_id = source.sense_id,
+                    lemma_id = source.lemma_id,
+                    lang_code = langCode,
+                    family = target,
+                    state = if (inherited == null) CardState.NEW else CardState.LEARNING,
+                    stability = inherited ?: 0.0,
+                    difficulty = if (inherited == null) 0.0 else source.difficulty,
+                    due = due,
+                    last_review = null,
+                    reps = 0,
+                    lapses = 0,
+                    created_at = now,
+                    // A paused word stays paused in its new family.
+                    available_after = source.available_after,
+                    answer_key = source.answer_key,
+                    suspended = false,
+                )
+                RerouteOutcome.INSERTED
+            }
         }
     }
 
     private enum class RerouteOutcome {
         INSERTED,
         NOT_PLAYABLE,
+        DATA_UNAVAILABLE,
         NOTHING_TO_DO,
     }
 
-    private data class RerouteSummary(val inserted: Int, val notPlayable: Int)
+    private data class RerouteSummary(val inserted: Int, val notPlayable: Int, val dataUnavailable: Int)
 
     @OptIn(ExperimentalTime::class)
     private fun newcomerGate(

@@ -48,6 +48,11 @@ import com.slovy.slovymovyapp.i18n.resolve
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.icons.SlovyIcons
+import com.slovy.slovymovyapp.ui.icons.StudyFormatFillTheGap
+import com.slovy.slovymovyapp.ui.icons.StudyFormatListen
+import com.slovy.slovymovyapp.ui.icons.StudyFormatSourceOnly
+import com.slovy.slovymovyapp.ui.icons.StudyFormatTranslationToWord
+import com.slovy.slovymovyapp.ui.icons.StudyFormatWordToTranslation
 import com.slovy.slovymovyapp.ui.icons.ThinkingOtter
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import com.slovy.slovymovyapp.ui.theme.serifFontFamily
@@ -257,12 +262,14 @@ private fun StudyFormatRow(
     }
 }
 
+// Strokes of one weight, so the five sit as a set: Material's arrows are filled glyphs and the
+// app's speaker is a solid silhouette, and mixed with a line circle they read as three weights.
 private fun StudyFormat.icon(): ImageVector = when (this) {
-    StudyFormat.WORD_TO_TRANSLATION -> StudyFormatsIcons.WordToTranslation
-    StudyFormat.TRANSLATION_TO_WORD -> StudyFormatsIcons.TranslationToWord
-    StudyFormat.FILL_THE_GAP -> StudyFormatsIcons.FillTheGap
-    StudyFormat.LISTEN -> StudyFormatsIcons.Listen
-    StudyFormat.SOURCE_ONLY -> StudyFormatsIcons.SourceOnly
+    StudyFormat.WORD_TO_TRANSLATION -> SlovyIcons.StudyFormatWordToTranslation
+    StudyFormat.TRANSLATION_TO_WORD -> SlovyIcons.StudyFormatTranslationToWord
+    StudyFormat.FILL_THE_GAP -> SlovyIcons.StudyFormatFillTheGap
+    StudyFormat.LISTEN -> SlovyIcons.StudyFormatListen
+    StudyFormat.SOURCE_ONLY -> SlovyIcons.StudyFormatSourceOnly
 }
 
 private fun previewFormats(): StudyFormatsUiState =

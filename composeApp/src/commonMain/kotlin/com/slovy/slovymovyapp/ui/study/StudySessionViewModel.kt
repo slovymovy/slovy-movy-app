@@ -116,7 +116,8 @@ class StudySessionViewModel(
         StudyFormatsEditor(
             repository = studyFormatsRepository,
             language = language,
-            scope = viewModelScope,
+            // Outlives this screen, so a toggle made just before leaving the session still lands.
+            scope = appScope,
             analyticsSource = "study",
             onSelectionChanged = { selection ->
                 if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, selection)
