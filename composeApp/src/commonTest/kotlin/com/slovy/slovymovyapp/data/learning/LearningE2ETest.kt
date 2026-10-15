@@ -2304,12 +2304,23 @@ class LearningE2ETest : BaseTest() {
             )
             env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY)))
 
-            val served = env.nextLoadedCard("en")
+            val served = env.session.nextCard("en", start, emptySet())
+                .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
 
-            assertEquals(CardFamily.RECOGNIZE_SENSE, served.card.family, "The session re-enters the word where it can be played")
-            assertEquals(CardKind.WORD_TO_SOURCE_DEFINITION, served.variant.kind)
+            assertNull(served, "The re-entered card waits for its own due time; inferred knowledge is not tested early")
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD), cards.map { it.family })
+            val recognition = cards.single { it.family == CardFamily.RECOGNIZE_SENSE }
             val factor = config.crossFamilyCreditFactor(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_SENSE, Rating.GOOD)!!
-            assertEquals(10.0 * factor, served.card.scheduling.stability, absoluteTolerance = 1e-9)
+            assertEquals(10.0 * factor, recognition.stability, absoluteTolerance = 1e-9)
+            assertEquals(CardState.LEARNING, recognition.state)
+            val expectedDue = start + stabilityDelay(
+                stability = recognition.stability,
+                ratio = config.backwardCreditDelayRatio,
+                floor = config.backwardCreditDelayFloor,
+                cap = config.backwardCreditDelayCap,
+            )
+            assertEquals(expectedDue.toEpochMilliseconds(), recognition.due, "Credit back down the ladder waits the backward delay")
             val buried = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
             assertEquals(
                 (start + config.buryUnplayableUnderFormatsFor).toEpochMilliseconds(),
@@ -2318,12 +2329,12 @@ class LearningE2ETest : BaseTest() {
             )
             assertEquals(production.stability, buried.stability)
 
-            // Grading the new card does not create a second recognition card next time.
-            env.session.submitReview(served, env.session.previewRatings(served).first { it.rating == Rating.GOOD }, 1.seconds.inWholeMilliseconds)
-            assertEquals(
-                2,
-                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size,
-            )
+            // Once due, the recognition card is served, and the selection adds nothing to the sense.
+            env.clock.advance(7.days)
+            val later = env.nextLoadedCard("en")
+            assertEquals(CardFamily.RECOGNIZE_SENSE, later.card.family)
+            assertEquals(CardKind.WORD_TO_SOURCE_DEFINITION, later.variant.kind)
+            assertEquals(2, env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size)
         }
     }
 

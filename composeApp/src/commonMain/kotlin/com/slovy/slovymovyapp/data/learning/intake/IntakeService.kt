@@ -285,6 +285,13 @@ class IntakeService(
     private val unplayableSenses = mutableMapOf<String, MutableSet<Uuid>>()
 
     /**
+     * Where the last run's walk through the stranded senses stopped, per language and
+     * selection, so the next run goes on from there instead of re-reading the same first pages;
+     * a vocabulary whose first pages cannot be re-entered is still walked to its end.
+     */
+    private val rerouteCursors = mutableMapOf<String, Uuid>()
+
+    /**
      * Re-enters stranded senses, whose cards all belong to families the learner switched off,
      * one at a time in the first family still studied: such a word could never be shown again,
      * and the ladder, which only runs on a review, could never bring it back. The new card
@@ -301,21 +308,23 @@ class IntakeService(
     ) {
         private val target: CardFamily = formats.families.first()
         private val cardsByLemma = mutableMapOf<String, LanguageCard?>()
-        private val unplayable: MutableSet<Uuid> = unplayableSenses.getOrPut(
-            "$langCode|${formats.enabled.sorted()}|${translationTargets.map { it.code }}",
-        ) { mutableSetOf() }
+        private val key = "$langCode|${formats.enabled.sorted()}|${translationTargets.map { it.code }}"
+        private val unplayable: MutableSet<Uuid> = unplayableSenses.getOrPut(key) { mutableSetOf() }
 
         /**
          * Walks the stranded senses a page at a time, keyed on the last sense seen so the rows
          * it inserts along the way cannot shift the next page, until [budget] is spent or the
-         * pages run out. Senses that cannot be re-entered never hold the ones behind them back.
+         * pages run out. It starts where the previous run stopped and wraps once, so senses that
+         * cannot be re-entered never hold the ones behind them back, however many there are.
          */
         suspend fun reenterStranded(budget: Int): RerouteSummary {
             var inserted = 0
             var notPlayable = 0
             var dataUnavailable = 0
             var scanned = 0
-            var after = Uuid.NIL
+            val startedAt = rerouteCursors[key] ?: Uuid.NIL
+            var after = startedAt
+            var wrapped = startedAt == Uuid.NIL
             val pageSize = config.dailyNewTaskFamilyBudget.toLong()
             for (page in 0 until MAX_REROUTE_PAGES) {
                 if (inserted >= budget) break
@@ -325,7 +334,12 @@ class IntakeService(
                     after_sense_id = after,
                     limit = pageSize,
                 ).executeAsList()
-                if (rows.isEmpty()) break
+                if (rows.isEmpty()) {
+                    if (wrapped) break
+                    wrapped = true
+                    after = Uuid.NIL
+                    continue
+                }
                 after = rows.last().sense_id
                 scanned += rows.size
                 for (source in rows) {
@@ -338,6 +352,7 @@ class IntakeService(
                     }
                 }
             }
+            rerouteCursors[key] = after
             AppLogger.debug(TAG, null) {
                 "Intake reroute done lang=$langCode inserted=$inserted notPlayable=$notPlayable " +
                     "dataUnavailable=$dataUnavailable scanned=$scanned"

@@ -88,24 +88,16 @@ class SessionService(
                         // played in a format the learner switched off, no fetch will change that,
                         // so it rests longer, and the sense is re-entered in a studied family that
                         // can play it, if there is one, since intake only re-enters senses with no
-                        // card in a studied family at all. Otherwise data may still arrive
-                        // (settings changed, fetch succeeded online) and the standard failed-card
-                        // cooldown applies.
+                        // card in a studied family at all. The new card waits for its own due
+                        // time like any credited card; this selection goes on with the candidates
+                        // it has. Otherwise data may still arrive (settings changed, fetch
+                        // succeeded online) and the standard failed-card cooldown applies.
                         val sense = result?.card?.findSense(card.senseId.toString())
                         val unplayableUnderFormats = sense != null &&
                             buildTaskVariants(card.family, sense, targets, StudyFormatSelection.ALL).isNotEmpty()
                         setCardAvailableAfter(card, unplayableUnderFormats)
-                        if (!unplayableUnderFormats) continue
-                        val reentered = reenterInPlayableFamily(card, sense, targets, formats, now) ?: continue
-                        val (_, reenteredCard) = loadUntilTerminal(reentered, language, targets, formats) {
-                            loadingEmissions += 1
-                        }
-                        if (reenteredCard == null) continue
-                        markResult(reenteredCard.loadState().name.lowercase())
-                        putAttribute("family", reenteredCard.card.family.name.lowercase())
-                        putAttribute("variant", reenteredCard.variant.kind.name.lowercase())
-                        emit(reenteredCard)
-                        return@flow
+                        if (unplayableUnderFormats) reenterInPlayableFamily(card, sense, targets, formats, now)
+                        continue
                     }
                     val loadState = sessionCard.loadState()
                     markResult(loadState.name.lowercase())
@@ -347,8 +339,8 @@ class SessionService(
 
     /**
      * Gives a sense whose [card] cannot be played under the formats a card in the first studied
-     * family that can play it, scheduled from this card the way an unlock would, and returns the
-     * new card; null when no studied family can play the sense or the family already has one.
+     * family that can play it, scheduled from this card the way an unlock would. Nothing happens
+     * when no studied family can play the sense or the family already has a card.
      */
     private fun reenterInPlayableFamily(
         card: Card,
@@ -356,10 +348,10 @@ class SessionService(
         targets: List<Language>,
         formats: StudyFormatSelection,
         now: Long,
-    ): Card? {
+    ) {
         val target = formats.families.firstOrNull { family ->
             family != card.family && buildTaskVariants(family, sense, targets, formats).isNotEmpty()
-        } ?: return null
+        } ?: return
         val scheduling = config.reentryScheduling(
             sourceFamily = card.family,
             sourceState = card.scheduling.state,
@@ -372,7 +364,7 @@ class SessionService(
             "Re-entering unplayable card=${card.id} sense=${card.senseId} from=${card.family} to=$target " +
                 "inheritedStability=${formatDouble(scheduling.stability)} dueIn=${scheduling.delay}"
         }
-        val inserted = insertTaskIfMissing(
+        insertTaskIfMissing(
             source = card,
             family = target,
             now = now,
@@ -382,8 +374,7 @@ class SessionService(
             difficulty = scheduling.difficulty,
             // A paused word stays paused in its new family.
             availableAfter = card.scheduling.availableAfterEpochMs,
-        ) ?: return null
-        return learning.selectCardById(inserted).executeAsOne().toCard()
+        )
     }
 
     private fun WordResult.isFetchLoading(): Boolean =
@@ -793,7 +784,6 @@ class SessionService(
         )
     }
 
-    /** Returns the new card's id, or null when the family already had one. */
     private fun insertTaskIfMissing(
         source: Card,
         family: CardFamily,
@@ -803,7 +793,7 @@ class SessionService(
         stability: Double,
         difficulty: Double,
         availableAfter: Long?,
-    ): Uuid? {
+    ) {
         val existing = learning.selectCardBySenseAndFamily(source.senseId, source.langCode, family)
             .executeAsOneOrNull()
         if (existing != null) {
@@ -811,7 +801,7 @@ class SessionService(
                 "Unlock card insert skipped: existing card=${existing.id} source=${source.id} " +
                     "sense=${source.senseId} family=$family"
             }
-            return null
+            return
         }
 
         val cardId = Uuid.random()
@@ -838,7 +828,6 @@ class SessionService(
                 "sense=${source.senseId} family=$family state=$state stability=${formatDouble(stability)} " +
                 "dueIn=${formatDelay(due, now)} availableAfterIn=${formatNullableDelay(availableAfter, now)}"
         }
-        return cardId
     }
 
     private fun propagateSameSenseCredit(

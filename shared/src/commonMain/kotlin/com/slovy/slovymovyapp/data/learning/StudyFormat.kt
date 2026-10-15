@@ -4,8 +4,9 @@ package com.slovy.slovymovyapp.data.learning
  * The ways a word can come back in a study session, as the learner sees them. The declaration
  * order is the ladder: a word unlocks these from top to bottom as it sticks.
  *
- * The three source-language-only kinds share one format: to the learner they are one idea, "no
- * translation anywhere", and they sit behind the same stability gate.
+ * The two definition kinds share the source-only format: to the learner they are one idea, "no
+ * translation anywhere". The source-sentence cloze is not one of them: it needs a translation
+ * target for its hint and its back, so it is a way of filling the gap.
  */
 enum class StudyFormat {
     WORD_TO_TRANSLATION,
@@ -19,11 +20,13 @@ val CardKind.format: StudyFormat
     get() = when (this) {
         CardKind.WORD_TO_TRANSLATION -> StudyFormat.WORD_TO_TRANSLATION
         CardKind.TRANSLATION_TO_WORD -> StudyFormat.TRANSLATION_TO_WORD
-        CardKind.CLOZE_TRANSLATION -> StudyFormat.FILL_THE_GAP
+        CardKind.CLOZE_TRANSLATION,
+        CardKind.CLOZE_SOURCE,
+            -> StudyFormat.FILL_THE_GAP
+
         CardKind.LISTENING_TRANSLATION -> StudyFormat.LISTEN
         CardKind.WORD_TO_SOURCE_DEFINITION,
         CardKind.SOURCE_DEFINITION_TO_WORD,
-        CardKind.CLOZE_SOURCE,
             -> StudyFormat.SOURCE_ONLY
     }
 

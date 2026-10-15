@@ -13,15 +13,19 @@ import kotlin.test.assertTrue
 class StudyFormatSelectionTest {
 
     @Test
-    fun everyKindMapsToOneFormatAndSourceOnlyGathersTheUntranslatedKinds() {
-        val sourceOnly = CardKind.entries.filter { it.format == StudyFormat.SOURCE_ONLY }
+    fun sourceOnlyIsTheDefinitionKindsAndBothClozesFillTheGap() {
         assertEquals(
-            CardKind.entries.filter { !it.requiresTranslation }.toSet(),
-            sourceOnly.toSet(),
-            "The source-only format is exactly the kinds that need no translation",
+            setOf(CardKind.WORD_TO_SOURCE_DEFINITION, CardKind.SOURCE_DEFINITION_TO_WORD),
+            CardKind.entries.filter { it.format == StudyFormat.SOURCE_ONLY }.toSet(),
+            "Only the kinds that render without a translation target are source-only",
         )
-        StudyFormat.entries.filter { it != StudyFormat.SOURCE_ONLY }.forEach { format ->
-            assertEquals(1, CardKind.entries.count { it.format == format }, "One kind per translated format: $format")
+        assertEquals(
+            setOf(CardKind.CLOZE_TRANSLATION, CardKind.CLOZE_SOURCE),
+            CardKind.entries.filter { it.format == StudyFormat.FILL_THE_GAP }.toSet(),
+            "The source-sentence cloze needs a target for its hint and back, so it fills the gap",
+        )
+        listOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.TRANSLATION_TO_WORD, StudyFormat.LISTEN).forEach { format ->
+            assertEquals(1, CardKind.entries.count { it.format == format }, "One kind for $format")
         }
     }
 
@@ -36,13 +40,13 @@ class StudyFormatSelectionTest {
         val sourceOnly = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY))
 
         assertEquals(
-            listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, CardFamily.PRODUCE_WORD_IN_CONTEXT),
+            listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
             sourceOnly.families,
-            "Listening has no source-only kind, so it is the one family left out",
+            "Context and listening have no source-only kind, so they are the families left out",
         )
-        assertEquals(setOf(CardFamily.RECOGNIZE_VOICE), sourceOnly.excludedFamilies)
-        assertTrue(sourceOnly.allows(CardKind.CLOZE_SOURCE))
-        assertTrue(!sourceOnly.allows(CardKind.CLOZE_TRANSLATION))
+        assertEquals(setOf(CardFamily.PRODUCE_WORD_IN_CONTEXT, CardFamily.RECOGNIZE_VOICE), sourceOnly.excludedFamilies)
+        assertTrue(sourceOnly.allows(CardKind.SOURCE_DEFINITION_TO_WORD))
+        assertTrue(!sourceOnly.allows(CardKind.CLOZE_SOURCE))
     }
 
     @Test
