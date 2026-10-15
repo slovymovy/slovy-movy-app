@@ -92,7 +92,10 @@ class SessionService(
                         // time like any credited card; this selection goes on with the candidates
                         // it has. Otherwise data may still arrive (settings changed, fetch
                         // succeeded online) and the standard failed-card cooldown applies.
-                        val sense = result?.card?.findSense(card.senseId.toString())
+                        // Only a fetch that finished cleanly can say so: after a failed one the
+                        // bilingual data may simply not have arrived, and the next attempt may
+                        // bring it.
+                        val sense = result?.takeIf { it.error == null }?.card?.findSense(card.senseId.toString())
                         val unplayableUnderFormats = sense != null &&
                             buildTaskVariants(card.family, sense, targets, StudyFormatSelection.ALL).isNotEmpty()
                         setCardAvailableAfter(card, unplayableUnderFormats)

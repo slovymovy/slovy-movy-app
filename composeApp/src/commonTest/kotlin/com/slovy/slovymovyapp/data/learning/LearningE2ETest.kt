@@ -2194,8 +2194,21 @@ class LearningE2ETest : BaseTest() {
     fun a_card_unplayable_only_under_the_formats_rests_longer_than_a_failed_load() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
         withEnv(includeTranslation = true, config = config) { env ->
-            // No translation data: with source-only off, the recognition family has nothing to play.
+            // A translation word but no translated definition: word-to-translation needs both, so
+            // with source-only off the recognition family has nothing to play, while the data
+            // itself is complete as far as a fetch is concerned.
             val fixture = env.seedSense(lemma = "formatsonlyblock")
+            env.translation!!.translationQueries.insertSenseTranslation(
+                sense_id = fixture.senseId,
+                from_lang_code = "en",
+                target_lang_code = "ru",
+                idx = 0,
+                target_lang_word = "слово",
+                target_lang_word_normalized = "слово",
+                target_lang_sense_clarification = null,
+                lemma_id = Uuid.random(),
+                lemma_pos_id = fixture.lemmaPosId,
+            )
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             val card = env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
@@ -2405,6 +2418,33 @@ class LearningE2ETest : BaseTest() {
             val after = env.intake.runIntake("en")
 
             assertEquals(1, after.rerouted, "A sense rejected for missing data is looked at again once the data is there")
+        }
+    }
+
+    @Test
+    fun a_failed_translation_fetch_keeps_the_short_cooldown_even_when_formats_would_block_it() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            // No translation data anywhere and the test server does not know the word, so the
+            // translation fetch ends in an error: the data may still arrive on a later attempt.
+            val fixture = env.seedSense(lemma = "fetchfailsword")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            val card = env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(StudyFormat.entries.toSet() - StudyFormat.SOURCE_ONLY),
+            )
+
+            val served = env.session.nextCard("en", start, emptySet()).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
+
+            assertNull(served)
+            val buried = env.app.favoritesQueries.selectCardById(card.id).executeAsOne()
+            assertEquals(
+                (start + config.buryFailedSessionCardsFor).toEpochMilliseconds(),
+                buried.available_after,
+                "After a failed fetch the card gets the short retry cooldown, not the formats rest",
+            )
         }
     }
 
