@@ -38,7 +38,7 @@ data class LearningLanguageUiState(
     val dictionarySizeBytes: Long,
     val translations: List<TranslationUiState> = emptyList(),
     /** Whether the language has translation targets to choose study formats with. */
-    val hasStudyFormats: Boolean = false,
+    val hasStudyFormats: Boolean,
 )
 
 data class TranslationUiState(
@@ -650,6 +650,7 @@ private fun LearningLanguageCardCollapsedPreview(
                 language = Language.DUTCH,
                 isExpanded = false,
                 dictionarySizeBytes = 12 * 1024 * 1024L,
+                hasStudyFormats = true,
                 translations = listOf(
                     TranslationUiState(
                         targetLanguage = Language.ENGLISH,

@@ -10,22 +10,19 @@ import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.StudyFormat
-import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
+import com.slovy.slovymovyapp.data.learning.StudyFormatsEditor
 import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
-import com.slovy.slovymovyapp.logging.AppLogger
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
  * The formats page reached from Settings. The study session hosts the same page itself, over the
- * card, through [StudySessionViewModel]; both write the same per-language setting.
+ * card, through [StudySessionViewModel]; both edit the same per-language setting.
  */
 class StudyFormatsViewModel(
     private val language: Language,
-    private val studyFormatsRepository: StudyFormatsRepository,
+    studyFormatsRepository: StudyFormatsRepository,
     /** Called after a change is stored, so review counts and intake caches can follow. */
-    private val onChanged: (Language) -> Unit,
+    onChanged: (Language) -> Unit,
 ) : ViewModel() {
 
     /** Null until the stored selection has been read; the page shows nothing before that. */
@@ -38,18 +35,24 @@ class StudyFormatsViewModel(
 
     val scrollState = ScrollState(0)
 
-    private var selection: StudyFormatSelection? = null
-    private var write: Job? = null
+    private val editor = StudyFormatsEditor(
+        repository = studyFormatsRepository,
+        language = language,
+        scope = viewModelScope,
+        analyticsSource = "settings",
+        onSelectionChanged = { selection -> state = studyFormatsUiState(language, selection) },
+        onStored = { onChanged(language) },
+    )
 
     init {
         viewModelScope.launch {
-            if (!studyFormatsRepository.hasChoice(language)) {
+            // One resolution of the targets answers both questions.
+            val targets = studyFormatsRepository.translationTargetsOf(language)
+            if (!studyFormatsRepository.hasChoice(language, targets)) {
                 closed = true
                 return@launch
             }
-            val loaded = studyFormatsRepository.get(language)
-            selection = loaded
-            state = studyFormatsUiState(language, loaded)
+            state = studyFormatsUiState(language, editor.load(targets))
             Analytics.logEvent(
                 AnalyticsEvent.STUDY_FORMATS_OPEN,
                 mapOf("lang" to language.code, "source" to "settings"),
@@ -58,47 +61,6 @@ class StudyFormatsViewModel(
     }
 
     fun toggle(format: StudyFormat) {
-        val current = selection ?: return
-        val next = current.with(format, enabled = format !in current.enabled) ?: return
-        selection = next
-        state = studyFormatsUiState(language, next)
-        val previousWrite = write
-        write = viewModelScope.launch {
-            // Writes land in tap order.
-            previousWrite?.join()
-            try {
-                studyFormatsRepository.set(language, next)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                AppLogger.warn(TAG, "Unable to store study formats lang=${language.code}", e)
-                // Back to what is stored, not to what this tap started from: a later tap may
-                // have landed in between. If even the read fails, the tap is simply undone.
-                val stored = try {
-                    studyFormatsRepository.get(language)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    current
-                }
-                selection = stored
-                state = studyFormatsUiState(language, stored)
-                return@launch
-            }
-            Analytics.logEvent(
-                AnalyticsEvent.STUDY_FORMAT_TOGGLED,
-                mapOf(
-                    "lang" to language.code,
-                    "format" to format.name.lowercase(),
-                    "enabled" to (format in next.enabled),
-                    "source" to "settings",
-                ),
-            )
-            onChanged(language)
-        }
-    }
-
-    private companion object {
-        const val TAG = "StudyFormatsViewModel"
+        editor.toggle(format)
     }
 }

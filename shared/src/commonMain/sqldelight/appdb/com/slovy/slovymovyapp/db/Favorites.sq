@@ -237,7 +237,7 @@ WHERE sense_id = :sense_id
 
 -- The strongest active card of each sense that has no card at all, suspended or not, in an
 -- enabled family, so a word the learner can no longer be shown can be re-entered in a family they
--- still study. One row per sense; bounded by :limit so one run never scans a whole vocabulary.
+-- still study. One row per sense, read a page at a time so one run never scans a whole vocabulary.
 selectStrongestCardOfSensesWithoutFamilies:
 SELECT c.id, c.sense_id, c.lemma_id, c.lang_code, c.family, c.state,
        c.stability, c.difficulty, c.due, c.last_review, c.reps, c.lapses, c.created_at,
@@ -265,7 +265,7 @@ WHERE c.lang_code = :lang_code
       )
   )
 ORDER BY c.sense_id ASC
-LIMIT :limit;
+LIMIT :limit OFFSET :offset;
 
 selectCardsBySense:
 SELECT id, sense_id, lemma_id, lang_code, family, state,

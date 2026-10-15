@@ -22,6 +22,7 @@ import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
+import com.slovy.slovymovyapp.data.learning.StudyFormatsEditor
 import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
@@ -103,15 +104,46 @@ class StudySessionViewModel(
     var studyFormatsScrollState: ScrollState by mutableStateOf(ScrollState(0))
         private set
 
-    /** The formats this language is studied in, read once at start and updated by the page. */
-    private var studyFormats: StudyFormatSelection = StudyFormatSelection.ALL
-
     /**
-     * The write of the latest toggle. Grading, loading the next card and ending the session wait
-     * for it: the service reads the stored selection, and the milestone baseline must be taken
-     * after it, so the in-memory choice and the stored one never disagree at those points.
+     * Edits this language's formats from the page over the session. Grading, loading the next
+     * card and ending the session wait for its latest write: the service reads the stored
+     * selection, and the milestone baseline must be taken after it, so the in-memory choice
+     * and the stored one never disagree at those points. Null for a language the app does not
+     * know, which has no page.
      */
-    private var studyFormatsWrite: Job? = null
+    private val studyFormatsEditor: StudyFormatsEditor? by lazy {
+        language?.let { language ->
+        StudyFormatsEditor(
+            repository = studyFormatsRepository,
+            language = language,
+            scope = viewModelScope,
+            analyticsSource = "study",
+            onSelectionChanged = { selection ->
+                if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, selection)
+            },
+            onStored = {
+                // Intake and the review badge read the selection, so they must be recomputed.
+                onFavoriteChanged(language)
+                // The words-learned milestone compares the pipeline at the end of the session
+                // with its start; a change of formats re-stages words, which is not learning.
+                if (sessionPrepared) {
+                    sessionStartPipeline = try {
+                        pipelineSnapshot()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to re-snapshot the pipeline after a format change lang=$langCode", e)
+                        emptyList()
+                    }
+                }
+            },
+        )
+        }
+    }
+
+    /** The formats this language is studied in, read at start and updated by the page. */
+    private val studyFormats: StudyFormatSelection
+        get() = studyFormatsEditor?.selection ?: StudyFormatSelection.ALL
 
     /** How the session ended, recorded at the point of truth rather than derived later. */
     private var completionArm: String? = null
@@ -353,58 +385,7 @@ class StudySessionViewModel(
      * switched-off family keep their scheduling and come back as they are when it returns.
      */
     fun toggleStudyFormat(format: StudyFormat) {
-        val language = language ?: return
-        val current = studyFormats
-        val next = current.with(format, enabled = format !in current.enabled) ?: return
-        studyFormats = next
-        if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, next)
-        val previousWrite = studyFormatsWrite
-        studyFormatsWrite = viewModelScope.launch {
-            // Writes land in tap order.
-            previousWrite?.join()
-            try {
-                studyFormatsRepository.set(language, next)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                AppLogger.warn(TAG, "Unable to store study formats lang=$langCode", e)
-                // Back to what is stored, not to what this tap started from: a later tap may
-                // have landed in between. If even the read fails, the tap is simply undone.
-                val stored = try {
-                    studyFormatsRepository.get(language)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    current
-                }
-                studyFormats = stored
-                if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, stored)
-                return@launch
-            }
-            Analytics.logEvent(
-                AnalyticsEvent.STUDY_FORMAT_TOGGLED,
-                mapOf(
-                    "lang" to langCode,
-                    "format" to format.name.lowercase(),
-                    "enabled" to (format in next.enabled),
-                    "source" to "study",
-                ),
-            )
-            // Intake and the review badge read the selection, so they must be recomputed.
-            onFavoriteChanged(language)
-            // The words-learned milestone compares the pipeline at the end of the session with
-            // its start; a change of formats re-stages words, which is not learning.
-            if (sessionPrepared) {
-                sessionStartPipeline = try {
-                    pipelineSnapshot()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    AppLogger.warn(TAG, "Unable to re-snapshot the pipeline after a format change lang=$langCode", e)
-                    emptyList()
-                }
-            }
-        }
+        studyFormatsEditor?.toggle(format)
     }
 
     /**
@@ -744,7 +725,7 @@ class StudySessionViewModel(
             // and its failure path cannot land behind the reward. It is bounded work: the
             // continuation only writes counters and calls loadNextCard, which exits early now.
             reviewJob?.join()
-            studyFormatsWrite?.join()
+            studyFormatsEditor?.awaitWrite()
             // The current card stays put rather than flashing a spinner; buildCompleteState
             // absorbs its own failures into a heroless summary, so there is no error path that
             // could strand the user here.
@@ -853,7 +834,7 @@ class StudySessionViewModel(
         val durationMs = (clock.now() - cardShownAt).inWholeMilliseconds
         state = active.copy(isSubmittingReview = true)
         reviewJob = viewModelScope.launch {
-            studyFormatsWrite?.join()
+            studyFormatsEditor?.awaitWrite()
             runCatching {
                 sessionService.submitReview(
                     card = card,
@@ -901,7 +882,7 @@ class StudySessionViewModel(
                             autoplayEnabled = settingsRepository.getStudyAutoplay()
                             autoplayPreferenceLoaded = true
                         }
-                        studyFormats = studyFormatsRepository.get(langCode)
+                        studyFormatsEditor?.load()
                         val intakeResult = intakeService.runIntake(langCode)
                         putMetric("cards_created", intakeResult.cardsCreated.toLong())
                         putMetric("activated_favorites", intakeResult.activated.size.toLong())
@@ -935,7 +916,7 @@ class StudySessionViewModel(
         silenceAudio()
         cardLoadJob?.cancel()
         cardLoadJob = viewModelScope.launch {
-            studyFormatsWrite?.join()
+            studyFormatsEditor?.awaitWrite()
             PerformanceMonitoring.startTrace("study_card_load").useWithResult {
                 putAttributes(
                     mapOf(

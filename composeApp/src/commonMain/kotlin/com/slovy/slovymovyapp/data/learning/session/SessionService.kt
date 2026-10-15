@@ -78,16 +78,16 @@ class SessionService(
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
                     attemptedCandidates += 1
-                    val sessionCard = loadUntilTerminal(card, language, targets, formats) {
+                    val (result, sessionCard) = loadUntilTerminal(card, language, targets, formats) {
                         loadingEmissions += 1
                     }
                     if (sessionCard == null) {
-                        // No playable variant (e.g. the configured translation languages carry no
-                        // data for this sense) or the favorite is gone. Bury the card for the
-                        // standard failed-card cooldown instead of leaving it due and silently
-                        // re-scanned forever; a later attempt may find data (settings changed,
-                        // fetch succeeded online).
-                        setCardAvailableAfter(card)
+                        // No playable variant or the favorite is gone. Bury the card instead of
+                        // leaving it due and silently re-scanned forever. When the sense could be
+                        // played in a format the learner switched off, no fetch will change that,
+                        // so it rests longer; otherwise data may still arrive (settings changed,
+                        // fetch succeeded online) and the standard failed-card cooldown applies.
+                        setCardAvailableAfter(card, isUnplayableUnderFormats(card, result, targets))
                         continue
                     }
                     val loadState = sessionCard.loadState()
@@ -313,8 +313,8 @@ class SessionService(
         targets: List<Language>,
         formats: StudyFormatSelection,
         onLoadingEmission: () -> Unit,
-    ): SessionCard? {
-        val sessionCardFlow = loadSessionCard(card, language, targets, formats) ?: return null
+    ): Pair<WordResult?, SessionCard?> {
+        val sessionCardFlow = loadSessionCard(card, language, targets, formats) ?: return null to null
         return sessionCardFlow
             .onEach { (result, sessionCard) ->
                 if (sessionCard != null && result.isFetchLoading()) {
@@ -326,15 +326,20 @@ class SessionService(
             // interim emission may still lack the translations that make a variant playable,
             // and burying on it would punish a card whose data was seconds away.
             .first { (result, _) -> !result.isFetchLoading() }
-            .second
+    }
+
+    /** True when the sense has a playable variant in this family that only the formats rule out. */
+    private fun isUnplayableUnderFormats(card: Card, result: WordResult?, targets: List<Language>): Boolean {
+        val sense = result?.card?.findSense(card.senseId.toString()) ?: return false
+        return buildTaskVariants(card.family, sense, targets, StudyFormatSelection.ALL).isNotEmpty()
     }
 
     private fun WordResult.isFetchLoading(): Boolean =
         isWordLoading || isTranslationLoading
 
     @OptIn(ExperimentalTime::class)
-    private fun setCardAvailableAfter(card: Card) {
-        val delay = config.buryFailedSessionCardsFor
+    private fun setCardAvailableAfter(card: Card, unplayableUnderFormats: Boolean = false) {
+        val delay = if (unplayableUnderFormats) config.buryUnplayableUnderFormatsFor else config.buryFailedSessionCardsFor
         if (delay <= Duration.ZERO) {
             AppLogger.debug(TAG, null) {
                 "Delay failed/session card skipped: card=${card.id} lang=${card.langCode} family=${card.family} delay=$delay"

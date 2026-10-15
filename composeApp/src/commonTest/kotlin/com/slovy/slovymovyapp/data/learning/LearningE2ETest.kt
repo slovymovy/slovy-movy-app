@@ -328,7 +328,7 @@ class LearningE2ETest : BaseTest() {
                 family = CardFamily.RECOGNIZE_SENSE,
             )
 
-            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en"))
+            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en", env.studyFormats.get(Language.ENGLISH).families))
 
             val result = env.intake.continueWithPendingFavoritesNow("en")
 
@@ -359,7 +359,7 @@ class LearningE2ETest : BaseTest() {
                 rating = Rating.AGAIN,
             )
 
-            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en"))
+            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en", env.studyFormats.get(Language.ENGLISH).families))
 
             val result = env.intake.continueWithPendingFavoritesNow("en")
 
@@ -2038,7 +2038,7 @@ class LearningE2ETest : BaseTest() {
             env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
 
             assertTrue(
-                env.intake.canContinueWithPendingFavoritesNow("en"),
+                env.intake.canContinueWithPendingFavoritesNow("en", env.studyFormats.get(Language.ENGLISH).families),
                 "A card due in a switched-off family is never served, so it must not count as a full queue",
             )
             val result = env.intake.runIntake("en")
@@ -2107,6 +2107,111 @@ class LearningE2ETest : BaseTest() {
                 cap = config.backwardCreditDelayCap,
             )
             assertEquals(expectedDue.toEpochMilliseconds(), recognition.due, "Credit back down the ladder waits like backward sibling credit")
+        }
+    }
+
+    @Test
+    fun reroute_walks_past_unplayable_senses_to_the_ones_behind_them() = runBlocking {
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 1)
+        withEnv(includeTranslation = true, config = config) { env ->
+            // Several senses with no translation data: never playable in production, and with a
+            // page size of one they would each fill a page.
+            val unplayable = (1..3).map { index ->
+                val fixture = env.seedSense(lemma = "unplayable$index")
+                env.addFavorite(fixture)
+                env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+                env.insertTask(
+                    fixture = fixture,
+                    family = CardFamily.RECOGNIZE_SENSE,
+                    state = CardState.REVIEW,
+                    stability = 10.0,
+                    createdAt = (start - 2.days).toEpochMilliseconds(),
+                )
+                fixture
+            }
+            val playable = env.seedSense(lemma = "playablebehind")
+            env.seedTranslation(playable.senseId, playable.lemmaPosId)
+            env.addFavorite(playable)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), playable.senseId.toString(), "en")
+            env.insertTask(
+                fixture = playable,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted, "The playable sense is reached whatever its position among unplayable ones")
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
+                env.app.favoritesQueries.selectCardsByFavorite(playable.senseId, "en").executeAsList().map { it.family },
+            )
+            unplayable.forEach { fixture ->
+                assertEquals(
+                    listOf(CardFamily.RECOGNIZE_SENSE),
+                    env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+                    fixture.lemma,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun reroute_runs_even_while_low_retention_pauses_new_words() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeRetentionMinReviews = 1, pauseIntakeIfRetentionBelow = 1.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val stranded = env.seedSense(lemma = "strandedlowretention")
+            env.seedTranslation(stranded.senseId, stranded.lemmaPosId)
+            env.addFavorite(stranded)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), stranded.senseId.toString(), "en")
+            val card = env.insertTask(
+                fixture = stranded,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            // One failed review this week: retention 0 < 1.0, so new words are paused.
+            env.insertReviewLog(cardId = card.id, variantKind = CardKind.WORD_TO_TRANSLATION, variantTargetLang = "ru", rating = Rating.AGAIN)
+            val pending = env.seedSense(lemma = "pausednewword")
+            env.seedTranslation(pending.senseId, pending.lemmaPosId)
+            env.addFavorite(pending)
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted, "A known word comes back whatever the pause rules say about new ones")
+            assertEquals(0, result.activated.size, "The new word waits")
+            assertTrue(SkipReason.RETENTION_TOO_LOW in result.skipped)
+        }
+    }
+
+    @Test
+    fun a_card_unplayable_only_under_the_formats_rests_longer_than_a_failed_load() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            // No translation data: with source-only off, the recognition family has nothing to play.
+            val fixture = env.seedSense(lemma = "formatsonlyblock")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            val card = env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(StudyFormat.entries.toSet() - StudyFormat.SOURCE_ONLY),
+            )
+
+            val served = env.session.nextCard("en", start, emptySet()).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
+
+            assertNull(served)
+            val buried = env.app.favoritesQueries.selectCardById(card.id).executeAsOne()
+            assertEquals(
+                (start + config.buryUnplayableUnderFormatsFor).toEpochMilliseconds(),
+                buried.available_after,
+                "A sense playable in a switched-off format rests for the longer cooldown, since no fetch will change that",
+            )
         }
     }
 

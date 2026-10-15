@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.analytics.PerformanceTrace
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.stats.ReviewQueueStats
@@ -78,8 +79,9 @@ internal class FavoritesReviewCoordinator(
                     .distinct()
                 putMetric("languages", languages.size.toLong())
                 val reviewByLanguage = languages.associateWith { language ->
-                    statsService.reviewQueueStats(language.code, studyFormats(language).families)
-                        .toFavoriteLanguageReviewState(language, intakeService)
+                    val families = studyFormats(language).families
+                    statsService.reviewQueueStats(language.code, families)
+                        .toFavoriteLanguageReviewState(language, families, intakeService)
                 }
                 putReviewStateMetrics(reviewByLanguage)
                 FavoritesReviewState(reviewByLanguage = reviewByLanguage)
@@ -118,16 +120,18 @@ internal class FavoritesReviewCoordinator(
             }
             putMetric("intake_runs", intakeRuns)
             val reviewByLanguage = languages.associateWith { language ->
-                statsService.reviewQueueStats(language.code, studyFormats(language).families)
-                    .toFavoriteLanguageReviewState(language, intakeService)
+                val families = studyFormats(language).families
+                statsService.reviewQueueStats(language.code, families)
+                    .toFavoriteLanguageReviewState(language, families, intakeService)
             }
             putReviewStateMetrics(reviewByLanguage)
             FavoritesReviewState(reviewByLanguage = reviewByLanguage)
         }
     }
 
-    private suspend fun ReviewQueueStats.toFavoriteLanguageReviewState(
+    private fun ReviewQueueStats.toFavoriteLanguageReviewState(
         language: Language,
+        studiedFamilies: List<CardFamily>,
         intakeService: LearningIntake,
     ) =
         FavoriteLanguageReviewState(
@@ -136,7 +140,7 @@ internal class FavoritesReviewCoordinator(
             delayedDueLemmaCount = delayedDueLemmaCount,
             delayedDueCardCount = delayedDueCardCount,
             pendingFavoriteLemmaCount = pendingFavoriteLemmaCount,
-            canStudyPendingFavoritesNow = intakeService.canContinueWithPendingFavoritesNow(language.code),
+            canStudyPendingFavoritesNow = intakeService.canContinueWithPendingFavoritesNow(language.code, studiedFamilies),
             nextReviewAtEpochMs = nextReviewAtEpochMs,
         )
 

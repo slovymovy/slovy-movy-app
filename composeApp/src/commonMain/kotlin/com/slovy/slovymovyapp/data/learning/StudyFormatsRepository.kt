@@ -39,7 +39,13 @@ class StudyFormatsRepository(
      * Settings row and the page itself all ask this, so none of them opens a page that lies.
      */
     suspend fun hasChoice(language: Language): Boolean =
-        translationTargets(language).any { it != language }
+        hasChoice(language, translationTargets(language))
+
+    fun hasChoice(language: Language, translationTargets: List<Language>): Boolean =
+        translationTargets.any { it != language }
+
+    /** The language's translation targets, for a caller that will ask several questions of them. */
+    suspend fun translationTargetsOf(language: Language): List<Language> = translationTargets(language)
 
     /** The selection for a language code; every format for a code the app does not know. */
     suspend fun get(langCode: String): StudyFormatSelection =

@@ -23,6 +23,14 @@ data class FsrsConfig(
     val contextUnlockStability: Duration,
     val crossFamilyCredits: List<CrossFamilyCredit>,
     val buryFailedSessionCardsFor: Duration,
+    /**
+     * How long a due card is set aside when its sense has playable variants but none in the
+     * formats the learner studies. Longer than [buryFailedSessionCardsFor], since no fetch will
+     * change that, yet short enough that switching a format back on is felt the same day.
+     */
+    val buryUnplayableUnderFormatsFor: Duration,
+    /** The floor for stability a card inherits through cross-family credit, so it is never zero. */
+    val minInheritedStability: Double,
     val sameSenseCooldownRatio: Double,
     val sameLemmaCooldownRatio: Double,
     val sameAnswerCooldownRatio: Double,
@@ -122,7 +130,7 @@ fun FsrsConfig.unlockStabilityGate(sourceFamily: CardFamily, targetFamily: CardF
 
 /** The stability a card inherits from a source at [stabilityDays] through a credit [factor]. */
 fun FsrsConfig.inheritedStability(stabilityDays: Double, factor: Double): Double =
-    (stabilityDays * factor).coerceAtLeast(FsrsDefaults.MIN_INHERITED_STABILITY)
+    (stabilityDays * factor).coerceAtLeast(minInheritedStability)
 
 /** How long a card credited forward to [stabilityDays] waits before it is first presented. */
 fun FsrsConfig.forwardCreditDelay(stabilityDays: Double): Duration =

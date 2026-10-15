@@ -42,7 +42,8 @@ import kotlin.uuid.Uuid
 interface LearningIntake {
     suspend fun runIntake(langCode: String): IntakeResult
     suspend fun continueWithPendingFavoritesNow(langCode: String): IntakeResult
-    suspend fun canContinueWithPendingFavoritesNow(langCode: String): Boolean
+    /** Whether pending words may start now, judged on the queue of [studiedFamilies]. */
+    fun canContinueWithPendingFavoritesNow(langCode: String, studiedFamilies: List<CardFamily>): Boolean
 }
 
 class IntakeService(
@@ -136,11 +137,8 @@ class IntakeService(
     }
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun canContinueWithPendingFavoritesNow(langCode: String): Boolean {
-        val language = Language.fromCodeOrNull(langCode) ?: return false
-        val formats = studyFormats(language, resolveTranslationTargets(language))
-        return pendingFavoritePauseReason(langCode, clock.now(), formats.families) == null
-    }
+    override fun canContinueWithPendingFavoritesNow(langCode: String, studiedFamilies: List<CardFamily>): Boolean =
+        pendingFavoritePauseReason(langCode, clock.now(), studiedFamilies) == null
 
     private suspend fun resolveTranslationTargets(language: Language): List<Language> =
         dictionary.defaultTranslationTargets(language)
@@ -203,49 +201,34 @@ class IntakeService(
 
         for (row in extensions) apply(row.lemma)
 
-        // Re-entry is daily work: "continue now" is the learner asking for the pending words by
-        // name, and must not spend its limit on words they already know.
-        val stranded = if (mode == IntakeRunMode.DAILY) strandedSenses(langCode, formats) else emptyList()
-        if (newcomers.isNotEmpty() || stranded.isNotEmpty()) {
-            when (val gate = newcomerGate(langCode, mode, nowInstant, startOfToday, formats.families)) {
+        // Re-entry is daily work under the daily budget alone: "continue now" is the learner
+        // asking for the pending words by name, and the pause rules protect them from new words,
+        // not from the words they already know. Known words come back before new ones start,
+        // so a toggle re-enters a large vocabulary over days rather than in one session.
+        var remainingDailyBudget: Int? = if (mode == IntakeRunMode.DAILY) remainingDailyBudget(langCode, startOfToday) else null
+        if (mode == IntakeRunMode.DAILY && formats.excludedFamilies.isNotEmpty()) {
+            val reroute = Rerouter(langCode, language, translationTargets, formats, now)
+            val outcome = reroute.reenterStranded(remainingDailyBudget)
+            rerouted += outcome.inserted
+            cardsCreated += outcome.inserted
+            repeat(outcome.notPlayable) { skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE }
+            remainingDailyBudget = remainingDailyBudget?.minus(outcome.inserted)
+        }
+
+        if (newcomers.isNotEmpty()) {
+            when (val gate = newcomerGate(langCode, mode, nowInstant, remainingDailyBudget, formats.families)) {
                 is NewcomerGate.Blocked -> {
                     skipped += gate.reason
                     AppLogger.debug(TAG, null) {
-                        "Intake newcomers blocked lang=$langCode mode=${mode.logName()} reason=${gate.reason} " +
-                            "stranded=${stranded.size}"
+                        "Intake newcomers blocked lang=$langCode mode=${mode.logName()} reason=${gate.reason}"
                     }
                 }
 
                 is NewcomerGate.Open -> {
                     AppLogger.debug(TAG, null) {
-                        "Intake newcomers open lang=$langCode mode=${mode.logName()} dailyBudget=${gate.dailyBudget ?: "none"} " +
-                            "stranded=${stranded.size}"
+                        "Intake newcomers open lang=$langCode mode=${mode.logName()} dailyBudget=${gate.dailyBudget ?: "none"}"
                     }
-                    var remainingDailyBudget = gate.dailyBudget
                     var activatedLemmaCount = 0
-                    // Words the learner already knows come back before new ones start, under the
-                    // same budget and limits, so a toggle re-enters a large vocabulary over days
-                    // rather than in one session.
-                    val reroute = Rerouter(langCode, language, translationTargets, formats, now)
-                    for (source in stranded) {
-                        val budget = remainingDailyBudget
-                        if (budget != null && budget <= 0) {
-                            skipped += SkipReason.BUDGET_EXHAUSTED
-                            break
-                        }
-                        when (reroute.reenter(source)) {
-                            RerouteOutcome.NOT_PLAYABLE -> {
-                                skipped += SkipReason.NO_TASKS_VARIANT_AVAILABLE
-                                continue
-                            }
-
-                            RerouteOutcome.NOTHING_TO_DO -> continue
-                            RerouteOutcome.INSERTED -> Unit
-                        }
-                        rerouted += 1
-                        cardsCreated += 1
-                        if (budget != null) remainingDailyBudget = budget - 1
-                    }
                     for (row in newcomers) {
                         if (mode == IntakeRunMode.CONTINUE_NOW &&
                             activatedLemmaCount >= config.continueNowPendingLemmaLimit
@@ -289,23 +272,18 @@ class IntakeService(
     }
 
     /**
-     * The strongest card of every active sense whose cards all belong to families the learner
-     * switched off. Such a word could never be shown again, and the ladder, which only runs on a
-     * review, could never bring it back. Empty while every family is on.
+     * Senses found unplayable in the studied families, per language and selection, so a run does
+     * not fetch their word data again. A fresh selection or process starts over.
      */
-    private fun strandedSenses(langCode: String, formats: StudyFormatSelection): List<DbCard> {
-        if (formats.excludedFamilies.isEmpty()) return emptyList()
-        return learning.selectStrongestCardOfSensesWithoutFamilies(
-            lang_code = langCode,
-            allowed_families = formats.families,
-            limit = config.dailyNewTaskFamilyBudget.toLong(),
-        ).executeAsList()
-    }
+    private val unplayableSenses = mutableMapOf<String, MutableSet<Uuid>>()
 
     /**
-     * Re-enters stranded senses one at a time in the first family still studied, inheriting from
-     * the strongest card the way an unlock would, so what the word already earned carries over.
-     * The cards it has keep their scheduling untouched. Word data is fetched once per lemma.
+     * Re-enters stranded senses, whose cards all belong to families the learner switched off,
+     * one at a time in the first family still studied: such a word could never be shown again,
+     * and the ladder, which only runs on a review, could never bring it back. The new card
+     * inherits from the strongest one the way an unlock would, so what the word already earned
+     * carries over; the cards it has keep their scheduling untouched. Word data is fetched once
+     * per lemma.
      */
     private inner class Rerouter(
         private val langCode: String,
@@ -316,8 +294,46 @@ class IntakeService(
     ) {
         private val target: CardFamily = formats.families.first()
         private val cardsByLemma = mutableMapOf<String, LanguageCard?>()
+        private val unplayable: MutableSet<Uuid> = unplayableSenses.getOrPut(
+            "$langCode|${formats.enabled.sorted()}|${translationTargets.map { it.code }}",
+        ) { mutableSetOf() }
 
-        suspend fun reenter(source: DbCard): RerouteOutcome {
+        /**
+         * Walks the stranded senses a page at a time until [budget] is spent or the pages run
+         * out, so senses that cannot be re-entered never hold the ones behind them back.
+         */
+        suspend fun reenterStranded(budget: Int?): RerouteSummary {
+            var inserted = 0
+            var notPlayable = 0
+            var offset = 0L
+            val pageSize = config.dailyNewTaskFamilyBudget.toLong()
+            for (page in 0 until MAX_REROUTE_PAGES) {
+                if (budget != null && inserted >= budget) break
+                val rows = learning.selectStrongestCardOfSensesWithoutFamilies(
+                    lang_code = langCode,
+                    allowed_families = formats.families,
+                    limit = pageSize,
+                    offset = offset,
+                ).executeAsList()
+                if (rows.isEmpty()) break
+                offset += rows.size
+                for (source in rows) {
+                    if (budget != null && inserted >= budget) break
+                    when (reenter(source)) {
+                        RerouteOutcome.INSERTED -> inserted += 1
+                        RerouteOutcome.NOT_PLAYABLE -> notPlayable += 1
+                        RerouteOutcome.NOTHING_TO_DO -> Unit
+                    }
+                }
+            }
+            AppLogger.debug(TAG, null) {
+                "Intake reroute done lang=$langCode inserted=$inserted notPlayable=$notPlayable scanned=$offset"
+            }
+            return RerouteSummary(inserted, notPlayable)
+        }
+
+        private suspend fun reenter(source: DbCard): RerouteOutcome {
+            if (source.sense_id in unplayable) return RerouteOutcome.NOTHING_TO_DO
             val senseId = source.sense_id.toString()
             val favorite = learning.selectFavoriteWithActivation(senseId, langCode).executeAsOneOrNull()
             if (favorite == null) {
@@ -348,6 +364,7 @@ class IntakeService(
                 AppLogger.debug(TAG, null) {
                     "Intake reroute skipped: no playable variant lang=$langCode sense=$senseId family=$target"
                 }
+                unplayable += source.sense_id
                 return RerouteOutcome.NOT_PLAYABLE
             }
             // Forward along the ladder, or back from a family further up; the delay follows the
@@ -402,21 +419,26 @@ class IntakeService(
         NOTHING_TO_DO,
     }
 
+    private data class RerouteSummary(val inserted: Int, val notPlayable: Int)
+
     @OptIn(ExperimentalTime::class)
     private fun newcomerGate(
         langCode: String,
         mode: IntakeRunMode,
         nowInstant: Instant,
-        startOfToday: Long,
+        remainingDailyBudget: Int?,
         studiedFamilies: List<CardFamily>,
     ): NewcomerGate {
         val pauseReason = pendingFavoritePauseReason(langCode, nowInstant, studiedFamilies)
         if (pauseReason != null) return NewcomerGate.Blocked(pauseReason)
         if (mode != IntakeRunMode.DAILY) return NewcomerGate.Open(dailyBudget = null)
+        return if (remainingDailyBudget == null || remainingDailyBudget <= 0) NewcomerGate.Blocked(SkipReason.BUDGET_EXHAUSTED)
+        else NewcomerGate.Open(dailyBudget = remainingDailyBudget)
+    }
+
+    private fun remainingDailyBudget(langCode: String, startOfToday: Long): Int {
         val addedToday = learning.countNewCardsCreatedSince(langCode, startOfToday).executeAsOne()
-        val remaining = config.dailyNewTaskFamilyBudget - addedToday.toInt()
-        return if (remaining <= 0) NewcomerGate.Blocked(SkipReason.BUDGET_EXHAUSTED)
-        else NewcomerGate.Open(dailyBudget = remaining)
+        return config.dailyNewTaskFamilyBudget - addedToday.toInt()
     }
 
 
@@ -620,3 +642,4 @@ private fun skipSummary(skipped: List<SkipReason>): String =
     }
 
 private const val TAG: String = "IntakeService"
+private const val MAX_REROUTE_PAGES: Int = 25
