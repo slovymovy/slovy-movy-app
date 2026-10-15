@@ -1606,6 +1606,55 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun review_queue_reads_next_review_and_delays_over_studied_families_only() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "hiddenduecard")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            // Due now, but in a family that is about to be switched off.
+            env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
+            val productionDue = (start + 2.days).toEpochMilliseconds()
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 5.0,
+                due = productionDue,
+            )
+            val delayed = env.seedSense(lemma = "hiddendelayedcard")
+            env.seedTranslation(delayed.senseId, delayed.lemmaPosId)
+            env.addFavorite(delayed)
+            env.insertTask(
+                fixture = delayed,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 5.0,
+                availableAfter = (start + 1.hours).toEpochMilliseconds(),
+            )
+            val selection = StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD, StudyFormat.FILL_THE_GAP))
+            env.settings.setStudyFormats(Language.ENGLISH, selection)
+
+            val queue = env.stats.reviewQueueStats("en", selection.families)
+
+            assertEquals(0, queue.dueToday, "The hidden recognition card is not due for the session")
+            assertEquals(
+                productionDue,
+                queue.nextReviewAtEpochMs,
+                "The next review is the production card's, not the hidden card's 'now'; otherwise My words shows no study block at all",
+            )
+            assertEquals(0, queue.delayedDueLemmaCount, "A delayed card in a hidden family offers no 'review more'")
+
+            env.session.continueDelayedCardsNow("en")
+            val stillDelayed = env.app.favoritesQueries.selectCardsByFavorite(delayed.senseId, "en").executeAsList().single()
+            assertEquals(
+                (start + 1.hours).toEpochMilliseconds(),
+                stillDelayed.available_after,
+                "Continue-now must not release a card the session could not serve",
+            )
+        }
+    }
+
+    @Test
     fun recognition_good_steps_over_switched_off_production_and_unlocks_context() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
         withEnv(includeTranslation = true, config = config) { env ->

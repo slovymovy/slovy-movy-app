@@ -70,6 +70,7 @@ class IntakeService(
                 ),
             )
             val result = activatePendingFavorites(langCode, mode)
+            val studiedFamilies = Language.fromCodeOrNull(langCode)?.let { studyFormats(it).families } ?: CardFamily.entries
             AppLogger.debug(TAG, null) {
                 "Intake completed lang=$langCode mode=${mode.logName()} cardsCreated=${result.cardsCreated} " +
                     "activated=${result.activated.size} rerouted=${result.rerouted} skipped=${skipSummary(result.skipped)}"
@@ -84,7 +85,7 @@ class IntakeService(
             }
             Analytics.logEvent(
                 AnalyticsEvent.LEARNING_INTAKE_RUN,
-                buildIntakeAnalyticsParams(langCode, mode, result),
+                buildIntakeAnalyticsParams(langCode, mode, result, studiedFamilies),
             )
             result
         }
@@ -94,6 +95,7 @@ class IntakeService(
         langCode: String,
         mode: IntakeRunMode,
         result: IntakeResult,
+        studiedFamilies: List<CardFamily>,
     ): Map<String, Any> {
         val nowMs = clock.now().toEpochMilliseconds()
         val params = mutableMapOf<String, Any>(
@@ -107,8 +109,8 @@ class IntakeService(
             "rerouted_count" to result.rerouted.toLong(),
             "active_card_count" to learning.countCardsByLang(langCode).executeAsOne(),
             "due_count" to learning.countDueCardsByLang(langCode, nowMs).executeAsOne(),
-            "delayed_due_lemma_count" to learning.countDelayedDueLemmasByLang(langCode, nowMs).executeAsOne(),
-            "delayed_due_card_count" to learning.countDelayedDueCardsByLang(langCode, nowMs).executeAsOne(),
+            "delayed_due_lemma_count" to learning.countDelayedDueLemmasByLang(langCode, nowMs, studiedFamilies).executeAsOne(),
+            "delayed_due_card_count" to learning.countDelayedDueCardsByLang(langCode, nowMs, studiedFamilies).executeAsOne(),
             "pending_favorite_lemma_count" to learning.countPendingFavoriteLemmasByLang(langCode).executeAsOne(),
         )
         SkipReason.entries.forEach { reason ->

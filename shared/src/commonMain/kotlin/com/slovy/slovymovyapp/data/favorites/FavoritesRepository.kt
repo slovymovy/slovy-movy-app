@@ -279,10 +279,12 @@ class FavoritesRepository(private val db: AppDatabase) {
                 availableAfterSuppressedCards = db.favoritesQueries.countDelayedDueCardsByLang(
                     lang_code = language.code,
                     now = nowEpochMs,
+                    allowed_families = CardFamily.entries,
                 ).executeAsOne(),
                 availableAfterSuppressedLemmas = db.favoritesQueries.countDelayedDueLemmasByLang(
                     lang_code = language.code,
                     now = nowEpochMs,
+                    allowed_families = CardFamily.entries,
                 ).executeAsOne(),
             )
         }

@@ -114,8 +114,8 @@ class StatsService(
         )
 
         val nowMs = clock.now().toEpochMilliseconds()
-        val delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, nowMs).executeAsOne().toInt()
-        val delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, nowMs).executeAsOne().toInt()
+        val delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, nowMs, studiedFamilies).executeAsOne().toInt()
+        val delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, nowMs, studiedFamilies).executeAsOne().toInt()
 
         trace.putMetric("card_rows", cardRows.size.toLong())
         trace.putMetric("queued_lemmas", queuedLemmas.size.toLong())
@@ -238,10 +238,12 @@ class StatsService(
                 now = now,
                 allowed_families = studiedFamilies,
             ).executeAsOne().toInt(),
-            delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now).executeAsOne().toInt(),
-            delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne().toInt(),
+            delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now, studiedFamilies).executeAsOne().toInt(),
+            delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, now, studiedFamilies).executeAsOne().toInt(),
             pendingFavoriteLemmaCount = learning.countPendingFavoriteLemmasByLang(langCode).executeAsOne().toInt(),
-            nextReviewAtEpochMs = learning.selectNextReviewAtByLang(langCode).executeAsOne().next_review_at,
+            // Over the studied families only: a hidden card due now must not read as "next
+            // review: now" and hide the study-done card behind an empty study card.
+            nextReviewAtEpochMs = learning.selectNextReviewAtByLang(langCode, studiedFamilies).executeAsOne().next_review_at,
         )
     }
 

@@ -353,11 +353,14 @@ WHERE lang_code = :lang_code
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
+-- Delayed, next-review and continue-now queries take the studied families so the "study done"
+-- card and "review more" never describe or release a card a session could not serve.
 countDelayedDueLemmasByLang:
 SELECT COUNT(DISTINCT lemma_id)
 FROM card INDEXED BY idx_card_active_lemma_due
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND available_after IS NOT NULL
   AND available_after > :now;
@@ -367,6 +370,7 @@ SELECT COUNT(*)
 FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND available_after IS NOT NULL
   AND available_after > :now;
@@ -380,6 +384,7 @@ SELECT MIN(
 ) AS next_review_at
 FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
+  AND family IN :allowed_families
   AND suspended = 0;
 
 countNewCardsCreatedSince:
@@ -478,6 +483,7 @@ SET available_after = NULL
 WHERE lang_code = :lang_code
   AND suspended = 0
   AND due <= :now
+  AND family IN :allowed_families
   AND available_after IS NOT NULL
   AND available_after > :now
   AND lemma_id IN (
@@ -486,6 +492,7 @@ WHERE lang_code = :lang_code
     WHERE lang_code = :lang_code
       AND suspended = 0
       AND due <= :now
+      AND family IN :allowed_families
       AND available_after IS NOT NULL
       AND available_after > :now
     GROUP BY lemma_id

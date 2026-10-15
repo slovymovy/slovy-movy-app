@@ -244,13 +244,16 @@ class SessionService(
 
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
-        val before = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
+        // Only cards a session can serve are released; a hidden family's delay stays as it is.
+        val families = studyFormatsFor(langCode).families
+        val before = learning.countDelayedDueCardsByLang(langCode, now, families).executeAsOne()
         learning.clearAvailableAfterForDelayedLemmas(
             lang_code = langCode,
             now = now,
+            allowed_families = families,
             lemma_limit = config.continueNowLemmaLimit.toLong(),
         )
-        val after = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
+        val after = learning.countDelayedDueCardsByLang(langCode, now, families).executeAsOne()
         AppLogger.debug(TAG, null) {
             "Continue delayed cards now lang=$langCode lemmaLimit=${config.continueNowLemmaLimit} " +
                 "delayedDueCards=$before->$after unblocked=${(before - after).coerceAtLeast(0)}"
