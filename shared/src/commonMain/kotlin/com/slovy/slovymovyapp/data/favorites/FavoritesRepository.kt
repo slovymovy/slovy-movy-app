@@ -265,7 +265,12 @@ class FavoritesRepository(private val db: AppDatabase) {
         }
     }
 
-    suspend fun getCardScheduleDebugStats(language: Language, nowEpochMs: Long): CardScheduleDebugStats =
+    /** Delayed counts cover [studiedFamilies] only, the same families "review more" can release. */
+    suspend fun getCardScheduleDebugStats(
+        language: Language,
+        nowEpochMs: Long,
+        studiedFamilies: Collection<CardFamily>,
+    ): CardScheduleDebugStats =
         withContext(Dispatchers.IO) {
             CardScheduleDebugStats(
                 futureScheduledCards = db.favoritesQueries.countFutureScheduledCardsByLang(
@@ -279,10 +284,12 @@ class FavoritesRepository(private val db: AppDatabase) {
                 availableAfterSuppressedCards = db.favoritesQueries.countDelayedDueCardsByLang(
                     lang_code = language.code,
                     now = nowEpochMs,
+                    allowed_families = studiedFamilies,
                 ).executeAsOne(),
                 availableAfterSuppressedLemmas = db.favoritesQueries.countDelayedDueLemmasByLang(
                     lang_code = language.code,
                     now = nowEpochMs,
+                    allowed_families = studiedFamilies,
                 ).executeAsOne(),
             )
         }

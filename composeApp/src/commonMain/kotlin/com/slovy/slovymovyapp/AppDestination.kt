@@ -59,6 +59,10 @@ internal sealed interface AppDestination {
     @Serializable
     data object Settings : AppDestination
 
+    /** The study formats of one learning language, opened from Settings. */
+    @Serializable
+    data class StudyFormats(val langCode: String) : AppDestination
+
     @Serializable
     data object Developer : AppDestination
 
