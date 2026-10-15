@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.learning.CardFamily
+import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsPracticeDay
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
@@ -56,6 +56,7 @@ class StatsViewModel(
     initialLearningLanguages: List<Language>,
     private val statsService: StatsService,
     private val settingsRepository: SettingsRepository,
+    private val studyFormatsRepository: StudyFormatsRepository,
     private val clock: Clock,
 ) : ViewModel() {
     val scrollState = ScrollState(0)
@@ -138,10 +139,7 @@ class StatsViewModel(
         viewModelScope.launch {
             runCatching {
                 withContext(Dispatchers.Default) {
-                    val studiedFamilies = Language.fromCodeOrNull(langCode)
-                        ?.let { settingsRepository.getStudyFormats(it).families }
-                        ?: CardFamily.entries
-                    statsService.statsScreenData(langCode, today, studiedFamilies)
+                    statsService.statsScreenData(langCode, today, studyFormatsRepository.get(langCode).families)
                 }
             }.onSuccess { data ->
                 if (!isCurrentReload(requestId)) return@launch

@@ -118,7 +118,7 @@ fun App(
             favoritesRepository = container.favoritesRepository,
             intakeService = container.intakeService,
             statsService = container.statsService,
-            studyFormats = settingsRepository::getStudyFormats,
+            studyFormats = container.studyFormatsRepository::get,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -129,7 +129,7 @@ fun App(
             favoritesRepository = container.favoritesRepository,
             intakeService = container.intakeService,
             statsService = container.statsService,
-            studyFormats = settingsRepository::getStudyFormats,
+            studyFormats = container.studyFormatsRepository::get,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -666,7 +666,13 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        StatsViewModel(learningLanguagesForStats, container.statsService, settingsRepository, Clock.System)
+                        StatsViewModel(
+                            learningLanguagesForStats,
+                            container.statsService,
+                            settingsRepository,
+                            container.studyFormatsRepository,
+                            Clock.System,
+                        )
                     }
 
                     StatsScreen(
@@ -699,6 +705,7 @@ fun App(
                             sessionService = container.sessionService,
                             statsService = container.statsService,
                             settingsRepository = settingsRepository,
+                            studyFormatsRepository = container.studyFormatsRepository,
                             appScope = appCoroutineScope,
                             clock = Clock.System,
                             ttsManager = container.ttsManager,
@@ -773,7 +780,7 @@ fun App(
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         StudyFormatsViewModel(
                             language = language,
-                            settingsRepository = settingsRepository,
+                            studyFormatsRepository = container.studyFormatsRepository,
                             onChanged = { changed ->
                                 // Intake re-enters words in the formats still studied, and the
                                 // review badge counts only those, so both must be recomputed.
@@ -792,6 +799,7 @@ fun App(
                         DeveloperViewModel(
                             favoritesRepository = container.favoritesRepository,
                             intake = container.intakeService,
+                            studyFormats = container.studyFormatsRepository::get,
                             listsService = container.listsService,
                             learningLanguagesProvider = {
                                 dataManager.listDownloadedDatabases()

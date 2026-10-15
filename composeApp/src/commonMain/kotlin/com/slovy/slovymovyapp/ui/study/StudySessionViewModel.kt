@@ -22,6 +22,7 @@ import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
 import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
+import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
@@ -62,6 +63,7 @@ class StudySessionViewModel(
     private val sessionService: SessionService,
     private val statsService: StatsService,
     private val settingsRepository: SettingsRepository,
+    private val studyFormatsRepository: StudyFormatsRepository,
     /** Outlives this screen, so a preference saved just before leaving the session still lands. */
     private val appScope: CoroutineScope,
     private val clock: Clock,
@@ -351,13 +353,16 @@ class StudySessionViewModel(
         if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, next)
         viewModelScope.launch {
             try {
-                settingsRepository.setStudyFormats(language, next)
+                studyFormatsRepository.set(language, next)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to store study formats lang=$langCode", e)
-                studyFormats = current
-                if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, current)
+                // Back to what is stored, not to what this tap started from: a later tap may
+                // have landed in between.
+                val stored = studyFormatsRepository.get(language)
+                studyFormats = stored
+                if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, stored)
                 return@launch
             }
             Analytics.logEvent(
@@ -878,8 +883,7 @@ class StudySessionViewModel(
                             autoplayEnabled = settingsRepository.getStudyAutoplay()
                             autoplayPreferenceLoaded = true
                         }
-                        studyFormats = language?.let { settingsRepository.getStudyFormats(it) }
-                            ?: StudyFormatSelection.ALL
+                        studyFormats = studyFormatsRepository.get(langCode)
                         val intakeResult = intakeService.runIntake(langCode)
                         putMetric("cards_created", intakeResult.cardsCreated.toLong())
                         putMetric("activated_favorites", intakeResult.activated.size.toLong())

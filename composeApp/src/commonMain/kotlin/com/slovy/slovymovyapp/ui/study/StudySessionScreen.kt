@@ -2700,6 +2700,7 @@ private fun activeState(
     card = card,
     side = side,
     ratingOptions = sampleRatings(),
+    canOpenStudyFormats = true,
 )
 
 @Preview

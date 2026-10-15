@@ -2,6 +2,8 @@ package com.slovy.slovymovyapp.data.learning
 
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.ladderCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.unlockStabilityGate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -76,7 +78,7 @@ class StudyFormatSelectionTest {
     }
 
     @Test
-    fun creditToAFarFamilyChainsTheSkippedSteps() {
+    fun siblingCreditStaysDirectWhileUnlockCreditChainsTheSkippedSteps() {
         val config = FsrsDefaults.config()
         val recognizeToProduce = config.crossFamilyCreditFactor(
             CardFamily.RECOGNIZE_SENSE,
@@ -88,17 +90,25 @@ class StudyFormatSelectionTest {
             CardFamily.PRODUCE_WORD_IN_CONTEXT,
             Rating.GOOD,
         )
-        val chained = config.crossFamilyCreditFactor(
-            CardFamily.RECOGNIZE_SENSE,
-            CardFamily.PRODUCE_WORD_IN_CONTEXT,
-            Rating.GOOD,
-        )
 
+        assertNull(
+            config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT, Rating.GOOD),
+            "A pair without a configured credit passes nothing to an existing sibling",
+        )
         assertEquals(
             recognizeToProduce!! * produceToContext!!,
-            chained!!,
+            config.ladderCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT, Rating.GOOD)!!,
             absoluteTolerance = 1e-9,
-            message = "Skipping a family must not grant more than climbing through it would",
+            message = "Unlocking over a skipped family inherits no more than climbing through it would",
+        )
+        assertEquals(
+            recognizeToProduce,
+            config.ladderCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.GOOD),
+            "An adjacent step is its own credit",
+        )
+        assertNull(
+            config.ladderCreditFactor(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_SENSE, Rating.GOOD),
+            "The ladder only climbs",
         )
         assertNull(
             config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.HARD),
@@ -109,5 +119,25 @@ class StudyFormatSelectionTest {
             config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_VOICE, CardFamily.RECOGNIZE_SENSE, Rating.GOOD),
             "A pair with its own credit uses it, whatever the direction",
         )
+    }
+
+    @Test
+    fun unlockingOverSkippedFamiliesTakesTheStrictestGate() {
+        val config = FsrsDefaults.config()
+
+        assertEquals(
+            config.productionUnlockStability,
+            config.unlockStabilityGate(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
+        )
+        assertEquals(
+            maxOf(config.productionUnlockStability, config.contextUnlockStability),
+            config.unlockStabilityGate(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT),
+            "Stepping over production must not reach context sooner than the ladder would",
+        )
+        assertEquals(
+            config.contextUnlockStability,
+            config.unlockStabilityGate(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_VOICE),
+        )
+        assertNull(config.unlockStabilityGate(CardFamily.RECOGNIZE_VOICE, CardFamily.RECOGNIZE_SENSE))
     }
 }

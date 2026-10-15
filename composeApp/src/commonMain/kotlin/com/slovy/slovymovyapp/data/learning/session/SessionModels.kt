@@ -3,7 +3,6 @@ package com.slovy.slovymovyapp.data.learning.session
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.Card
 import com.slovy.slovymovyapp.data.learning.CardVariant
-import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.remote.DictionaryClientException
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.WordResult
@@ -16,7 +15,6 @@ data class SessionCard(
     val example: ExamplePair?,
     val studiedSenseIds: Set<String> = emptySet(),
     val translationTargets: List<Language> = emptyList(),
-    val studyFormats: StudyFormatSelection = StudyFormatSelection.ALL,
 ) {
     fun loadState(): SessionCardLoadState {
         if (wordResult.isWordLoading) return SessionCardLoadState.LOADING

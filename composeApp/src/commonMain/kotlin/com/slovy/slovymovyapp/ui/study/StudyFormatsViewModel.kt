@@ -11,7 +11,7 @@ import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
-import com.slovy.slovymovyapp.data.settings.SettingsRepository
+import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  */
 class StudyFormatsViewModel(
     private val language: Language,
-    private val settingsRepository: SettingsRepository,
+    private val studyFormatsRepository: StudyFormatsRepository,
     /** Called after a change is stored, so review counts and intake caches can follow. */
     private val onChanged: (Language) -> Unit,
 ) : ViewModel() {
@@ -37,7 +37,7 @@ class StudyFormatsViewModel(
 
     init {
         viewModelScope.launch {
-            val loaded = settingsRepository.getStudyFormats(language)
+            val loaded = studyFormatsRepository.get(language)
             selection = loaded
             state = studyFormatsUiState(language, loaded)
             Analytics.logEvent(
@@ -54,13 +54,16 @@ class StudyFormatsViewModel(
         state = studyFormatsUiState(language, next)
         viewModelScope.launch {
             try {
-                settingsRepository.setStudyFormats(language, next)
+                studyFormatsRepository.set(language, next)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to store study formats lang=${language.code}", e)
-                selection = current
-                state = studyFormatsUiState(language, current)
+                // Back to what is stored, not to what this tap started from: a later tap may
+                // have landed in between.
+                val stored = studyFormatsRepository.get(language)
+                selection = stored
+                state = studyFormatsUiState(language, stored)
                 return@launch
             }
             Analytics.logEvent(

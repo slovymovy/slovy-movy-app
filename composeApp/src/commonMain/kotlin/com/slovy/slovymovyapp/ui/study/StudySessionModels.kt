@@ -30,7 +30,7 @@ sealed interface StudySessionUiState {
         val viewedSenseId: String? = null,
         val isAutoplayEnabled: Boolean = false,
         /** Whether the study formats page exists for this card; false in a target-language-only setup. */
-        val canOpenStudyFormats: Boolean = true,
+        val canOpenStudyFormats: Boolean,
         val isOverflowMenuOpen: Boolean = false,
         val removeConfirmation: StudyRemoveConfirmationUiState? = null,
     ) : StudySessionUiState

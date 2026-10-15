@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
 import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.ladderCreditFactor
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.intake.SkipReason
 import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
@@ -1688,7 +1689,7 @@ class LearningE2ETest : BaseTest() {
                 "The ladder must step over the switched-off production family, not stall on it",
             )
             val context = cards.single { it.family == CardFamily.PRODUCE_WORD_IN_CONTEXT }
-            val chainedFactor = config.crossFamilyCreditFactor(
+            val chainedFactor = config.ladderCreditFactor(
                 CardFamily.RECOGNIZE_SENSE,
                 CardFamily.PRODUCE_WORD_IN_CONTEXT,
                 Rating.GOOD,
@@ -1809,6 +1810,201 @@ class LearningE2ETest : BaseTest() {
         }
     }
 
+    @Test
+    fun sibling_credit_does_not_chain_over_families_without_a_configured_credit() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "nochainedcredit")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            // Weak enough that a chained credit from recognition would raise it.
+            val context = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                state = CardState.LEARNING,
+                stability = 0.01,
+                due = (start + 5.days).toEpochMilliseconds(),
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val after = env.app.favoritesQueries.selectCardById(context.id).executeAsOne()
+            // The same-sense bury may delay the sibling; its memory must not have moved.
+            assertEquals(
+                Triple(context.stability, context.state, context.due),
+                Triple(after.stability, after.state, after.due),
+                "With every format on, recognition must credit only the production family, as before this branch",
+            )
+        }
+    }
+
+    @Test
+    fun grading_a_card_uses_the_formats_as_they_stand_at_submit_time() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "latetoggle")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+
+            // Loaded with every format on; production is switched off while it is on screen.
+            val recognition = env.nextLoadedCard("en")
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
+            )
+            env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val families = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family }
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT),
+                families,
+                "A family switched off after the card loaded must not be unlocked by grading it",
+            )
+        }
+    }
+
+    @Test
+    fun reroute_is_paid_from_the_daily_budget_and_resumes_the_next_day() = runBlocking {
+        val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 1)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixtures = listOf("reroutebudgetone", "reroutebudgettwo").map { lemma ->
+                val fixture = env.seedSense(lemma = lemma)
+                env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+                env.addFavorite(fixture)
+                env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+                // Created on an earlier day, or the seeded cards would spend today's budget themselves.
+                env.insertTask(
+                    fixture = fixture,
+                    family = CardFamily.RECOGNIZE_SENSE,
+                    state = CardState.REVIEW,
+                    stability = 10.0,
+                    createdAt = (start - 2.days).toEpochMilliseconds(),
+                )
+                fixture
+            }
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val first = env.intake.runIntake("en")
+            assertEquals(1, first.rerouted, "One re-entry fits the budget of one")
+            assertTrue(SkipReason.BUDGET_EXHAUSTED in first.skipped, "The second sense waits for budget")
+
+            val sameDay = env.intake.runIntake("en")
+            assertEquals(0, sameDay.rerouted, "The budget is spent for today")
+
+            env.clock.advance(1.days)
+            val nextDay = env.intake.runIntake("en")
+            assertEquals(1, nextDay.rerouted, "A new day re-enters the next sense")
+            fixtures.forEach { fixture ->
+                val families = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family }
+                assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD), families, fixture.lemma)
+            }
+        }
+    }
+
+    @Test
+    fun reroute_skips_a_sense_with_no_playable_variant_in_the_studied_family() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            // No translation data at all, so no listening variant can be built.
+            val fixture = env.seedSense(lemma = "unplayablelisten")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 10.0)
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.LISTEN)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(0, result.rerouted)
+            assertTrue(SkipReason.NO_TASKS_VARIANT_AVAILABLE in result.skipped)
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE),
+                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+                "A card nobody could ever play must not be created",
+            )
+        }
+    }
+
+    @Test
+    fun reroute_leaves_a_sense_alone_when_the_target_family_already_has_a_card() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "suspendedtarget")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 10.0)
+            val suspendedId = Uuid.random()
+            env.app.favoritesQueries.insertCard(
+                id = suspendedId,
+                sense_id = fixture.senseId,
+                lemma_id = fixture.lemmaId,
+                lang_code = "en",
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 3.0,
+                difficulty = 5.0,
+                due = start.toEpochMilliseconds(),
+                last_review = null,
+                reps = 1,
+                lapses = 0,
+                created_at = start.toEpochMilliseconds(),
+                available_after = null,
+                answer_key = fixture.lemma,
+                suspended = true,
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(0, result.rerouted, "The unique task index must never be hit")
+            assertEquals(2, env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size)
+        }
+    }
+
+    @Test
+    fun without_translation_targets_the_source_only_format_is_always_on() = runBlocking {
+        withEnv(includeTranslation = false) { env ->
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION)))
+
+            val effective = env.studyFormats.get(Language.ENGLISH)
+            assertTrue(
+                StudyFormat.SOURCE_ONLY in effective.enabled,
+                "With no translation language the only playable format must stay on, or every word is stuck",
+            )
+            assertEquals(
+                setOf(StudyFormat.WORD_TO_TRANSLATION),
+                env.settings.getStudyFormats(Language.ENGLISH).enabled,
+                "The stored choice is kept for when a translation language returns",
+            )
+
+            val fixture = env.seedSense(lemma = "sourceonlyforced")
+            env.addFavorite(fixture)
+            val result = env.intake.runIntake("en")
+            assertEquals(1, result.cardsCreated, "The word can still be studied")
+        }
+    }
+
     private suspend fun withEnv(
         includeTranslation: Boolean,
         config: FsrsConfig = FsrsDefaults.config(),
@@ -1853,12 +2049,16 @@ class LearningE2ETest : BaseTest() {
                 config.maximumInterval,
                 enableFuzz = config.enableFuzz,
             )
+            val studyFormats = StudyFormatsRepository(
+                settingsRepository = settings,
+                translationTargets = dictionaryRepository::defaultTranslationTargets,
+            )
             val intake = IntakeService(
                 learning = app.database.favoritesQueries,
                 dictionary = dictionaryRepository,
                 config = config,
                 clock = clock,
-                studyFormats = settings::getStudyFormats,
+                studyFormats = studyFormats::get,
             )
             val session = SessionService(
                 learning = app.database.favoritesQueries,
@@ -1868,13 +2068,13 @@ class LearningE2ETest : BaseTest() {
                 config = config,
                 clock = clock,
                 translationTargets = dictionaryRepository::defaultTranslationTargets,
-                studyFormats = settings::getStudyFormats,
+                studyFormats = studyFormats::get,
             )
             val stats = StatsService(
                 learning = app.database.favoritesQueries,
                 clock = clock,
             )
-            block(Env(app.database, dictionary, translation, intake, session, stats, favorites, settings, clock))
+            block(Env(app.database, dictionary, translation, intake, session, stats, favorites, settings, studyFormats, clock))
         } finally {
             dataDbManager.closeAllReadOnlyDatabases()
             localDbManager.deleteAll()
@@ -1963,6 +2163,7 @@ class LearningE2ETest : BaseTest() {
         availableAfter: Long? = null,
         lastReview: Long? = null,
         reps: Long = 0,
+        createdAt: Long = start.toEpochMilliseconds(),
     ): com.slovy.slovymovyapp.db.Card {
         app.favoritesQueries.insertCard(
             id = cardId,
@@ -1977,7 +2178,7 @@ class LearningE2ETest : BaseTest() {
             last_review = lastReview,
             reps = reps,
             lapses = 0,
-            created_at = start.toEpochMilliseconds(),
+            created_at = createdAt,
             available_after = availableAfter,
             answer_key = fixture.lemma.lowercase(),
             suspended = false,
@@ -2097,6 +2298,7 @@ private data class Env(
     val stats: StatsService,
     val favorites: FavoritesRepository,
     val settings: SettingsRepository,
+    val studyFormats: StudyFormatsRepository,
     val clock: MutableClock,
 )
 

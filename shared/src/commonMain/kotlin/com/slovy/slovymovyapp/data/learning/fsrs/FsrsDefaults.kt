@@ -22,6 +22,8 @@ object FsrsDefaults {
     const val PAUSE_INTAKE_RETENTION_MIN_REVIEWS: Long = 50L
     const val PAUSE_INTAKE_IF_RETENTION_BELOW: Double = 0.75
     val MATURE_STABILITY: Duration = 21.days
+    /** The floor for stability a card inherits through cross-family credit, so it is never zero. */
+    const val MIN_INHERITED_STABILITY: Double = 0.001
     val PRODUCTION_UNLOCK_STABILITY: Duration = 48.hours
     val CONTEXT_UNLOCK_STABILITY: Duration = 72.hours
     val BURY_FAILED_SESSION_CARDS_FOR: Duration = 10.minutes

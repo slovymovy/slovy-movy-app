@@ -3,6 +3,8 @@ package com.slovy.slovymovyapp.data.learning.fsrs
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.Rating
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 data class FsrsConfig(
     val weights: List<Double>,
@@ -48,7 +50,7 @@ data class CrossFamilyCredit(
     val easyFactor: Double,
 )
 
-/** The credit factor a [rating] on [sourceFamily] passes to [targetFamily]; null when none. */
+/** The credit factor a [rating] carries; null when this rating passes nothing on. */
 fun CrossFamilyCredit.factorFor(rating: Rating): Double? =
     when (rating) {
         Rating.GOOD -> goodFactor
@@ -59,29 +61,11 @@ fun CrossFamilyCredit.factorFor(rating: Rating): Double? =
     }?.takeIf { it > 0.0 }
 
 /**
- * The stability factor carried from [sourceFamily] to [targetFamily] by a [rating]. A pair with
- * its own credit uses it. A forward pair without one, which happens when the learner has switched
- * the families between them off, chains the credits of every step it skips, so a word reaching a
- * far family directly inherits no more than it would have through the ladder.
+ * The stability factor a [rating] on [sourceFamily] passes to a [targetFamily] card that already
+ * exists: the configured credit for that pair, or none. Pairs without a credit get nothing; the
+ * ladder's chaining is only for unlocking, see [ladderCreditFactor].
  */
 fun FsrsConfig.crossFamilyCreditFactor(
-    sourceFamily: CardFamily,
-    targetFamily: CardFamily,
-    rating: Rating,
-): Double? {
-    directCreditFactor(sourceFamily, targetFamily, rating)?.let { return it }
-    if (targetFamily.ordinal <= sourceFamily.ordinal) return null
-    var factor = 1.0
-    var from = sourceFamily
-    for (next in CardFamily.entries) {
-        if (next.ordinal <= sourceFamily.ordinal || next.ordinal > targetFamily.ordinal) continue
-        factor *= directCreditFactor(from, next, rating) ?: return null
-        from = next
-    }
-    return factor
-}
-
-private fun FsrsConfig.directCreditFactor(
     sourceFamily: CardFamily,
     targetFamily: CardFamily,
     rating: Rating,
@@ -89,3 +73,70 @@ private fun FsrsConfig.directCreditFactor(
     crossFamilyCredits
         .firstOrNull { it.sourceFamily == sourceFamily && it.targetFamily == targetFamily }
         ?.factorFor(rating)
+
+/**
+ * The stability factor a new [targetFamily] card inherits when [sourceFamily] unlocks it. An
+ * adjacent step uses its own credit. A step over families the learner switched off multiplies the
+ * credits of every step it skips, so a word reaching a far family directly inherits no more than it
+ * would have climbing through the ladder. Null when the target is not ahead of the source or a
+ * step in between carries no credit.
+ */
+fun FsrsConfig.ladderCreditFactor(
+    sourceFamily: CardFamily,
+    targetFamily: CardFamily,
+    rating: Rating,
+): Double? {
+    if (targetFamily.ordinal <= sourceFamily.ordinal) return null
+    var factor = 1.0
+    var from = sourceFamily
+    for (next in CardFamily.entries) {
+        if (next.ordinal <= sourceFamily.ordinal || next.ordinal > targetFamily.ordinal) continue
+        factor *= crossFamilyCreditFactor(from, next, rating) ?: return null
+        from = next
+    }
+    return factor
+}
+
+/**
+ * The stability a [sourceFamily] card must reach before it unlocks [targetFamily]. Each step of the
+ * ladder has its own gate; a step over switched-off families takes the strictest of the gates it
+ * skips, so a limited selection never reaches a far family sooner than the full ladder would.
+ * Null when the target is not ahead of the source.
+ */
+fun FsrsConfig.unlockStabilityGate(sourceFamily: CardFamily, targetFamily: CardFamily): Duration? {
+    if (targetFamily.ordinal <= sourceFamily.ordinal) return null
+    return CardFamily.entries
+        .filter { it.ordinal >= sourceFamily.ordinal && it.ordinal < targetFamily.ordinal }
+        .maxOf { step ->
+            when (step) {
+                CardFamily.RECOGNIZE_SENSE -> productionUnlockStability
+                CardFamily.PRODUCE_WORD,
+                CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                    -> contextUnlockStability
+
+                // Nothing lies beyond listening; the filter above never yields it.
+                CardFamily.RECOGNIZE_VOICE -> Duration.INFINITE
+            }
+        }
+}
+
+/** The stability a card inherits from a source at [stabilityDays] through a credit [factor]. */
+fun FsrsConfig.inheritedStability(stabilityDays: Double, factor: Double): Double =
+    (stabilityDays * factor).coerceAtLeast(FsrsDefaults.MIN_INHERITED_STABILITY)
+
+/** How long a card credited forward to [stabilityDays] waits before it is first presented. */
+fun FsrsConfig.forwardCreditDelay(stabilityDays: Double): Duration =
+    scaledStability(stabilityDays, forwardCreditDelayRatio, forwardCreditDelayFloor, forwardCreditDelayCap)
+
+/** How long a card credited backward to [stabilityDays] waits before it is presented again. */
+fun FsrsConfig.backwardCreditDelay(stabilityDays: Double): Duration =
+    scaledStability(stabilityDays, backwardCreditDelayRatio, backwardCreditDelayFloor, backwardCreditDelayCap)
+
+/** How long a sense's siblings are held back after a review that left it at [stabilityDays]. */
+fun FsrsConfig.sameSenseExposureCooldown(stabilityDays: Double): Duration =
+    scaledStability(stabilityDays, sameSenseExposureRatio, sameSenseExposureFloor, sameSenseExposureCap)
+
+private fun scaledStability(stabilityDays: Double, ratio: Double, floor: Duration, cap: Duration): Duration {
+    if (ratio <= 0.0) return Duration.ZERO
+    return (stabilityDays.toDuration(DurationUnit.DAYS) * ratio).coerceIn(floor, cap)
+}

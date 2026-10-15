@@ -11,7 +11,13 @@ import com.slovy.slovymovyapp.data.learning.*
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
+import com.slovy.slovymovyapp.data.learning.fsrs.backwardCreditDelay
 import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.forwardCreditDelay
+import com.slovy.slovymovyapp.data.learning.fsrs.inheritedStability
+import com.slovy.slovymovyapp.data.learning.fsrs.ladderCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.sameSenseExposureCooldown
+import com.slovy.slovymovyapp.data.learning.fsrs.unlockStabilityGate
 import com.slovy.slovymovyapp.data.learning.stats.retrievability
 import com.slovy.slovymovyapp.data.remote.LanguageCard
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
@@ -39,7 +45,7 @@ class SessionService(
     private val config: FsrsConfig = FsrsDefaults.config(),
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
-    private val studyFormats: suspend (Language) -> StudyFormatSelection,
+    private val studyFormats: suspend (String) -> StudyFormatSelection,
 ) {
     fun nextCard(
         langCode: String,
@@ -52,7 +58,7 @@ class SessionService(
             var loadingEmissions = 0L
             try {
                 val now = clock.now().toEpochMilliseconds()
-                val formats = studyFormatsFor(langCode)
+                val formats = studyFormats(langCode)
                 val candidates = nextCandidates(
                     langCode = langCode,
                     now = now,
@@ -63,7 +69,7 @@ class SessionService(
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
                     attemptedCandidates += 1
-                    val sessionCard = loadUntilTerminal(card) {
+                    val sessionCard = loadUntilTerminal(card, formats) {
                         loadingEmissions += 1
                     }
                     if (sessionCard == null) {
@@ -122,6 +128,10 @@ class SessionService(
             trace.putMetric("duration_ms", durationMs)
             val now = clock.now()
             val nowMs = now.toEpochMilliseconds()
+            // Read at submit time, not at load time: the learner may have changed the formats
+            // from the session menu while this card was on screen, and the ladder must not
+            // unlock into a family that is off by now.
+            val formats = studyFormats(card.card.langCode)
             val before = card.card.scheduling
             val after = scheduler.apply(before, outcome, now)
             val elapsedDays = scheduler.elapsedDaysForReview(before, now)
@@ -201,7 +211,7 @@ class SessionService(
                     propagateSameSenseCredit(card.card, after, outcome.rating, nowMs)
                 }
                 if (outcome.rating.unlocksNextFamily()) {
-                    unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs)
+                    unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs, formats)
                 }
             }
 
@@ -245,7 +255,7 @@ class SessionService(
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
         // Only cards a session can serve are released; a hidden family's delay stays as it is.
-        val families = studyFormatsFor(langCode).families
+        val families = studyFormats(langCode).families
         val before = learning.countDelayedDueCardsByLang(langCode, now, families).executeAsOne()
         learning.clearAvailableAfterForDelayedLemmas(
             lang_code = langCode,
@@ -260,7 +270,10 @@ class SessionService(
         }
     }
 
-    private suspend fun loadSessionCard(card: Card): Flow<Pair<WordResult, SessionCard?>>? {
+    private suspend fun loadSessionCard(
+        card: Card,
+        formats: StudyFormatSelection,
+    ): Flow<Pair<WordResult, SessionCard?>>? {
         val favorite =
             learning.selectFavoriteWithActivation(card.senseId.toString(), card.langCode).executeAsOneOrNull()
                 ?: return null
@@ -269,7 +282,6 @@ class SessionService(
         val targets = translationTargets(language)
             .filter { it != language }
             .distinctBy { it.code }
-        val formats = studyFormats(language)
 
         return wordFetchManager.getWord(
             language = language,
@@ -280,14 +292,13 @@ class SessionService(
         }
     }
 
-    private suspend fun studyFormatsFor(langCode: String): StudyFormatSelection =
-        Language.fromCodeOrNull(langCode)?.let { studyFormats(it) } ?: StudyFormatSelection.ALL
 
     private suspend fun FlowCollector<SessionCard?>.loadUntilTerminal(
         card: Card,
+        formats: StudyFormatSelection,
         onLoadingEmission: () -> Unit,
     ): SessionCard? {
-        val sessionCardFlow = loadSessionCard(card) ?: return null
+        val sessionCardFlow = loadSessionCard(card, formats) ?: return null
         return sessionCardFlow
             .onEach { (result, sessionCard) ->
                 if (sessionCard != null && result.isFetchLoading()) {
@@ -533,40 +544,13 @@ class SessionService(
         return scaled.coerceIn(floor, cap)
     }
 
-    private fun stabilityCooldown(
-        stability: Double,
-        ratio: Double,
-        floor: Duration,
-        cap: Duration,
-    ): Duration {
-        if (ratio <= 0.0) return Duration.ZERO
-        val scaled = stability.toDuration(DurationUnit.DAYS) * ratio
-        return scaled.coerceIn(floor, cap)
-    }
-
     private fun sameSenseExposureCooldown(after: CardScheduling): Duration =
-        stabilityCooldown(
-            after.stability,
-            config.sameSenseExposureRatio,
-            config.sameSenseExposureFloor,
-            config.sameSenseExposureCap,
-        )
+        config.sameSenseExposureCooldown(after.stability)
 
     private fun creditDelay(stability: Double, direction: CreditDirection): Duration =
         when (direction) {
-            CreditDirection.FORWARD -> stabilityCooldown(
-                stability,
-                config.forwardCreditDelayRatio,
-                config.forwardCreditDelayFloor,
-                config.forwardCreditDelayCap,
-            )
-
-            CreditDirection.BACKWARD -> stabilityCooldown(
-                stability,
-                config.backwardCreditDelayRatio,
-                config.backwardCreditDelayFloor,
-                config.backwardCreditDelayCap,
-            )
+            CreditDirection.FORWARD -> config.forwardCreditDelay(stability)
+            CreditDirection.BACKWARD -> config.backwardCreditDelay(stability)
         }
 
     private fun delayedEpochMs(nowMs: Long, delay: Duration): Long =
@@ -629,7 +613,7 @@ class SessionService(
             lemma_id = card.lemmaId,
         ).executeAsList().mapTo(HashSet()) { it.toString() }
         val sessionCards = sortedVariants(card, sense, translationTargets, studyFormats).map { variant ->
-            toSessionCard(card, variant, senseId, sense, studiedSenseIds, translationTargets, studyFormats)
+            toSessionCard(card, variant, senseId, sense, studiedSenseIds, translationTargets)
         }
 
         return sessionCards.firstOrNull { it.loadState() == SessionCardLoadState.READY }
@@ -644,7 +628,6 @@ class SessionService(
         sense: LanguageCardResponseSense?,
         studiedSenseIds: Set<String>,
         translationTargets: List<Language>,
-        studyFormats: StudyFormatSelection,
     ): SessionCard {
         val example = if (variant.kind.isCloze && sense != null) {
             val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
@@ -665,7 +648,6 @@ class SessionService(
             example = example,
             studiedSenseIds = studiedSenseIds,
             translationTargets = translationTargets,
-            studyFormats = studyFormats,
         )
     }
 
@@ -680,36 +662,30 @@ class SessionService(
         after: CardScheduling,
         rating: Rating,
         now: Long,
+        formats: StudyFormatSelection,
     ) {
-        val stability = after.stability.toDuration(DurationUnit.DAYS)
-        val gate = when (card.card.family) {
-            CardFamily.RECOGNIZE_SENSE -> config.productionUnlockStability
-            CardFamily.PRODUCE_WORD,
-            CardFamily.PRODUCE_WORD_IN_CONTEXT,
-                -> config.contextUnlockStability
-
-            CardFamily.RECOGNIZE_VOICE -> null
-        } ?: return
-        if (stability < gate) return
         // The next family the learner studies: families switched off are stepped over, so a
         // limited selection still climbs the whole ladder and the word can reach every format
-        // it is allowed to.
-        val unlockFamily = card.studyFormats.nextFamilyAfter(card.card.family)
+        // it is allowed to. The gate and the credit of a step over skipped families are those
+        // of the whole stretch, so skipping is never a shortcut.
+        val unlockFamily = formats.nextFamilyAfter(card.card.family)
         if (unlockFamily == null) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no enabled family after ${card.card.family} source=${card.card.id}"
             }
             return
         }
-        val credit = crossFamilyCredit(card.card.family, unlockFamily, rating)
-        if (credit == null) {
+        val gate = config.unlockStabilityGate(card.card.family, unlockFamily) ?: return
+        if (after.stability.toDuration(DurationUnit.DAYS) < gate) return
+        val factor = config.ladderCreditFactor(card.card.family, unlockFamily, rating)
+        if (factor == null) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no cross-family credit source=${card.card.id} " +
                     "from=${card.card.family} to=$unlockFamily rating=$rating"
             }
             return
         }
-        val inheritedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+        val inheritedStability = config.inheritedStability(after.stability, factor)
 
         val sense = card.wordResult.card?.findSense(card.senseId)
         if (sense == null) {
@@ -718,7 +694,7 @@ class SessionService(
             }
             return
         }
-        val variants = buildTaskVariants(unlockFamily, sense, card.translationTargets, card.studyFormats)
+        val variants = buildTaskVariants(unlockFamily, sense, card.translationTargets, formats)
         if (variants.isEmpty()) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
@@ -801,7 +777,7 @@ class SessionService(
             .filter { it.id != source.id }
             .forEach { sibling ->
                 val credit = crossFamilyCredit(source.family, sibling.family, rating) ?: return@forEach
-                val propagatedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+                val propagatedStability = config.inheritedStability(after.stability, credit.factor)
                 // The SQL repeats this guard so concurrent writes cannot lower stability.
                 if (propagatedStability <= sibling.scheduling.stability) {
                     AppLogger.debug(TAG, null) {
@@ -892,7 +868,6 @@ class SessionService(
     private companion object {
         const val TAG: String = "SessionService"
         const val HARD_EXCLUDE: Double = 1_000_000.0
-        const val MIN_INHERITED_STABILITY: Double = 0.001
         const val PROPAGATED_REVIEW_STABILITY_DAYS: Double = 1.0
         val DAY: Duration = 1.days
         const val RECENT_LIMIT: Int = 20
