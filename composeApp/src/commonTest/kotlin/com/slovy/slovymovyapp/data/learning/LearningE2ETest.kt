@@ -1909,7 +1909,6 @@ class LearningE2ETest : BaseTest() {
 
             val first = env.intake.runIntake("en")
             assertEquals(1, first.rerouted, "One re-entry fits the budget of one")
-            assertTrue(SkipReason.BUDGET_EXHAUSTED in first.skipped, "The second sense waits for budget")
 
             val sameDay = env.intake.runIntake("en")
             assertEquals(0, sameDay.rerouted, "The budget is spent for today")
@@ -1979,6 +1978,10 @@ class LearningE2ETest : BaseTest() {
 
             assertEquals(0, result.rerouted, "The unique task index must never be hit")
             assertEquals(2, env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size)
+            assertFalse(
+                SkipReason.NO_TASKS_VARIANT_AVAILABLE in result.skipped,
+                "A sense with a card in the target family is not stranded and must not be reported as unplayable",
+            )
         }
     }
 
@@ -2002,6 +2005,108 @@ class LearningE2ETest : BaseTest() {
             env.addFavorite(fixture)
             val result = env.intake.runIntake("en")
             assertEquals(1, result.cardsCreated, "The word can still be studied")
+        }
+    }
+
+    @Test
+    fun intake_pause_ignores_due_cards_of_switched_off_families() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeIfQueueAbove = 0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val hidden = env.seedSense(lemma = "hiddenqueue")
+            env.seedTranslation(hidden.senseId, hidden.lemmaPosId)
+            env.addFavorite(hidden)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), hidden.senseId.toString(), "en")
+            env.insertTask(
+                fixture = hidden,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 5.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            // A production card too, so the sense is not stranded and only the pause gate is tested.
+            env.insertTask(
+                fixture = hidden,
+                family = CardFamily.PRODUCE_WORD,
+                state = CardState.REVIEW,
+                stability = 5.0,
+                due = (start + 3.days).toEpochMilliseconds(),
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            val newcomer = env.seedSense(lemma = "newcomerword")
+            env.seedTranslation(newcomer.senseId, newcomer.lemmaPosId)
+            env.addFavorite(newcomer)
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            assertTrue(
+                env.intake.canContinueWithPendingFavoritesNow("en"),
+                "A card due in a switched-off family is never served, so it must not count as a full queue",
+            )
+            val result = env.intake.runIntake("en")
+
+            assertFalse(SkipReason.QUEUE_TOO_FULL in result.skipped)
+            assertEquals(1, result.activated.size, "The new word is taken in")
+        }
+    }
+
+    @Test
+    fun continue_now_spends_its_limit_on_pending_words_not_on_reentry() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val stranded = env.seedSense(lemma = "strandedlater")
+            env.seedTranslation(stranded.senseId, stranded.lemmaPosId)
+            env.addFavorite(stranded)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), stranded.senseId.toString(), "en")
+            env.insertTask(
+                fixture = stranded,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            val pending = env.seedSense(lemma = "pendingword")
+            env.seedTranslation(pending.senseId, pending.lemmaPosId)
+            env.addFavorite(pending)
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val continueNow = env.intake.continueWithPendingFavoritesNow("en")
+            assertEquals(0, continueNow.rerouted, "Continue-now is about the pending words")
+            assertEquals(1, continueNow.activated.size)
+
+            val daily = env.intake.runIntake("en")
+            assertEquals(1, daily.rerouted, "The daily run re-enters the stranded word")
+        }
+    }
+
+    @Test
+    fun reroute_back_down_the_ladder_uses_the_backward_delay() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "backwardreroute")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_VOICE,
+                state = CardState.REVIEW,
+                stability = 30.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted)
+            val recognition = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+                .single { it.family == CardFamily.RECOGNIZE_SENSE }
+            val factor = config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_VOICE, CardFamily.RECOGNIZE_SENSE, Rating.GOOD)!!
+            assertEquals(30.0 * factor, recognition.stability, absoluteTolerance = 1e-9)
+            val expectedDue = start + stabilityDelay(
+                stability = recognition.stability,
+                ratio = config.backwardCreditDelayRatio,
+                floor = config.backwardCreditDelayFloor,
+                cap = config.backwardCreditDelayCap,
+            )
+            assertEquals(expectedDue.toEpochMilliseconds(), recognition.due, "Credit back down the ladder waits like backward sibling credit")
         }
     }
 

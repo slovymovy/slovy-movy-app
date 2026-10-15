@@ -235,23 +235,37 @@ WHERE sense_id = :sense_id
   AND lang_code = :lang_code
   AND family = :family;
 
--- The strongest card of every active sense that has no card in an enabled family, so a word the
--- learner can no longer be shown can be re-entered in a family they still study.
+-- The strongest active card of each sense that has no card at all, suspended or not, in an
+-- enabled family, so a word the learner can no longer be shown can be re-entered in a family they
+-- still study. One row per sense; bounded by :limit so one run never scans a whole vocabulary.
 selectStrongestCardOfSensesWithoutFamilies:
-SELECT id, sense_id, lemma_id, lang_code, family, state,
-       stability, difficulty, due, last_review, reps, lapses, created_at,
-       available_after, answer_key, suspended
-FROM card
-WHERE lang_code = :lang_code
-  AND suspended = 0
-  AND sense_id NOT IN (
-    SELECT sense_id
-    FROM card
-    WHERE lang_code = :lang_code
-      AND suspended = 0
-      AND family IN :allowed_families
+SELECT c.id, c.sense_id, c.lemma_id, c.lang_code, c.family, c.state,
+       c.stability, c.difficulty, c.due, c.last_review, c.reps, c.lapses, c.created_at,
+       c.available_after, c.answer_key, c.suspended
+FROM card c
+WHERE c.lang_code = :lang_code
+  AND c.suspended = 0
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card s
+    WHERE s.sense_id = c.sense_id
+      AND s.lang_code = c.lang_code
+      AND s.family IN :allowed_families
   )
-ORDER BY sense_id ASC, stability DESC, created_at ASC;
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card b
+    WHERE b.sense_id = c.sense_id
+      AND b.lang_code = c.lang_code
+      AND b.suspended = 0
+      AND (
+        b.stability > c.stability
+        OR (b.stability = c.stability AND b.created_at < c.created_at)
+        OR (b.stability = c.stability AND b.created_at = c.created_at AND b.id < c.id)
+      )
+  )
+ORDER BY c.sense_id ASC
+LIMIT :limit;
 
 selectCardsBySense:
 SELECT id, sense_id, lemma_id, lang_code, family, state,
@@ -327,6 +341,7 @@ SELECT COUNT(*)
 FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 

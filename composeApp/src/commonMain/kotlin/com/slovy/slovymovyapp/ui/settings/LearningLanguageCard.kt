@@ -36,7 +36,9 @@ data class LearningLanguageUiState(
     val language: Language,
     val isExpanded: Boolean = false,
     val dictionarySizeBytes: Long,
-    val translations: List<TranslationUiState> = emptyList()
+    val translations: List<TranslationUiState> = emptyList(),
+    /** Whether the language has translation targets to choose study formats with. */
+    val hasStudyFormats: Boolean = false,
 )
 
 data class TranslationUiState(
@@ -196,9 +198,12 @@ fun LearningLanguageCard(
                         )
                     }
 
-                    // Only with translation languages: without them every word comes back in the
-                    // one source-only format, and there is nothing to choose.
-                    StudyFormatsRow(onClick = onOpenStudyFormats)
+                    // Only with configured translation languages, not merely downloaded ones:
+                    // without them every word comes back in the one source-only format, and
+                    // there is nothing to choose.
+                    if (state.hasStudyFormats) {
+                        StudyFormatsRow(onClick = onOpenStudyFormats)
+                    }
                 }
             }
         }
@@ -601,6 +606,7 @@ private fun LearningLanguageCardPreview(
                 language = Language.DUTCH,
                 isExpanded = true,
                 dictionarySizeBytes = 12 * 1024 * 1024L,
+                hasStudyFormats = true,
                 translations = listOf(
                     TranslationUiState(
                         targetLanguage = Language.ENGLISH,

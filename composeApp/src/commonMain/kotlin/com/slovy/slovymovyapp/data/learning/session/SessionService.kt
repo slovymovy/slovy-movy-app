@@ -45,7 +45,8 @@ class SessionService(
     private val config: FsrsConfig = FsrsDefaults.config(),
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
-    private val studyFormats: suspend (String) -> StudyFormatSelection,
+    /** The learner's formats for a language, given its already-resolved translation targets. */
+    private val studyFormats: suspend (Language, List<Language>) -> StudyFormatSelection,
 ) {
     fun nextCard(
         langCode: String,
@@ -58,7 +59,15 @@ class SessionService(
             var loadingEmissions = 0L
             try {
                 val now = clock.now().toEpochMilliseconds()
-                val formats = studyFormats(langCode)
+                val language = Language.fromCodeOrNull(langCode)
+                if (language == null) {
+                    AppLogger.warn(TAG, "Card selection skipped: unknown language lang=$langCode", null)
+                    emit(null)
+                    return@useWithResult
+                }
+                // Resolved once per selection, not per candidate: both are settings reads.
+                val targets = resolveTranslationTargets(language)
+                val formats = studyFormats(language, targets)
                 val candidates = nextCandidates(
                     langCode = langCode,
                     now = now,
@@ -69,7 +78,7 @@ class SessionService(
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
                     attemptedCandidates += 1
-                    val sessionCard = loadUntilTerminal(card, formats) {
+                    val sessionCard = loadUntilTerminal(card, language, targets, formats) {
                         loadingEmissions += 1
                     }
                     if (sessionCard == null) {
@@ -131,7 +140,9 @@ class SessionService(
             // Read at submit time, not at load time: the learner may have changed the formats
             // from the session menu while this card was on screen, and the ladder must not
             // unlock into a family that is off by now.
-            val formats = studyFormats(card.card.langCode)
+            val language = Language.fromCodeOrNull(card.card.langCode)
+                ?: error("Unknown learning card language: ${card.card.langCode}")
+            val formats = studyFormats(language, card.translationTargets)
             val before = card.card.scheduling
             val after = scheduler.apply(before, outcome, now)
             val elapsedDays = scheduler.elapsedDaysForReview(before, now)
@@ -255,7 +266,8 @@ class SessionService(
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
         // Only cards a session can serve are released; a hidden family's delay stays as it is.
-        val families = studyFormats(langCode).families
+        val language = Language.fromCodeOrNull(langCode) ?: return@withContext
+        val families = studyFormats(language, resolveTranslationTargets(language)).families
         val before = learning.countDelayedDueCardsByLang(langCode, now, families).executeAsOne()
         learning.clearAvailableAfterForDelayedLemmas(
             lang_code = langCode,
@@ -270,18 +282,20 @@ class SessionService(
         }
     }
 
+    private suspend fun resolveTranslationTargets(language: Language): List<Language> =
+        translationTargets(language)
+            .filter { it != language }
+            .distinctBy { it.code }
+
     private suspend fun loadSessionCard(
         card: Card,
+        language: Language,
+        targets: List<Language>,
         formats: StudyFormatSelection,
     ): Flow<Pair<WordResult, SessionCard?>>? {
         val favorite =
             learning.selectFavoriteWithActivation(card.senseId.toString(), card.langCode).executeAsOneOrNull()
                 ?: return null
-        val language = Language.fromCodeOrNull(card.langCode)
-            ?: error("Unknown learning card language: ${card.langCode}")
-        val targets = translationTargets(language)
-            .filter { it != language }
-            .distinctBy { it.code }
 
         return wordFetchManager.getWord(
             language = language,
@@ -295,10 +309,12 @@ class SessionService(
 
     private suspend fun FlowCollector<SessionCard?>.loadUntilTerminal(
         card: Card,
+        language: Language,
+        targets: List<Language>,
         formats: StudyFormatSelection,
         onLoadingEmission: () -> Unit,
     ): SessionCard? {
-        val sessionCardFlow = loadSessionCard(card, formats) ?: return null
+        val sessionCardFlow = loadSessionCard(card, language, targets, formats) ?: return null
         return sessionCardFlow
             .onEach { (result, sessionCard) ->
                 if (sessionCard != null && result.isFetchLoading()) {

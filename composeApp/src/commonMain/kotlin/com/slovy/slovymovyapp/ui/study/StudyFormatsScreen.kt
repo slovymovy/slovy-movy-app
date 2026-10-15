@@ -27,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -62,6 +63,9 @@ fun StudyFormatsScreen(
     viewModel: StudyFormatsViewModel,
     onBack: () -> Unit,
 ) {
+    LaunchedEffect(viewModel.closed) {
+        if (viewModel.closed) onBack()
+    }
     val state = viewModel.state ?: return
     StudyFormatsContent(
         state = state,

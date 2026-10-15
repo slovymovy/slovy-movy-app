@@ -106,6 +106,13 @@ class StudySessionViewModel(
     /** The formats this language is studied in, read once at start and updated by the page. */
     private var studyFormats: StudyFormatSelection = StudyFormatSelection.ALL
 
+    /**
+     * The write of the latest toggle. Grading, loading the next card and ending the session wait
+     * for it: the service reads the stored selection, and the milestone baseline must be taken
+     * after it, so the in-memory choice and the stored one never disagree at those points.
+     */
+    private var studyFormatsWrite: Job? = null
+
     /** How the session ended, recorded at the point of truth rather than derived later. */
     private var completionArm: String? = null
     private var sessionEndLogged: Boolean = false
@@ -351,7 +358,10 @@ class StudySessionViewModel(
         val next = current.with(format, enabled = format !in current.enabled) ?: return
         studyFormats = next
         if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, next)
-        viewModelScope.launch {
+        val previousWrite = studyFormatsWrite
+        studyFormatsWrite = viewModelScope.launch {
+            // Writes land in tap order.
+            previousWrite?.join()
             try {
                 studyFormatsRepository.set(language, next)
             } catch (e: CancellationException) {
@@ -359,8 +369,14 @@ class StudySessionViewModel(
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to store study formats lang=$langCode", e)
                 // Back to what is stored, not to what this tap started from: a later tap may
-                // have landed in between.
-                val stored = studyFormatsRepository.get(language)
+                // have landed in between. If even the read fails, the tap is simply undone.
+                val stored = try {
+                    studyFormatsRepository.get(language)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    current
+                }
                 studyFormats = stored
                 if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, stored)
                 return@launch
@@ -728,6 +744,7 @@ class StudySessionViewModel(
             // and its failure path cannot land behind the reward. It is bounded work: the
             // continuation only writes counters and calls loadNextCard, which exits early now.
             reviewJob?.join()
+            studyFormatsWrite?.join()
             // The current card stays put rather than flashing a spinner; buildCompleteState
             // absorbs its own failures into a heroless summary, so there is no error path that
             // could strand the user here.
@@ -836,6 +853,7 @@ class StudySessionViewModel(
         val durationMs = (clock.now() - cardShownAt).inWholeMilliseconds
         state = active.copy(isSubmittingReview = true)
         reviewJob = viewModelScope.launch {
+            studyFormatsWrite?.join()
             runCatching {
                 sessionService.submitReview(
                     card = card,
@@ -917,6 +935,7 @@ class StudySessionViewModel(
         silenceAudio()
         cardLoadJob?.cancel()
         cardLoadJob = viewModelScope.launch {
+            studyFormatsWrite?.join()
             PerformanceMonitoring.startTrace("study_card_load").useWithResult {
                 putAttributes(
                     mapOf(

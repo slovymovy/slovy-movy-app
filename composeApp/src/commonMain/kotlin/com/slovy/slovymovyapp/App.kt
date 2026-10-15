@@ -153,6 +153,7 @@ fun App(
                 container.dictionaryClient,
                 container.appDataExporter,
                 settingsRepository,
+                container.studyFormatsRepository,
                 platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->

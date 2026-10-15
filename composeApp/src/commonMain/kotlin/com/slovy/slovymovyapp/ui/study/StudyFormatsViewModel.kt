@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -31,12 +32,21 @@ class StudyFormatsViewModel(
     var state by mutableStateOf<StudyFormatsUiState?>(null)
         private set
 
+    /** Set when the language turns out to offer no choice; the screen leaves. */
+    var closed by mutableStateOf(false)
+        private set
+
     val scrollState = ScrollState(0)
 
     private var selection: StudyFormatSelection? = null
+    private var write: Job? = null
 
     init {
         viewModelScope.launch {
+            if (!studyFormatsRepository.hasChoice(language)) {
+                closed = true
+                return@launch
+            }
             val loaded = studyFormatsRepository.get(language)
             selection = loaded
             state = studyFormatsUiState(language, loaded)
@@ -52,7 +62,10 @@ class StudyFormatsViewModel(
         val next = current.with(format, enabled = format !in current.enabled) ?: return
         selection = next
         state = studyFormatsUiState(language, next)
-        viewModelScope.launch {
+        val previousWrite = write
+        write = viewModelScope.launch {
+            // Writes land in tap order.
+            previousWrite?.join()
             try {
                 studyFormatsRepository.set(language, next)
             } catch (e: CancellationException) {
@@ -60,8 +73,14 @@ class StudyFormatsViewModel(
             } catch (e: Exception) {
                 AppLogger.warn(TAG, "Unable to store study formats lang=${language.code}", e)
                 // Back to what is stored, not to what this tap started from: a later tap may
-                // have landed in between.
-                val stored = studyFormatsRepository.get(language)
+                // have landed in between. If even the read fails, the tap is simply undone.
+                val stored = try {
+                    studyFormatsRepository.get(language)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    current
+                }
                 selection = stored
                 state = studyFormatsUiState(language, stored)
                 return@launch

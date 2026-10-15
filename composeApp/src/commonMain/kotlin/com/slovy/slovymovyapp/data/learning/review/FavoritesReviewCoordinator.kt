@@ -126,7 +126,7 @@ internal class FavoritesReviewCoordinator(
         }
     }
 
-    private fun ReviewQueueStats.toFavoriteLanguageReviewState(
+    private suspend fun ReviewQueueStats.toFavoriteLanguageReviewState(
         language: Language,
         intakeService: LearningIntake,
     ) =
