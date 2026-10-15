@@ -11,6 +11,7 @@ import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
+import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.intake.SkipReason
 import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
@@ -32,6 +33,7 @@ import com.slovy.slovymovyapp.translation.TranslationDatabase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.abs
 import kotlin.test.*
@@ -1546,6 +1548,218 @@ class LearningE2ETest : BaseTest() {
         }
     }
 
+    @Test
+    fun study_formats_setting_round_trips_per_language_and_ignores_unknown_names() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            assertEquals(StudyFormatSelection.ALL, env.settings.getStudyFormats(Language.ENGLISH))
+
+            val chosen = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.LISTEN))
+            env.settings.setStudyFormats(Language.ENGLISH, chosen)
+
+            assertEquals(chosen, env.settings.getStudyFormats(Language.ENGLISH))
+            assertEquals(
+                StudyFormatSelection.ALL,
+                env.settings.getStudyFormats(Language.DUTCH),
+                "The choice is per language",
+            )
+
+            env.settings.insert(
+                Setting(
+                    Setting.Name.STUDY_FORMATS,
+                    JsonObject(mapOf("en" to JsonArray(listOf(JsonPrimitive("NO_SUCH_FORMAT"))))),
+                )
+            )
+            assertEquals(
+                StudyFormatSelection.ALL,
+                env.settings.getStudyFormats(Language.ENGLISH),
+                "A stored selection with no known format falls back to all",
+            )
+        }
+    }
+
+    @Test
+    fun session_never_serves_a_switched_off_family() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "switchedoff")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(fixture = fixture, family = CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 5.0)
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
+            )
+
+            val card = env.session.nextCard("en", start, emptySet()).first()
+
+            assertNull(card, "A due production card must not be served while production is switched off")
+            assertEquals(
+                0,
+                env.stats.dueNow("en", env.settings.getStudyFormats(Language.ENGLISH).families),
+                "The due count must agree with what the session serves",
+            )
+            assertEquals(
+                1,
+                env.stats.dueNow("en", CardFamily.entries),
+                "The card itself is untouched: it is still due in its own family",
+            )
+        }
+    }
+
+    @Test
+    fun recognition_good_steps_over_switched_off_production_and_unlocks_context() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "skipproduction")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
+            )
+
+            val recognition = env.nextLoadedCard("en")
+            val reviewed = env.session.submitReview(
+                recognition,
+                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT),
+                cards.map { it.family },
+                "The ladder must step over the switched-off production family, not stall on it",
+            )
+            val context = cards.single { it.family == CardFamily.PRODUCE_WORD_IN_CONTEXT }
+            val chainedFactor = config.crossFamilyCreditFactor(
+                CardFamily.RECOGNIZE_SENSE,
+                CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                Rating.GOOD,
+            )!!
+            assertEquals(
+                reviewed.card.scheduling.stability * chainedFactor,
+                context.stability,
+                absoluteTolerance = 1e-9,
+                message = "The far family inherits through the skipped step's credit",
+            )
+            assertEquals(CardState.LEARNING, context.state)
+        }
+    }
+
+    @Test
+    fun intake_reenters_a_sense_whose_cards_are_all_in_switched_off_families() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "reroutedword")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(
+                start.toEpochMilliseconds(),
+                fixture.senseId.toString(),
+                "en",
+            )
+            val paused = (start + 2.days).toEpochMilliseconds()
+            val recognition = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                difficulty = 5.0,
+                availableAfter = paused,
+                lastReview = (start - 1.days).toEpochMilliseconds(),
+                reps = 3,
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted)
+            assertEquals(1, result.cardsCreated)
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD), cards.map { it.family })
+            val untouched = cards.single { it.family == CardFamily.RECOGNIZE_SENSE }
+            assertEquals(recognition, untouched, "The switched-off card keeps its scheduling to the last field")
+
+            val production = cards.single { it.family == CardFamily.PRODUCE_WORD }
+            val factor = config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.GOOD)!!
+            assertEquals(10.0 * factor, production.stability, absoluteTolerance = 1e-9)
+            assertEquals(CardState.LEARNING, production.state)
+            assertEquals(5.0, production.difficulty)
+            val expectedDue = start + stabilityDelay(
+                stability = production.stability,
+                ratio = config.forwardCreditDelayRatio,
+                floor = config.forwardCreditDelayFloor,
+                cap = config.forwardCreditDelayCap,
+            )
+            assertEquals(expectedDue.toEpochMilliseconds(), production.due)
+            assertEquals(paused, production.available_after, "A paused word stays paused in its new family")
+
+            val again = env.intake.runIntake("en")
+            assertEquals(0, again.rerouted, "Re-entry happens once; the word now has a card in a studied family")
+            assertEquals(0, again.cardsCreated)
+        }
+    }
+
+    @Test
+    fun intake_reenters_a_never_reviewed_sense_as_a_new_card() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "freshreroute")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(
+                start.toEpochMilliseconds(),
+                fixture.senseId.toString(),
+                "en",
+            )
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+
+            env.intake.runIntake("en")
+
+            val production = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            assertEquals(CardState.NEW, production.state, "Nothing was earned yet, so nothing is inherited")
+            assertEquals(0.0, production.stability)
+            assertEquals(start.toEpochMilliseconds(), production.due)
+        }
+    }
+
+    @Test
+    fun intake_starts_a_new_word_in_the_first_studied_family() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "startinproduction")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.settings.setStudyFormats(
+                Language.ENGLISH,
+                StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD, StudyFormat.LISTEN)),
+            )
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.cardsCreated)
+            assertEquals(0, result.rerouted)
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(listOf(CardFamily.PRODUCE_WORD), cards.map { it.family })
+            assertEquals(CardState.NEW, cards.single().state)
+        }
+    }
+
     private suspend fun withEnv(
         includeTranslation: Boolean,
         config: FsrsConfig = FsrsDefaults.config(),
@@ -1595,6 +1809,7 @@ class LearningE2ETest : BaseTest() {
                 dictionary = dictionaryRepository,
                 config = config,
                 clock = clock,
+                studyFormats = settings::getStudyFormats,
             )
             val session = SessionService(
                 learning = app.database.favoritesQueries,
@@ -1604,12 +1819,13 @@ class LearningE2ETest : BaseTest() {
                 config = config,
                 clock = clock,
                 translationTargets = dictionaryRepository::defaultTranslationTargets,
+                studyFormats = settings::getStudyFormats,
             )
             val stats = StatsService(
                 learning = app.database.favoritesQueries,
                 clock = clock,
             )
-            block(Env(app.database, dictionary, translation, intake, session, stats, favorites, clock))
+            block(Env(app.database, dictionary, translation, intake, session, stats, favorites, settings, clock))
         } finally {
             dataDbManager.closeAllReadOnlyDatabases()
             localDbManager.deleteAll()
@@ -1831,6 +2047,7 @@ private data class Env(
     val session: SessionService,
     val stats: StatsService,
     val favorites: FavoritesRepository,
+    val settings: SettingsRepository,
     val clock: MutableClock,
 )
 

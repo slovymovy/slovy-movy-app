@@ -26,29 +26,38 @@ class StatsService(
     private val clock: Clock,
 ) {
 
+    /**
+     * [studiedFamilies] are the task families the learner studies this language in. A word's
+     * stage is judged on its cards in those families only, so a learner on a limited selection of
+     * formats can still bring a word to learned; cards of switched-off families keep their
+     * scheduling but are not counted.
+     */
     @OptIn(ExperimentalTime::class)
     fun rewardSnapshot(
         langCode: String,
+        studiedFamilies: Collection<CardFamily>,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
         today: LocalDate = clock.now().toLocalDateTime(timeZone).date,
     ): StatsRewardSnapshot {
         val practicedDays = practicedDays(langCode = langCode, timeZone = timeZone)
         return StatsRewardSnapshot(
             streakDays = computeStreak(today = today, practicedDays = practicedDays),
-            pipeline = pipelineSnapshot(langCode),
+            pipeline = pipelineSnapshot(langCode, studiedFamilies),
         )
     }
 
-    fun pipelineSnapshot(langCode: String): List<StatsPipelineStage> =
+    fun pipelineSnapshot(langCode: String, studiedFamilies: Collection<CardFamily>): List<StatsPipelineStage> =
         computePipeline(
             cardRows = learning.selectCardSchedulingByLang(langCode).executeAsList(),
             queuedCount = learning.countPendingFavoritesByLang(langCode).executeAsOne().toInt(),
+            studiedFamilies = studiedFamilies,
         )
 
     @OptIn(ExperimentalTime::class)
     fun statsScreenData(
         langCode: String,
         today: LocalDate,
+        studiedFamilies: Collection<CardFamily>,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): StatsScreenData = PerformanceMonitoring.startTrace("stats_screen_data").use { trace ->
         trace.putAttributes(mapOf("lang" to langCode))
@@ -101,6 +110,7 @@ class StatsService(
         val pipeline = computePipeline(
             cardRows = cardRows,
             queuedCount = learning.countPendingFavoritesByLang(langCode).executeAsOne().toInt(),
+            studiedFamilies = studiedFamilies,
         )
 
         val nowMs = clock.now().toEpochMilliseconds()
@@ -155,14 +165,19 @@ class StatsService(
     private fun computePipeline(
         cardRows: List<SelectCardSchedulingByLang>,
         queuedCount: Int,
+        studiedFamilies: Collection<CardFamily>,
     ): List<StatsPipelineStage> {
         val counts = StatsPipelineStageId.entries.associateWith { 0 }.toMutableMap()
         counts[StatsPipelineStageId.QUEUE] = queuedCount
+        val studied = studiedFamilies.toSet()
         cardRows
             .groupBy { it.sense_id }
             .values
             .forEach { senseCards ->
-                val stage = classifySense(senseCards)
+                val studiedCards = senseCards.filter { it.family in studied }
+                // A sense with cards only in switched-off families is waiting for intake to
+                // re-enter it in a studied one, which is what the queue stage means.
+                val stage = if (studiedCards.isEmpty()) StatsPipelineStageId.QUEUE else classifySense(studiedCards)
                 counts[stage] = counts.getValue(stage) + 1
             }
         return StatsPipelineStageId.entries.map { id ->
@@ -202,25 +217,26 @@ class StatsService(
         )
     }
 
+    /** Lemmas with a card due now in one of [allowedFamilies]: what a session would serve. */
     @OptIn(ExperimentalTime::class)
-    suspend fun dueNow(langCode: String, excludedFamilies: Set<CardFamily>): Int = withContext(Dispatchers.IO) {
+    suspend fun dueNow(langCode: String, allowedFamilies: Collection<CardFamily>): Int = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
         learning.countDueCardsByLangDistinctByLemma(
             lang_code = langCode,
             now = now,
-            allowed_families = CardFamily.entries - excludedFamilies,
+            allowed_families = allowedFamilies,
         ).executeAsOne().toInt()
     }
 
     @OptIn(ExperimentalTime::class)
-    fun reviewQueueStats(langCode: String): ReviewQueueStats {
+    fun reviewQueueStats(langCode: String, studiedFamilies: Collection<CardFamily>): ReviewQueueStats {
         val now = clock.now().toEpochMilliseconds()
         return ReviewQueueStats(
             activeCardCount = learning.countCardsByLang(langCode).executeAsOne().toInt(),
             dueToday = learning.countDueCardsByLangDistinctByLemma(
                 lang_code = langCode,
                 now = now,
-                allowed_families = CardFamily.entries,
+                allowed_families = studiedFamilies,
             ).executeAsOne().toInt(),
             delayedDueLemmaCount = learning.countDelayedDueLemmasByLang(langCode, now).executeAsOne().toInt(),
             delayedDueCardCount = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne().toInt(),

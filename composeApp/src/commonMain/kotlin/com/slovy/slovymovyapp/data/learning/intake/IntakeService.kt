@@ -8,8 +8,11 @@ import com.slovy.slovymovyapp.analytics.use
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
+import com.slovy.slovymovyapp.data.learning.Rating
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
+import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
 import com.slovy.slovymovyapp.data.learning.session.buildTaskVariants
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.db.FavoritesQueries
@@ -23,7 +26,9 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
+import kotlin.time.toDuration
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -38,6 +43,7 @@ class IntakeService(
     private val dictionary: DictionaryRepository,
     private val config: FsrsConfig = FsrsDefaults.config(),
     private val clock: Clock,
+    private val studyFormats: suspend (Language) -> StudyFormatSelection,
 ) : LearningIntake {
     @OptIn(ExperimentalTime::class)
     override suspend fun runIntake(langCode: String): IntakeResult =
@@ -66,10 +72,11 @@ class IntakeService(
             val result = activatePendingFavorites(langCode, mode)
             AppLogger.debug(TAG, null) {
                 "Intake completed lang=$langCode mode=${mode.logName()} cardsCreated=${result.cardsCreated} " +
-                    "activated=${result.activated.size} skipped=${skipSummary(result.skipped)}"
+                    "activated=${result.activated.size} rerouted=${result.rerouted} skipped=${skipSummary(result.skipped)}"
             }
             trace.putMetric("cards_created", result.cardsCreated.toLong())
             trace.putMetric("activated", result.activated.size.toLong())
+            trace.putMetric("rerouted", result.rerouted.toLong())
             trace.putMetric("skipped", result.skipped.size.toLong())
             SkipReason.entries.forEach { reason ->
                 val count = result.skipped.count { it == reason }.toLong()
@@ -97,6 +104,7 @@ class IntakeService(
             },
             "cards_created" to result.cardsCreated.toLong(),
             "activated_count" to result.activated.size.toLong(),
+            "rerouted_count" to result.rerouted.toLong(),
             "active_card_count" to learning.countCardsByLang(langCode).executeAsOne(),
             "due_count" to learning.countDueCardsByLang(langCode, nowMs).executeAsOne(),
             "delayed_due_lemma_count" to learning.countDelayedDueLemmasByLang(langCode, nowMs).executeAsOne(),
@@ -123,20 +131,23 @@ class IntakeService(
             AppLogger.debug(TAG, null) {
                 "Intake skipped: unknown language lang=$langCode mode=${mode.logName()}"
             }
-            return IntakeResult(emptyList(), emptyList(), 0)
+            return IntakeResult(emptyList(), emptyList(), 0, 0)
         }
         val translationTargets = dictionary.defaultTranslationTargets(language)
             .filter { it != language }
             .distinctBy { it.code }
+        val formats = studyFormats(language)
+        val intakeFamilies = formats.intakeFamilies(config.defaultIntakeFamilies)
         val nowInstant = clock.now()
         val now = nowInstant.toEpochMilliseconds()
+        val rerouted = rerouteSensesWithoutStudiedFamily(langCode, formats, now)
 
         val timeZone = TimeZone.currentSystemDefault()
         val startOfToday = nowInstant.toLocalDateTime(timeZone).date
             .atStartOfDayIn(timeZone)
             .toEpochMilliseconds()
 
-        val familiesPerSense = config.defaultIntakeFamilies.size
+        val familiesPerSense = intakeFamilies.size
         val pendingLemmaLimit = when (mode) {
             IntakeRunMode.DAILY -> maxOf(
                 config.dailyNewTaskFamilyBudget,
@@ -160,7 +171,7 @@ class IntakeService(
         var cardsCreated = 0
 
         suspend fun apply(lemma: String) {
-            val outcome = activateLemma(lemma, langCode, language, translationTargets, now)
+            val outcome = activateLemma(lemma, langCode, language, translationTargets, formats, intakeFamilies, now)
             skipped += outcome.skipped
             invalidatedSenses += outcome.activatedSenses.map { it.toString() }
             activated += outcome.activatedSenses
@@ -228,8 +239,68 @@ class IntakeService(
                 "Intake invalidated dictionary senses lang=$langCode count=${invalidatedSenses.size}"
             }
         }
-        return IntakeResult(activated, skipped, cardsCreated)
+        return IntakeResult(activated, skipped, cardsCreated + rerouted, rerouted)
     }
+
+    /**
+     * Re-enters every active sense whose cards all belong to families the learner switched off:
+     * such a word could never be shown again, and the ladder, which only runs on a review, could
+     * never bring it back. It gets one card in the first family still studied, inheriting from
+     * its strongest card the way an unlock would, so what the word already earned carries over.
+     * The cards it has keep their scheduling untouched. Nothing happens while every family is on.
+     */
+    private fun rerouteSensesWithoutStudiedFamily(
+        langCode: String,
+        formats: StudyFormatSelection,
+        now: Long,
+    ): Int {
+        if (formats.excludedFamilies.isEmpty()) return 0
+        val target = formats.families.first()
+        val strongest = learning.selectStrongestCardOfSensesWithoutFamilies(
+            lang_code = langCode,
+            allowed_families = formats.families,
+        ).executeAsList().distinctBy { it.sense_id }
+        if (strongest.isEmpty()) return 0
+        learning.transaction {
+            strongest.forEach { source ->
+                val factor = config.crossFamilyCreditFactor(source.family, target, Rating.GOOD)
+                val inherited = if (source.state == CardState.NEW || factor == null) {
+                    null
+                } else {
+                    (source.stability * factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+                }
+                val due = if (inherited == null) now else now + forwardCreditDelay(inherited).inWholeMilliseconds
+                AppLogger.debug(TAG, null) {
+                    "Intake rerouting sense lang=$langCode sense=${source.sense_id} from=${source.family} " +
+                        "to=$target inheritedStability=${inherited ?: 0.0} dueIn=${(due - now).toDuration(DurationUnit.MILLISECONDS)}"
+                }
+                learning.insertCard(
+                    id = Uuid.random(),
+                    sense_id = source.sense_id,
+                    lemma_id = source.lemma_id,
+                    lang_code = langCode,
+                    family = target,
+                    state = if (inherited == null) CardState.NEW else CardState.LEARNING,
+                    stability = inherited ?: 0.0,
+                    difficulty = if (inherited == null) 0.0 else source.difficulty,
+                    due = due,
+                    last_review = null,
+                    reps = 0,
+                    lapses = 0,
+                    created_at = now,
+                    // A paused word stays paused in its new family.
+                    available_after = source.available_after,
+                    answer_key = source.answer_key,
+                    suspended = false,
+                )
+            }
+        }
+        return strongest.size
+    }
+
+    private fun forwardCreditDelay(stabilityDays: Double) =
+        (stabilityDays.toDuration(DurationUnit.DAYS) * config.forwardCreditDelayRatio)
+            .coerceIn(config.forwardCreditDelayFloor, config.forwardCreditDelayCap)
 
     @OptIn(ExperimentalTime::class)
     private fun newcomerGate(
@@ -253,6 +324,8 @@ class IntakeService(
         langCode: String,
         language: Language,
         translationTargets: List<Language>,
+        formats: StudyFormatSelection,
+        intakeFamilies: List<CardFamily>,
         now: Long,
     ): LemmaActivationOutcome {
         val group = learning.selectPendingActivationByLemma(langCode, lemma).executeAsList()
@@ -291,8 +364,8 @@ class IntakeService(
                 }
                 continue
             }
-            val tasksToCreate = config.defaultIntakeFamilies.mapNotNull { family ->
-                val variants = buildTaskVariants(family, sense, translationTargets)
+            val tasksToCreate = intakeFamilies.mapNotNull { family ->
+                val variants = buildTaskVariants(family, sense, translationTargets, formats)
                 if (variants.isEmpty()) null else family
             }
             if (tasksToCreate.isEmpty()) {
@@ -382,7 +455,10 @@ class IntakeService(
 data class IntakeResult(
     val activated: List<Uuid>,
     val skipped: List<SkipReason>,
+    /** Every card this run inserted, the rerouted ones included. */
     val cardsCreated: Int,
+    /** Senses re-entered in a studied family because all their cards were in switched-off ones. */
+    val rerouted: Int,
 )
 
 enum class SkipReason {
@@ -436,3 +512,4 @@ private fun skipSummary(skipped: List<SkipReason>): String =
     }
 
 private const val TAG: String = "IntakeService"
+private const val MIN_INHERITED_STABILITY: Double = 0.001

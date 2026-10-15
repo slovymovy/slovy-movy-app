@@ -126,6 +126,7 @@ internal fun rememberAppContainer(
             dictionary = dictionaryRepository,
             config = fsrsConfig,
             clock = Clock.System,
+            studyFormats = settingsRepository::getStudyFormats,
         )
     }
     val sessionService = remember(appDatabase, wordFetchManager, fsrsScheduler, fsrsConfig, dictionaryRepository) {
@@ -137,6 +138,7 @@ internal fun rememberAppContainer(
             config = fsrsConfig,
             clock = Clock.System,
             translationTargets = dictionaryRepository::defaultTranslationTargets,
+            studyFormats = settingsRepository::getStudyFormats,
         )
     }
     val statsService = remember(appDatabase, fsrsConfig) {

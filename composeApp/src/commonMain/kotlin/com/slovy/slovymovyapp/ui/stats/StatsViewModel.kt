@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStage
 import com.slovy.slovymovyapp.data.learning.stats.StatsPracticeDay
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
@@ -137,7 +138,10 @@ class StatsViewModel(
         viewModelScope.launch {
             runCatching {
                 withContext(Dispatchers.Default) {
-                    statsService.statsScreenData(langCode, today)
+                    val studiedFamilies = Language.fromCodeOrNull(langCode)
+                        ?.let { settingsRepository.getStudyFormats(it).families }
+                        ?: CardFamily.entries
+                    statsService.statsScreenData(langCode, today, studiedFamilies)
                 }
             }.onSuccess { data ->
                 if (!isCurrentReload(requestId)) return@launch

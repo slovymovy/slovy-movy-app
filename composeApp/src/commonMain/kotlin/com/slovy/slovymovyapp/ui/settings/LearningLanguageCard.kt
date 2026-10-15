@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -53,7 +54,8 @@ fun LearningLanguageCard(
     onRemove: () -> Unit,
     onDownloadTranslation: (Language) -> Unit,
     onCancelDownload: (String) -> Unit,
-    onDeleteTranslation: (Language) -> Unit
+    onDeleteTranslation: (Language) -> Unit,
+    onOpenStudyFormats: () -> Unit,
 ) {
     val expandedStateDescription = stringResource(Res.string.common_state_expanded)
     val collapsedStateDescription = stringResource(Res.string.common_state_collapsed)
@@ -193,8 +195,45 @@ fun LearningLanguageCard(
                             onDelete = { onDeleteTranslation(translation.targetLanguage) }
                         )
                     }
+
+                    // Only with translation languages: without them every word comes back in the
+                    // one source-only format, and there is nothing to choose.
+                    StudyFormatsRow(onClick = onOpenStudyFormats)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StudyFormatsRow(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        onClick = onClick,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppSpacing.md, vertical = AppSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(Res.string.study_actions_explainer),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(Res.string.study_actions_explainer_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -588,7 +627,8 @@ private fun LearningLanguageCardPreview(
             onRemove = {},
             onDownloadTranslation = {},
             onCancelDownload = {},
-            onDeleteTranslation = {}
+            onDeleteTranslation = {},
+            onOpenStudyFormats = {},
         )
     }
 }
@@ -623,7 +663,8 @@ private fun LearningLanguageCardCollapsedPreview(
             onRemove = {},
             onDownloadTranslation = {},
             onCancelDownload = {},
-            onDeleteTranslation = {}
+            onDeleteTranslation = {},
+            onOpenStudyFormats = {},
         )
     }
 }

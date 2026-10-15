@@ -20,6 +20,8 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
+import com.slovy.slovymovyapp.data.learning.StudyFormat
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
@@ -92,12 +94,15 @@ class StudySessionViewModel(
      * The "How studying works" page, drawn over the session. It lives beside [state] rather than
      * inside Active so the card underneath is left exactly as it was.
      */
-    var explainer by mutableStateOf<StudyExplainerUiState?>(null)
+    var studyFormatsPage by mutableStateOf<StudyFormatsUiState?>(null)
         private set
 
-    /** Scroll position of the open explainer; replaced on every opening so the page starts at the top. */
-    var explainerScrollState: ScrollState by mutableStateOf(ScrollState(0))
+    /** Scroll position of the open page; replaced on every opening so the page starts at the top. */
+    var studyFormatsScrollState: ScrollState by mutableStateOf(ScrollState(0))
         private set
+
+    /** The formats this language is studied in, read once at start and updated by the page. */
+    private var studyFormats: StudyFormatSelection = StudyFormatSelection.ALL
 
     /** How the session ended, recorded at the point of truth rather than derived later. */
     private var completionArm: String? = null
@@ -307,44 +312,78 @@ class StudySessionViewModel(
         state = active.copy(isOverflowMenuOpen = false)
     }
 
-    /** Opens "How studying works" from the actions menu, for the card on screen as it stands. */
-    fun openStudyExplainer() {
+    /** Opens "How studying works" from the actions menu. */
+    fun openStudyFormats() {
         val active = state as? StudySessionUiState.Active ?: return
-        if (active.isSubmittingReview || !active.canOpenExplainer) return
+        if (active.isSubmittingReview || !active.canOpenStudyFormats) return
         val card = currentCard ?: return
+        val language = language ?: return
         state = active.copy(isOverflowMenuOpen = false)
+        // The page covers every speaker control, so nothing may keep sounding, or start
+        // sounding once a pending play request resolves, behind it.
+        stopAudio()
+        studyFormatsScrollState = ScrollState(0)
+        Analytics.logEvent(
+            AnalyticsEvent.STUDY_FORMATS_OPEN,
+            mapOf(
+                "lang" to langCode,
+                "source" to "study",
+                "variant" to card.variant.kind.name.lowercase(),
+            ),
+        )
+        studyFormatsPage = studyFormatsUiState(language, studyFormats)
+    }
+
+    fun dismissStudyFormats() {
+        studyFormatsPage = null
+    }
+
+    /**
+     * Switches a format on or off for this language. The card on screen is never swapped out;
+     * the change applies from the next card. Nothing already earned is touched: cards of a
+     * switched-off family keep their scheduling and come back as they are when it returns.
+     */
+    fun toggleStudyFormat(format: StudyFormat) {
+        val language = language ?: return
+        val current = studyFormats
+        val next = current.with(format, enabled = format !in current.enabled) ?: return
+        studyFormats = next
+        if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, next)
         viewModelScope.launch {
-            // Read what this word has unlocked so the rows show its real state. A failed read
-            // falls back to the positional ladder rather than to wrong locks.
-            val unlocked = try {
-                sessionService.unlockedFamilyStability(card)
+            try {
+                settingsRepository.setStudyFormats(language, next)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                AppLogger.warn(TAG, "Unable to read unlocked families for the study explainer lang=$langCode", e)
-                null
+                AppLogger.warn(TAG, "Unable to store study formats lang=$langCode", e)
+                studyFormats = current
+                if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, current)
+                return@launch
             }
-            // The learner may have rated the card while the read was in flight; the page is
-            // about the card on screen, so a stale one opens nothing.
-            if (isExitingSession || currentCard !== card) return@launch
-            val page = card.toStudyExplainerUiState(unlocked) ?: return@launch
-            // The page covers every speaker control, so nothing may keep sounding, or start
-            // sounding once a pending play request resolves, behind it.
-            stopAudio()
-            explainerScrollState = ScrollState(0)
             Analytics.logEvent(
-                AnalyticsEvent.STUDY_EXPLAINER_OPEN,
+                AnalyticsEvent.STUDY_FORMAT_TOGGLED,
                 mapOf(
                     "lang" to langCode,
-                    "variant" to card.variant.kind.name.lowercase(),
+                    "format" to format.name.lowercase(),
+                    "enabled" to (format in next.enabled),
+                    "source" to "study",
                 ),
             )
-            explainer = page
+            // Intake and the review badge read the selection, so they must be recomputed.
+            onFavoriteChanged(language)
+            // The words-learned milestone compares the pipeline at the end of the session with
+            // its start; a change of formats re-stages words, which is not learning.
+            if (sessionPrepared) {
+                sessionStartPipeline = try {
+                    pipelineSnapshot()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    AppLogger.warn(TAG, "Unable to re-snapshot the pipeline after a format change lang=$langCode", e)
+                    emptyList()
+                }
+            }
         }
-    }
-
-    fun dismissStudyExplainer() {
-        explainer = null
     }
 
     /**
@@ -839,12 +878,14 @@ class StudySessionViewModel(
                             autoplayEnabled = settingsRepository.getStudyAutoplay()
                             autoplayPreferenceLoaded = true
                         }
+                        studyFormats = language?.let { settingsRepository.getStudyFormats(it) }
+                            ?: StudyFormatSelection.ALL
                         val intakeResult = intakeService.runIntake(langCode)
                         putMetric("cards_created", intakeResult.cardsCreated.toLong())
                         putMetric("activated_favorites", intakeResult.activated.size.toLong())
                         putMetric("skip_reasons", intakeResult.skipped.size.toLong())
                         sessionStartPipeline = pipelineSnapshot()
-                        sessionTotal = statsService.dueNow(langCode, excludedCardFamiliesForSession())
+                        sessionTotal = statsService.dueNow(langCode, allowedCardFamiliesForSession())
                         sessionPrepared = true
                         putMetric("due_now", sessionTotal.toLong())
                         loadNextCard()
@@ -962,7 +1003,7 @@ class StudySessionViewModel(
             ratingOptions = emptyList(),
             viewedSenseId = uiCard.activeSenseId,
             isAutoplayEnabled = autoplayEnabled,
-            canOpenExplainer = sessionCard.hasStudyExplainer(),
+            canOpenStudyFormats = sessionCard.hasStudyFormatsPage(),
         )
         if (autoplayEnabled) {
             autoplayFrontAudioText(uiCard)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
@@ -999,7 +1040,8 @@ class StudySessionViewModel(
         sessionService.nextCard(
             langCode = langCode,
             sessionStartedAt = sessionStartedAt,
-            excludedFamilies = excludedCardFamiliesForSession(),
+            // The service applies the formats itself; the session only adds what it postponed.
+            excludedFamilies = postponedCardFamilies(),
         )
 
     private suspend fun buildCompleteState(): StudySessionCompleteUiState {
@@ -1033,25 +1075,28 @@ class StudySessionViewModel(
 
     private suspend fun pipelineSnapshot(): List<StatsPipelineStage> =
         withContext(Dispatchers.IO) {
-            statsService.pipelineSnapshot(langCode)
+            statsService.pipelineSnapshot(langCode, studyFormats.families)
         }
 
     private suspend fun rewardSnapshot() =
         withContext(Dispatchers.IO) {
-            statsService.rewardSnapshot(langCode)
+            statsService.rewardSnapshot(langCode, studyFormats.families)
         }
 
-    private fun excludedCardFamiliesForSession(): Set<CardFamily> =
+    private fun postponedCardFamilies(): Set<CardFamily> =
         if (postponeListeningCardsForSession) {
             setOf(CardFamily.RECOGNIZE_VOICE)
         } else {
             emptySet()
         }
 
+    private fun allowedCardFamiliesForSession(): List<CardFamily> =
+        studyFormats.families - postponedCardFamilies()
+
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
         val completedCount = reviewedCount + skippedCount
         val current = completedCount + 1
-        val dueNow = statsService.dueNow(langCode, excludedCardFamiliesForSession())
+        val dueNow = statsService.dueNow(langCode, allowedCardFamiliesForSession())
         val projectedTotal = completedCount + dueNow
         sessionTotal = if (postponeListeningCardsForSession) {
             maxOf(projectedTotal, current)

@@ -15,11 +15,11 @@ import androidx.compose.ui.unit.dp
  * next to each other. Material's arrows are filled glyphs and the app's speaker is a solid
  * silhouette; mixed with a line circle they read as three different weights.
  */
-internal object StudyExplainerIcons {
+internal object StudyFormatsIcons {
     private const val STROKE = 1.75f
 
     val WordToTranslation: ImageVector by lazy {
-        lineIcon("StudyExplainerWordToTranslation") {
+        lineIcon("StudyFormatsWordToTranslation") {
             moveTo(5f, 12f)
             lineTo(19f, 12f)
             moveTo(13f, 6f)
@@ -29,7 +29,7 @@ internal object StudyExplainerIcons {
     }
 
     val TranslationToWord: ImageVector by lazy {
-        lineIcon("StudyExplainerTranslationToWord") {
+        lineIcon("StudyFormatsTranslationToWord") {
             moveTo(19f, 12f)
             lineTo(5f, 12f)
             moveTo(11f, 6f)
@@ -40,7 +40,7 @@ internal object StudyExplainerIcons {
 
     /** A baseline rule with two short ascenders: the blank in a sentence. */
     val FillTheGap: ImageVector by lazy {
-        lineIcon("StudyExplainerFillTheGap") {
+        lineIcon("StudyFormatsFillTheGap") {
             moveTo(5f, 11f)
             lineTo(5f, 17f)
             lineTo(19f, 17f)
@@ -49,7 +49,7 @@ internal object StudyExplainerIcons {
     }
 
     val Listen: ImageVector by lazy {
-        lineIcon("StudyExplainerListen") {
+        lineIcon("StudyFormatsListen") {
             moveTo(4f, 9.5f)
             lineTo(7.5f, 9.5f)
             lineTo(12.5f, 5.5f)
@@ -63,7 +63,7 @@ internal object StudyExplainerIcons {
     }
 
     val SourceOnly: ImageVector by lazy {
-        lineIcon("StudyExplainerSourceOnly") {
+        lineIcon("StudyFormatsSourceOnly") {
             moveTo(12f, 5f)
             arcTo(7f, 7f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 12f, y1 = 19f)
             arcTo(7f, 7f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 12f, y1 = 5f)

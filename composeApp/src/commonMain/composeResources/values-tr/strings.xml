@@ -621,9 +621,9 @@
     <string name="study_suspend_message">“%1$s” 30 gün duraklatıldı</string>
     <string name="study_suspend_undo">Geri al</string>
     <string name="study_actions_remove">Kelimelerim'den kaldır</string>
-    <string name="study_actions_explainer">Çalışma nasıl işliyor</string>
+    <string name="study_actions_explainer">Çalışma biçimleri</string>
     <string name="study_actions_explainer_description">Bir kelimeyi tekrarlamanın farklı yolları</string>
-    <string name="study_explainer_title">Çalışma nasıl işliyor</string>
+    <string name="study_explainer_title">Çalışma biçimlerini seç</string>
     <string name="study_explainer_intro">Kelime yerleştikçe daha zor biçimler kendiliğinden açılır.</string>
     <string name="study_explainer_word_to_translation_title">Kelime → çeviri</string>
     <string name="study_explainer_word_to_translation">Kelimeyi gör, çevirisini hatırla.</string>
@@ -635,10 +635,9 @@
     <string name="study_explainer_listen">Sadece dinle, metin yok.</string>
     <string name="study_explainer_source_only_title">Yalnızca %1$s</string>
     <string name="study_explainer_source_only">Çeviri olmadan açıklanır.</string>
-    <string name="study_explainer_status_current">Buradasın</string>
-    <string name="study_explainer_status_unlocked">Açık</string>
-    <string name="study_explainer_status_locked">Kilitli</string>
-    <string name="study_explainer_done">Anladım</string>
+    <string name="study_explainer_label_easiest">En kolay</string>
+    <string name="study_explainer_label_not_for_beginners">Yeni başlayanlar için değil</string>
+    <string name="study_explainer_done">Tamam</string>
     <string name="study_remove_title">“%1$s” Kelimelerim'den kaldırılsın mı?</string>
     <string name="study_remove_message">Bu anlam çalışma oturumlarında artık görünmeyecek. “%1$s” kelimesinin diğer anlamları Kelimelerim'de kalacak. İlerlemeni kaybetmeden istediğin zaman geri ekleyebilirsin.</string>
     <string name="study_remove_cancel">İptal</string>

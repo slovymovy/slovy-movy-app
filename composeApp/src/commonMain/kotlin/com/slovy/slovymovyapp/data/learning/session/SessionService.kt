@@ -8,10 +8,10 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.CardScheduleSnapshot
 import com.slovy.slovymovyapp.data.favorites.applyCardScheduleSnapshots
 import com.slovy.slovymovyapp.data.learning.*
-import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
+import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
 import com.slovy.slovymovyapp.data.learning.stats.retrievability
 import com.slovy.slovymovyapp.data.remote.LanguageCard
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
@@ -39,6 +39,7 @@ class SessionService(
     private val config: FsrsConfig = FsrsDefaults.config(),
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
+    private val studyFormats: suspend (Language) -> StudyFormatSelection,
 ) {
     fun nextCard(
         langCode: String,
@@ -51,11 +52,13 @@ class SessionService(
             var loadingEmissions = 0L
             try {
                 val now = clock.now().toEpochMilliseconds()
+                val formats = studyFormatsFor(langCode)
                 val candidates = nextCandidates(
                     langCode = langCode,
                     now = now,
                     sessionStartedAt = sessionStartedAt.toEpochMilliseconds(),
-                    excludedFamilies = excludedFamilies,
+                    // A family the learner switched off is never served, whatever it has due.
+                    excludedFamilies = excludedFamilies + formats.excludedFamilies,
                 )
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
@@ -101,20 +104,6 @@ class SessionService(
 
     fun previewRatings(card: SessionCard): List<GradeOutcome> =
         scheduler.preview(card.card.scheduling, clock.now(), fuzzSeed = fuzzSeed(card.card))
-
-    /**
-     * The task families this sense has already unlocked, each with its card's current stability.
-     * A family is unlocked exactly when it has a card: [unlockNextFamilyIfEligible] inserts one
-     * the moment a review clears the gate, so this reads the same truth the scheduler works from.
-     * Suspended cards are left out, matching the query; suspension is per sense today, so the
-     * card on screen never has a suspended sibling.
-     */
-    suspend fun unlockedFamilyStability(card: SessionCard): Map<CardFamily, Duration> =
-        withContext(Dispatchers.IO) {
-            learning.selectCardsBySense(card.card.senseId, card.card.langCode)
-                .executeAsList()
-                .associate { row -> row.family to row.stability.toDuration(DurationUnit.DAYS) }
-        }
 
     suspend fun submitReview(
         card: SessionCard,
@@ -277,15 +266,19 @@ class SessionService(
         val targets = translationTargets(language)
             .filter { it != language }
             .distinctBy { it.code }
+        val formats = studyFormats(language)
 
         return wordFetchManager.getWord(
             language = language,
             lemma = favorite.lemma,
             translationTargets = targets,
         ).map { result ->
-            result to result.toSessionCard(card, targets)
+            result to result.toSessionCard(card, targets, formats)
         }
     }
+
+    private suspend fun studyFormatsFor(langCode: String): StudyFormatSelection =
+        Language.fromCodeOrNull(langCode)?.let { studyFormats(it) } ?: StudyFormatSelection.ALL
 
     private suspend fun FlowCollector<SessionCard?>.loadUntilTerminal(
         card: Card,
@@ -606,6 +599,7 @@ class SessionService(
         card: Card,
         sense: LanguageCardResponseSense?,
         translationTargets: List<Language>,
+        studyFormats: StudyFormatSelection,
     ): List<CardVariant> {
         sense ?: return emptyList()
         val lastReview = learning.selectLastReviewVariantByCard(card.id).executeAsOneOrNull()
@@ -614,20 +608,25 @@ class SessionService(
             family = card.family,
             sense = sense,
             translationTargets = translationTargets,
+            studyFormats = studyFormats,
             cardStability = card.scheduling.stability.toDuration(DurationUnit.DAYS),
             lastVariant = lastVariant,
         )
     }
 
-    private fun WordResult.toSessionCard(card: Card, translationTargets: List<Language>): SessionCard? {
+    private fun WordResult.toSessionCard(
+        card: Card,
+        translationTargets: List<Language>,
+        studyFormats: StudyFormatSelection,
+    ): SessionCard? {
         val senseId = card.senseId.toString()
         val sense = this.card?.findSense(senseId)
         val studiedSenseIds = learning.selectActiveSenseIdsByLemma(
             lang_code = card.langCode,
             lemma_id = card.lemmaId,
         ).executeAsList().mapTo(HashSet()) { it.toString() }
-        val sessionCards = sortedVariants(card, sense, translationTargets).map { variant ->
-            toSessionCard(card, variant, senseId, sense, studiedSenseIds, translationTargets)
+        val sessionCards = sortedVariants(card, sense, translationTargets, studyFormats).map { variant ->
+            toSessionCard(card, variant, senseId, sense, studiedSenseIds, translationTargets, studyFormats)
         }
 
         return sessionCards.firstOrNull { it.loadState() == SessionCardLoadState.READY }
@@ -642,6 +641,7 @@ class SessionService(
         sense: LanguageCardResponseSense?,
         studiedSenseIds: Set<String>,
         translationTargets: List<Language>,
+        studyFormats: StudyFormatSelection,
     ): SessionCard {
         val example = if (variant.kind.isCloze && sense != null) {
             val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
@@ -662,6 +662,7 @@ class SessionService(
             example = example,
             studiedSenseIds = studiedSenseIds,
             translationTargets = translationTargets,
+            studyFormats = studyFormats,
         )
     }
 
@@ -678,13 +679,25 @@ class SessionService(
         now: Long,
     ) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
-        val unlockFamily = when (card.card.family) {
-            CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> CardFamily.PRODUCE_WORD
-            CardFamily.PRODUCE_WORD if stability >= config.contextUnlockStability -> CardFamily.PRODUCE_WORD_IN_CONTEXT
-            CardFamily.PRODUCE_WORD_IN_CONTEXT if stability >= config.contextUnlockStability -> CardFamily.RECOGNIZE_VOICE
+        val gate = when (card.card.family) {
+            CardFamily.RECOGNIZE_SENSE -> config.productionUnlockStability
+            CardFamily.PRODUCE_WORD,
+            CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                -> config.contextUnlockStability
 
-            else -> null
+            CardFamily.RECOGNIZE_VOICE -> null
         } ?: return
+        if (stability < gate) return
+        // The next family the learner studies: families switched off are stepped over, so a
+        // limited selection still climbs the whole ladder and the word can reach every format
+        // it is allowed to.
+        val unlockFamily = card.studyFormats.nextFamilyAfter(card.card.family)
+        if (unlockFamily == null) {
+            AppLogger.debug(TAG, null) {
+                "Unlock skipped: no enabled family after ${card.card.family} source=${card.card.id}"
+            }
+            return
+        }
         val credit = crossFamilyCredit(card.card.family, unlockFamily, rating)
         if (credit == null) {
             AppLogger.debug(TAG, null) {
@@ -702,7 +715,7 @@ class SessionService(
             }
             return
         }
-        val variants = buildTaskVariants(unlockFamily, sense, card.translationTargets)
+        val variants = buildTaskVariants(unlockFamily, sense, card.translationTargets, card.studyFormats)
         if (variants.isEmpty()) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
@@ -845,10 +858,7 @@ class SessionService(
         targetFamily: CardFamily,
         rating: Rating,
     ): AppliedCredit? {
-        val credit = config.crossFamilyCredits.firstOrNull {
-            it.sourceFamily == sourceFamily && it.targetFamily == targetFamily
-        } ?: return null
-        val factor = credit.factorFor(rating) ?: return null
+        val factor = config.crossFamilyCreditFactor(sourceFamily, targetFamily, rating) ?: return null
         val direction = if (targetFamily.ordinal > sourceFamily.ordinal) {
             CreditDirection.FORWARD
         } else {
@@ -856,15 +866,6 @@ class SessionService(
         }
         return AppliedCredit(factor, direction)
     }
-
-    private fun CrossFamilyCredit.factorFor(rating: Rating): Double? =
-        when (rating) {
-            Rating.GOOD -> goodFactor
-            Rating.EASY -> easyFactor
-            Rating.AGAIN,
-            Rating.HARD,
-                -> null
-        }?.takeIf { it > 0.0 }
 
     private data class AppliedCredit(
         val factor: Double,

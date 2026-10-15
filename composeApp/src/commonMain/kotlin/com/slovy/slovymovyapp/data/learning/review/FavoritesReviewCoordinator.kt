@@ -5,6 +5,7 @@ import com.slovy.slovymovyapp.analytics.PerformanceTrace
 import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
 import com.slovy.slovymovyapp.data.learning.stats.ReviewQueueStats
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
@@ -51,9 +52,10 @@ internal class FavoritesReviewCoordinator(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
+        studyFormats: suspend (Language) -> StudyFormatSelection,
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
-        computeFavoritesReviewState(favoritesRepository, intakeService, statsService)
+        computeFavoritesReviewState(favoritesRepository, intakeService, statsService, studyFormats)
     }
 
     /**
@@ -66,6 +68,7 @@ internal class FavoritesReviewCoordinator(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
+        studyFormats: suspend (Language) -> StudyFormatSelection,
     ): FavoritesReviewState = refreshMutex.withLock {
         if (!enabled) return@withLock FavoritesReviewState(emptyMap())
         PerformanceMonitoring.startTrace("favorites_review_due_counts").useWithResult {
@@ -75,7 +78,7 @@ internal class FavoritesReviewCoordinator(
                     .distinct()
                 putMetric("languages", languages.size.toLong())
                 val reviewByLanguage = languages.associateWith { language ->
-                    statsService.reviewQueueStats(language.code)
+                    statsService.reviewQueueStats(language.code, studyFormats(language).families)
                         .toFavoriteLanguageReviewState(language, intakeService)
                 }
                 putReviewStateMetrics(reviewByLanguage)
@@ -96,6 +99,7 @@ internal class FavoritesReviewCoordinator(
         favoritesRepository: FavoritesRepository,
         intakeService: LearningIntake,
         statsService: StatsService,
+        studyFormats: suspend (Language) -> StudyFormatSelection,
     ): FavoritesReviewState = PerformanceMonitoring.startTrace("favorites_review_compute_state").useWithResult {
         withContext(Dispatchers.Default) {
             val favorites = favoritesRepository.getAllGroupedByLangAndLemma()
@@ -114,7 +118,7 @@ internal class FavoritesReviewCoordinator(
             }
             putMetric("intake_runs", intakeRuns)
             val reviewByLanguage = languages.associateWith { language ->
-                statsService.reviewQueueStats(language.code)
+                statsService.reviewQueueStats(language.code, studyFormats(language).families)
                     .toFavoriteLanguageReviewState(language, intakeService)
             }
             putReviewStateMetrics(reviewByLanguage)

@@ -35,6 +35,8 @@ import com.slovy.slovymovyapp.ui.listdetail.*
 import com.slovy.slovymovyapp.ui.languagesetup.*
 import com.slovy.slovymovyapp.ui.download.*
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
+import com.slovy.slovymovyapp.ui.study.StudyFormatsScreen
+import com.slovy.slovymovyapp.ui.study.StudyFormatsViewModel
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.reader.TextReaderScreen
 import com.slovy.slovymovyapp.ui.reader.TextReaderViewModel
@@ -116,6 +118,7 @@ fun App(
             favoritesRepository = container.favoritesRepository,
             intakeService = container.intakeService,
             statsService = container.statsService,
+            studyFormats = settingsRepository::getStudyFormats,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -126,6 +129,7 @@ fun App(
             favoritesRepository = container.favoritesRepository,
             intakeService = container.intakeService,
             statsService = container.statsService,
+            studyFormats = settingsRepository::getStudyFormats,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -753,7 +757,34 @@ fun App(
                         onNavigateToDeveloper = {
                             navController.navigate(AppDestination.Developer)
                         },
+                        onOpenStudyFormats = { language ->
+                            navController.navigate(AppDestination.StudyFormats(langCode = language.code))
+                        },
                         hasFavoritesToReview = hasFavoritesToReview,
+                    )
+                }
+                composable<AppDestination.StudyFormats> { backStackEntry ->
+                    val args = backStackEntry.toRoute<AppDestination.StudyFormats>()
+                    val language = Language.fromCodeOrNull(args.langCode)
+                    if (language == null) {
+                        LaunchedEffect(Unit) { navController.popBackStack() }
+                        return@composable
+                    }
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        StudyFormatsViewModel(
+                            language = language,
+                            settingsRepository = settingsRepository,
+                            onChanged = { changed ->
+                                // Intake re-enters words in the formats still studied, and the
+                                // review badge counts only those, so both must be recomputed.
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(changed)
+                                appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            },
+                        )
+                    }
+                    StudyFormatsScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
                     )
                 }
                 composable<AppDestination.Developer> { backStackEntry ->

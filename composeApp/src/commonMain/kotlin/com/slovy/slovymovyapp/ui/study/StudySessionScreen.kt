@@ -107,6 +107,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.speech.AudioControl
@@ -205,8 +206,8 @@ fun StudySessionScreen(
 
     StudySessionScreenContent(
         state = viewModel.state,
-        explainer = viewModel.explainer,
-        explainerScrollState = viewModel.explainerScrollState,
+        studyFormatsPage = viewModel.studyFormatsPage,
+        studyFormatsScrollState = viewModel.studyFormatsScrollState,
         completeScrollState = viewModel.completeScrollState,
         snackbarHostState = viewModel.snackbarHostState,
         onCancel = viewModel::requestExit,
@@ -226,16 +227,17 @@ fun StudySessionScreen(
         onRequestRemoveFromLibrary = viewModel::requestRemoveFromLibrary,
         onDismissRemoveConfirmation = viewModel::dismissRemoveConfirmation,
         onConfirmRemoveFromLibrary = viewModel::confirmRemoveFromLibrary,
-        onOpenExplainer = viewModel::openStudyExplainer,
-        onDismissExplainer = viewModel::dismissStudyExplainer,
+        onOpenStudyFormats = viewModel::openStudyFormats,
+        onToggleStudyFormat = viewModel::toggleStudyFormat,
+        onDismissStudyFormats = viewModel::dismissStudyFormats,
     )
 }
 
 @Composable
 fun StudySessionScreenContent(
     state: StudySessionUiState,
-    explainer: StudyExplainerUiState? = null,
-    explainerScrollState: ScrollState = ScrollState(0),
+    studyFormatsPage: StudyFormatsUiState? = null,
+    studyFormatsScrollState: ScrollState = ScrollState(0),
     completeScrollState: ScrollState = ScrollState(0),
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
     onCancel: () -> Unit,
@@ -255,14 +257,15 @@ fun StudySessionScreenContent(
     onRequestRemoveFromLibrary: () -> Unit = {},
     onDismissRemoveConfirmation: () -> Unit = {},
     onConfirmRemoveFromLibrary: (String, String) -> Unit = { _, _ -> },
-    onOpenExplainer: () -> Unit = {},
-    onDismissExplainer: () -> Unit = {},
+    onOpenStudyFormats: () -> Unit = {},
+    onToggleStudyFormat: (StudyFormat) -> Unit = {},
+    onDismissStudyFormats: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
         // While the page covers the session, the session's controls must not stay reachable to
         // screen readers: a card could be graded or the session closed from behind the page.
-        val sessionSemantics = if (explainer != null) Modifier.clearAndSetSemantics {} else Modifier
+        val sessionSemantics = if (studyFormatsPage != null) Modifier.clearAndSetSemantics {} else Modifier
         StudySessionStateContent(
             modifier = sessionSemantics,
             state = state,
@@ -285,15 +288,16 @@ fun StudySessionScreenContent(
             onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
             onDismissRemoveConfirmation = onDismissRemoveConfirmation,
             onConfirmRemoveFromLibrary = onConfirmRemoveFromLibrary,
-            onOpenExplainer = onOpenExplainer,
+            onOpenStudyFormats = onOpenStudyFormats,
         )
         // Drawn over the session, not inside a state branch, so the card underneath is left
         // exactly as it was and comes back untouched when the page is dismissed.
-        explainer?.let { page ->
-            StudyExplainerContent(
+        studyFormatsPage?.let { page ->
+            StudyFormatsContent(
                 state = page,
-                scrollState = explainerScrollState,
-                onDismiss = onDismissExplainer,
+                scrollState = studyFormatsScrollState,
+                onToggle = onToggleStudyFormat,
+                onDismiss = onDismissStudyFormats,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -318,12 +322,12 @@ private fun StudySessionStateContent(
     onViewedSenseChange: (String) -> Unit,
     onOpenOverflowMenu: () -> Unit,
     onDismissOverflowMenu: () -> Unit,
-    onToggleAutoplay: () -> Unit,
+    onToggleAutoplay: (String, String) -> Unit,
     onSuspendWord: (String, String) -> Unit,
     onRequestRemoveFromLibrary: () -> Unit,
     onDismissRemoveConfirmation: () -> Unit,
     onConfirmRemoveFromLibrary: (String, String) -> Unit,
-    onOpenExplainer: () -> Unit,
+    onOpenStudyFormats: () -> Unit,
 ) {
     when (state) {
         is StudySessionUiState.Loading -> {
@@ -410,7 +414,7 @@ private fun StudySessionStateContent(
             onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
             onDismissRemoveConfirmation = onDismissRemoveConfirmation,
             onConfirmRemoveFromLibrary = onConfirmRemoveFromLibrary,
-            onOpenExplainer = onOpenExplainer,
+            onOpenStudyFormats = onOpenStudyFormats,
             snackbarHostState = snackbarHostState,
             modifier = modifier,
         )
@@ -552,7 +556,7 @@ private fun StudySessionActiveContent(
     onRequestRemoveFromLibrary: () -> Unit,
     onDismissRemoveConfirmation: () -> Unit,
     onConfirmRemoveFromLibrary: (String, String) -> Unit,
-    onOpenExplainer: () -> Unit,
+    onOpenStudyFormats: () -> Unit,
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
@@ -634,7 +638,7 @@ private fun StudySessionActiveContent(
         if (state.isOverflowMenuOpen) {
             StudySessionOverflowSheet(
                 autoplayEnabled = state.isAutoplayEnabled,
-                onOpenExplainer = onOpenExplainer.takeIf { state.canOpenExplainer },
+                onOpenStudyFormats = onOpenStudyFormats.takeIf { state.canOpenStudyFormats },
                 onToggleAutoplay = { onToggleAutoplay(autoplaySavedOnMessage, autoplaySavedOffMessage) },
                 onSuspendWord = { onSuspendWord(suspendedMessage, suspendedUndoLabel) },
                 onRequestRemoveFromLibrary = onRequestRemoveFromLibrary,
@@ -812,7 +816,7 @@ private fun StudySessionProgressLabel(
 @Composable
 private fun StudySessionOverflowSheet(
     autoplayEnabled: Boolean,
-    onOpenExplainer: (() -> Unit)?,
+    onOpenStudyFormats: (() -> Unit)?,
     onToggleAutoplay: () -> Unit,
     onSuspendWord: () -> Unit,
     onRequestRemoveFromLibrary: () -> Unit,
@@ -891,7 +895,7 @@ private fun StudySessionOverflowSheet(
                 )
                 // Help lives last, under a hairline: the sheet is opened to act on the card, and
                 // the actions keep the top; the page is there for whoever scans further.
-                if (onOpenExplainer != null) {
+                if (onOpenStudyFormats != null) {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = AppSpacing.sm),
                         thickness = Dp.Hairline,
@@ -906,7 +910,7 @@ private fun StudySessionOverflowSheet(
                         },
                         label = stringResource(Res.string.study_actions_explainer),
                         supporting = stringResource(Res.string.study_actions_explainer_description),
-                        onClick = onOpenExplainer,
+                        onClick = onOpenStudyFormats,
                     )
                 }
             }

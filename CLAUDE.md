@@ -393,6 +393,15 @@ answers also apply same-sense cross-family credit and unlock the next family onc
 the last-shown kind. `ExamplePicker` favors examples that were not seen recently. `SessionCard.loadState()` exposes
 explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can distinguish retry from skip.
 
+Study formats (`StudyFormat`, `StudyFormatSelection` in `shared/.../data/learning`) are the learner's per-language
+choice of the five card formats, stored under `Setting.Name.STUDY_FORMATS` and read through
+`SettingsRepository.getStudyFormats`. The selection is a filter, never a mutation: `buildTaskVariants` drops kinds
+of switched-off formats, `SessionService.nextCard` excludes families with no enabled kind, the unlock ladder steps
+over them (`FsrsConfig.crossFamilyCreditFactor` chains the skipped credits), intake starts new words in the first
+enabled family and re-enters senses whose cards are all in switched-off families, and the stats pipeline judges a
+sense on its studied families only. Toggling a format must not create, delete, suspend or reschedule an existing
+card. At least one format is always enabled; a language without translation targets gets no formats page.
+
 `StatsService` owns queue/global/screen snapshots, streak/practice data, and the pipeline stages `QUEUE`, `NEW`,
 `FRESH`, `MIDDLE`, `STRONG`, and `LEARNED`. Its retrievability function is reused in session priority.
 `FavoritesReviewCoordinator` (in `data/learning/review`) caches a full intake refresh for five minutes per language;
