@@ -14,6 +14,8 @@ data class Card(
     val scheduling: CardScheduling,
 )
 
+// Stored by ordinal in the app database. Append new families at the end; reordering changes stored
+// data and the forward/backward direction of cross-family credit.
 enum class CardFamily(
     val testsWordRecall: Boolean,
 ) {
@@ -21,6 +23,9 @@ enum class CardFamily(
     PRODUCE_WORD(testsWordRecall = true),
     PRODUCE_WORD_IN_CONTEXT(testsWordRecall = true),
     RECOGNIZE_VOICE(testsWordRecall = true),
+
+    /** The learner types the word. Unlocked from PRODUCE_WORD; see FsrsDefaults.UNLOCK_RULES. */
+    SPELL_WORD(testsWordRecall = true),
 }
 
 enum class CardKind(
@@ -76,6 +81,15 @@ enum class CardKind(
         requiresTranslation = true,
         isCloze = false,
         family = CardFamily.RECOGNIZE_VOICE,
+        priority = 0,
+        minStability = Duration.ZERO,
+    ),
+
+    // Stored by ordinal in review_log.variant_kind; append only.
+    TRANSLATION_TO_WORD_TYPED(
+        requiresTranslation = true,
+        isCloze = false,
+        family = CardFamily.SPELL_WORD,
         priority = 0,
         minStability = Duration.ZERO,
     ),

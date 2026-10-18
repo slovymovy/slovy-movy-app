@@ -178,14 +178,18 @@ sealed interface StudyCardUiState {
             ),
         )
 
-        /** Reveals the next letter, discarding a wrong tail first. Null when no hint is possible. */
+        /**
+         * Reveals the next letter, discarding a wrong tail first. Null when no hint is possible.
+         * Only a revealed letter counts as a hint used; cutting a tail with nothing left to reveal
+         * is an edit on the learner's behalf, not help with the spelling.
+         */
         fun withNextLetterHint(): Typed? {
             val hint = SpellingChecker.applyHint(input.value.text, lemma, input.hintedPositions) ?: return null
             return copy(
                 input = StudyTypedInputUiState(
                     value = TextFieldValue(text = hint.value, selection = TextRange(hint.value.length)),
                     hintedPositions = hint.hintedPositions,
-                    hintsUsed = input.hintsUsed + 1,
+                    hintsUsed = if (hint.revealedPosition != null) input.hintsUsed + 1 else input.hintsUsed,
                 ),
             )
         }

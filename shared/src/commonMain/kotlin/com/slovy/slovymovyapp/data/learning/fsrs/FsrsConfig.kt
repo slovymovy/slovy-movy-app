@@ -16,8 +16,7 @@ data class FsrsConfig(
     val pauseIntakeIfRetentionBelow: Double,
     val matureStability: Duration,
     val defaultIntakeFamilies: List<CardFamily>,
-    val productionUnlockStability: Duration,
-    val contextUnlockStability: Duration,
+    val unlockRules: List<UnlockRule>,
     val crossFamilyCredits: List<CrossFamilyCredit>,
     val buryFailedSessionCardsFor: Duration,
     val sameSenseCooldownRatio: Double,
@@ -38,6 +37,19 @@ data class FsrsConfig(
     val backwardCreditDelayCap: Duration,
     val cooldownJitterRatio: Double,
     val selectionCandidateLimit: Int,
+)
+
+/**
+ * A successful review of a [sourceFamily] card whose stability has reached [minStability] creates
+ * the sense's [targetFamily] card, if it does not exist yet. The new card inherits stability through
+ * the matching [CrossFamilyCredit]; with [floorToSenseMinimum] it also starts no weaker than the
+ * sense's weakest existing card, so creating it never changes the sense's pipeline stage.
+ */
+data class UnlockRule(
+    val sourceFamily: CardFamily,
+    val targetFamily: CardFamily,
+    val minStability: Duration,
+    val floorToSenseMinimum: Boolean,
 )
 
 data class CrossFamilyCredit(
