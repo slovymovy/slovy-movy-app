@@ -68,6 +68,26 @@ class StudyTypedCardTest {
     }
 
     @Test
+    fun cuttingAWrongTail_isNotCountedAsAHint() {
+        val card = card().withInput(typed("gezelligxx")).withNextLetterHint()!!
+        assertEquals("gezellig", card.input.value.text, "The wrong tail is cut")
+        assertEquals(0, card.input.hintsUsed, "No letter was revealed, so no hint was used")
+        assertEquals(0, card.remainingSlots, "Without a hint used there are no length slots")
+    }
+
+    @Test
+    fun cuttingATailAfterALeadingSpace_isNotCountedAsAHintEither() {
+        // A surviving hint shifts left when the leading space goes; that must not read as a new hint.
+        val card = card().copy(lemma = "aardvark")
+            .withNextLetterHint()!!
+            .withInput(typed(" aa"))
+            .withInput(typed(" aardvarkx"))
+            .withNextLetterHint()!!
+        assertEquals("aardvark", card.input.value.text, "The space and the tail are gone")
+        assertEquals(1, card.input.hintsUsed, "Only the first hint revealed a letter")
+    }
+
+    @Test
     fun deletingAHintLetter_dropsItsMark() {
         val card = card().withNextLetterHint()!!.withNextLetterHint()!!.withInput(typed("g"))
         assertEquals(setOf(0), card.input.hintedPositions)

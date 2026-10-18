@@ -21,6 +21,14 @@ class SpellingCheckerTest {
     }
 
     @Test
+    fun isCorrect_foldsSmartPunctuation() {
+        assertTrue(SpellingChecker.isCorrect("zo\u2019n", "zo'n"), "A typographic apostrophe is the plain one")
+        assertTrue(SpellingChecker.isCorrect("e\u2013mail", "e-mail"), "An en dash is a hyphen")
+        assertEquals(3, SpellingChecker.matchingPrefixLength("zo\u2019", "zo'n"), "Prefix matching folds too")
+        assertEquals(emptySet(), SpellingChecker.diff("zo\u2019n", "zo'n").missed, "The diff marks nothing")
+    }
+
+    @Test
     fun isCorrect_accentOnlyMismatchIsNotCorrect() {
         assertFalse(SpellingChecker.isCorrect("cafe", "café"), "An accent-only mismatch is a typo, not a correct answer")
     }
@@ -71,6 +79,39 @@ class SpellingCheckerTest {
         assertFalse(SpellingChecker.canHint(lemma, lemma), "Nothing remains")
         assertNull(SpellingChecker.applyHint(lemma, lemma, emptySet()), "No hint once the word is complete")
         assertFalse(SpellingChecker.canHint("Gezellig", lemma), "Case does not matter for completeness")
+    }
+
+    @Test
+    fun canHint_isFalseWheneverTheAnswerIsAlreadyCorrect() {
+        assertFalse(SpellingChecker.canHint(" gezellig", lemma), "Padding does not make a correct answer hintable")
+        assertNull(SpellingChecker.applyHint("gezellig ", lemma, emptySet()), "A hint never destroys a correct answer")
+        assertFalse(SpellingChecker.canHint("ice  cream", "ice cream"), "Doubled inner space is still the right answer")
+    }
+
+    @Test
+    fun applyHint_dropsALeadingSpaceInsteadOfResetting() {
+        val hint = SpellingChecker.applyHint(" gez", lemma, emptySet())!!
+        assertEquals("geze", hint.value, "The stray space goes, the typed letters stay")
+        assertEquals(setOf(3), hint.hintedPositions, "Only the revealed e is a hint")
+    }
+
+    @Test
+    fun applyHint_cutsAWrongTailAfterTheWholeWord() {
+        assertTrue(SpellingChecker.canHint("gezelligxx", lemma), "A wrong tail still gives the hint something to do")
+        val hint = SpellingChecker.applyHint("gezelligxx", lemma, setOf(0, 1))!!
+        assertEquals("gezellig", hint.value, "The tail is cut and nothing is appended")
+        assertEquals(setOf(0, 1), hint.hintedPositions, "No new position is marked as a hint")
+        assertNull(hint.revealedPosition, "Cutting a tail reveals nothing")
+        assertFalse(SpellingChecker.canHint(hint.value, lemma), "The word is now complete")
+        assertEquals(3, SpellingChecker.applyHint("gez", lemma, emptySet())?.revealedPosition, "A normal hint reports the position it revealed")
+    }
+
+    @Test
+    fun applyHint_tidiesDoubledInnerSpaces() {
+        val hint = SpellingChecker.applyHint("ice  creamx", "ice cream", emptySet())!!
+        assertEquals("ice cream", hint.value, "Doubled space collapses and the tail goes; the words survive")
+        assertNull(hint.revealedPosition, "Nothing was revealed")
+        assertFalse(SpellingChecker.canHint(hint.value, "ice cream"), "The answer is now complete")
     }
 
     @Test

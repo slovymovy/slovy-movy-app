@@ -18,6 +18,7 @@ import com.slovy.slovymovyapp.data.remote.LearnerLevel
 import com.slovy.slovymovyapp.data.remote.PartOfSpeech
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
 import com.slovy.slovymovyapp.data.remote.WordResult
+import com.slovy.slovymovyapp.i18n.UiText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -201,6 +202,23 @@ class StudySessionMapperTest {
         // Same bullet-per-language block as the word-details screen, one line per language.
         assertEquals("• cosy, sociable\n• уютный", mapped.back.translations)
         assertEquals("• a feeling of warmth\n• чувство тепла", mapped.back.definitionTranslation)
+    }
+
+    @Test
+    fun translationToWordTyped_rendersTheTypedCard() {
+        val sessionCard = sessionCard(
+            variant = CardVariant(CardKind.TRANSLATION_TO_WORD_TYPED, targetLang = Language.ENGLISH.code),
+        )
+
+        val mapped = assertIs<StudyCardUiState.Typed>(sessionCard.toStudyCardUiState(emptySet()))
+
+        assertEquals("cosy, sociable", mapped.promptText, "The prompt is the translation cue")
+        assertEquals("gezellig", mapped.lemma, "The expected answer is the lemma")
+        assertEquals("nl", mapped.languageCode, "The keyboard hint locale is the studied language")
+        assertEquals(UiText.Resource(PartOfSpeech.ADJECTIVE.displayName), mapped.partOfSpeech, "The entry's part of speech becomes the placeholder")
+        assertEquals("gezellig", mapped.back.headline, "The back is the same source back as the tap-to-check card")
+        assertTrue(mapped.back.isLemmaHeadline)
+        assertFalse(mapped.canCheck, "Nothing typed yet, so Check stays disabled")
     }
 
     @Test

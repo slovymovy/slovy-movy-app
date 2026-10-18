@@ -2,10 +2,14 @@ package com.slovy.slovymovyapp.data.learning.spelling
 
 import com.slovy.slovymovyapp.util.stripAccents
 
-/** A hint applied to the learner's field: the new text and which of its positions a hint revealed. */
+/**
+ * A hint applied to the learner's field: the new text, which of its positions a hint revealed, and
+ * the position revealed by this hint, null when it only cut a wrong tail.
+ */
 data class SpellingHint(
     val value: String,
     val hintedPositions: Set<Int>,
+    val revealedPosition: Int?,
 )
 
 /**
@@ -33,46 +37,72 @@ object SpellingChecker {
     private val whitespace = Regex("\\s+")
 
     /**
-     * Trim, collapse inner whitespace and lowercase, the only normalisation applied before
-     * comparing. Case is folded per character so the length never changes and every comparison
+     * Trim, collapse inner whitespace and fold each character, the only normalisation applied
+     * before comparing. Folding is per character so the length never changes and every comparison
      * here agrees on what a position means.
      */
     fun normalize(text: String): String =
-        text.trim().replace(whitespace, " ").map { it.lowercaseChar() }.joinToString("")
+        text.trim().replace(whitespace, " ").map(::fold).joinToString("")
+
+    /**
+     * Lowercases and maps the typographic apostrophes and dashes that smart keyboards insert onto
+     * the plain ones dictionaries use, so "zo’n" is the same spelling as "zo'n".
+     */
+    private fun fold(c: Char): Char = when (c) {
+        '\u2018', '\u2019', '\u02BC', '\u00B4', '`' -> '\''
+        '\u2010', '\u2011', '\u2012', '\u2013', '\u2014', '\u2212' -> '-'
+        else -> c.lowercaseChar()
+    }
 
     fun isCorrect(attempt: String, expected: String): Boolean =
         normalize(attempt) == normalize(expected)
 
-    /** Length of the longest prefix of [value] matching [expected] character by character, ignoring case. */
+    /** Length of the longest prefix of [value] matching [expected] character by character, after folding. */
     fun matchingPrefixLength(value: String, expected: String): Int {
         var length = 0
         while (
             length < value.length &&
             length < expected.length &&
-            value[length].equals(expected[length], ignoreCase = true)
+            fold(value[length]) == fold(expected[length])
         ) {
             length++
         }
         return length
     }
 
-    /** False once the field already holds the whole word; the last letter may be hinted like any other. */
+    /**
+     * False once the field already holds the word as [isCorrect] sees it, so a hint can never
+     * destroy a correct answer. Otherwise there is always something to do: reveal the next letter
+     * or cut a wrong tail.
+     */
     fun canHint(value: String, expected: String): Boolean =
-        matchingPrefixLength(value, expected) < expected.length
+        !isCorrect(value, expected)
 
     /**
      * Keeps the longest correct prefix of [value], drops whatever follows it and appends the next
      * letter of [expected]. Returns null when [canHint] is false, that is once the word is complete.
      *
      * `""` becomes `g`, `gez` becomes `geze`, `gezal` becomes `geze`, `hez` becomes `g` for
-     * `gezellig`. Earlier hints that survive the truncation stay marked.
+     * `gezellig`; `gezelligxx` becomes `gezellig`, with nothing left to reveal. Earlier hints that
+     * survive the truncation stay marked.
      */
     fun applyHint(value: String, expected: String, hintedPositions: Set<Int>): SpellingHint? {
         if (!canHint(value, expected)) return null
-        val kept = matchingPrefixLength(value, expected)
+        // Stray or doubled spaces are not the learner's spelling; tidy them rather than reset to
+        // one letter. Earlier hints keep their mark only where their letter still sits.
+        val base = value.trimStart().replace(whitespace, " ")
+        val shift = value.length - value.trimStart().length
+        val kept = matchingPrefixLength(base, expected)
+        val survivingHints = hintedPositions
+            .map { it - shift }
+            .filterTo(mutableSetOf()) { it in 0 until kept && fold(base[it]) == fold(expected[it]) }
+        if (kept == expected.length) {
+            return SpellingHint(value = base.take(kept), hintedPositions = survivingHints, revealedPosition = null)
+        }
         return SpellingHint(
-            value = value.take(kept) + expected[kept],
-            hintedPositions = hintedPositions.filterTo(mutableSetOf()) { it < kept } + kept,
+            value = base.take(kept) + expected[kept],
+            hintedPositions = survivingHints + kept,
+            revealedPosition = kept,
         )
     }
 
@@ -82,7 +112,7 @@ object SpellingChecker {
      */
     fun hintedPositionsAfterEdit(value: String, expected: String, hintedPositions: Set<Int>): Set<Int> =
         hintedPositions.filterTo(mutableSetOf()) { index ->
-            index < value.length && index < expected.length && value[index].equals(expected[index], ignoreCase = true)
+            index < value.length && index < expected.length && fold(value[index]) == fold(expected[index])
         }
 
     /** True when the field holds at least one character the learner typed, not counting hints or spaces. */
@@ -97,8 +127,8 @@ object SpellingChecker {
      * and the rest of the word is not.
      */
     fun diff(attempt: String, expected: String): SpellingDiff {
-        val typed = attempt.trim().map { it.lowercaseChar() }
-        val target = expected.map { it.lowercaseChar() }
+        val typed = attempt.trim().map(::fold)
+        val target = expected.map(::fold)
         val matched = align(typed, target)
         return SpellingDiff(
             missed = target.indices.filterTo(linkedSetOf()) { it !in matched.target },

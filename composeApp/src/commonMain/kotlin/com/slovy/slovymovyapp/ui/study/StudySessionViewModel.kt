@@ -142,6 +142,7 @@ class StudySessionViewModel(
     private var isExitingSession: Boolean = false
     private var cardLoadJob: Job? = null
     private var reviewJob: Job? = null
+    private var revealInFlight: Boolean = false
     private val snackbarMutex = Mutex()
 
     init {
@@ -643,27 +644,48 @@ class StudySessionViewModel(
     }
 
     fun reveal() {
-        startReveal()
+        startTurnOver { front -> front.card }
     }
 
-    /** Turns the card over. False when nothing was started: the session is closing or the back is already up. */
-    private fun startReveal(): Boolean {
-        if (isExitingSession) return false
-        val active = state as? StudySessionUiState.Active ?: return false
-        if (active.side == StudyCardSide.BACK) return false
+    /**
+     * The active card while it is on its front, no reveal is in flight and the session is not
+     * closing; null otherwise.
+     */
+    private fun revealableFront(): StudySessionUiState.Active? {
+        if (isExitingSession || revealInFlight) return null
+        val active = state as? StudySessionUiState.Active ?: return null
+        return active.takeIf { it.side == StudyCardSide.FRONT }
+    }
 
+    /**
+     * Turns the card over: previews the ratings and shows the back, whose card is [backCard] of the
+     * front as it stands at that moment (the front's own card, or the typed card with its result).
+     * The in-flight flag is raised before anything is launched, so a Go key and a Check tap in the
+     * same frame, or a Show answer racing a Check, cannot turn the card over twice; the state is
+     * re-read inside, so nothing written in between is clobbered by a stale snapshot.
+     */
+    private fun startTurnOver(backCard: (StudySessionUiState.Active) -> StudyCardUiState) {
+        revealableFront() ?: return
+        revealInFlight = true
         viewModelScope.launch {
-            val card = currentCard ?: return@launch
-            currentOutcomes = sessionService.previewRatings(card)
-            state = active.copy(
-                side = StudyCardSide.BACK,
-                ratingOptions = currentOutcomes.toStudyRatings(),
-            )
-            if (autoplayEnabled) {
-                autoplayBackAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
+            try {
+                val sessionCard = currentCard ?: return@launch
+                currentOutcomes = sessionService.previewRatings(sessionCard)
+                val front = state as? StudySessionUiState.Active ?: return@launch
+                if (front.side != StudyCardSide.FRONT) return@launch
+                val card = backCard(front)
+                state = front.copy(
+                    card = card,
+                    side = StudyCardSide.BACK,
+                    ratingOptions = currentOutcomes.toStudyRatings(),
+                )
+                if (autoplayEnabled) {
+                    autoplayBackAudioText(card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
+                }
+            } finally {
+                revealInFlight = false
             }
         }
-        return true
     }
 
     fun revealFirstLetterHint() {
@@ -689,59 +711,38 @@ class StudySessionViewModel(
 
     /** The learner edited the spelling field. */
     fun updateTypedInput(value: TextFieldValue) {
-        val active = state as? StudySessionUiState.Active ?: return
-        if (active.side != StudyCardSide.FRONT) return
-        val card = active.card as? StudyCardUiState.Typed ?: return
+        val card = typedCardAwaitingAnswer() ?: return
+        val active = state as StudySessionUiState.Active
         state = active.copy(card = card.withInput(value))
     }
 
     /** Reveals the next letter of the word, discarding a wrong tail first. */
     fun revealTypedHint() {
-        val active = state as? StudySessionUiState.Active ?: return
-        if (active.side != StudyCardSide.FRONT) return
-        val card = active.card as? StudyCardUiState.Typed ?: return
+        val card = typedCardAwaitingAnswer() ?: return
+        val active = state as StudySessionUiState.Active
         val hinted = card.withNextLetterHint() ?: return
         state = active.copy(card = hinted)
-        logHintRevealed(card.id, card.lemma, hintKind = "next_letter")
+        if (hinted.input.hintsUsed > card.input.hintsUsed) {
+            logHintRevealed(card.id, card.lemma, hintKind = "next_letter")
+        }
     }
 
     /** Compares the field with the word and turns the card over with the comparison on its back. */
     fun checkTypedAnswer() {
         val card = typedCardAwaitingAnswer() ?: return
-        val checked = card.checked() ?: return
-        revealTyped(card, checked)
+        if (card.checked() == null) return
+        startTurnOver { front -> (front.card as? StudyCardUiState.Typed)?.checked() ?: front.card }
     }
 
     /** The learner gives up on typing; the back shows the word, with the comparison if they typed. */
     fun showTypedAnswer() {
-        val card = typedCardAwaitingAnswer() ?: return
-        revealTyped(card, card.answerShown())
+        typedCardAwaitingAnswer() ?: return
+        startTurnOver { front -> (front.card as? StudyCardUiState.Typed)?.answerShown() ?: front.card }
     }
 
-    /**
-     * Writes [answered] and turns the card over. The result goes in first so a second trigger in
-     * the same frame is refused; if the reveal does not start, the result comes out again so the
-     * card is not left on its front with Check inert.
-     */
-    private fun revealTyped(card: StudyCardUiState.Typed, answered: StudyCardUiState.Typed) {
-        val active = state as? StudySessionUiState.Active ?: return
-        state = active.copy(card = answered)
-        if (!startReveal()) {
-            state = active.copy(card = card)
-        }
-    }
-
-    /**
-     * The typed card on the front with no result yet. The result is written before [reveal] turns
-     * the card over in its coroutine, so it is the guard that stops a Go key and a Check tap in the
-     * same frame, or a Show answer racing a Check, from revealing twice.
-     */
-    private fun typedCardAwaitingAnswer(): StudyCardUiState.Typed? {
-        val active = state as? StudySessionUiState.Active ?: return null
-        if (active.side != StudyCardSide.FRONT) return null
-        val card = active.card as? StudyCardUiState.Typed ?: return null
-        return card.takeIf { it.result == null }
-    }
+    /** The typed card on a revealable front; null otherwise. */
+    private fun typedCardAwaitingAnswer(): StudyCardUiState.Typed? =
+        revealableFront()?.card as? StudyCardUiState.Typed
 
     fun revealTranslationHint() {
         val active = state as? StudySessionUiState.Active ?: return
