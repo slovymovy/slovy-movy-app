@@ -772,7 +772,17 @@ fun App(
                     DeveloperScreen(
                         viewModel = viewModel,
                         isDebugBuild = buildConfig.isDebug,
+                        onOpenTypedPlayground = { navController.navigate(AppDestination.TypedCardPlayground) },
                         onBack = { navController.popBackStack() },
+                    )
+                }
+                composable<AppDestination.TypedCardPlayground> { backStackEntry ->
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        TypedCardPlaygroundViewModel()
+                    }
+                    TypedCardPlaygroundScreen(
+                        viewModel = viewModel,
+                        onClose = { navController.popBackStack() },
                     )
                 }
                 composable<AppDestination.WordDetail> { backStackEntry ->

@@ -35,6 +35,7 @@ class LearningDomainTest {
                 "WORD_TO_TRANSLATION",
                 "CLOZE_TRANSLATION",
                 "LISTENING_TRANSLATION",
+                "TRANSLATION_TO_WORD_TYPED",
             ),
             CardKind.entries.map { it.name },
         )
@@ -242,8 +243,7 @@ class LearningDomainTest {
 
         assertEquals(FsrsDefaults.DEFAULT_INTAKE_FAMILIES, config.defaultIntakeFamilies)
         assertEquals(FsrsDefaults.ENABLE_FUZZ, config.enableFuzz)
-        assertEquals(FsrsDefaults.PRODUCTION_UNLOCK_STABILITY, config.productionUnlockStability)
-        assertEquals(FsrsDefaults.CONTEXT_UNLOCK_STABILITY, config.contextUnlockStability)
+        assertEquals(FsrsDefaults.UNLOCK_RULES, config.unlockRules)
         assertEquals(FsrsDefaults.PAUSE_INTAKE_RETENTION_MIN_REVIEWS, config.pauseIntakeRetentionMinReviews)
         assertEquals(FsrsDefaults.CROSS_FAMILY_CREDITS, config.crossFamilyCredits)
         assertEquals(FsrsDefaults.BURY_FAILED_SESSION_CARDS_FOR, config.buryFailedSessionCardsFor)
@@ -281,6 +281,10 @@ class LearningDomainTest {
             CardFamily.RECOGNIZE_VOICE to CardFamily.PRODUCE_WORD_IN_CONTEXT,
             CardFamily.RECOGNIZE_VOICE to CardFamily.PRODUCE_WORD,
             CardFamily.RECOGNIZE_VOICE to CardFamily.RECOGNIZE_SENSE,
+            CardFamily.PRODUCE_WORD to CardFamily.SPELL_WORD,
+            CardFamily.SPELL_WORD to CardFamily.PRODUCE_WORD,
+            CardFamily.SPELL_WORD to CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            CardFamily.SPELL_WORD to CardFamily.RECOGNIZE_SENSE,
         )
 
         assertEquals(expectedEdges, configuredEdges)

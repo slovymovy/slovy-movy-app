@@ -26,10 +26,10 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
 
     val cardData = wordResult.card ?: return null
     val sourceLanguage = Language.fromCodeOrNull(card.langCode) ?: return null
-    val sense = cardData.entries
-        .flatMap { it.senses }
-        .firstOrNull { it.senseId == senseId }
+    val entry = cardData.entries
+        .firstOrNull { entry -> entry.senses.any { it.senseId == senseId } }
         ?: return null
+    val sense = entry.senses.first { it.senseId == senseId }
     val targetLanguage = variant.targetLang?.let(Language::fromCodeOrNull)
     val lemma = cardData.lemma
 
@@ -125,7 +125,9 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
             )
         }
 
-        CardKind.TRANSLATION_TO_WORD -> {
+        CardKind.TRANSLATION_TO_WORD,
+        CardKind.TRANSLATION_TO_WORD_TYPED,
+            -> {
             val target = targetLanguage ?: return null
             val cue = sense.translationCue(target) ?: return null
             val senses = studiedSenses.toSourceSenseUiStates(
@@ -134,26 +136,41 @@ fun SessionCard.toStudyCardUiState(favoriteLemmas: Set<String>): StudyCardUiStat
                 translationTargets = translationTargets,
                 favoriteLemmas = favoriteLemmas,
             )
-            StudyCardUiState.Production(
-                id = card.id.toString(),
-                chipLabel = UiText.Plain("${target.studyCode()} -> ${sourceLanguage.studyCode()}"),
-                promptLabel = UiText.Resource(
-                    Res.string.study_prompt_translate_to,
-                    listOf(sourceLanguage.selfName),
-                ),
-                promptText = cue,
-                firstLetterHint = lemma.firstLetterHint(),
-                senses = senses,
-                activeSenseId = sense.senseId,
-                back = sourceBack(
-                    lemma = lemma,
-                    sense = sense,
-                    targetLanguage = target,
-                    translationTargets = translationTargets,
-                    favoriteLemmas = favoriteLemmas,
-                    examples = sense.studyExamples(target),
-                ),
+            val back = sourceBack(
+                lemma = lemma,
+                sense = sense,
+                targetLanguage = target,
+                translationTargets = translationTargets,
+                favoriteLemmas = favoriteLemmas,
+                examples = sense.studyExamples(target),
             )
+            if (variant.kind == CardKind.TRANSLATION_TO_WORD_TYPED) {
+                StudyCardUiState.Typed(
+                    id = card.id.toString(),
+                    chipLabel = UiText.Resource(Res.string.study_chip_type),
+                    promptText = cue,
+                    partOfSpeech = UiText.Resource(entry.pos.displayName),
+                    lemma = lemma,
+                    languageCode = sourceLanguage.code,
+                    senses = senses,
+                    activeSenseId = sense.senseId,
+                    back = back,
+                )
+            } else {
+                StudyCardUiState.Production(
+                    id = card.id.toString(),
+                    chipLabel = UiText.Plain("${target.studyCode()} -> ${sourceLanguage.studyCode()}"),
+                    promptLabel = UiText.Resource(
+                        Res.string.study_prompt_translate_to,
+                        listOf(sourceLanguage.selfName),
+                    ),
+                    promptText = cue,
+                    firstLetterHint = lemma.firstLetterHint(),
+                    senses = senses,
+                    activeSenseId = sense.senseId,
+                    back = back,
+                )
+            }
         }
 
         CardKind.CLOZE_SOURCE -> {

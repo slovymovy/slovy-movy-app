@@ -54,6 +54,12 @@ fun buildTaskVariants(
                 .filter { sense.satisfiesTranslationData(CardKind.LISTENING_TRANSLATION, it) }
                 .forEach { add(CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = it.code)) }
         }
+
+        CardFamily.SPELL_WORD -> buildList {
+            targets
+                .filter { sense.satisfiesTranslationData(CardKind.TRANSLATION_TO_WORD_TYPED, it) }
+                .forEach { add(CardVariant(CardKind.TRANSLATION_TO_WORD_TYPED, targetLang = it.code)) }
+        }
     }
 }
 
@@ -63,11 +69,13 @@ fun buildTaskVariants(
 // selected in a shape its renderer rejects: WORD_TO_TRANSLATION renders translation words as the
 // answer headline and the target-language definition as the body, TRANSLATION_TO_WORD cues from
 // translation words, and the remaining bilingual kinds only need some translation cue for the
-// card back.
+// card back. TRANSLATION_TO_WORD_TYPED cues from translation words exactly like TRANSLATION_TO_WORD.
 internal fun LanguageCardResponseSense.satisfiesTranslationData(kind: CardKind, language: Language): Boolean =
     when (kind) {
         CardKind.WORD_TO_TRANSLATION -> hasTranslationWords(language) && hasTranslationDefinition(language)
-        CardKind.TRANSLATION_TO_WORD -> hasTranslationWords(language)
+        CardKind.TRANSLATION_TO_WORD,
+        CardKind.TRANSLATION_TO_WORD_TYPED,
+            -> hasTranslationWords(language)
         else -> hasTranslationWords(language) || hasTranslationDefinition(language)
     }
 
