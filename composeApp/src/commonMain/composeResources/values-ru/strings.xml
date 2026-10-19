@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">Добавить язык</string>
     <string name="settings_section_translation_languages">Языки перевода</string>
     <string name="settings_section_voice">Озвучка</string>
-    <string name="settings_section_your_data">Данные</string>
     <string name="settings_section_about">О приложении</string>
 
     <string name="feedback_dialog_title">Отзыв о приложении</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">Удалить строки учебных карточек для отладки. Эти действия нельзя отменить.</string>
     <string name="developer_remove_suspended_cards">Удалить скрытые</string>
     <string name="developer_remove_all_learning_cards">Удалить все учебные карточки</string>
+    <string name="developer_app_data_title">Данные приложения</string>
+    <string name="developer_app_data_description">Экспортировать базы данных приложения в архив или импортировать его. Импорт заменяет сохранённые слова, прогресс и настройки на этом устройстве.</string>
+    <string name="developer_export_app_data">Экспортировать данные приложения</string>
+    <string name="developer_import_app_data">Импортировать данные приложения…</string>
+    <string name="developer_import_staged">Импорт (%1$s) подготовлен. Закройте приложение и откройте его снова, чтобы применить.</string>
+    <string name="developer_import_quit">Закрыть приложение сейчас</string>
+    <string name="developer_import_discard">Отменить подготовленный импорт</string>
+    <string name="developer_import_last_applied">При последнем запуске применён импорт: %1$s</string>
+    <string name="developer_import_last_failed">При последнем запуске импорт отклонён: %1$s</string>
     <string name="developer_stats_title">Статистика</string>
     <string name="developer_terminal_title">Терминал</string>
     <string name="developer_terminal_clear">Очистить</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">Все материалы доступны по лицензии CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Благодарим сообщество Викисловаря и Тату Илонена за свободный доступ к этим данным.</string>
 
-    <string name="app_data_backup_title">Резервная копия</string>
-    <string name="app_data_backup_description">Создаёт архив с вашими словами и настройками. Пригодится, чтобы сохранить данные или перенести их на новое устройство.</string>
-    <string name="app_data_exporting">Экспорт...</string>
-    <string name="app_data_export_now">Экспортировать сейчас</string>
 
     <string name="settings_dictionary_size_with_colon">Словарь: %1$s</string>
     <string name="settings_dictionary_size">Словарь %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">Не удалось скачать словарь: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Не удалось скачать перевод: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Не удалось загрузить данные озвучки: %1$s</string>
-    <string name="settings_export_success">Экспортировано %1$s в %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">Не удалось открыть окно обратной связи: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Ошибка при экспорте данных: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Не удалось сохранить выбор голоса: %1$s</string>
     <string name="settings_feedback_sent">Отзыв отправлен. Спасибо!</string>
     <string name="settings_feedback_view">Посмотреть</string>

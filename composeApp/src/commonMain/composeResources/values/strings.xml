@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">Add a language to learn</string>
     <string name="settings_section_translation_languages">Translation languages</string>
     <string name="settings_section_voice">Voice</string>
-    <string name="settings_section_your_data">Your data</string>
     <string name="settings_section_about">About</string>
 
     <string name="feedback_dialog_title">App feedback</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">Delete learning card rows for debugging. These actions cannot be undone.</string>
     <string name="developer_remove_suspended_cards">Remove suspended</string>
     <string name="developer_remove_all_learning_cards">Remove all learning cards</string>
+    <string name="developer_app_data_title">App data</string>
+    <string name="developer_app_data_description">Export the app databases to an archive, or import one. Importing replaces saved words, progress and settings on this device.</string>
+    <string name="developer_export_app_data">Export app data</string>
+    <string name="developer_import_app_data">Import app data…</string>
+    <string name="developer_import_staged">An import of %1$s is staged. Quit and reopen the app to apply it.</string>
+    <string name="developer_import_quit">Quit app now</string>
+    <string name="developer_import_discard">Discard staged import</string>
+    <string name="developer_import_last_applied">Last launch applied an import: %1$s</string>
+    <string name="developer_import_last_failed">Last launch rejected an import: %1$s</string>
     <string name="developer_stats_title">Stats</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Clear</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">All words data is available under CC-BY-SA-4.0 license.</string>
     <string name="acknowledgements_thanks">We are grateful to the Wiktionary community and to Tatu Ylonen for making this data freely available.</string>
 
-    <string name="app_data_backup_title">Back up your saved words</string>
-    <string name="app_data_backup_description">Exports your saved words and app settings to an archive. Useful for keeping a copy or moving to a new device.</string>
-    <string name="app_data_exporting">Exporting...</string>
-    <string name="app_data_export_now">Export now</string>
 
     <string name="settings_dictionary_size_with_colon">Dictionary: %1$s</string>
     <string name="settings_dictionary_size">Dictionary %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">Failed to download dictionary: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Failed to download translation: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Failed to load voices: %1$s</string>
-    <string name="settings_export_success">Exported %1$s to %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">Failed to open share dialog: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Failed to export app data: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Failed to update voice selection: %1$s</string>
     <string name="settings_feedback_sent">Feedback sent</string>
     <string name="settings_feedback_view">View</string>

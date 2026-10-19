@@ -23,20 +23,20 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
     private val exportsRoot: String by lazy {
         val paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
         val dir = (paths as NSArray).objectAtIndex(0u) as? String ?: NSHomeDirectory()
-        val full = "$dir/SlovyMovy"
+        val full = "$dir/OpenWords"
         ensureDir(full)
         full
     }
 
     actual val isSupported: Boolean = true
-    actual val destinationDescription: String = "Documents/SlovyMovy"
+    actual val destinationDescription: String = "Documents/OpenWords"
     actual val canShareExport: Boolean = true
 
     actual suspend fun exportAppData(): AppDataExportResult = withContext(Dispatchers.Default) {
         val formatter = NSDateFormatter().apply {
             dateFormat = "yyyyMMdd-HHmmss"
         }
-        val fileName = "slovymovy-db-export-${formatter.stringFromDate(NSDate())}.tar"
+        val fileName = "openwords-export-${formatter.stringFromDate(NSDate())}.tar"
         val outputPath = "$exportsRoot/$fileName"
         withAppDataSnapshots(platformDbSupport) { snapshots ->
             require(snapshots.isNotEmpty()) { "No database files found to export." }
@@ -58,7 +58,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
 
             AppDataExportResult(
                 artifactName = fileName,
-                destinationLabel = "Documents/SlovyMovy/$fileName",
+                destinationLabel = "Documents/OpenWords/$fileName",
                 shareReference = outputPath
             )
         }
@@ -66,7 +66,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
 
     actual fun shareExport(result: AppDataExportResult) {
         val shareReference = result.shareReference ?: error("Missing share reference for export.")
-        val presenter = topViewController() ?: error("No iOS view controller available for sharing.")
+        val presenter = IosPresentation.topViewController() ?: error("No iOS view controller available for sharing.")
         val fileUrl = NSURL.fileURLWithPath(shareReference)
         val shareSheet = UIActivityViewController(
             activityItems = listOf(fileUrl),
@@ -124,28 +124,5 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
         if (!fileManager.fileExistsAtPath(path)) {
             fileManager.createDirectoryAtPath(path, true, null, null)
         }
-    }
-
-    private fun topViewController(): UIViewController? {
-        val controller = activeWindow()
-            ?.rootViewController
-            ?: UIApplication.sharedApplication.keyWindow?.rootViewController
-        var current = controller
-        while (current?.presentedViewController != null) {
-            current = current.presentedViewController
-        }
-        return current
-    }
-
-    private fun activeWindow(): UIWindow? {
-        val scenes = UIApplication.sharedApplication.connectedScenes
-            .mapNotNull { it as? UIWindowScene }
-        val foregroundScenes = scenes.filter { scene ->
-            scene.activationState == UISceneActivationStateForegroundActive
-        }
-        val windows = (foregroundScenes.ifEmpty { scenes }).flatMap { scene ->
-            scene.windows.mapNotNull { it as? UIWindow }
-        }
-        return windows.firstOrNull { window -> window.isKeyWindow() } ?: windows.firstOrNull()
     }
 }

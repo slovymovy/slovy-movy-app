@@ -106,6 +106,10 @@ fun DeveloperScreen(
         onShiftTimeBack = viewModel::shiftTimeBack,
         onRunIntake = viewModel::runIntake,
         onClearListsCache = viewModel::clearListsCache,
+        onExportAppData = viewModel::exportAppData,
+        onImportAppData = viewModel::importAppData,
+        onDiscardStagedImport = viewModel::discardStagedImport,
+        onQuitToApplyImport = viewModel::quitToApplyImport,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -129,6 +133,10 @@ fun DeveloperScreenContent(
     onShiftTimeBack: (TimeShiftOption) -> Unit = {},
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onClearListsCache: () -> Unit = {},
+    onExportAppData: () -> Unit = {},
+    onImportAppData: () -> Unit = {},
+    onDiscardStagedImport: () -> Unit = {},
+    onQuitToApplyImport: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -242,6 +250,22 @@ fun DeveloperScreenContent(
                     DeveloperCachesCard(
                         isBusy = state.isBusy,
                         onClearListsCache = onClearListsCache,
+                    )
+                }
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.developer_app_data_title),
+                        modifier = Modifier.padding(top = AppSpacing.sm),
+                    )
+                }
+                item {
+                    DeveloperAppDataCard(
+                        appData = state.appData,
+                        isBusy = state.isBusy,
+                        onExport = onExportAppData,
+                        onImport = onImportAppData,
+                        onDiscardStagedImport = onDiscardStagedImport,
+                        onQuitToApply = onQuitToApplyImport,
                     )
                 }
 

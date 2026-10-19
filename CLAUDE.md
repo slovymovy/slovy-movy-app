@@ -22,6 +22,9 @@ Important namespaces and entry points:
 - Android application ID: `com.slovy.slovymovyapp`; Android app namespace: `com.slovy.slovymovyapp.androidApp`.
 - Shared Compose/library namespace: `com.slovy.slovymovyapp`.
 - Server main class: `com.slovy.slovymovyapp.ApplicationKt`.
+- Process entry: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/AppRoot.kt`. Every platform shell calls
+  `AppRoot`, which applies a staged app-data import, opens `app.db`, and then renders `App`. Do not open the app
+  database in a platform shell.
 - Shared UI navigation: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/App.kt`; its typed destinations
   are in `AppDestination.kt` and the app-scoped object graph in `AppContainer.kt`, both alongside it.
 - Versions: `gradle/libs.versions.toml`. The root build derives `versionCode` from the git commit count and
@@ -196,8 +199,7 @@ Import `PreviewParameter` from `androidx.compose.ui.tooling.preview.PreviewParam
 ## Localization
 
 Compose resources live under `composeApp/src/commonMain/composeResources`. Base UI strings are in `values/strings.xml`;
-localized UI resource sets currently exist for DE, ES, IT, NL, PL, and RU. That is intentionally a smaller set than
-the ten learning languages.
+localized UI resource sets exist for CS, DE, ES, FR, IT, NL, PL, RU, TR, and ZH.
 
 - Use `stringResource(Res.string.<key>)` for composable UI and accessibility text. Use XML placeholders and `<plurals>`
   rather than building grammar in Kotlin.
@@ -457,11 +459,28 @@ Production client server URL is `https://backend.openwords.ai`.
 
 ## Export, settings, and data-version behavior
 
+Export and import are developer-mode tools on the Developer screen, not Settings features.
 `AppDataExporter` is expect/actual; shared tar/snapshot logic is in `composeApp/.../data/export` and
 `composeApp/.../data/remote/AppDataSnapshotter.kt`. A consistent snapshot uses `VACUUM INTO`, with
 `wal_checkpoint(FULL)` plus copy as fallback. The archive contains the three main snapshots (`app.db`,
 `local_dictionary.db`, `local_translation.db`), not live `-wal`/`-shm` sidecars. `.part` names are used for atomic
 file destinations where the platform permits.
+
+Import is the reverse. `AppDataImportPicker` (expect/actual: Android document picker through the Activity's result
+registry, desktop `FileDialog`, iOS `UIDocumentPickerViewController`) only picks a file; `AppDataImportManager.stage`
+copies it to `openwords-import-staged.tar` in the databases directory after validating it fully, and
+`applyStagedImportIfPresent` runs on the next launch, from `AppRoot`, before any app database connection exists. It never
+swaps a live database, and `AppRoot` runs it once per process on a scope that outlives the composition. The archive
+is the whole state, so standard databases absent from it are removed; the device-bound settings and the names of the
+databases the device has are snapshotted to `openwords-import-carried.json` first, every existing database and sidecar
+(`-wal`, `-shm`, `-journal`) is moved to a backup name before anything is installed, and any failure restores those
+backups and deletes databases the device never had. An unreadable device `app.db` contributes no settings rather than
+blocking the import. Deleting the archive is the commit point: a launch that finds the snapshot with the archive rolls
+the interrupted attempt back and retries from the snapshot; without the archive it only cleans up. Validation reads the SQLite header (magic, `user_version` within the current schema) and then
+migrates and `integrity_check`s a scratch copy with the normal writable driver, so a schema-less or wrong-kind file
+can never pass. `AppDataImportManager.carriedOverSettings` lists the device-bound settings copied from the previous
+`app.db` into the imported one; keep it in sync when adding device-specific keys. Rollback is tested through the
+`AppDataFileStore` seam; keep file operations behind it.
 
 `Setting.Name` is the canonical key list. It includes onboarding/language/data/voice settings, per-screen persisted
 languages, developer mode, and migration markers. Add keys there and use `SettingsRepository`; do not invent raw

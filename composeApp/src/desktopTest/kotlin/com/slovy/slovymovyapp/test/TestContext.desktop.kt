@@ -21,7 +21,7 @@ actual object TestContext {
     actual suspend fun runInExportTestEnvironment(block: suspend () -> Unit) {
         val originalHome = System.getProperty("user.home")
         val tempHome = withContext(Dispatchers.IO) {
-            Files.createTempDirectory("slovymovy-export-test-")
+            Files.createTempDirectory("openwords-export-test-")
         }.toFile()
         try {
             System.setProperty("user.home", tempHome.absolutePath)

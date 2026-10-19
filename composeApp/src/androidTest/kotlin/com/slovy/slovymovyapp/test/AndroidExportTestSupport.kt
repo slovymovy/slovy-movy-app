@@ -43,7 +43,7 @@ internal object AndroidExportTestSupport {
             } ?: false
         }
         val root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: return false
-        return File(File(root, "SlovyMovy"), result.artifactName).exists()
+        return File(File(root, "OpenWords"), result.artifactName).exists()
     }
 
     fun deleteExportArtifact(
@@ -73,7 +73,7 @@ internal object AndroidExportTestSupport {
             }
         } else {
             val root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: return
-            File(File(root, "SlovyMovy"), result.artifactName).delete()
+            File(File(root, "OpenWords"), result.artifactName).delete()
         }
     }
 
@@ -82,7 +82,7 @@ internal object AndroidExportTestSupport {
             val resolver = context.contentResolver
             val projection = arrayOf(MediaStore.Downloads._ID)
             val selection = "${MediaStore.Downloads.DISPLAY_NAME} LIKE ?"
-            val selectionArgs = arrayOf("slovymovy-db-export-%")
+            val selectionArgs = arrayOf("openwords-export-%")
             resolver.query(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                 projection,
@@ -101,7 +101,7 @@ internal object AndroidExportTestSupport {
             }
         } else {
             val root = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: return
-            File(root, "SlovyMovy").deleteRecursively()
+            File(root, "OpenWords").deleteRecursively()
         }
     }
 

@@ -302,7 +302,6 @@ private fun SettingsScreenPreviewWithMixedStates(
                     "dict_ru" to DownloadProgress(5 * 1024 * 1024, 12 * 1024 * 1024),
                     "trans_en_pl" to DownloadProgress(2 * 1024 * 1024, 7 * 1024 * 1024)
                 ),
-                isAppDataExportSupported = true,
             )
         )
     }

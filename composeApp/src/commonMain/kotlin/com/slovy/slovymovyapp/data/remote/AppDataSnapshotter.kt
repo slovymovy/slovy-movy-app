@@ -16,10 +16,15 @@ internal val standardAppDataDatabaseFileNames: List<String> = listOf(
     LocalDbManager.LOCAL_TRANSLATION_FILENAME
 )
 
+/**
+ * The database file plus the SQLite sidecars that must always travel with it: the WAL pair and the
+ * rollback journal, which SQLite replays into whatever file sits under the database name.
+ */
+internal fun appDataFileNameWithSidecars(name: String): List<String> =
+    listOf(name, "$name-wal", "$name-shm", "$name-journal")
+
 internal val standardAppDataFileNamesWithSidecars: List<String> =
-    standardAppDataDatabaseFileNames.flatMap { name ->
-        listOf(name, "$name-wal", "$name-shm")
-    }
+    standardAppDataDatabaseFileNames.flatMap { appDataFileNameWithSidecars(it) }
 
 internal inline fun <T> withAppDataSnapshots(
     platform: PlatformDbSupport,
@@ -36,7 +41,7 @@ internal inline fun <T> withAppDataSnapshots(
 }
 
 private fun createAppDataSnapshots(platform: PlatformDbSupport): List<AppDataSnapshot> {
-    val snapshotPrefix = "slovymovy-export-snapshot-${Random.nextInt(1_000_000_000)}"
+    val snapshotPrefix = "openwords-export-snapshot-${Random.nextInt(1_000_000_000)}"
     val snapshots = mutableListOf<AppDataSnapshot>()
     try {
         standardAppDataDatabaseFileNames.forEach { fileName ->

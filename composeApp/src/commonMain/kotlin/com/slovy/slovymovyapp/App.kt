@@ -19,6 +19,7 @@ import coil3.svg.SvgDecoder
 import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.AppDataImportOutcome
 import com.slovy.slovymovyapp.data.learning.review.FavoritesReviewCoordinator
 import com.slovy.slovymovyapp.data.learning.review.FavoritesReviewState
 import com.slovy.slovymovyapp.data.remote.*
@@ -73,6 +74,7 @@ fun App(
     platform: PlatformDbSupport,
     appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
+    startupImportOutcome: AppDataImportOutcome?,
 ) {
     // Word-list icons arrive from the server as SVG text; Coil needs the SVG decoder
     // registered to render them (see WordListIcon).
@@ -147,7 +149,6 @@ fun App(
                 dataManager,
                 container.downloadCoordinator,
                 container.dictionaryClient,
-                container.appDataExporter,
                 settingsRepository,
                 platform,
                 buildConfig,
@@ -767,6 +768,10 @@ fun App(
                                     .filterIsInstance<DatabaseFileInfo.Dictionary>()
                                     .map { it.language }
                             },
+                            appDataExporter = container.appDataExporter,
+                            appDataImportPicker = container.appDataImportPicker,
+                            appDataImportManager = container.appDataImportManager,
+                            startupImportOutcome = startupImportOutcome,
                         )
                     }
                     DeveloperScreen(

@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">Voeg een taal toe om te leren</string>
     <string name="settings_section_translation_languages">Vertaaltalen</string>
     <string name="settings_section_voice">Stem</string>
-    <string name="settings_section_your_data">Jouw gegevens</string>
     <string name="settings_section_about">Over</string>
 
     <string name="feedback_dialog_title">Feedback over de app</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">Verwijder leerkaartregels voor debugging. Deze acties kunnen niet ongedaan worden gemaakt.</string>
     <string name="developer_remove_suspended_cards">Verwijder opgeschort</string>
     <string name="developer_remove_all_learning_cards">Verwijder alle leerkaarten</string>
+    <string name="developer_app_data_title">App-gegevens</string>
+    <string name="developer_app_data_description">Exporteert de app-databases naar een archief of importeert er een. Importeren vervangt opgeslagen woorden, voortgang en instellingen op dit apparaat.</string>
+    <string name="developer_export_app_data">App-gegevens exporteren</string>
+    <string name="developer_import_app_data">App-gegevens importeren…</string>
+    <string name="developer_import_staged">Een import van %1$s staat klaar. Sluit de app en open hem opnieuw om hem toe te passen.</string>
+    <string name="developer_import_quit">App nu afsluiten</string>
+    <string name="developer_import_discard">Klaargezette import verwijderen</string>
+    <string name="developer_import_last_applied">Bij de laatste start is een import toegepast: %1$s</string>
+    <string name="developer_import_last_failed">Bij de laatste start is een import geweigerd: %1$s</string>
     <string name="developer_stats_title">Stats</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Wissen</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">Alle woordgegevens zijn beschikbaar onder de CC-BY-SA-4.0-licentie.</string>
     <string name="acknowledgements_thanks">Onze dank gaat uit naar de Wiktionary-community en Tatu Ylonen voor het gratis beschikbaar stellen van deze gegevens.</string>
 
-    <string name="app_data_backup_title">Maak een back-up van je opgeslagen woorden</string>
-    <string name="app_data_backup_description">Exporteert je opgeslagen woorden en app-instellingen naar een archief. Handig om een kopie te bewaren of te verhuizen naar een nieuw apparaat.</string>
-    <string name="app_data_exporting">Bezig met exporteren...</string>
-    <string name="app_data_export_now">Exporteer nu</string>
 
     <string name="settings_dictionary_size_with_colon">Woordenboek: %1$s</string>
     <string name="settings_dictionary_size">Woordenboek %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">Woordenboek downloaden mislukt: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Vertaling downloaden mislukt: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Stemmen laden mislukt: %1$s</string>
-    <string name="settings_export_success">%1$s geëxporteerd naar %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">Delenvenster openen mislukt: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Exporteren van appgegevens mislukt: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Bijwerken van stemselectie mislukt: %1$s</string>
     <string name="settings_feedback_sent">Feedback verzonden</string>
     <string name="settings_feedback_view">Bekijk</string>

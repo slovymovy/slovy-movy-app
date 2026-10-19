@@ -4,6 +4,8 @@ import com.slovy.slovymovyapp.ui.developer.CardTableCard
 import com.slovy.slovymovyapp.ui.developer.DeveloperOptionsCard
 import com.slovy.slovymovyapp.ui.developer.DeveloperScreenContent
 import com.slovy.slovymovyapp.ui.developer.DeveloperUiState
+import com.slovy.slovymovyapp.ui.developer.DeveloperAppDataUiState
+import com.slovy.slovymovyapp.ui.developer.DeveloperStartupImport
 import com.slovy.slovymovyapp.ui.developer.DeveloperCardTableRow
 import com.slovy.slovymovyapp.ui.developer.DeveloperCardTablePageInfo
 import com.slovy.slovymovyapp.ui.developer.CardTablePageSize
@@ -52,6 +54,29 @@ private fun DeveloperScreenPreviewAfterIntake(
             state = DeveloperUiState(
                 terminalLines = listOf(
                     "now INFO/DeveloperViewModel: Action finished: Daily - en:+12/4, pl:+0/0 | total: 12c/4s",
+                ),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DeveloperScreenPreviewStagedImport(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        DeveloperScreenContent(
+            state = DeveloperUiState(
+                appData = DeveloperAppDataUiState(
+                    isExportSupported = true,
+                    isImportSupported = true,
+                    canQuitToApply = true,
+                    stagedImportSizeBytes = 3L * 1024 * 1024,
+                    lastStartupImport = DeveloperStartupImport(
+                        applied = false,
+                        detail = "Imported app.db has schema version 12; this app supports 1..9.",
+                    ),
                 ),
             ),
         )
