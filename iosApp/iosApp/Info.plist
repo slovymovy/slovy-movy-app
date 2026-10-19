@@ -21,6 +21,13 @@
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
 
+        <!-- Expose the Documents directory (app-data exports live in Documents/OpenWords) in the Files app so an export
+             can be re-imported on device. Databases live under Application Support and stay private. -->
+        <key>UIFileSharingEnabled</key>
+        <true/>
+        <key>LSSupportsOpeningDocumentsInPlace</key>
+        <true/>
+
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSExceptionDomains</key>

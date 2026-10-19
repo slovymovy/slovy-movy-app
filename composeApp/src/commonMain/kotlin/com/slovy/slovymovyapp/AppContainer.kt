@@ -5,6 +5,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import com.slovy.slovymovyapp.data.export.AppDataExporter
+import com.slovy.slovymovyapp.data.export.AppDataImportManager
+import com.slovy.slovymovyapp.data.export.AppDataImportPicker
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
@@ -52,6 +54,8 @@ internal class AppContainer(
     val downloadCoordinator: DownloadCoordinator,
     val ttsManager: TextToSpeechManager,
     val appDataExporter: AppDataExporter,
+    val appDataImportPicker: AppDataImportPicker,
+    val appDataImportManager: AppDataImportManager,
     val voiceFilterHelper: VoiceFilterHelper,
 )
 
@@ -148,6 +152,8 @@ internal fun rememberAppContainer(
     val downloadCoordinator = remember { DownloadCoordinator() }
     val ttsManager = remember(androidContext) { TextToSpeechManager(androidContext) }
     val appDataExporter = remember(androidContext) { AppDataExporter(androidContext) }
+    val appDataImportPicker = remember(androidContext) { AppDataImportPicker(androidContext) }
+    val appDataImportManager = remember(platform) { AppDataImportManager(platform) }
     val voiceFilterHelper = remember(settingsRepository) { VoiceFilterHelper(settingsRepository) }
     DisposableEffect(lemmaRecoveryController) {
         onDispose { lemmaRecoveryController.close() }
@@ -172,6 +178,8 @@ internal fun rememberAppContainer(
         downloadCoordinator,
         ttsManager,
         appDataExporter,
+        appDataImportPicker,
+        appDataImportManager,
         voiceFilterHelper,
     ) {
         AppContainer(
@@ -189,6 +197,8 @@ internal fun rememberAppContainer(
             downloadCoordinator = downloadCoordinator,
             ttsManager = ttsManager,
             appDataExporter = appDataExporter,
+            appDataImportPicker = appDataImportPicker,
+            appDataImportManager = appDataImportManager,
             voiceFilterHelper = voiceFilterHelper,
         )
     }

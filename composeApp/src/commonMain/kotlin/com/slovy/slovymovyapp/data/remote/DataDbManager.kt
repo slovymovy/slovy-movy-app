@@ -687,6 +687,7 @@ expect class PlatformDbSupport(androidContext: Any? = null) {
     fun getDatabasePath(name: String): Path
     fun ensureDatabasesDir()
     fun fileExists(path: Path): Boolean
+    fun openInput(sourcePath: Path): PlatformFileInput
     fun openOutput(destPath: Path): PlatformFileOutput
     fun copyFile(from: Path, to: Path): Boolean
     fun deleteFile(path: Path)
@@ -744,6 +745,50 @@ interface PlatformFileOutput {
     fun write(buffer: ByteArray, offset: Int, length: Int)
     fun flush()
     fun close()
+}
+
+interface PlatformFileInput {
+    /** Reads up to [length] bytes into [buffer] at [offset]; returns the count read, or -1 at end of file. */
+    fun read(buffer: ByteArray, offset: Int, length: Int): Int
+    fun close()
+}
+
+inline fun <T> PlatformFileInput.use(block: (PlatformFileInput) -> T): T {
+    try {
+        return block(this)
+    } finally {
+        close()
+    }
+}
+
+inline fun <T> PlatformFileOutput.use(block: (PlatformFileOutput) -> T): T {
+    try {
+        return block(this)
+    } finally {
+        close()
+    }
+}
+
+/** Fills [buffer] as far as the input allows and returns the count read, which is short only at end of file. */
+fun PlatformFileInput.readFully(buffer: ByteArray): Int {
+    var total = 0
+    while (total < buffer.size) {
+        val read = read(buffer, total, buffer.size - total)
+        if (read <= 0) break
+        total += read
+    }
+    return total
+}
+
+/** Copies everything remaining in this input to [output] and flushes it. Closes neither side. */
+fun PlatformFileInput.copyTo(output: PlatformFileOutput) {
+    val buffer = ByteArray(16 * 1024)
+    while (true) {
+        val read = read(buffer, 0, buffer.size)
+        if (read <= 0) break
+        output.write(buffer, 0, read)
+    }
+    output.flush()
 }
 
 // Query-only enforcement is identical across platforms

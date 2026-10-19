@@ -11,6 +11,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.export.AppDataExporter
+import com.slovy.slovymovyapp.data.export.AppDataImportManager
+import com.slovy.slovymovyapp.data.export.AppDataImportOutcome
+import com.slovy.slovymovyapp.data.export.AppDataImportPicker
 import com.slovy.slovymovyapp.data.favorites.CardFamilyDebugCount
 import com.slovy.slovymovyapp.data.favorites.CardScheduleDebugStats
 import com.slovy.slovymovyapp.data.favorites.CardTableDebugRow
@@ -40,6 +44,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import com.slovy.slovymovyapp.ui.formatDeveloperRelativeTime
+import com.slovy.slovymovyapp.ui.formatFileSize
 import com.slovy.slovymovyapp.ui.developerLogSignature
 import com.slovy.slovymovyapp.ui.toDeveloperTerminalLine
 import androidx.compose.runtime.getValue
@@ -100,7 +105,35 @@ data class DeveloperUiState(
     val cardTablePage: DeveloperCardTablePageInfo = DeveloperCardTablePageInfo(),
     val isTableLoading: Boolean = false,
     val tableErrorLabel: String? = null,
+    val appData: DeveloperAppDataUiState = DeveloperAppDataUiState(),
 )
+
+data class DeveloperAppDataUiState(
+    val isExportSupported: Boolean = false,
+    val isImportSupported: Boolean = false,
+    val canQuitToApply: Boolean = false,
+    /** Size of the archive waiting for the next launch, or `null` when nothing is staged. */
+    val stagedImportSizeBytes: Long? = null,
+    val lastStartupImport: DeveloperStartupImport? = null,
+)
+
+data class DeveloperStartupImport(
+    val applied: Boolean,
+    val detail: String,
+)
+
+private fun AppDataImportOutcome.toDeveloperStartupImport(): DeveloperStartupImport = when (this) {
+    is AppDataImportOutcome.Applied -> DeveloperStartupImport(
+        applied = true,
+        detail = buildString {
+            append(result.installedFiles.joinToString())
+            if (result.removedFiles.isNotEmpty()) {
+                append("; removed ").append(result.removedFiles.joinToString())
+            }
+        },
+    )
+    is AppDataImportOutcome.Failed -> DeveloperStartupImport(applied = false, detail = message)
+}
 
 data class DeveloperScheduleStats(
     val futureScheduledCards: Long = 0,
@@ -147,6 +180,10 @@ class DeveloperViewModel(
     private val intake: LearningIntake,
     private val listsService: ListsService,
     private val learningLanguagesProvider: suspend () -> List<Language>,
+    private val appDataExporter: AppDataExporter,
+    private val appDataImportPicker: AppDataImportPicker,
+    private val appDataImportManager: AppDataImportManager,
+    startupImportOutcome: AppDataImportOutcome?,
 ) : ViewModel() {
 
     private val previousDeveloperLogger = AppLogger.developerLogger
@@ -158,7 +195,16 @@ class DeveloperViewModel(
         }
     }
 
-    var state by mutableStateOf(DeveloperUiState())
+    var state by mutableStateOf(
+        DeveloperUiState(
+            appData = DeveloperAppDataUiState(
+                isExportSupported = appDataExporter.isSupported,
+                isImportSupported = appDataImportPicker.isSupported,
+                canQuitToApply = appDataImportPicker.canQuitToApply,
+                lastStartupImport = startupImportOutcome?.toDeveloperStartupImport(),
+            )
+        )
+    )
         private set
 
     val scrollState = LazyListState()
@@ -215,6 +261,52 @@ class DeveloperViewModel(
             val removed = listsService.clearCache()
             "Cleared word lists cache ($removed lists); next sync refetches from the server"
         }
+    }
+
+    fun exportAppData() {
+        runAction(actionName = "Export app data") {
+            val result = appDataExporter.exportAppData()
+            val shareNote = if (!appDataExporter.canShareExport) {
+                ""
+            } else {
+                try {
+                    withContext(Dispatchers.Main) { appDataExporter.shareExport(result) }
+                    ""
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // The archive is already written; a failed share sheet should not read as a failed export.
+                    AppLogger.warn(TAG, "Share dialog failed after export", e)
+                    " (share dialog failed: ${describe(e)})"
+                }
+            }
+            "Exported ${result.artifactName} to ${result.destinationLabel}$shareNote"
+        }
+    }
+
+    fun importAppData() {
+        runAction(actionName = "Import app data") {
+            val picked = appDataImportPicker.pickArchive() ?: return@runAction "Import cancelled"
+            val staged = try {
+                appDataImportManager.stage(picked.input, picked.sizeBytes)
+            } finally {
+                picked.release()
+            }
+            "Staged ${picked.displayName} (${formatFileSize(staged.sizeBytes)}: ${staged.entries.joinToString()}). " +
+                "Quit and reopen the app to apply it."
+        }
+    }
+
+    fun discardStagedImport() {
+        runAction(actionName = "Discard staged import") {
+            appDataImportManager.discardStagedImport()
+            "Discarded the staged import"
+        }
+    }
+
+    fun quitToApplyImport() {
+        AppLogger.info(TAG, "Quitting so the next launch applies the staged import", null)
+        appDataImportPicker.quitToApply()
     }
 
     fun clearTerminalLogs() {
@@ -314,8 +406,15 @@ class DeveloperViewModel(
     }
 
     private fun refreshDeveloperData() {
+        refreshStagedImport()
         refreshSchedulingStats()
         refreshCardTableRows()
+    }
+
+    private fun refreshStagedImport() {
+        state = state.copy(
+            appData = state.appData.copy(stagedImportSizeBytes = appDataImportManager.stagedImportSizeBytes())
+        )
     }
 
     private fun refreshSchedulingStats() {

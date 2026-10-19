@@ -197,7 +197,6 @@
     <string name="settings_add_language_to_learn">Dodaj język</string>
     <string name="settings_section_translation_languages">Języki tłumaczeń</string>
     <string name="settings_section_voice">Głos</string>
-    <string name="settings_section_your_data">Twoje dane</string>
     <string name="settings_section_about">O aplikacji</string>
 
     <string name="feedback_dialog_title">Opinia o aplikacji</string>
@@ -314,6 +313,15 @@
     <string name="developer_danger_description">Usuń wiersze kart nauki do debugowania. Tych akcji nie można cofnąć.</string>
     <string name="developer_remove_suspended_cards">Usuń wstrzymane</string>
     <string name="developer_remove_all_learning_cards">Usuń wszystkie karty nauki</string>
+    <string name="developer_app_data_title">Dane aplikacji</string>
+    <string name="developer_app_data_description">Eksportuje bazy danych aplikacji do archiwum lub importuje je. Import zastępuje zapisane słowa, postępy i ustawienia na tym urządzeniu.</string>
+    <string name="developer_export_app_data">Eksportuj dane aplikacji</string>
+    <string name="developer_import_app_data">Importuj dane aplikacji…</string>
+    <string name="developer_import_staged">Import (%1$s) czeka na zastosowanie. Zamknij aplikację i otwórz ją ponownie.</string>
+    <string name="developer_import_quit">Zamknij aplikację teraz</string>
+    <string name="developer_import_discard">Odrzuć przygotowany import</string>
+    <string name="developer_import_last_applied">Przy ostatnim uruchomieniu zastosowano import: %1$s</string>
+    <string name="developer_import_last_failed">Przy ostatnim uruchomieniu odrzucono import: %1$s</string>
     <string name="developer_stats_title">Statystyki</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Wyczyść</string>
@@ -365,10 +373,6 @@
     <string name="acknowledgements_words_sources_body">Wszystkie dane słownikowe są dostępne na licencji CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Dziękujemy społeczności Wiktionary oraz Tatu Ylonenowi za udostępnienie tych danych.</string>
 
-    <string name="app_data_backup_title">Kopia zapasowa Twoich słów</string>
-    <string name="app_data_backup_description">Eksportuj zapisane słowa i ustawienia do archiwum. Przydatne, aby zachować kopię lub przenieść dane na nowe urządzenie.</string>
-    <string name="app_data_exporting">Eksportowanie...</string>
-    <string name="app_data_export_now">Eksportuj teraz</string>
 
     <string name="settings_dictionary_size_with_colon">Słownik: %1$s</string>
     <string name="settings_dictionary_size">Słownik %1$s</string>
@@ -420,9 +424,6 @@
     <string name="settings_error_download_dictionary_with_reason">Nie udało się pobrać słownika: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Nie udało się pobrać tłumaczenia: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Nie udało się załadować głosów: %1$s</string>
-    <string name="settings_export_success">Wyeksportowano %1$s do %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">Nie udało się otworzyć okna udostępniania: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Nie udało się wyeksportować danych aplikacji: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Nie udało się zaktualizować wyboru głosu: %1$s</string>
     <string name="settings_feedback_sent">Opinia została wysłana</string>
     <string name="settings_feedback_view">Pokaż</string>
