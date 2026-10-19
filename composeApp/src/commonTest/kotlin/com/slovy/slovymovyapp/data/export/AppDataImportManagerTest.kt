@@ -7,6 +7,7 @@ import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.copyTo
+import com.slovy.slovymovyapp.data.remote.readFully
 import com.slovy.slovymovyapp.data.remote.use
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -53,15 +54,18 @@ class AppDataImportManagerTest : BaseTest() {
             createLocalDictionary(platform, "source-dict.db")
             createLocalTranslation(platform, "source-trans.db")
             stageArchive(platform, appDb to "source-app.db", localDict to "source-dict.db", localTrans to "source-trans.db")
-            writeText(platform, "$appDb-journal", "hot rollback journal of the old database")
+            val staleJournal = "hot rollback journal of the old database"
+            writeText(platform, "$appDb-journal", staleJournal)
 
             val result = manager(platform).applyStagedImportIfPresent()
 
             assertNotNull(result, "A staged archive should be applied")
             assertEquals(listOf(appDb, localDict, localTrans).sorted(), result.installedFiles, "All entries should install")
+            // Writing the carried settings may leave the new database's own (empty) journal behind on
+            // platforms that keep a persistent rollback journal; the old one must be gone either way.
             assertFalse(
-                platform.fileExists(platform.getDatabasePath("$appDb-journal")),
-                "The old database's rollback journal must not be replayed into the imported one",
+                readTextOrNull(platform, "$appDb-journal") == staleJournal,
+                "The old database's rollback journal must not survive to be replayed into the imported one",
             )
             assertEquals(emptyList(), result.removedFiles, "Nothing was absent from the archive")
             val settings = readSettings(platform, appDb)
@@ -487,6 +491,15 @@ class AppDataImportManagerTest : BaseTest() {
             lastModifiedEpochSeconds = 1_700_000_000L,
         )
         entries.forEach { (_, sourceName) -> platform.deleteFile(platform.getDatabasePath(sourceName)) }
+    }
+
+    private fun readTextOrNull(platform: PlatformDbSupport, name: String): String? {
+        val path = platform.getDatabasePath(name)
+        if (!platform.fileExists(path)) return null
+        val size = platform.getFileSize(path)?.toInt() ?: return null
+        val bytes = ByteArray(size)
+        val read = platform.openInput(path).use { it.readFully(bytes) }
+        return bytes.decodeToString(0, read)
     }
 
     private fun writeText(platform: PlatformDbSupport, name: String, text: String) {
