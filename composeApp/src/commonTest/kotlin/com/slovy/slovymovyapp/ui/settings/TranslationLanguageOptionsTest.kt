@@ -68,6 +68,21 @@ class TranslationLanguageOptionsTest {
     }
 
     @Test
+    fun aStaleSelectionEqualToTheOnlyLearningLanguageIsMarkedDead() {
+        val state = SettingsUiState(
+            learningLanguages = learning(Language.ENGLISH),
+            translationLanguages = setOf(Language.ENGLISH)
+        )
+
+        val english = state.translationLanguageOptions.single { it.language == Language.ENGLISH }
+        assertEquals(
+            listOf(Language.ENGLISH),
+            english.unsupportedFor,
+            "English selected by an English-only learner serves nothing, so the row says so"
+        )
+    }
+
+    @Test
     fun noInstalledLearningLanguageListsTheFullUnion() {
         val state = SettingsUiState(learningLanguages = emptyList())
 
