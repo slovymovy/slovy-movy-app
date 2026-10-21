@@ -188,26 +188,79 @@ enum class Language(
     ),
 
     /*
+     * Generated for English only (issue #973): most learners want a translation into their own
+     * language, and translating every learning language into every target does not pay for
+     * itself. Both carry translationSourceCodes = setOf("en"), so no learner of another language
+     * is offered them and no Russian word is ever requested with them.
+     */
+    JAPANESE(
+        "ja", "日本語", "🇯🇵", "Japanese",
+        translationSourceCodes = setOf("en"),
+        translationPromptNotes = """
+            Write ordinary mixed script - kanji with kana, katakana for loanwords and foreign names
+            (スミス). No furigana, readings or romaji anywhere.
+
+            Japanese has no spaces, so tag precisely: the word itself, with the following particle
+            outside the tag (私は<w>本</w>を読んだ, not <w>本を</w>). For a verb or adjective, tag the
+            whole inflected form in the sentence (<w>走った</w>); the declared translation stays the
+            dictionary form (走る).
+
+            For a する-noun, declare and tag the noun (勉強) when pos is noun and the する verb
+            (勉強する) when pos is verb.
+
+            Plain form in definitions; natural polite speech (です・ます) in examples.
+
+            Articles, number and some prepositions have no Japanese word. Where the sense is carried
+            by structure alone, write the natural sentence and leave it untagged with an empty
+            declared translation and a paraphrase in the clarification; never insert a filler just to
+            tag something. At least one example per sense must still tag a real word where any
+            carries the sense.
+        """.trimIndent()
+    ),
+
+    /**
+     * European Portuguese, decided 2026-10-21. [englishName] is the sole input to the translation
+     * prompt's `$TARGET_LANG` and is never shown in the UI; plain "Portuguese" would let the model
+     * drift between varieties word by word, because the extracted translations do not pick one
+     * (see [translationPromptNotes]). Brazilian would join as a separate entry rather than a
+     * variant of this one.
+     */
+    PORTUGUESE(
+        "pt", "Português", "🇵🇹", "European Portuguese",
+        translationSourceCodes = setOf("en"),
+        translationPromptNotes = """
+            Write European Portuguese throughout - definitions, translations, clarifications and
+            examples: autocarro, telemóvel, comboio, pequeno-almoço, ecrã, casa de banho; "estou a
+            fazer", not "estou fazendo"; clitics after the verb in affirmative clauses (diga-me,
+            vi-o); "tu" for informal address. Spelling as Portugal applies the 1990 Agreement:
+            facto, registo, económico.
+
+            The extracted translations mix varieties, often both for one sense. Take the European
+            form and drop the Brazilian one (registo, not registro beside it); where only a
+            Brazilian form is given (trem, celular, sorvete), replace it with the European word
+            (comboio, telemóvel, gelado).
+        """.trimIndent()
+    ),
+
+    /*
      * Declared, not yet offered. Their extracts are imported (see kaikki-parser's
      * ExtractionUtils.langToSourceFile), so their translations already enrich the languages being
      * generated, but no corpus has been generated in them: supportedForTranslation stays false
      * until one has, and translationPromptNotes are written and measured. See
      * docs/ADDING_A_LANGUAGE.md in kaikki-parser.
      *
-     * englishName is the sole input to the translation prompt's $TARGET_LANG, so for the two below
-     * whose extract covers more than one variety it is the thing to settle before generating:
-     * Portuguese is European or Brazilian, and Kurdish is Kurmanji or Sorani. Both currently carry
-     * the neutral name, which is only safe while nothing generates from it.
+     * englishName is the sole input to the translation prompt's $TARGET_LANG, so for Kurdish,
+     * whose extract covers more than one variety, it is the thing to settle before generating:
+     * Kurmanji or Sorani. It currently carries the neutral name, which is only safe while nothing
+     * generates from it.
      */
     GREEK("el", "Ελληνικά", "🇬🇷", "Greek", supportedForTranslation = false),
     INDONESIAN("id", "Bahasa Indonesia", "🇮🇩", "Indonesian", supportedForTranslation = false),
-    JAPANESE("ja", "日本語", "🇯🇵", "Japanese", supportedForTranslation = false),
     KOREAN("ko", "한국어", "🇰🇷", "Korean", supportedForTranslation = false),
 
     /** No country flag exists for Kurdish, and every neighbouring one would be wrong. */
     KURDISH("ku", "Kurdî", "🌍", "Kurdish", supportedForTranslation = false),
     MALAY("ms", "Bahasa Melayu", "🇲🇾", "Malay", supportedForTranslation = false),
-    PORTUGUESE("pt", "Português", "🇵🇹", "Portuguese", supportedForTranslation = false),
     THAI("th", "ไทย", "🇹🇭", "Thai", supportedForTranslation = false),
     VIETNAMESE("vi", "Tiếng Việt", "🇻🇳", "Vietnamese", supportedForTranslation = false);
 
@@ -231,13 +284,13 @@ enum class Language(
      * Separator for enumerating words written in this language, such as the translation glosses
      * that make up a sense title.
      *
-     * Chinese enumerates with the ideographic comma and no trailing space; a Latin `", "` there
-     * reads as foreign punctuation next to the corpus text, which already uses `、` inside its own
-     * definitions. Every other supported language enumerates the Latin/Cyrillic way.
+     * Chinese and Japanese enumerate with the ideographic comma and no trailing space; a Latin
+     * `", "` there reads as foreign punctuation next to the corpus text, which already uses `、`
+     * inside its own definitions. Every other supported language enumerates the Latin/Cyrillic way.
      */
     val wordSeparator: String
         get() = when (this) {
-            CHINESE -> "、"
+            CHINESE, JAPANESE -> "、"
             else -> ", "
         }
 

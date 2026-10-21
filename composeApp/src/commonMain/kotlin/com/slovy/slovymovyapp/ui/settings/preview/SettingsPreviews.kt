@@ -106,7 +106,9 @@ private fun SettingsScreenPreviewWithLanguages(
                         availableTranslations = emptyList()
                     )
                 ),
-                translationLanguages = setOf(Language.ENGLISH, Language.RUSSIAN, Language.POLISH),
+                // Japanese is generated for English only, so its row is marked for the Dutch learner.
+                translationLanguages = setOf(Language.ENGLISH, Language.RUSSIAN, Language.POLISH, Language.JAPANESE),
+                isTranslationLanguagesExpanded = true,
                 languages = mapOf(
                     Text2SpeechLanguage(
                         language = Language.DUTCH,

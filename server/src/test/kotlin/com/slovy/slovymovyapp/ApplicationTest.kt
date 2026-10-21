@@ -206,6 +206,33 @@ class ApplicationTest {
         assertTrue(translations.containsKey("pl"), "Translations should contain 'pl' key")
     }
 
+    /**
+     * Japanese is generated for English only. The route rejects the pair before loading or
+     * generating anything, so this needs no GitHub token and no AI provider.
+     */
+    @Test
+    fun testWord_rejectsTranslationTargetTheLearningLanguageIsNotTranslatedInto() = testApplication {
+        application {
+            module()
+        }
+        val response = client.get("/word/ru/test?translations=en,ja")
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("Unsupported translation target for ru: ja", response.bodyAsText())
+    }
+
+    @Test
+    fun testWord_acceptsTranslationTargetGeneratedForTheLearningLanguage() = testApplication {
+        // With a token the route would go on to generate en -> ja for real; the pair check is what
+        // is under test, and it runs before the token check.
+        if (GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+        val response = client.get("/word/en/test?translations=ja")
+        assertEquals(HttpStatusCode.ServiceUnavailable, response.status, "the pair passed; only the token is missing")
+    }
+
     @Test
     fun testWord_skipsSelfTranslationRequest() = testApplication {
         if (!GitHubClient.isAvailable()) return@testApplication

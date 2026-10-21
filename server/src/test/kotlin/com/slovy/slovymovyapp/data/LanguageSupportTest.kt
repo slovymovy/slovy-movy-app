@@ -69,6 +69,31 @@ class LanguageSupportTest {
         }
     }
 
+    /**
+     * Japanese and European Portuguese are generated from English only. Russian, Dutch, Polish and
+     * German learners must neither be offered them nor have them requested from `/word`.
+     */
+    @Test
+    fun japaneseAndPortugueseAreTranslatedFromEnglishOnly() {
+        listOf(Language.JAPANESE, Language.PORTUGUESE).forEach { target ->
+            assertTrue(target.isTranslationTargetFor(Language.ENGLISH), "${target.code} is generated for English")
+            Language.learningLanguages.filter { it != Language.ENGLISH }.forEach { source ->
+                assertFalse(
+                    target.isTranslationTargetFor(source),
+                    "${target.code} is not generated for ${source.code}, so it must not be offered to its learners"
+                )
+            }
+            assertTrue(target in Language.translationTargetsFor(Language.ENGLISH), "${target.code} is in English's picker")
+            assertFalse(target in Language.translationTargetsFor(Language.RUSSIAN), "${target.code} is not in Russian's picker")
+            assertTrue(target in Language.translationTargets, "${target.code} is in the union shown with several learning languages")
+        }
+        assertEquals(
+            "European Portuguese",
+            Language.PORTUGUESE.englishName,
+            "the English name is what the translation prompt generates from; a neutral name would mix varieties"
+        )
+    }
+
     @Test
     fun translationTargetsAreTheUnionOverLearningLanguages() {
         val union = Language.learningLanguages.flatMap { Language.translationTargetsFor(it) }.toSet()
