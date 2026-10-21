@@ -48,6 +48,7 @@ class IngestibleForms private constructor(private val language: LanguageFormRule
         fun forLanguage(langCode: String): IngestibleForms = IngestibleForms(
             when (langCode) {
                 Language.GERMAN.code -> GermanFormRules
+                Language.FRENCH.code -> FrenchFormRules
                 Language.DUTCH.code -> DutchFormRules
                 else -> LanguageFormRules.None
             }
@@ -59,7 +60,8 @@ class IngestibleForms private constructor(private val language: LanguageFormRule
 interface LanguageFormRules {
     /**
      * The form of [entry] as it is ingested, or null to drop it. May rewrite the text
-     * (e.g. "ich kaufe" -> "kaufe"); the tags are never changed.
+     * (e.g. "ich kaufe" -> "kaufe"); tags are only ever added, for grammar the removed text carried
+     * (the French edition marks a verb's person only by its pronoun).
      */
     fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm? = form
 
@@ -228,25 +230,6 @@ object GermanFormRules : LanguageFormRules {
 
     private fun isMultiWord(text: String) = ' ' in text.trim()
 
-    /**
-     * Keeps one row per cell: a form is dropped when another form with the same text fills the same
-     * cell (the earlier one wins, so native beats English) or a more specific one
-     * ("kaufe!" [imperative, singular] next to [imperative, second-person, singular]).
-     */
-    private fun dropRepeatedCells(
-        forms: List<Pair<ExtractedWordForm, FormSource>>,
-        cellOf: (List<String>) -> Set<String>
-    ): List<Pair<ExtractedWordForm, FormSource>> {
-        val cells = forms.map { (f, _) -> f.form to cellOf(f.tags) }
-        return forms.filterIndexed { i, _ ->
-            val (text, cell) = cells[i]
-            cells.indices.none { j ->
-                j != i && cells[j].first == text && cells[j].second.containsAll(cell) &&
-                    (cells[j].second.size > cell.size || j < i)
-            }
-        }
-    }
-
     // --- nouns
 
     private val nounCellTags = setOf("nominative", "genitive", "dative", "accusative", "singular", "plural")
@@ -352,15 +335,130 @@ object GermanFormRules : LanguageFormRules {
      */
     private fun dropCoveredEnglishForms(
         forms: List<Pair<ExtractedWordForm, FormSource>>
-    ): List<Pair<ExtractedWordForm, FormSource>> {
-        val nativeGrammar = mutableMapOf<String, MutableList<Set<String>>>()
-        forms.filter { it.second == FormSource.NATIVE }.forEach { (f, _) ->
-            nativeGrammar.getOrPut(f.form.trim()) { mutableListOf() } += grammar(f.tags, emptySet())
-        }
-        return forms.filterNot { (f, source) ->
-            source == FormSource.EN && nativeGrammar[f.form.trim()].orEmpty().any { native ->
-                native.containsAll(grammar(f.tags, englishLayoutTags))
-            }
+    ): List<Pair<ExtractedWordForm, FormSource>> =
+        dropCoveredEnglishForms(forms, { grammar(it, emptySet()) }, { grammar(it, englishLayoutTags) })
+}
+
+/**
+ * Keeps one row per cell: a form is dropped when another form with the same text fills the same
+ * cell (the earlier one wins, so native beats English) or a more specific one
+ * ("kaufe!" [imperative, singular] next to [imperative, second-person, singular]).
+ */
+private fun dropRepeatedCells(
+    forms: List<Pair<ExtractedWordForm, FormSource>>,
+    cellOf: (List<String>) -> Set<String>
+): List<Pair<ExtractedWordForm, FormSource>> {
+    val cells = forms.map { (f, _) -> f.form to cellOf(f.tags) }
+    return forms.filterIndexed { i, _ ->
+        val (text, cell) = cells[i]
+        cells.indices.none { j ->
+            j != i && cells[j].first == text && cells[j].second.containsAll(cell) &&
+                (cells[j].second.size > cell.size || j < i)
         }
     }
+}
+
+/**
+ * Drops an English-edition form when a native form has exactly its text and all its grammar, as
+ * [nativeGrammar] and [englishGrammar] read each edition's tags. The text must match as written:
+ * search and the reader match whole forms, so a bare "Spindoktoren" is not covered by the native
+ * "die Spindoktoren".
+ */
+private fun dropCoveredEnglishForms(
+    forms: List<Pair<ExtractedWordForm, FormSource>>,
+    nativeGrammar: (List<String>) -> Set<String>,
+    englishGrammar: (List<String>) -> Set<String>
+): List<Pair<ExtractedWordForm, FormSource>> {
+    val native = mutableMapOf<String, MutableList<Set<String>>>()
+    forms.filter { it.second == FormSource.NATIVE }.forEach { (f, _) ->
+        native.getOrPut(f.form.trim()) { mutableListOf() } += nativeGrammar(f.tags)
+    }
+    return forms.filterNot { (f, source) ->
+        source == FormSource.EN && native[f.form.trim()].orEmpty().any { it.containsAll(englishGrammar(f.tags)) }
+    }
+}
+
+/**
+ * The French Wiktionary writes each verb cell with its pronoun and gives the person only there
+ * ("je parle", "il/elle/on parle", "que je parle" - all tagged just indicative or subjunctive
+ * present), and writes out the compound tenses ("j'ai parlé", "avoir parlé", "en ayant parlé") and
+ * the gerund ("en parlant"): half of a verb's ~100 rows. The English edition adds pronunciations as
+ * forms ("/paʁl/") and placeholders ("avoir + past participle").
+ *
+ * Verbs keep one row per cell of the simple tenses, the imperative, the infinitive and the
+ * participles as single words: the subject and reflexive pronouns are removed, and the person and
+ * number the subject pronoun gave become tags. A row still more than one word is a compound tense
+ * and is dropped; "abcéderai ou abcèderai" keeps its first spelling. Other parts of speech keep their
+ * forms - plurals, gender counterparts, the 1990 spellings - except an English-edition row a native
+ * one already covers. Pronunciations and placeholders are dropped everywhere.
+ */
+object FrenchFormRules : LanguageFormRules {
+
+    private const val VERB = "verb"
+
+    // Phonetic letters no French word uses, a pronunciation wrapped in /.../ or \...\, a placeholder.
+    // "œ" is a French letter (cœur) and does not count.
+    private val pronunciation = Regex("""[ʁʃʒɛɔɑəɲŋɥʎˈˌː̃\\]|^/.*/$|\+""")
+
+    // "que je", "qu'il/elle/on" and the like; the subject pronoun is captured for its person.
+    private val subject = Regex(
+        """^(?:que |qu['’])?(je |j['’]|tu |il/elle/on |il/elle |il |elle |on |nous |vous |ils/elles |ils |elles )""",
+        RegexOption.IGNORE_CASE
+    )
+    private val reflexive = Regex("""^(?:me |m['’]|te |t['’]|se |s['’]|nous |vous )""", RegexOption.IGNORE_CASE)
+    private val personTags = setOf("first-person", "second-person", "third-person")
+
+    private fun personOf(pronoun: String): List<String> = when (pronoun.trim().trimEnd('\'', '’').lowercase()) {
+        "je", "j" -> listOf("first-person", "singular")
+        "tu" -> listOf("second-person", "singular")
+        "nous" -> listOf("first-person", "plural")
+        "vous" -> listOf("second-person", "plural")
+        "ils/elles", "ils", "elles" -> listOf("third-person", "plural")
+        else -> listOf("third-person", "singular")
+    }
+
+    override fun select(entry: ExtractedWordEntry, form: ExtractedWordForm): ExtractedWordForm? {
+        val raw = form.form.trim()
+        if (pronunciation.containsMatchIn(raw)) return null
+        if (entry.pos != VERB) return form
+        val pronoun = subject.find(raw)
+        val text = raw.removeRange(0, pronoun?.range?.last?.plus(1) ?: 0).replace(reflexive, "")
+            .substringBefore(" ou ").trim()
+        if (text.isEmpty() || ' ' in text) return null
+        val added = pronoun?.groupValues?.get(1)
+            ?.takeIf { form.tags.none { it in personTags } }
+            ?.let { personOf(it).filterNot { tag -> tag in form.tags } }
+            .orEmpty()
+        if (text == form.form && added.isEmpty()) return form
+        return form.copy(form = text, tags = (form.tags + added).toMutableList())
+    }
+
+    override fun dropRepeated(
+        entryPos: String,
+        forms: List<Pair<ExtractedWordForm, FormSource>>
+    ): List<Pair<ExtractedWordForm, FormSource>> =
+        if (entryPos == VERB) dropRepeatedCells(forms, ::verbCell)
+        else dropCoveredEnglishForms(forms, { it.toSet() }, { tags -> tags.filterNot { it in englishLayoutTags }.toSet() })
+
+    // Tags that place a verb form in a table cell; participle agreement keeps its gender.
+    private val verbCellTags = setOf(
+        "indicative", "subjunctive", "conditional", "imperative", "infinitive", "participle",
+        "present", "imperfect", "past", "future", "first-person", "second-person", "third-person",
+        "singular", "plural", "masculine", "feminine"
+    )
+
+    /**
+     * The cell of a verb form, read the same way from both editions: the English edition's passé
+     * simple is "historic past", and its conditional, imperative and infinitive carry no "present".
+     */
+    private fun verbCell(tags: List<String>): Set<String> {
+        val cell = tags.filterTo(mutableSetOf()) { it in verbCellTags }
+        if ((cell.contains("conditional") || cell.contains("imperative") || cell.contains("infinitive")) && "past" !in cell) {
+            cell += "present"
+        }
+        return cell
+    }
+
+    // English-edition tags that describe how a row is written rather than its grammar.
+    private val englishLayoutTags = setOf("canonical", "multiword-construction", "includes-article", "with-article", "without-article")
 }

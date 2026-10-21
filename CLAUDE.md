@@ -340,6 +340,9 @@ Persisted enum/protocol invariants:
   adjectives: base forms and strong declension; nouns: the native cells with articles plus one bare row per word;
   personal pronouns: their own row of the pronoun table) and never merges tags. It drops abbreviations, symbols,
   unparsed rows and grammar that does not fit the part of speech; inflected words a learner can meet all stay.
+  `FrenchFormRules` keeps verbs to one single-word row per cell: it strips subject and reflexive pronouns
+  ("je parle" -> "parle"), adds the person and number the subject pronoun gave (the French edition tags it nowhere
+  else), and drops compound tenses and gerunds; it drops pronunciations and placeholders for every part of speech.
 - Raw-only online lemmas can be ingested first, processed data can later overlay them, and translations-only ingestion
   is supported only after the base senses exist.
 
