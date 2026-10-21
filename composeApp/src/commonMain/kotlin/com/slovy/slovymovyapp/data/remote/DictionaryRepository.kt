@@ -400,7 +400,7 @@ class DictionaryRepository(
     }
 
     fun installedTranslationTargets(src: Language): List<Language> = languages.filter { tgt ->
-        tgt != src && dataDbManager.hasTranslation(src, tgt)
+        tgt.isTranslationTargetFor(src) && dataDbManager.hasTranslation(src, tgt)
     }
 
     /**
