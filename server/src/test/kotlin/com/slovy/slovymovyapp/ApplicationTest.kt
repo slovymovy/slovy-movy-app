@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.server.ServerJson
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.github.GitHubClient
@@ -220,17 +221,24 @@ class ApplicationTest {
         assertEquals("Unsupported translation target for ru: ja", response.bodyAsText())
     }
 
+    /**
+     * The positive side cannot go through the route: without a token it stops at 503, with one it
+     * would generate en -> ja for real. So the function the route calls is checked directly, and
+     * the test runs with or without credentials.
+     */
     @Test
-    fun testWord_acceptsTranslationTargetGeneratedForTheLearningLanguage() = testApplication {
-        // With a token the route would go on to generate en -> ja for real; the pair check is what
-        // is under test, and it runs before the token check.
-        if (GitHubClient.isAvailable()) return@testApplication
-
-        application {
-            module()
-        }
-        val response = client.get("/word/en/test?translations=ja")
-        assertEquals(HttpStatusCode.ServiceUnavailable, response.status, "the pair passed; only the token is missing")
+    fun unsupportedTranslationTarget_passesOnlyPairsTheLearningLanguageIsTranslatedInto() {
+        assertNull(
+            unsupportedTranslationTarget(Language.ENGLISH, listOf("ja", "pt", "ru", "en")),
+            "English is translated into Japanese and Portuguese; its own code is tolerated"
+        )
+        assertEquals("ja", unsupportedTranslationTarget(Language.RUSSIAN, listOf("en", "ja")), "Russian is not translated into Japanese")
+        assertEquals("xx", unsupportedTranslationTarget(Language.ENGLISH, listOf("xx")), "an unknown code is rejected")
+        assertEquals(
+            "JA",
+            unsupportedTranslationTarget(Language.ENGLISH, listOf("JA")),
+            "a code is a bare lowercase subtag everywhere; an upper-cased one is not a language"
+        )
     }
 
     @Test

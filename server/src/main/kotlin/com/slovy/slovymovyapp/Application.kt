@@ -208,14 +208,7 @@ fun Application.module() {
                 return@get
             }
 
-            // Likewise a target this learning language is not translated into: the pair decides,
-            // not the target alone, so a target that exists for English only is never generated
-            // for a Russian word. A self-translation request is tolerated and skipped later, as
-            // before. targetLanguageName re-checks the target itself further in.
-            val unsupportedTarget = parseTranslationCodes(translationsParam).firstOrNull { code ->
-                !code.equals(lang, ignoreCase = true) &&
-                    Language.fromCodeOrNull(code)?.isTranslationTargetFor(learningLanguage) != true
-            }
+            val unsupportedTarget = unsupportedTranslationTarget(learningLanguage, parseTranslationCodes(translationsParam))
             if (unsupportedTarget != null) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported translation target for $lang: $unsupportedTarget")
                 return@get
@@ -518,6 +511,19 @@ private fun Route.feedbackSubmission(
         }
     }
 }
+
+/**
+ * The first requested code that [learningLanguage] is not translated into, or null when every
+ * code passes. The pair decides, not the target alone, so a target generated for English only is
+ * never generated for a Russian word. The learning language's own code is tolerated and skipped
+ * later, as before. Codes are compared as they are, like every other `Language.code` lookup: a
+ * code is a bare lowercase subtag, and `targetLanguageName` re-checks the target further in.
+ */
+internal fun unsupportedTranslationTarget(learningLanguage: Language, codes: List<String>): String? =
+    codes.firstOrNull { code ->
+        code != learningLanguage.code &&
+            Language.fromCodeOrNull(code)?.isTranslationTargetFor(learningLanguage) != true
+    }
 
 private fun parseTranslationCodes(source: String?): List<String> {
     val raw = source ?: return emptyList()

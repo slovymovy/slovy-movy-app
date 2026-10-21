@@ -68,6 +68,22 @@ class TranslationLanguageOptionsTest {
     }
 
     @Test
+    fun noInstalledLearningLanguageListsTheFullUnion() {
+        val state = SettingsUiState(learningLanguages = emptyList())
+
+        assertEquals(
+            Language.translationTargets.sortedBy { it.selfName },
+            state.translationLanguageOptions.map { it.language },
+            "with nothing installed yet the picker still offers every target, as the flat list did"
+        )
+        assertEquals(
+            emptyList(),
+            state.translationLanguageOptions.flatMap { it.unsupportedFor },
+            "no learning language means nothing to be unsupported for"
+        )
+    }
+
+    @Test
     fun aSelectionNoLearningLanguageSupportsStaysVisibleSoItCanBeDropped() {
         val state = SettingsUiState(
             learningLanguages = learning(Language.RUSSIAN),

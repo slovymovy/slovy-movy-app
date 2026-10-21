@@ -102,11 +102,13 @@ data class SettingsUiState(
      * translated into, plus whatever is already selected, so a selection no installed language
      * supports can still be seen and dropped. With one learning language this is exactly its own
      * target list; with several it is their union, each row naming the languages it does not serve.
+     * Before any dictionary is installed the full union is listed, as the flat list was.
      */
     val translationLanguageOptions: List<TranslationLanguageOption>
         get() {
             val learning = learningLanguages.map { it.language }
-            return (Language.translationTargetsFor(learning) + translationLanguages)
+            val offered = if (learning.isEmpty()) Language.translationTargets else Language.translationTargetsFor(learning)
+            return (offered + translationLanguages)
                 .distinct()
                 .sortedBy { it.selfName }
                 .map { target ->

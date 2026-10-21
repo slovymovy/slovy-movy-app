@@ -566,7 +566,7 @@ private fun TranslationLanguageLabel(
             Text(
                 text = stringResource(
                     Res.string.settings_translation_unsupported_for,
-                    option.unsupportedFor.joinToString { it.selfName }
+                    option.unsupportedFor.joinToString(stringResource(Res.string.common_list_separator)) { it.selfName }
                 ),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
