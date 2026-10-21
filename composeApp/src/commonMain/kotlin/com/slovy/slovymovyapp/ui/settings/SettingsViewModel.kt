@@ -102,6 +102,9 @@ data class SettingsUiState(
      * translated into, plus whatever is already selected, so a selection no installed language
      * supports can still be seen and dropped. With one learning language this is exactly its own
      * target list; with several it is their union, each row naming the languages it does not serve.
+     * A learning language is not named on its own row while the row serves another one (English
+     * is obviously not a translation for English learners); a row that serves none is marked
+     * fully, so a stale selection equal to the only learning language is visibly dead too.
      * Before any dictionary is installed the full union is listed, as the flat list was.
      */
     val translationLanguageOptions: List<TranslationLanguageOption>
@@ -112,9 +115,10 @@ data class SettingsUiState(
                 .distinct()
                 .sortedBy { it.selfName }
                 .map { target ->
+                    val gaps = learning.filter { !target.isTranslationTargetFor(it) }
                     TranslationLanguageOption(
                         language = target,
-                        unsupportedFor = learning.filter { it != target && !target.isTranslationTargetFor(it) }
+                        unsupportedFor = if (gaps.size == learning.size) gaps else gaps.filter { it != target }
                     )
                 }
         }

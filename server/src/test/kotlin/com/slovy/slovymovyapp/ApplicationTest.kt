@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.server.ServerJson
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
+import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -228,15 +229,16 @@ class ApplicationTest {
      */
     @Test
     fun unsupportedTranslationTarget_passesOnlyPairsTheLearningLanguageIsTranslatedInto() {
+        val check = DbExtractEnhancerUtils::unsupportedTranslationTarget
         assertNull(
-            unsupportedTranslationTarget(Language.ENGLISH, listOf("ja", "pt", "ru", "en")),
-            "English is translated into Japanese and Portuguese; its own code is tolerated"
+            check(Language.ENGLISH, listOf("ja", "pt", "ru", "en", "EN")),
+            "English is translated into Japanese and Portuguese; its own code is tolerated in any case, as the self-skip is"
         )
-        assertEquals("ja", unsupportedTranslationTarget(Language.RUSSIAN, listOf("en", "ja")), "Russian is not translated into Japanese")
-        assertEquals("xx", unsupportedTranslationTarget(Language.ENGLISH, listOf("xx")), "an unknown code is rejected")
+        assertEquals("ja", check(Language.RUSSIAN, listOf("en", "ja")), "Russian is not translated into Japanese")
+        assertEquals("xx", check(Language.ENGLISH, listOf("xx")), "an unknown code is rejected")
         assertEquals(
             "JA",
-            unsupportedTranslationTarget(Language.ENGLISH, listOf("JA")),
+            check(Language.ENGLISH, listOf("JA")),
             "a code is a bare lowercase subtag everywhere; an upper-cased one is not a language"
         )
     }

@@ -211,7 +211,12 @@ fun Application.module() {
                 return@get
             }
 
-            val unsupportedTarget = unsupportedTranslationTarget(learningLanguage, parseTranslationCodes(translationsParam))
+            // Likewise a target this learning language is not translated into; see
+            // DbExtractEnhancerUtils.unsupportedTranslationTarget.
+            val unsupportedTarget = DbExtractEnhancerUtils.unsupportedTranslationTarget(
+                learningLanguage,
+                parseTranslationCodes(translationsParam)
+            )
             if (unsupportedTarget != null) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported translation target for $lang: $unsupportedTarget")
                 return@get
@@ -515,19 +520,6 @@ private fun Route.feedbackSubmission(
     }
 }
 
-/**
- * The first requested code that [learningLanguage] is not translated into, or null when every
- * code passes. The pair decides, not the target alone, so a target generated for English only is
- * never generated for a Russian word. The learning language's own code is tolerated and skipped
- * later, as before. Codes are compared as they are, like every other `Language.code` lookup: a
- * code is a bare lowercase subtag, and `targetLanguageName` re-checks the target further in.
- */
-internal fun unsupportedTranslationTarget(learningLanguage: Language, codes: List<String>): String? =
-    codes.firstOrNull { code ->
-        code != learningLanguage.code &&
-            Language.fromCodeOrNull(code)?.isTranslationTargetFor(learningLanguage) != true
-    }
-
 private fun parseTranslationCodes(source: String?): List<String> {
     val raw = source ?: return emptyList()
     return raw.split(',')
@@ -795,7 +787,12 @@ private suspend fun addMissingTranslations(
     val targetLangCodes = requestedLangCodes.filterNot { it.equals(lang, ignoreCase = true) }
     if (targetLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
-    // ensure all languages are valid - throws in case of invalid language code
+    // Ensure every target is valid and generated for this source - throws otherwise. The route
+    // already answered 400 on these; this keeps any other caller from generating the pair.
+    val source = Language.fromCodeOrNull(lang) ?: error("Unsupported learning language: $lang")
+    DbExtractEnhancerUtils.unsupportedTranslationTarget(source, targetLangCodes)?.let { code ->
+        error("Unsupported translation target for $lang: $code")
+    }
     targetLangCodes.forEach { targetLanguageName(it) }
 
     val existingLanguages = getExistingTranslationLanguages(response)
