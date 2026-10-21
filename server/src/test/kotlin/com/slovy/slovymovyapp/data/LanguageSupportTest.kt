@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.data
 import com.slovy.slovymovyapp.ingestion.LANG_TO_SOURCE_FILE
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -22,14 +23,65 @@ class LanguageSupportTest {
         )
     }
 
+    /**
+     * The corpus of every learning language is translated into every other one, so each pair of
+     * learning languages must pass the pair check in both directions - that is what makes the
+     * union in Settings equal to the plain target list for the languages that can be studied.
+     */
     @Test
-    fun everyLearningLanguageIsAlsoATranslationTarget() {
-        Language.learningLanguages.forEach { language ->
-            assertTrue(
-                language.supportedForTranslation,
-                "${language.code} has a generated corpus, so it must be offerable as a target too"
+    fun everyLearningLanguageIsATranslationTargetForEveryOtherOne() {
+        Language.learningLanguages.forEach { target ->
+            Language.learningLanguages.filter { it != target }.forEach { source ->
+                assertTrue(
+                    target.isTranslationTargetFor(source),
+                    "${target.code} has a generated corpus, so it must be offerable to a learner of ${source.code}"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun aLanguageIsNeverATranslationTargetForItself() {
+        Language.entries.forEach { language ->
+            assertFalse(
+                language.isTranslationTargetFor(language),
+                "${language.code} must not be offered as a translation of itself"
             )
         }
+    }
+
+    @Test
+    fun onlyLearningLanguagesCanBeTranslationSources() {
+        val learningCodes = Language.learningLanguages.map { it.code }.toSet()
+        Language.entries.forEach { target ->
+            target.translationSourceCodes?.forEach { code ->
+                assertTrue(
+                    code in learningCodes,
+                    "${target.code} names '$code' as a source, but only a learning language has a corpus to translate"
+                )
+            }
+            Language.entries.filter { !it.supportedForLearning }.forEach { source ->
+                assertFalse(
+                    target.isTranslationTargetFor(source),
+                    "${target.code} cannot be a target for ${source.code}: nothing is generated for it"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun translationTargetsAreTheUnionOverLearningLanguages() {
+        val union = Language.learningLanguages.flatMap { Language.translationTargetsFor(it) }.toSet()
+        assertEquals(
+            union,
+            Language.translationTargets.toSet(),
+            "translationTargets must be exactly what some learning language is translated into"
+        )
+        assertEquals(
+            Language.translationTargets,
+            Language.translationTargetsFor(Language.learningLanguages),
+            "the collection overload must be the same union, in enum order"
+        )
     }
 
     /**

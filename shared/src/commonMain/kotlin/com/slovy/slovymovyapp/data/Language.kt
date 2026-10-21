@@ -28,6 +28,14 @@ enum class Language(
      */
     val supportedForTranslation: Boolean = true,
     /**
+     * Codes of the learning languages whose corpus is translated into this one, or `null` for every
+     * one of them. A target generated for English only names `setOf("en")` here, and then nothing
+     * offers it to, or requests it for, a learner of another language: see [isTranslationTargetFor].
+     *
+     * Codes rather than entries, because an enum constant cannot refer to one declared after it.
+     */
+    val translationSourceCodes: Set<String>? = null,
+    /**
      * Extra guidance appended to the AI base-processing prompt for this language, substituted for
      * its `$INPUT_NOTES` placeholder. Describes what the Wiktextract input for this language can
      * actually look like, where that differs from what the generic prompt assumes.
@@ -204,6 +212,22 @@ enum class Language(
     VIETNAMESE("vi", "Tiếng Việt", "🇻🇳", "Vietnamese", supportedForTranslation = false);
 
     /**
+     * Whether the corpus of [source] is translated into this language, so that this one may be
+     * offered to a learner of [source] and requested from `/word` for words of it. A language is
+     * never a target for itself.
+     *
+     * Every place that offers, requests or lists a translation decides through this pair check -
+     * onboarding, Settings, word fetches, the remote DB listing and the server's `/word` route - so
+     * a target that exists for English only (see [translationSourceCodes]) stays invisible to a
+     * learner of Russian.
+     */
+    fun isTranslationTargetFor(source: Language): Boolean =
+        this != source &&
+            supportedForTranslation &&
+            source.supportedForLearning &&
+            (translationSourceCodes?.contains(source.code) ?: true)
+
+    /**
      * Separator for enumerating words written in this language, such as the translation glosses
      * that make up a sense title.
      *
@@ -221,8 +245,19 @@ enum class Language(
         /** The languages that can be studied. See [supportedForLearning]. */
         val learningLanguages: List<Language> get() = entries.filter { it.supportedForLearning }
 
-        /** The languages that can be picked as a translation target. See [supportedForTranslation]. */
-        val translationTargets: List<Language> get() = entries.filter { it.supportedForTranslation }
+        /**
+         * The languages that some learning language is translated into. This is the union over all
+         * learning languages; a picker for a particular learner uses [translationTargetsFor].
+         */
+        val translationTargets: List<Language> get() = translationTargetsFor(learningLanguages)
+
+        /** The languages a learner of [source] can be offered as translation targets, in enum order. */
+        fun translationTargetsFor(source: Language): List<Language> =
+            entries.filter { it.isTranslationTargetFor(source) }
+
+        /** The union of [translationTargetsFor] over [sources], in enum order. */
+        fun translationTargetsFor(sources: Collection<Language>): List<Language> =
+            entries.filter { target -> sources.any { target.isTranslationTargetFor(it) } }
 
         fun fromCode(code: String): Language {
             return entries.find { it.code == code }

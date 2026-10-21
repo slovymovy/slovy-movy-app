@@ -385,7 +385,7 @@ fun AddLanguageCard(
 
 @Composable
 fun TranslationLanguageSection(
-    allLanguages: List<Language>,
+    options: List<TranslationLanguageOption>,
     selectedLanguages: Set<Language>,
     isExpanded: Boolean,
     onToggleExpanded: () -> Unit,
@@ -450,11 +450,11 @@ fun TranslationLanguageSection(
 
                     if (selectedLanguages.isNotEmpty()) {
                         Spacer(Modifier.height(AppSpacing.sm))
-                        val sorted = selectedLanguages.sortedBy { it.selfName }
+                        val sorted = options.filter { it.language in selectedLanguages }
                         val maxVisible = 3
                         val visible = sorted.take(maxVisible)
                         val remaining = sorted.size - maxVisible
-                        visible.forEachIndexed { index, language ->
+                        visible.forEachIndexed { index, option ->
                             if (index > 0) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = AppSpacing.xs),
@@ -462,9 +462,8 @@ fun TranslationLanguageSection(
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                                 )
                             }
-                            Text(
-                                text = "${language.flag} ${language.selfName}",
-                                style = MaterialTheme.typography.bodyLarge,
+                            TranslationLanguageLabel(
+                                option = option,
                                 modifier = Modifier.padding(vertical = AppSpacing.xs)
                             )
                         }
@@ -510,7 +509,8 @@ fun TranslationLanguageSection(
                         .padding(horizontal = AppSpacing.lg)
                         .padding(bottom = AppSpacing.lg)
                 ) {
-                    allLanguages.forEachIndexed { index, language ->
+                    options.forEachIndexed { index, option ->
+                        val language = option.language
                         if (index > 0) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = AppSpacing.xs),
@@ -536,17 +536,41 @@ fun TranslationLanguageSection(
                                 .padding(vertical = AppSpacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "${language.flag} ${language.selfName}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f)
-                            )
+                            TranslationLanguageLabel(option = option, modifier = Modifier.weight(1f))
 
                             CircularToggle(isSelected = isSelected)
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Flag and name of a translation language, with a line underneath naming the installed learning
+ * languages it does nothing for - a target that exists for English only, selected by someone who
+ * also learns Russian.
+ */
+@Composable
+private fun TranslationLanguageLabel(
+    option: TranslationLanguageOption,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = "${option.language.flag} ${option.language.selfName}",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        if (option.unsupportedFor.isNotEmpty()) {
+            Text(
+                text = stringResource(
+                    Res.string.settings_translation_unsupported_for,
+                    option.unsupportedFor.joinToString { it.selfName }
+                ),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
