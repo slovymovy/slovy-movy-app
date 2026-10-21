@@ -201,10 +201,23 @@ fun Application.module() {
 
             // The corpus this route reads and generates only exists for languages that are
             // studied, so reject the rest here rather than letting the words-repo lookup fail
-            // obscurely further in. Requested translation targets are validated separately, by
-            // targetLanguageName.
-            if (Language.fromCodeOrNull(lang)?.supportedForLearning != true) {
+            // obscurely further in.
+            val learningLanguage = Language.fromCodeOrNull(lang)
+            if (learningLanguage?.supportedForLearning != true) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported learning language: $lang")
+                return@get
+            }
+
+            // Likewise a target this learning language is not translated into: the pair decides,
+            // not the target alone, so a target that exists for English only is never generated
+            // for a Russian word. A self-translation request is tolerated and skipped later, as
+            // before. targetLanguageName re-checks the target itself further in.
+            val unsupportedTarget = parseTranslationCodes(translationsParam).firstOrNull { code ->
+                !code.equals(lang, ignoreCase = true) &&
+                    Language.fromCodeOrNull(code)?.isTranslationTargetFor(learningLanguage) != true
+            }
+            if (unsupportedTarget != null) {
+                call.respond(HttpStatusCode.BadRequest, "Unsupported translation target for $lang: $unsupportedTarget")
                 return@get
             }
 

@@ -46,7 +46,9 @@ class LanguageSetupViewModel(
     var state by mutableStateOf(
         LanguageSetupUiState(
             learningLanguage = initialLearningLanguage,
-            nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage),
+            nativeLanguages = initialNativeLanguages.filter { target ->
+                initialLearningLanguage == null || target.isTranslationTargetFor(initialLearningLanguage)
+            }.toSet(),
             // Routing only reaches setup with a learning language after LANGUAGE was persisted,
             // so an empty set here means a saved "no translation" choice (LANGUAGE=[]), not a
             // fresh user who skipped the step.
@@ -89,7 +91,8 @@ class LanguageSetupViewModel(
         if (state.learningLanguage == language) return
         state = state.copy(
             learningLanguage = language,
-            nativeLanguages = state.nativeLanguages.filter { it != language }.toSet(),
+            // Switching the learning language drops targets the new one is not translated into.
+            nativeLanguages = state.nativeLanguages.filter { it.isTranslationTargetFor(language) }.toSet(),
             noTranslationSelected = false
         )
     }

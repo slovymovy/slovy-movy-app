@@ -82,8 +82,9 @@ fun LanguageSetupScreenContent(
 ) {
     val canGoNext = state.learningLanguage != null && (state.nativeLanguages.isNotEmpty() || state.noTranslationSelected)
     val translateIntoEnabled = state.learningLanguage != null
-    val translationLanguages = Language.translationTargets
-        .filter { it != state.learningLanguage }
+    // Only what the chosen learning language is translated into; before a choice the (disabled)
+    // list previews the union, so the section is never an empty card.
+    val translationLanguages = (state.learningLanguage?.let(Language::translationTargetsFor) ?: Language.translationTargets)
         .sortedBy { it.selfName }
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->

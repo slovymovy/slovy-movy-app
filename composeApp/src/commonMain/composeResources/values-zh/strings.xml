@@ -402,6 +402,7 @@
     </plurals>
     <string name="settings_languages_more">+%1$d 种</string>
     <string name="settings_toggle_translation_for_language">切换 %1$s 翻译</string>
+    <string name="settings_translation_unsupported_for">不适用于%1$s</string>
     <string name="settings_remove_language_confirm_title">移除 %1$s？</string>
     <string name="settings_remove_language_confirm_message">该词典及其全部翻译都会被删除。你随时可以重新下载。</string>
     <plurals name="settings_remove_language_warning">

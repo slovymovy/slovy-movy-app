@@ -402,6 +402,7 @@
     </plurals>
     <string name="settings_languages_more">+%1$d daha</string>
     <string name="settings_toggle_translation_for_language">%1$s çevirisini aç/kapat</string>
+    <string name="settings_translation_unsupported_for">%1$s için kullanılamaz</string>
     <string name="settings_remove_language_confirm_title">%1$s kaldırılsın mı?</string>
     <string name="settings_remove_language_confirm_message">Sözlük ve tüm çevirileri silinecek. İstediğin zaman yeniden indirebilirsin.</string>
     <plurals name="settings_remove_language_warning">
