@@ -708,6 +708,9 @@ class DataDbManagerTest : BaseTest() {
                 RemoteFile("translation_en_fr.db", 10),
                 RemoteFile("translation_en_el.db", 10), // target not offered yet
                 RemoteFile("translation_fr_en.db", 10), // source not studiable
+                RemoteFile("translation_en_ja.db", 10), // Japanese is generated for English only...
+                RemoteFile("dictionary_ru.db", 100),
+                RemoteFile("translation_ru_ja.db", 10), // ...so this pair is never offered
             )
 
             override fun downloadUrlFor(fileName: String) = error("not downloaded in this test")
@@ -719,14 +722,19 @@ class DataDbManagerTest : BaseTest() {
             val available = mgr.fetchAvailableLanguages()
 
             assertEquals(
-                listOf(Language.ENGLISH),
+                listOf(Language.ENGLISH, Language.RUSSIAN),
                 available.map { it.language },
                 "only languages supported for learning are listed, whatever dictionaries the bucket holds"
             )
             assertEquals(
-                listOf(Language.FRENCH),
-                available.single().availableTranslations.map { it.targetLanguage },
-                "translations are listed only into targets supported for translation"
+                listOf(Language.FRENCH, Language.JAPANESE),
+                available.first { it.language == Language.ENGLISH }.availableTranslations.map { it.targetLanguage },
+                "translations are listed only into targets the source language is translated into"
+            )
+            assertEquals(
+                emptyList(),
+                available.first { it.language == Language.RUSSIAN }.availableTranslations,
+                "a translation into a target generated for English only is not offered to a Russian learner"
             )
         } finally {
             appDriver.close()

@@ -1,7 +1,9 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.server.ServerJson
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
+import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -204,6 +206,41 @@ class ApplicationTest {
         assertNotNull(translations, "Sense should contain 'translations' field")
         assertTrue(translations.containsKey("ru"), "Translations should contain 'ru' key")
         assertTrue(translations.containsKey("pl"), "Translations should contain 'pl' key")
+    }
+
+    /**
+     * Japanese is generated for English only. The route rejects the pair before loading or
+     * generating anything, so this needs no GitHub token and no AI provider.
+     */
+    @Test
+    fun testWord_rejectsTranslationTargetTheLearningLanguageIsNotTranslatedInto() = testApplication {
+        application {
+            module()
+        }
+        val response = client.get("/word/ru/test?translations=en,ja")
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals("Unsupported translation target for ru: ja", response.bodyAsText())
+    }
+
+    /**
+     * The positive side cannot go through the route: without a token it stops at 503, with one it
+     * would generate en -> ja for real. So the function the route calls is checked directly, and
+     * the test runs with or without credentials.
+     */
+    @Test
+    fun unsupportedTranslationTarget_passesOnlyPairsTheLearningLanguageIsTranslatedInto() {
+        val check = DbExtractEnhancerUtils::unsupportedTranslationTarget
+        assertNull(
+            check(Language.ENGLISH, listOf("ja", "pt", "ru", "en", "EN")),
+            "English is translated into Japanese and Portuguese; its own code is tolerated in any case, as the self-skip is"
+        )
+        assertEquals("ja", check(Language.RUSSIAN, listOf("en", "ja")), "Russian is not translated into Japanese")
+        assertEquals("xx", check(Language.ENGLISH, listOf("xx")), "an unknown code is rejected")
+        assertEquals(
+            "JA",
+            check(Language.ENGLISH, listOf("JA")),
+            "a code is a bare lowercase subtag everywhere; an upper-cased one is not a language"
+        )
     }
 
     @Test

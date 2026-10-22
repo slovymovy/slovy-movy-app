@@ -338,11 +338,19 @@ class WordDetailViewModel(
 
     private var hasScrolledToTarget = false
     private var requestedTranslationLanguages: List<Language> =
-        translationLanguages?.distinctBy { it.code } ?: emptyList()
+        translationLanguages?.let(::supportedTargets) ?: emptyList()
+
+    /**
+     * Keeps only the targets [dictionaryLanguage] is translated into. The list handed in through
+     * navigation is the user's whole selection, which may hold a target that exists for English
+     * only; the repository default is already filtered the same way.
+     */
+    private fun supportedTargets(languages: List<Language>): List<Language> =
+        languages.filter { it.isTranslationTargetFor(dictionaryLanguage) }.distinctBy { it.code }
 
     init {
         viewModelScope.launch {
-            val resolvedTranslations = translationLanguages?.distinctBy { it.code }
+            val resolvedTranslations = translationLanguages?.let(::supportedTargets)
                 ?: repository.defaultTranslationTargets(dictionaryLanguage).distinctBy { it.code }
             requestedTranslationLanguages = resolvedTranslations
             wordFetchManager.getWord(
