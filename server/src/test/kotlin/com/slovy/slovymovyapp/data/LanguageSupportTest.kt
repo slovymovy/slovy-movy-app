@@ -40,6 +40,25 @@ class LanguageSupportTest {
         }
     }
 
+    /**
+     * The eleven targets that predate the per-pair model carry no source list, and that must keep
+     * meaning "every learning language": French, Chinese and the rest stay offered to a learner of
+     * any language exactly as the old global flag offered them.
+     */
+    @Test
+    fun aTargetWithoutASourceListIsOfferedToEveryLearner() {
+        val unrestricted = Language.entries.filter { it.supportedForTranslation && it.translationSourceCodes == null }
+        assertTrue(Language.FRENCH in unrestricted && Language.CHINESE in unrestricted, "the pre-existing targets carry no source list")
+        unrestricted.forEach { target ->
+            Language.learningLanguages.filter { it != target }.forEach { source ->
+                assertTrue(
+                    target.isTranslationTargetFor(source),
+                    "${target.code} lists no sources, so it must stay a target for ${source.code}"
+                )
+            }
+        }
+    }
+
     @Test
     fun aLanguageIsNeverATranslationTargetForItself() {
         Language.entries.forEach { language ->
