@@ -27,7 +27,6 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.share.SharedTextReceiver
 import com.slovy.slovymovyapp.share.SharedTextRoute
-import com.slovy.slovymovyapp.share.SharedTextDispatcher
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.favorites.*
 import com.slovy.slovymovyapp.ui.settings.*
@@ -101,10 +100,6 @@ fun App(
         platform = platform,
         androidContext = androidContext,
     )
-
-    val sharedTextDispatcher = remember(container.dictionaryRepository) {
-        SharedTextDispatcher(container.dictionaryRepository, settingsRepository)
-    }
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -292,11 +287,16 @@ fun App(
     // still brought forward. Waiting for the first back stack entry lets a share that
     // cold-started the app see the start destination.
     val currentDictionaryLanguage by rememberUpdatedState(dictionaryLanguage)
-    LaunchedEffect(sharedTextReceiver, sharedTextDispatcher) {
+    LaunchedEffect(sharedTextReceiver) {
         sharedTextReceiver.requests.collect { request ->
             val currentDestination = navController.currentBackStackEntryFlow.first().destination
-            val delivery = sharedTextDispatcher.deliveryFor(request, currentDestination, currentDictionaryLanguage)
-                ?: return@collect
+            val route = sharedTextReceiver.routeFor(
+                request = request,
+                destination = currentDestination,
+                savedSearchLanguage = settingsRepository.getSearchLanguage(),
+                activeLanguage = currentDictionaryLanguage,
+                installed = container.dictionaryRepository.installedDictionaries(),
+            ) ?: return@collect
             // Land on Search first (same pattern as Favorites' "search in dictionary"), so the
             // shared result sits directly above the app's root rather than above whatever the
             // user had open. popBackStack pops nothing when Search is already on top, so skip it.
@@ -305,12 +305,12 @@ fun App(
             ) {
                 navController.navigate(AppDestination.Search)
             }
-            when (val route = delivery.route) {
+            when (route) {
                 is SharedTextRoute.Search -> pendingSearchQuery = route.query
                 is SharedTextRoute.Reader -> {
-                    pendingReaderTexts[delivery.serial] = route.text
+                    pendingReaderTexts[route.serial] = route.text
                     navController.navigate(
-                        AppDestination.TextReader(languageCode = delivery.language.code, sharedTextSerial = delivery.serial)
+                        AppDestination.TextReader(languageCode = route.language.code, sharedTextSerial = route.serial)
                     )
                 }
             }
@@ -327,7 +327,7 @@ fun App(
                 popEnterTransition = { EnterTransition.None },
                 popExitTransition = { ExitTransition.None }
             ) {
-                val screens = AppNavGraphBuilder(this, sharedTextDispatcher)
+                val screens = AppNavGraphBuilder(this, sharedTextReceiver)
                 screens.screen<AppDestination.Welcome>(interruptibleByShare = false) { backStackEntry ->
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry

@@ -178,7 +178,7 @@ cache. Do not accidentally change those lifetimes when refactoring navigation.
 
 Register every screen with `screens.screen<AppDestination.X>(interruptibleByShare = ...)` (`AppNavGraphBuilder.kt`),
 never a bare `composable<X>`. The flag says whether text shared from another app (Android `PROCESS_TEXT`/`SEND`) may
-navigate away from that screen; `SharedTextDispatcher` drops a share that arrives on a screen registered with `false`.
+navigate away from that screen; `SharedTextReceiver` drops a share that arrives on a screen registered with `false`.
 Use `false` for setup/onboarding, data-version, error, and study-session screens, which a share must not skip or
 tear down.
 
