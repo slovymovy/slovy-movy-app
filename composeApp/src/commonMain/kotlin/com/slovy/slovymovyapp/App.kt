@@ -35,6 +35,8 @@ import com.slovy.slovymovyapp.ui.listdetail.*
 import com.slovy.slovymovyapp.ui.languagesetup.*
 import com.slovy.slovymovyapp.ui.download.*
 import com.slovy.slovymovyapp.ui.study.StudySessionScreen
+import com.slovy.slovymovyapp.ui.study.StudyFormatsScreen
+import com.slovy.slovymovyapp.ui.study.StudyFormatsViewModel
 import com.slovy.slovymovyapp.ui.study.StudySessionViewModel
 import com.slovy.slovymovyapp.ui.reader.TextReaderScreen
 import com.slovy.slovymovyapp.ui.reader.TextReaderViewModel
@@ -116,6 +118,7 @@ fun App(
             favoritesRepository = container.favoritesRepository,
             intakeService = container.intakeService,
             statsService = container.statsService,
+            studyFormats = container.studyFormatsRepository::get,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -126,6 +129,7 @@ fun App(
             favoritesRepository = container.favoritesRepository,
             intakeService = container.intakeService,
             statsService = container.statsService,
+            studyFormats = container.studyFormatsRepository::get,
         )
         favoritesViewModel.updateReviewState(reviewState.toFavoriteLanguageReviewUiState())
         hasFavoritesToReview = reviewState.hasDueCards
@@ -149,6 +153,7 @@ fun App(
                 container.dictionaryClient,
                 container.appDataExporter,
                 settingsRepository,
+                container.studyFormatsRepository,
                 platform,
                 buildConfig,
                 onDictionaryDataChanged = { recoverFavorites ->
@@ -662,7 +667,13 @@ fun App(
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
-                        StatsViewModel(learningLanguagesForStats, container.statsService, settingsRepository, Clock.System)
+                        StatsViewModel(
+                            learningLanguagesForStats,
+                            container.statsService,
+                            settingsRepository,
+                            container.studyFormatsRepository,
+                            Clock.System,
+                        )
                     }
 
                     StatsScreen(
@@ -695,6 +706,7 @@ fun App(
                             sessionService = container.sessionService,
                             statsService = container.statsService,
                             settingsRepository = settingsRepository,
+                            studyFormatsRepository = container.studyFormatsRepository,
                             appScope = appCoroutineScope,
                             clock = Clock.System,
                             ttsManager = container.ttsManager,
@@ -753,7 +765,35 @@ fun App(
                         onNavigateToDeveloper = {
                             navController.navigate(AppDestination.Developer)
                         },
+                        onOpenStudyFormats = { language ->
+                            navController.navigate(AppDestination.StudyFormats(langCode = language.code))
+                        },
                         hasFavoritesToReview = hasFavoritesToReview,
+                    )
+                }
+                composable<AppDestination.StudyFormats> { backStackEntry ->
+                    val args = backStackEntry.toRoute<AppDestination.StudyFormats>()
+                    val language = Language.fromCodeOrNull(args.langCode)
+                    if (language == null) {
+                        LaunchedEffect(Unit) { navController.popBackStack() }
+                        return@composable
+                    }
+                    val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
+                        StudyFormatsViewModel(
+                            language = language,
+                            studyFormatsRepository = container.studyFormatsRepository,
+                            appScope = appCoroutineScope,
+                            onChanged = { changed ->
+                                // Intake re-enters words in the formats still studied, and the
+                                // review badge counts only those, so both must be recomputed.
+                                favoritesReviewCoordinator.invalidateIntakeCacheForLanguage(changed)
+                                appCoroutineScope.launch { refreshFavoritesDueCountsOnly() }
+                            },
+                        )
+                    }
+                    StudyFormatsScreen(
+                        viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
                     )
                 }
                 composable<AppDestination.Developer> { backStackEntry ->
@@ -761,6 +801,7 @@ fun App(
                         DeveloperViewModel(
                             favoritesRepository = container.favoritesRepository,
                             intake = container.intakeService,
+                            studyFormats = container.studyFormatsRepository::get,
                             listsService = container.listsService,
                             learningLanguagesProvider = {
                                 dataManager.listDownloadedDatabases()

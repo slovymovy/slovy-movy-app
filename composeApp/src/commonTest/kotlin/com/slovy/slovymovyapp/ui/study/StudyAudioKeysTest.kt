@@ -27,6 +27,7 @@ class StudyAudioKeysTest {
             side = StudyCardSide.FRONT,
             playingAudioKey = playing,
             preparingAudioKey = preparing,
+            canOpenStudyFormats = true,
         )
 
     @Test

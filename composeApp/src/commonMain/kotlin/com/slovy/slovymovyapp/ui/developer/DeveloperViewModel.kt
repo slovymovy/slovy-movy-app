@@ -15,6 +15,7 @@ import com.slovy.slovymovyapp.data.favorites.CardFamilyDebugCount
 import com.slovy.slovymovyapp.data.favorites.CardScheduleDebugStats
 import com.slovy.slovymovyapp.data.favorites.CardTableDebugRow
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.learning.intake.IntakeResult
 import com.slovy.slovymovyapp.data.learning.intake.IntakeRunMode
 import com.slovy.slovymovyapp.data.learning.intake.LearningIntake
@@ -145,6 +146,7 @@ private data class DeveloperCardTablePageResult(
 class DeveloperViewModel(
     private val favoritesRepository: FavoritesRepository,
     private val intake: LearningIntake,
+    private val studyFormats: suspend (Language) -> StudyFormatSelection,
     private val listsService: ListsService,
     private val learningLanguagesProvider: suspend () -> List<Language>,
 ) : ViewModel() {
@@ -377,7 +379,7 @@ class DeveloperViewModel(
         val languages = learningLanguagesProvider()
         val now = Clock.System.now().toEpochMilliseconds()
         val perLanguage: List<CardScheduleDebugStats> = languages.map { language ->
-            favoritesRepository.getCardScheduleDebugStats(language, now)
+            favoritesRepository.getCardScheduleDebugStats(language, now, studyFormats(language).families)
         }
         val familyCounts = favoritesRepository.getCardFamilyDebugCounts().map { it.toDeveloperFamilyCount() }
         return DeveloperScheduleStats(

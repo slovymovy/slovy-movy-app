@@ -22,9 +22,12 @@ object FsrsDefaults {
     const val PAUSE_INTAKE_RETENTION_MIN_REVIEWS: Long = 50L
     const val PAUSE_INTAKE_IF_RETENTION_BELOW: Double = 0.75
     val MATURE_STABILITY: Duration = 21.days
+    /** The floor for stability a card inherits through cross-family credit, so it is never zero. */
+    const val MIN_INHERITED_STABILITY: Double = 0.001
     val PRODUCTION_UNLOCK_STABILITY: Duration = 48.hours
     val CONTEXT_UNLOCK_STABILITY: Duration = 72.hours
     val BURY_FAILED_SESSION_CARDS_FOR: Duration = 10.minutes
+    val BURY_UNPLAYABLE_UNDER_FORMATS_FOR: Duration = 2.hours
     const val SAME_SENSE_COOLDOWN_RATIO: Double = 0.30
     const val SAME_LEMMA_COOLDOWN_RATIO: Double = 0.02
     const val SAME_ANSWER_COOLDOWN_RATIO: Double = 0.05
@@ -122,6 +125,8 @@ object FsrsDefaults {
         contextUnlockStability = CONTEXT_UNLOCK_STABILITY,
         crossFamilyCredits = CROSS_FAMILY_CREDITS,
         buryFailedSessionCardsFor = BURY_FAILED_SESSION_CARDS_FOR,
+        buryUnplayableUnderFormatsFor = BURY_UNPLAYABLE_UNDER_FORMATS_FOR,
+        minInheritedStability = MIN_INHERITED_STABILITY,
         sameSenseCooldownRatio = SAME_SENSE_COOLDOWN_RATIO,
         sameLemmaCooldownRatio = SAME_LEMMA_COOLDOWN_RATIO,
         sameAnswerCooldownRatio = SAME_ANSWER_COOLDOWN_RATIO,

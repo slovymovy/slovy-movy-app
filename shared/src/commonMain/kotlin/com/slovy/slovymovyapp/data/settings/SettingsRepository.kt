@@ -1,12 +1,16 @@
 package com.slovy.slovymovyapp.data.settings
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.learning.StudyFormat
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -78,5 +82,27 @@ class SettingsRepository(private val db: AppDatabase) {
 
     suspend fun setStudyAutoplay(enabled: Boolean) {
         insert(Setting(Setting.Name.STUDY_AUTOPLAY, JsonPrimitive(enabled)))
+    }
+
+    /**
+     * The study formats chosen for [language]; every format when none has been stored. Names
+     * that no longer exist are dropped, and a selection left empty by that falls back to all,
+     * since a language with no format could not be studied.
+     */
+    suspend fun getStudyFormats(language: Language): StudyFormatSelection {
+        val json = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: return StudyFormatSelection.ALL
+        val names = json[language.code] as? JsonArray ?: return StudyFormatSelection.ALL
+        val formats = names
+            .mapNotNull { element -> (element as? JsonPrimitive)?.contentOrNull }
+            .mapNotNull { name -> StudyFormat.entries.firstOrNull { it.name == name } }
+            .toSet()
+        return if (formats.isEmpty()) StudyFormatSelection.ALL else StudyFormatSelection(formats)
+    }
+
+    suspend fun setStudyFormats(language: Language, selection: StudyFormatSelection) {
+        val existing = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: JsonObject(emptyMap())
+        val names = StudyFormat.entries.filter { it in selection.enabled }.map { JsonPrimitive(it.name) }
+        val updated = JsonObject(existing + (language.code to JsonArray(names)))
+        insert(Setting(Setting.Name.STUDY_FORMATS, updated))
     }
 }

@@ -7,21 +7,28 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardVariant
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.remote.LanguageCardExample
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import kotlin.time.Duration
 
+/**
+ * The variants of [family] this sense can be played in, in the learner's configured translation
+ * languages and chosen [studyFormats]. Intake, review-time selection and the unlock ladder all
+ * build from here, so a format the learner switched off is never created, served or unlocked.
+ */
 fun buildTaskVariants(
     family: CardFamily,
     sense: LanguageCardResponseSense,
     translationTargets: List<Language>,
+    studyFormats: StudyFormatSelection,
 ): List<CardVariant> {
     // Only the user's configured translation languages may cue a card; languages that merely
     // happen to exist in cached sense data must not be tested.
     val targets = translationTargets.distinctBy { it.code }
 
-    return when (family) {
+    val all = when (family) {
         CardFamily.RECOGNIZE_SENSE -> buildList {
             add(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null))
             targets
@@ -55,6 +62,7 @@ fun buildTaskVariants(
                 .forEach { add(CardVariant(CardKind.LISTENING_TRANSLATION, targetLang = it.code)) }
         }
     }
+    return all.filter { studyFormats.allows(it.kind) }
 }
 
 // The data a variant needs before it is playable in a given target language. This is the single
@@ -81,6 +89,7 @@ fun selectVariantsForReview(
     family: CardFamily,
     sense: LanguageCardResponseSense,
     translationTargets: List<Language>,
+    studyFormats: StudyFormatSelection,
     cardStability: Duration,
     lastVariant: CardVariant?,
 ): List<CardVariant> = PerformanceMonitoring.startTrace("learning_select_variants_for_review").use { trace ->
@@ -94,7 +103,7 @@ fun selectVariantsForReview(
     trace.putMetric("examples", sense.examples.size.toLong())
     trace.putMetric("stability_ms", cardStability.inWholeMilliseconds)
 
-    val all = buildTaskVariants(family, sense, translationTargets)
+    val all = buildTaskVariants(family, sense, translationTargets, studyFormats)
     val gated = all.filter { it.kind.minStability <= cardStability }
     val fallbackToAll = gated.isEmpty() && all.isNotEmpty()
     val pool = if (fallbackToAll) all else gated

@@ -20,6 +20,10 @@ import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.GradeOutcome
+import com.slovy.slovymovyapp.data.learning.StudyFormat
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
+import com.slovy.slovymovyapp.data.learning.StudyFormatsEditor
+import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
@@ -60,6 +64,7 @@ class StudySessionViewModel(
     private val sessionService: SessionService,
     private val statsService: StatsService,
     private val settingsRepository: SettingsRepository,
+    private val studyFormatsRepository: StudyFormatsRepository,
     /** Outlives this screen, so a preference saved just before leaving the session still lands. */
     private val appScope: CoroutineScope,
     private val clock: Clock,
@@ -87,6 +92,59 @@ class StudySessionViewModel(
     /** Set when leaving the session must not stop at the reward screen. Observed by the screen. */
     var exitRequested by mutableStateOf(false)
         private set
+
+    /**
+     * The "How studying works" page, drawn over the session. It lives beside [state] rather than
+     * inside Active so the card underneath is left exactly as it was.
+     */
+    var studyFormatsPage by mutableStateOf<StudyFormatsUiState?>(null)
+        private set
+
+    /** Scroll position of the open page; replaced on every opening so the page starts at the top. */
+    var studyFormatsScrollState: ScrollState by mutableStateOf(ScrollState(0))
+        private set
+
+    /**
+     * Edits this language's formats from the page over the session. Grading, loading the next
+     * card and ending the session wait for its latest write: the service reads the stored
+     * selection, and the milestone baseline must be taken after it, so the in-memory choice
+     * and the stored one never disagree at those points. Null for a language the app does not
+     * know, which has no page.
+     */
+    private val studyFormatsEditor: StudyFormatsEditor? by lazy {
+        language?.let { language ->
+        StudyFormatsEditor(
+            repository = studyFormatsRepository,
+            language = language,
+            // Outlives this screen, so a toggle made just before leaving the session still lands.
+            scope = appScope,
+            analyticsSource = "study",
+            onSelectionChanged = { selection ->
+                if (studyFormatsPage != null) studyFormatsPage = studyFormatsUiState(language, selection)
+            },
+            onStored = {
+                // Intake and the review badge read the selection, so they must be recomputed.
+                onFavoriteChanged(language)
+                // The words-learned milestone compares the pipeline at the end of the session
+                // with its start; a change of formats re-stages words, which is not learning.
+                if (sessionPrepared) {
+                    sessionStartPipeline = try {
+                        pipelineSnapshot()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        AppLogger.warn(TAG, "Unable to re-snapshot the pipeline after a format change lang=$langCode", e)
+                        emptyList()
+                    }
+                }
+            },
+        )
+        }
+    }
+
+    /** The formats this language is studied in, read at start and updated by the page. */
+    private val studyFormats: StudyFormatSelection
+        get() = studyFormatsEditor?.selection ?: StudyFormatSelection.ALL
 
     /** How the session ended, recorded at the point of truth rather than derived later. */
     private var completionArm: String? = null
@@ -294,6 +352,41 @@ class StudySessionViewModel(
     fun dismissOverflowMenu() {
         val active = state as? StudySessionUiState.Active ?: return
         state = active.copy(isOverflowMenuOpen = false)
+    }
+
+    /** Opens "How studying works" from the actions menu. */
+    fun openStudyFormats() {
+        val active = state as? StudySessionUiState.Active ?: return
+        if (active.isSubmittingReview || !active.canOpenStudyFormats) return
+        val card = currentCard ?: return
+        val language = language ?: return
+        state = active.copy(isOverflowMenuOpen = false)
+        // The page covers every speaker control, so nothing may keep sounding, or start
+        // sounding once a pending play request resolves, behind it.
+        stopAudio()
+        studyFormatsScrollState = ScrollState(0)
+        Analytics.logEvent(
+            AnalyticsEvent.STUDY_FORMATS_OPEN,
+            mapOf(
+                "lang" to langCode,
+                "source" to "study",
+                "variant" to card.variant.kind.name.lowercase(),
+            ),
+        )
+        studyFormatsPage = studyFormatsUiState(language, studyFormats)
+    }
+
+    fun dismissStudyFormats() {
+        studyFormatsPage = null
+    }
+
+    /**
+     * Switches a format on or off for this language. The card on screen is never swapped out;
+     * the change applies from the next card. Nothing already earned is touched: cards of a
+     * switched-off family keep their scheduling and come back as they are when it returns.
+     */
+    fun toggleStudyFormat(format: StudyFormat) {
+        studyFormatsEditor?.toggle(format)
     }
 
     /**
@@ -633,6 +726,7 @@ class StudySessionViewModel(
             // and its failure path cannot land behind the reward. It is bounded work: the
             // continuation only writes counters and calls loadNextCard, which exits early now.
             reviewJob?.join()
+            studyFormatsEditor?.awaitWrite()
             // The current card stays put rather than flashing a spinner; buildCompleteState
             // absorbs its own failures into a heroless summary, so there is no error path that
             // could strand the user here.
@@ -741,6 +835,7 @@ class StudySessionViewModel(
         val durationMs = (clock.now() - cardShownAt).inWholeMilliseconds
         state = active.copy(isSubmittingReview = true)
         reviewJob = viewModelScope.launch {
+            studyFormatsEditor?.awaitWrite()
             runCatching {
                 sessionService.submitReview(
                     card = card,
@@ -788,12 +883,13 @@ class StudySessionViewModel(
                             autoplayEnabled = settingsRepository.getStudyAutoplay()
                             autoplayPreferenceLoaded = true
                         }
+                        studyFormatsEditor?.load()
                         val intakeResult = intakeService.runIntake(langCode)
                         putMetric("cards_created", intakeResult.cardsCreated.toLong())
                         putMetric("activated_favorites", intakeResult.activated.size.toLong())
                         putMetric("skip_reasons", intakeResult.skipped.size.toLong())
                         sessionStartPipeline = pipelineSnapshot()
-                        sessionTotal = statsService.dueNow(langCode, excludedCardFamiliesForSession())
+                        sessionTotal = statsService.dueNow(langCode, allowedCardFamiliesForSession())
                         sessionPrepared = true
                         putMetric("due_now", sessionTotal.toLong())
                         loadNextCard()
@@ -821,6 +917,7 @@ class StudySessionViewModel(
         silenceAudio()
         cardLoadJob?.cancel()
         cardLoadJob = viewModelScope.launch {
+            studyFormatsEditor?.awaitWrite()
             PerformanceMonitoring.startTrace("study_card_load").useWithResult {
                 putAttributes(
                     mapOf(
@@ -911,6 +1008,7 @@ class StudySessionViewModel(
             ratingOptions = emptyList(),
             viewedSenseId = uiCard.activeSenseId,
             isAutoplayEnabled = autoplayEnabled,
+            canOpenStudyFormats = sessionCard.hasStudyFormatsPage(),
         )
         if (autoplayEnabled) {
             autoplayFrontAudioText(uiCard)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
@@ -947,7 +1045,8 @@ class StudySessionViewModel(
         sessionService.nextCard(
             langCode = langCode,
             sessionStartedAt = sessionStartedAt,
-            excludedFamilies = excludedCardFamiliesForSession(),
+            // The service applies the formats itself; the session only adds what it postponed.
+            excludedFamilies = postponedCardFamilies(),
         )
 
     private suspend fun buildCompleteState(): StudySessionCompleteUiState {
@@ -981,25 +1080,28 @@ class StudySessionViewModel(
 
     private suspend fun pipelineSnapshot(): List<StatsPipelineStage> =
         withContext(Dispatchers.IO) {
-            statsService.pipelineSnapshot(langCode)
+            statsService.pipelineSnapshot(langCode, studyFormats.families)
         }
 
     private suspend fun rewardSnapshot() =
         withContext(Dispatchers.IO) {
-            statsService.rewardSnapshot(langCode)
+            statsService.rewardSnapshot(langCode, studyFormats.families)
         }
 
-    private fun excludedCardFamiliesForSession(): Set<CardFamily> =
+    private fun postponedCardFamilies(): Set<CardFamily> =
         if (postponeListeningCardsForSession) {
             setOf(CardFamily.RECOGNIZE_VOICE)
         } else {
             emptySet()
         }
 
+    private fun allowedCardFamiliesForSession(): List<CardFamily> =
+        studyFormats.families - postponedCardFamilies()
+
     private suspend fun nextCardProgress(): StudySessionProgressUiState {
         val completedCount = reviewedCount + skippedCount
         val current = completedCount + 1
-        val dueNow = statsService.dueNow(langCode, excludedCardFamiliesForSession())
+        val dueNow = statsService.dueNow(langCode, allowedCardFamiliesForSession())
         val projectedTotal = completedCount + dueNow
         sessionTotal = if (postponeListeningCardsForSession) {
             maxOf(projectedTotal, current)

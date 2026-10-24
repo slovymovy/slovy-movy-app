@@ -14,6 +14,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
+import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.networkErrorUiText
@@ -103,6 +104,7 @@ class SettingsViewModel(
     private val dictionaryClient: DictionaryClient,
     private val appDataExporter: AppDataExporter,
     private val settingsRepository: SettingsRepository,
+    private val studyFormatsRepository: StudyFormatsRepository,
     private val platform: PlatformDbSupport,
     buildConfig: AppBuildConfig,
     private val onDictionaryDataChanged: suspend (recoverFavorites: Boolean) -> Unit = { _ -> },
@@ -268,7 +270,8 @@ class SettingsViewModel(
                         language = language,
                         isExpanded = false, // placeholder, merged below
                         dictionarySizeBytes = dictSize,
-                        translations = translations
+                        translations = translations,
+                        hasStudyFormats = studyFormatsRepository.hasChoice(language),
                     )
                 }
 
