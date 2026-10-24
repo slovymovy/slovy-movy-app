@@ -65,7 +65,7 @@ actual object TestContext {
     private fun exportsRoot(): String {
         val paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
         val dir = (paths as NSArray).objectAtIndex(0u) as? String ?: NSHomeDirectory()
-        return "$dir/SlovyMovy"
+        return "$dir/OpenWords"
     }
 }
 

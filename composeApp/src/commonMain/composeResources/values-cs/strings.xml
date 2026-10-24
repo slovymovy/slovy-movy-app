@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">Přidat jazyk k učení</string>
     <string name="settings_section_translation_languages">Jazyky překladu</string>
     <string name="settings_section_voice">Hlas</string>
-    <string name="settings_section_your_data">Tvoje data</string>
     <string name="settings_section_about">O aplikaci</string>
 
     <string name="feedback_dialog_title">Zpětná vazba k aplikaci</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">Smaže řádky učebních karet pro ladění. Tyto akce nelze vrátit.</string>
     <string name="developer_remove_suspended_cards">Odebrat pozastavené</string>
     <string name="developer_remove_all_learning_cards">Odebrat všechny učební karty</string>
+    <string name="developer_app_data_title">Data aplikace</string>
+    <string name="developer_app_data_description">Exportuje databáze aplikace do archivu nebo nějaký importuje. Import nahradí uložená slova, pokrok a nastavení v tomto zařízení.</string>
+    <string name="developer_export_app_data">Exportovat data aplikace</string>
+    <string name="developer_import_app_data">Importovat data aplikace…</string>
+    <string name="developer_import_staged">Import (%1$s) je připraven. Zavři aplikaci a znovu ji otevři, aby se použil.</string>
+    <string name="developer_import_quit">Zavřít aplikaci teď</string>
+    <string name="developer_import_discard">Zahodit připravený import</string>
+    <string name="developer_import_last_applied">Při posledním spuštění byl použit import: %1$s</string>
+    <string name="developer_import_last_failed">Při posledním spuštění byl import odmítnut: %1$s</string>
     <string name="developer_stats_title">Statistiky</string>
     <string name="developer_terminal_title">Terminál</string>
     <string name="developer_terminal_clear">Vymazat</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">Všechna slovní data jsou dostupná pod licencí CC-BY-SA-4.0.</string>
     <string name="acknowledgements_thanks">Děkujeme komunitě Wikislovníku a Tatu Ylonenovi za volné zpřístupnění těchto dat.</string>
 
-    <string name="app_data_backup_title">Zálohuj si uložená slova</string>
-    <string name="app_data_backup_description">Exportuje tvoje uložená slova a nastavení aplikace do archivu. Hodí se pro zálohu nebo přechod na nové zařízení.</string>
-    <string name="app_data_exporting">Exportování...</string>
-    <string name="app_data_export_now">Exportovat teď</string>
 
     <string name="settings_dictionary_size_with_colon">Slovník: %1$s</string>
     <string name="settings_dictionary_size">Slovník %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">Stažení slovníku se nezdařilo: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Stažení překladu se nezdařilo: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Načtení hlasů se nezdařilo: %1$s</string>
-    <string name="settings_export_success">%1$s exportováno do %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">Otevření dialogu sdílení se nezdařilo: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Export dat aplikace se nezdařil: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Aktualizace výběru hlasu se nezdařila: %1$s</string>
     <string name="settings_feedback_sent">Zpětná vazba odeslána</string>
     <string name="settings_feedback_view">Zobrazit</string>

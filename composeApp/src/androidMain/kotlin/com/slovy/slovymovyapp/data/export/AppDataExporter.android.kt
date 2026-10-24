@@ -28,12 +28,12 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
     private val platform = PlatformDbSupport(context)
 
     actual val isSupported: Boolean = true
-    actual val destinationDescription: String = "Downloads/SlovyMovy"
+    actual val destinationDescription: String = "Downloads/OpenWords"
     actual val canShareExport: Boolean = true
 
     actual suspend fun exportAppData(): AppDataExportResult = withContext(Dispatchers.IO) {
         val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-        val fileName = "slovymovy-db-export-$timestamp.tar"
+        val fileName = "openwords-export-$timestamp.tar"
         withAppDataSnapshots(platform) { snapshots ->
             require(snapshots.isNotEmpty()) { "No database files found to export." }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -55,7 +55,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
             put(MediaStore.Downloads.MIME_TYPE, "application/x-tar")
             put(
                 MediaStore.Downloads.RELATIVE_PATH,
-                "${Environment.DIRECTORY_DOWNLOADS}/SlovyMovy"
+                "${Environment.DIRECTORY_DOWNLOADS}/OpenWords"
             )
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
@@ -74,7 +74,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
             writeSucceeded = true
             return AppDataExportResult(
                 artifactName = fileName,
-                destinationLabel = "Downloads/SlovyMovy/$fileName",
+                destinationLabel = "Downloads/OpenWords/$fileName",
                 shareReference = uri.toString()
             )
         } finally {
@@ -92,7 +92,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
             ?: error("Failed to access external downloads directory")
         val exportDir = File(
             downloadsDir,
-            "SlovyMovy"
+            "OpenWords"
         ).apply { mkdirs() }
         val outputFile = File(exportDir, fileName)
         writeTarArchiveToPath(

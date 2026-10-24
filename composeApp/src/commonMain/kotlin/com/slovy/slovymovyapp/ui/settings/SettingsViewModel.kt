@@ -11,7 +11,6 @@ import com.slovy.slovymovyapp.AppBuildConfig
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
-import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.remote.*
 import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
@@ -74,8 +73,6 @@ data class SettingsUiState(
     val deleteConfirmation: DeleteConfirmationState? = null,
 
     // Data export
-    val isAppDataExportSupported: Boolean = false,
-    val isExportingAppData: Boolean = false,
 
     // About
     val buildConfig: AppBuildConfig = AppBuildConfig("compile", 42, true, "com.slovy.slovymovyapp"),
@@ -101,19 +98,13 @@ class SettingsViewModel(
     private val dataDbManager: DataDbManager,
     private val downloadCoordinator: DownloadCoordinator,
     private val dictionaryClient: DictionaryClient,
-    private val appDataExporter: AppDataExporter,
     private val settingsRepository: SettingsRepository,
     private val platform: PlatformDbSupport,
     buildConfig: AppBuildConfig,
     private val onDictionaryDataChanged: suspend (recoverFavorites: Boolean) -> Unit = { _ -> },
 ) : ViewModel() {
 
-    var state by mutableStateOf(
-        SettingsUiState(
-            buildConfig = buildConfig,
-            isAppDataExportSupported = appDataExporter.isSupported
-        )
-    )
+    var state by mutableStateOf(SettingsUiState(buildConfig = buildConfig))
         private set
 
     val scrollState = LazyListState()
@@ -751,46 +742,6 @@ class SettingsViewModel(
     fun openSystemSettings() {
         Analytics.logEvent(AnalyticsEvent.SETTINGS_OPEN_SYSTEM_SETTINGS_CLICK)
         ttsManager.openSettings()
-    }
-
-    fun exportAppData() {
-        if (!state.isAppDataExportSupported || state.isExportingAppData) return
-
-        viewModelScope.launch {
-            state = state.copy(isExportingAppData = true)
-            try {
-                val result = appDataExporter.exportAppData()
-                showSnackbar(
-                    UiText.Resource(
-                        Res.string.settings_export_success,
-                        listOf(result.artifactName, result.destinationLabel)
-                    )
-                )
-                if (appDataExporter.canShareExport) {
-                    try {
-                        appDataExporter.shareExport(result)
-                    } catch (e: Exception) {
-                        state = state.copy(
-                            errorMessage = UiText.Resource(
-                                Res.string.settings_error_open_share_dialog_with_reason,
-                                listOf(messageOrUnknown(e))
-                            )
-                        )
-                    }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                state = state.copy(
-                    errorMessage = UiText.Resource(
-                        Res.string.settings_error_export_app_data_with_reason,
-                        listOf(messageOrUnknown(e))
-                    )
-                )
-            } finally {
-                state = state.copy(isExportingAppData = false)
-            }
-        }
     }
 
     fun dismissError() {

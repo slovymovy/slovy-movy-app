@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">Eine Lernsprache hinzufügen</string>
     <string name="settings_section_translation_languages">Übersetzungssprachen</string>
     <string name="settings_section_voice">Stimme</string>
-    <string name="settings_section_your_data">Deine Daten</string>
     <string name="settings_section_about">Über</string>
 
     <string name="feedback_dialog_title">App-Feedback</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">Lösche Lernkarten-Zeilen zum Debuggen. Diese Aktionen können nicht rückgängig gemacht werden.</string>
     <string name="developer_remove_suspended_cards">Pausierte entfernen</string>
     <string name="developer_remove_all_learning_cards">Alle Lernkarten entfernen</string>
+    <string name="developer_app_data_title">App-Daten</string>
+    <string name="developer_app_data_description">Exportiert die App-Datenbanken in ein Archiv oder importiert eines. Beim Import werden gespeicherte Wörter, Fortschritt und Einstellungen auf diesem Gerät ersetzt.</string>
+    <string name="developer_export_app_data">App-Daten exportieren</string>
+    <string name="developer_import_app_data">App-Daten importieren…</string>
+    <string name="developer_import_staged">Ein Import von %1$s ist vorbereitet. Beende die App und öffne sie erneut, um ihn anzuwenden.</string>
+    <string name="developer_import_quit">App jetzt beenden</string>
+    <string name="developer_import_discard">Vorbereiteten Import verwerfen</string>
+    <string name="developer_import_last_applied">Beim letzten Start wurde ein Import angewendet: %1$s</string>
+    <string name="developer_import_last_failed">Beim letzten Start wurde ein Import abgelehnt: %1$s</string>
     <string name="developer_stats_title">Statistiken</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Leeren</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">Alle Wortdaten sind unter der Lizenz CC-BY-SA-4.0 verfügbar.</string>
     <string name="acknowledgements_thanks">Wir danken der Wiktionary-Community und Tatu Ylonen dafür, dass sie diese Daten frei zugänglich machen.</string>
 
-    <string name="app_data_backup_title">Sichere deine gespeicherten Wörter</string>
-    <string name="app_data_backup_description">Exportiert deine gespeicherten Wörter und App-Einstellungen in ein Archiv. Praktisch, um eine Kopie zu behalten oder auf ein neues Gerät umzuziehen.</string>
-    <string name="app_data_exporting">Wird exportiert...</string>
-    <string name="app_data_export_now">Jetzt exportieren</string>
 
     <string name="settings_dictionary_size_with_colon">Wörterbuch: %1$s</string>
     <string name="settings_dictionary_size">Wörterbuch %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">Wörterbuch konnte nicht heruntergeladen werden: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Übersetzung konnte nicht heruntergeladen werden: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Stimmen konnten nicht geladen werden: %1$s</string>
-    <string name="settings_export_success">%1$s nach %2$s exportiert</string>
-    <string name="settings_error_open_share_dialog_with_reason">Teilen-Dialog konnte nicht geöffnet werden: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">App-Daten konnten nicht exportiert werden: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Stimmenauswahl konnte nicht aktualisiert werden: %1$s</string>
     <string name="settings_feedback_sent">Feedback gesendet</string>
     <string name="settings_feedback_view">Anzeigen</string>

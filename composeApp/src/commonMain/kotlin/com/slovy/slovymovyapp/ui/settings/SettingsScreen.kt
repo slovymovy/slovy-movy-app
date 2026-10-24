@@ -79,7 +79,6 @@ fun SettingsScreen(
         onTestVoice = { voice -> viewModel.testVoice(voice) },
         onToggleVoiceEnabled = { language, voiceId -> viewModel.toggleVoiceEnabled(language, voiceId) },
         onOpenSettings = { viewModel.openSystemSettings() },
-        onExportAppData = { viewModel.exportAppData() },
         onDismissError = { viewModel.dismissError() },
         onConfirmDelete = { viewModel.confirmDelete() },
         onDismissDeleteConfirmation = { viewModel.dismissDeleteConfirmation() },
@@ -117,7 +116,6 @@ fun SettingsScreenContent(
     onTestVoice: (Text2SpeechVoice) -> Unit = { _ -> },
     onToggleVoiceEnabled: (Text2SpeechLanguage, String) -> Unit = { _, _ -> },
     onOpenSettings: () -> Unit = {},
-    onExportAppData: () -> Unit = {},
     onDismissError: () -> Unit = {},
     onConfirmDelete: () -> Unit = {},
     onDismissDeleteConfirmation: () -> Unit = {},
@@ -325,22 +323,6 @@ fun SettingsScreenContent(
 
                                 item {
                                     DownloadMoreVoicesCard(onOpenSettings = onOpenSettings)
-                                }
-                            }
-
-                            if (state.isAppDataExportSupported) {
-                                item {
-                                    SectionHeader(
-                                        title = stringResource(Res.string.settings_section_your_data),
-                                        modifier = Modifier.padding(top = AppSpacing.sm)
-                                    )
-                                }
-
-                                item {
-                                    AppDataSection(
-                                        isExporting = state.isExportingAppData,
-                                        onExport = onExportAppData
-                                    )
                                 }
                             }
 

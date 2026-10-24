@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.slovy.slovymovyapp.data.learning.intake.IntakeRunMode
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
+import com.slovy.slovymovyapp.ui.formatFileSize
 import com.slovy.slovymovyapp.ui.study.StudySessionCompletePreviewCase
 import com.slovy.slovymovyapp.ui.theme.AppSpacing
 import org.jetbrains.compose.resources.stringResource
@@ -337,6 +338,89 @@ internal fun DeveloperCachesCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(Res.string.developer_clear_lists_cache))
+            }
+        }
+    }
+}
+
+@Composable
+internal fun DeveloperAppDataCard(
+    appData: DeveloperAppDataUiState,
+    isBusy: Boolean,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
+    onDiscardStagedImport: () -> Unit,
+    onQuitToApply: () -> Unit,
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+        ) {
+            Text(
+                text = stringResource(Res.string.developer_app_data_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            FilledTonalButton(
+                onClick = onExport,
+                enabled = !isBusy && appData.isExportSupported,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(Res.string.developer_export_app_data))
+            }
+            ScaryFilledTonalButton(
+                text = stringResource(Res.string.developer_import_app_data),
+                onClick = onImport,
+                enabled = !isBusy && appData.isImportSupported,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            appData.stagedImportSizeBytes?.let { sizeBytes ->
+                HorizontalDivider()
+                Text(
+                    text = stringResource(Res.string.developer_import_staged, formatFileSize(sizeBytes)),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+                ) {
+                    if (appData.canQuitToApply) {
+                        FilledTonalButton(
+                            onClick = onQuitToApply,
+                            enabled = !isBusy,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(stringResource(Res.string.developer_import_quit))
+                        }
+                    }
+                    TextButton(
+                        onClick = onDiscardStagedImport,
+                        enabled = !isBusy,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(Res.string.developer_import_discard))
+                    }
+                }
+            }
+            appData.lastStartupImport?.let { last ->
+                Text(
+                    text = stringResource(
+                        if (last.applied) Res.string.developer_import_last_applied else Res.string.developer_import_last_failed,
+                        last.detail,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (last.applied) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

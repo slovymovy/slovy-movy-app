@@ -14,7 +14,7 @@ import java.util.*
 actual class AppDataExporter actual constructor(androidContext: Any?) {
     private val platform = PlatformDbSupport()
     private val homeDir = File(System.getProperty("user.home") ?: ".")
-    private val exportsDir = File(homeDir, "Downloads/SlovyMovy")
+    private val exportsDir = File(homeDir, "Downloads/OpenWords")
 
     actual val isSupported: Boolean = true
     actual val destinationDescription: String = exportsDir.absolutePath
@@ -22,7 +22,7 @@ actual class AppDataExporter actual constructor(androidContext: Any?) {
 
     actual suspend fun exportAppData(): AppDataExportResult = withContext(Dispatchers.IO) {
         val timestamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-        val fileName = "slovymovy-db-export-$timestamp.tar"
+        val fileName = "openwords-export-$timestamp.tar"
         withAppDataSnapshots(platform) { snapshots ->
             require(snapshots.isNotEmpty()) { "No database files found to export." }
 

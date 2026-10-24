@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">Öğrenmek için dil ekle</string>
     <string name="settings_section_translation_languages">Çeviri dilleri</string>
     <string name="settings_section_voice">Ses</string>
-    <string name="settings_section_your_data">Verilerin</string>
     <string name="settings_section_about">Hakkında</string>
 
     <string name="feedback_dialog_title">Uygulama geri bildirimi</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">Hata ayıklama için öğrenme kartı satırlarını siler. Bu işlemler geri alınamaz.</string>
     <string name="developer_remove_suspended_cards">Duraklatılanları kaldır</string>
     <string name="developer_remove_all_learning_cards">Tüm öğrenme kartlarını kaldır</string>
+    <string name="developer_app_data_title">Uygulama verileri</string>
+    <string name="developer_app_data_description">Uygulama veritabanlarını bir arşive aktarır veya bir arşivi içe aktarır. İçe aktarma bu cihazdaki kayıtlı kelimeleri, ilerlemeyi ve ayarları değiştirir.</string>
+    <string name="developer_export_app_data">Uygulama verilerini dışa aktar</string>
+    <string name="developer_import_app_data">Uygulama verilerini içe aktar…</string>
+    <string name="developer_import_staged">%1$s boyutunda bir içe aktarma hazır. Uygulamak için uygulamayı kapatıp yeniden aç.</string>
+    <string name="developer_import_quit">Uygulamayı şimdi kapat</string>
+    <string name="developer_import_discard">Hazırlanan içe aktarmayı sil</string>
+    <string name="developer_import_last_applied">Son açılışta bir içe aktarma uygulandı: %1$s</string>
+    <string name="developer_import_last_failed">Son açılışta bir içe aktarma reddedildi: %1$s</string>
     <string name="developer_stats_title">İstatistikler</string>
     <string name="developer_terminal_title">Terminal</string>
     <string name="developer_terminal_clear">Temizle</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">Tüm kelime verileri CC-BY-SA-4.0 lisansıyla sunulmaktadır.</string>
     <string name="acknowledgements_thanks">Bu verileri özgürce erişilebilir kıldıkları için Wiktionary topluluğuna ve Tatu Ylonen'e minnettarız.</string>
 
-    <string name="app_data_backup_title">Kayıtlı kelimelerini yedekle</string>
-    <string name="app_data_backup_description">Kayıtlı kelimelerini ve uygulama ayarlarını bir arşive aktarır. Kopya tutmak veya yeni cihaza geçmek için kullanışlıdır.</string>
-    <string name="app_data_exporting">Dışa aktarılıyor...</string>
-    <string name="app_data_export_now">Şimdi dışa aktar</string>
 
     <string name="settings_dictionary_size_with_colon">Sözlük: %1$s</string>
     <string name="settings_dictionary_size">Sözlük %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">Sözlük indirilemedi: %1$s</string>
     <string name="settings_error_download_translation_with_reason">Çeviri indirilemedi: %1$s</string>
     <string name="settings_error_load_voices_with_reason">Sesler yüklenemedi: %1$s</string>
-    <string name="settings_export_success">%1$s şuraya aktarıldı: %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">Paylaşım penceresi açılamadı: %1$s</string>
-    <string name="settings_error_export_app_data_with_reason">Uygulama verileri dışa aktarılamadı: %1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">Ses seçimi güncellenemedi: %1$s</string>
     <string name="settings_feedback_sent">Geri bildirim gönderildi</string>
     <string name="settings_feedback_view">Görüntüle</string>

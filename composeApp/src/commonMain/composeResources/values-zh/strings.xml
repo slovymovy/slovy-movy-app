@@ -198,7 +198,6 @@
     <string name="settings_add_language_to_learn">添加要学的语言</string>
     <string name="settings_section_translation_languages">翻译语言</string>
     <string name="settings_section_voice">语音</string>
-    <string name="settings_section_your_data">你的数据</string>
     <string name="settings_section_about">关于</string>
 
     <string name="feedback_dialog_title">应用反馈</string>
@@ -315,6 +314,15 @@
     <string name="developer_danger_description">删除学习卡片记录以便调试。这些操作无法撤销。</string>
     <string name="developer_remove_suspended_cards">删除已暂停的</string>
     <string name="developer_remove_all_learning_cards">删除全部学习卡片</string>
+    <string name="developer_app_data_title">应用数据</string>
+    <string name="developer_app_data_description">将应用数据库导出为归档文件，或导入一个归档文件。导入会替换此设备上已保存的单词、学习进度和设置。</string>
+    <string name="developer_export_app_data">导出应用数据</string>
+    <string name="developer_import_app_data">导入应用数据…</string>
+    <string name="developer_import_staged">已准备好导入（%1$s）。退出并重新打开应用即可应用。</string>
+    <string name="developer_import_quit">立即退出应用</string>
+    <string name="developer_import_discard">放弃已准备的导入</string>
+    <string name="developer_import_last_applied">上次启动已应用导入：%1$s</string>
+    <string name="developer_import_last_failed">上次启动拒绝了导入：%1$s</string>
     <string name="developer_stats_title">统计</string>
     <string name="developer_terminal_title">终端</string>
     <string name="developer_terminal_clear">清空</string>
@@ -366,10 +374,6 @@
     <string name="acknowledgements_words_sources_body">所有单词数据依据 CC-BY-SA-4.0 许可证提供。</string>
     <string name="acknowledgements_thanks">感谢 Wiktionary 社区，也感谢 Tatu Ylonen 让这些数据免费开放。</string>
 
-    <string name="app_data_backup_title">备份你保存的单词</string>
-    <string name="app_data_backup_description">把你保存的单词和应用设置导出为一个压缩包。适合留个副本，或者换新设备时使用。</string>
-    <string name="app_data_exporting">正在导出…</string>
-    <string name="app_data_export_now">立即导出</string>
 
     <string name="settings_dictionary_size_with_colon">词典：%1$s</string>
     <string name="settings_dictionary_size">词典 %1$s</string>
@@ -421,9 +425,6 @@
     <string name="settings_error_download_dictionary_with_reason">词典下载失败：%1$s</string>
     <string name="settings_error_download_translation_with_reason">翻译下载失败：%1$s</string>
     <string name="settings_error_load_voices_with_reason">加载语音失败：%1$s</string>
-    <string name="settings_export_success">已把 %1$s 导出到 %2$s</string>
-    <string name="settings_error_open_share_dialog_with_reason">打开分享对话框失败：%1$s</string>
-    <string name="settings_error_export_app_data_with_reason">导出应用数据失败：%1$s</string>
     <string name="settings_error_update_voice_selection_with_reason">更新语音选择失败：%1$s</string>
     <string name="settings_feedback_sent">反馈已发送</string>
     <string name="settings_feedback_view">查看</string>
