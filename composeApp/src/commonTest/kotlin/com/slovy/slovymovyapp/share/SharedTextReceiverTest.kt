@@ -1,41 +1,36 @@
 package com.slovy.slovymovyapp.share
 
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class SharedTextReceiverTest {
 
     @Test
-    fun offer_ignores_blank_text() {
+    fun offer_ignores_blank_text() = runBlocking {
         val receiver = SharedTextReceiver()
         receiver.offer("   ", SharedTextSource.PROCESS_TEXT)
-        assertNull(receiver.pending, "blank text must not become a pending request")
+        receiver.offer("woord", SharedTextSource.PROCESS_TEXT)
+        assertEquals("woord", receiver.requests.first().text, "blank text must not become a request")
     }
 
     @Test
-    fun identical_texts_produce_distinct_requests() {
+    fun identical_texts_produce_distinct_requests() = runBlocking {
         val receiver = SharedTextReceiver()
         receiver.offer("woord", SharedTextSource.PROCESS_TEXT)
-        val first = assertNotNull(receiver.pending)
-        receiver.consume(first)
-        assertNull(receiver.pending, "consumed request must clear pending")
-
+        val first = receiver.requests.first()
         receiver.offer("woord", SharedTextSource.PROCESS_TEXT)
-        val second = assertNotNull(receiver.pending)
-        assertNotEquals(first, second, "a repeated share of the same text must be a new request")
-        assertEquals(first.text, second.text)
+        val second = receiver.requests.first()
+        assertNotEquals(first.serial, second.serial, "a repeated share of the same text must get its own serial")
     }
 
     @Test
-    fun consume_of_stale_request_keeps_newer_pending() {
+    fun undelivered_request_is_replaced_by_a_later_one() = runBlocking {
         val receiver = SharedTextReceiver()
         receiver.offer("eerste", SharedTextSource.SHARE)
-        val stale = assertNotNull(receiver.pending)
         receiver.offer("tweede", SharedTextSource.SHARE)
-        receiver.consume(stale)
-        assertEquals("tweede", receiver.pending?.text, "consuming a replaced request must not drop the newer one")
+        assertEquals("tweede", receiver.requests.first().text, "only the latest undelivered share must be kept")
     }
 }

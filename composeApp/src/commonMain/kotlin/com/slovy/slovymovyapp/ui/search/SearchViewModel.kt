@@ -19,10 +19,7 @@ import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import kotlinx.coroutines.CancellationException
@@ -143,9 +140,7 @@ class SearchViewModel(
         }
         viewModelScope.launch {
             // Restore saved language before loading suggestions so they load for the right language.
-            val savedCode = settingsRepository.getById(Setting.Name.SEARCH_LANGUAGE)
-                ?.value?.jsonPrimitive?.content
-            val savedLang = savedCode?.let { Language.fromCodeOrNull(it) }
+            val savedLang = settingsRepository.getSearchLanguage()
             savedSearchLanguage = savedLang
             if (savedLang != null && savedLang in state.availableLanguages && savedLang != state.selectedLanguage) {
                 // This bypasses setSelectedLanguage (the preference must not be re-saved),
@@ -338,11 +333,7 @@ class SearchViewModel(
         state = state.copy(selectedLanguage = language)
         savedSearchLanguage = language
         viewModelScope.launch {
-            if (language != null) {
-                settingsRepository.insert(Setting(Setting.Name.SEARCH_LANGUAGE, JsonPrimitive(language.code)))
-            } else {
-                settingsRepository.deleteById(Setting.Name.SEARCH_LANGUAGE)
-            }
+            settingsRepository.setSearchLanguage(language)
             Analytics.logEvent(
                 AnalyticsEvent.SETTING_CHANGED,
                 mapOf("setting" to "search_language", "value" to (language?.code ?: "any")),

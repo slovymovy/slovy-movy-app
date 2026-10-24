@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.rememberNavController
@@ -28,7 +27,7 @@ import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.logging.AppLogger
 import com.slovy.slovymovyapp.share.SharedTextReceiver
 import com.slovy.slovymovyapp.share.SharedTextRoute
-import com.slovy.slovymovyapp.share.SharedTextRouter
+import com.slovy.slovymovyapp.share.SharedTextDispatcher
 import com.slovy.slovymovyapp.ui.*
 import com.slovy.slovymovyapp.ui.favorites.*
 import com.slovy.slovymovyapp.ui.settings.*
@@ -46,6 +45,7 @@ import com.slovy.slovymovyapp.ui.theme.AppTheme
 import com.slovy.slovymovyapp.ui.word.WordDetailScreen
 import com.slovy.slovymovyapp.ui.word.WordDetailViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.stringResource
@@ -78,8 +78,8 @@ fun App(
     appBuildConfig: AppBuildConfig,
     androidContext: Any? = null,
     // Text handed over by the platform (Android text-selection action / share sheet).
-    // Null on platforms without such an entry point.
-    sharedTextReceiver: SharedTextReceiver? = null,
+    // Platforms without such an entry point pass a receiver that never gets an offer.
+    sharedTextReceiver: SharedTextReceiver,
 ) {
     // Word-list icons arrive from the server as SVG text; Coil needs the SVG decoder
     // registered to render them (see WordListIcon).
@@ -101,6 +101,10 @@ fun App(
         platform = platform,
         androidContext = androidContext,
     )
+
+    val sharedTextDispatcher = remember(container.dictionaryRepository) {
+        SharedTextDispatcher(container.dictionaryRepository, settingsRepository)
+    }
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -284,71 +288,31 @@ fun App(
 
     val resolvedStart = startDestination ?: return
 
-    // Deliver platform-shared text once one of the main screens is showing. Anything else
-    // (welcome, setup, download, data-version, error, and a running study session) holds the
-    // request instead of dropping it: a share that cold-starts a not-yet-configured app lands
-    // after setup, and a share during study does not tear the session down. An allow-list so
-    // a future blocking screen holds by default.
-    val sharedTextRequest = sharedTextReceiver?.pending
-    val currentDestination = navBackStackEntry?.destination
-    val readyForSharedText = currentDestination != null && (
-            currentDestination.hasRoute<AppDestination.Search>() ||
-                    currentDestination.hasRoute<AppDestination.Favorites>() ||
-                    currentDestination.hasRoute<AppDestination.Stats>() ||
-                    currentDestination.hasRoute<AppDestination.Settings>() ||
-                    currentDestination.hasRoute<AppDestination.Developer>() ||
-                    currentDestination.hasRoute<AppDestination.WordDetail>() ||
-                    currentDestination.hasRoute<AppDestination.ListDetail>() ||
-                    currentDestination.hasRoute<AppDestination.TextReader>()
-            )
-    LaunchedEffect(sharedTextRequest, readyForSharedText, dictionaryLanguage) {
-        val request = sharedTextRequest ?: return@LaunchedEffect
-        if (!readyForSharedText) return@LaunchedEffect
-        // The lookup runs in the language Search is set to, so resolve it the way
-        // SearchViewModel does: the persisted search language when its dictionary is
-        // installed, else the active learning language, else any installed dictionary.
-        val installed = container.dictionaryRepository.installedDictionaries()
-        val savedSearchLanguage = settingsRepository.getById(Setting.Name.SEARCH_LANGUAGE)
-            ?.value?.jsonPrimitive?.content?.let { Language.fromCodeOrNull(it) }
-        val language = savedSearchLanguage?.takeIf { it in installed }
-            ?: dictionaryLanguage?.takeIf { it in installed }
-            ?: installed.firstOrNull()
-            ?: return@LaunchedEffect
-        val route = SharedTextRouter.route(request.text)
-        sharedTextReceiver.consume(request)
-        if (route == null) return@LaunchedEffect
-        logEvent(
-            AnalyticsEvent.SHARED_TEXT_RECEIVED,
-            buildMap {
-                put("lang", language.code)
-                put("source", request.source.analyticsValue)
-                put(
-                    "route",
-                    when (route) {
-                        is SharedTextRoute.Search -> "search"
-                        is SharedTextRoute.Reader -> "reader"
-                    },
-                )
-                put("char_count", request.text.length.toLong())
-                // Absent for oversized passages, which are never tokenized.
-                SharedTextRouter.wordCount(request.text)?.let { put("word_count", it.toLong()) }
-            },
-        )
-        // Land on Search first (same pattern as Favorites' "search in dictionary"), so the
-        // shared result sits directly above the app's root rather than above whatever the
-        // user had open. popBackStack pops nothing when Search is already on top, so skip it.
-        if (!currentDestination.hasRoute<AppDestination.Search>() &&
-            !navController.popBackStack(AppDestination.Search, inclusive = false)
-        ) {
-            navController.navigate(AppDestination.Search)
-        }
-        when (route) {
-            is SharedTextRoute.Search -> pendingSearchQuery = route.query
-            is SharedTextRoute.Reader -> {
-                pendingReaderTexts[request.serial] = route.text
-                navController.navigate(
-                    AppDestination.TextReader(languageCode = language.code, sharedTextSerial = request.serial)
-                )
+    // Open platform-shared text. A share the current screen cannot take is dropped; the app was
+    // still brought forward. Waiting for the first back stack entry lets a share that
+    // cold-started the app see the start destination.
+    val currentDictionaryLanguage by rememberUpdatedState(dictionaryLanguage)
+    LaunchedEffect(sharedTextReceiver, sharedTextDispatcher) {
+        sharedTextReceiver.requests.collect { request ->
+            val currentDestination = navController.currentBackStackEntryFlow.first().destination
+            val delivery = sharedTextDispatcher.deliveryFor(request, currentDestination, currentDictionaryLanguage)
+                ?: return@collect
+            // Land on Search first (same pattern as Favorites' "search in dictionary"), so the
+            // shared result sits directly above the app's root rather than above whatever the
+            // user had open. popBackStack pops nothing when Search is already on top, so skip it.
+            if (!currentDestination.hasRoute<AppDestination.Search>() &&
+                !navController.popBackStack(AppDestination.Search, inclusive = false)
+            ) {
+                navController.navigate(AppDestination.Search)
+            }
+            when (val route = delivery.route) {
+                is SharedTextRoute.Search -> pendingSearchQuery = route.query
+                is SharedTextRoute.Reader -> {
+                    pendingReaderTexts[delivery.serial] = route.text
+                    navController.navigate(
+                        AppDestination.TextReader(languageCode = delivery.language.code, sharedTextSerial = delivery.serial)
+                    )
+                }
             }
         }
     }
@@ -363,7 +327,8 @@ fun App(
                 popEnterTransition = { EnterTransition.None },
                 popExitTransition = { ExitTransition.None }
             ) {
-                composable<AppDestination.Welcome> { backStackEntry ->
+                val screens = AppNavGraphBuilder(this, sharedTextDispatcher)
+                screens.screen<AppDestination.Welcome>(interruptibleByShare = false) { backStackEntry ->
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
@@ -394,7 +359,7 @@ fun App(
                         }
                     )
                 }
-                composable<AppDestination.SetupLanguages> { backStackEntry ->
+                screens.screen<AppDestination.SetupLanguages>(interruptibleByShare = false) { backStackEntry ->
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
@@ -429,7 +394,7 @@ fun App(
                         }
                     )
                 }
-                composable<AppDestination.DownloadSetup> { backStackEntry ->
+                screens.screen<AppDestination.DownloadSetup>(interruptibleByShare = false) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.DownloadSetup>()
                     val addedTranslation = args.addedTranslationCode?.let { Language.fromCodeOrNull(it) }
                     val dictLang = dictionaryLanguage
@@ -566,7 +531,7 @@ fun App(
                         )
                     }
                 }
-                composable<AppDestination.Search> { backStackEntry ->
+                screens.screen<AppDestination.Search>(interruptibleByShare = true) { backStackEntry ->
 
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
@@ -633,12 +598,12 @@ fun App(
                         },
                     )
                 }
-                composable<AppDestination.ListDetail> { backStackEntry ->
+                screens.screen<AppDestination.ListDetail>(interruptibleByShare = true) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.ListDetail>()
                     val lang = Language.fromCodeOrNull(args.languageCode)
                     if (lang == null) {
                         LaunchedEffect(Unit) { navController.popBackStack() }
-                        return@composable
+                        return@screen
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         ListDetailViewModel(
@@ -674,7 +639,7 @@ fun App(
                         },
                     )
                 }
-                composable<AppDestination.Favorites> {
+                screens.screen<AppDestination.Favorites>(interruptibleByShare = true) {
                     FavoritesScreen(
                         viewModel = favoritesViewModel,
                         onNavigateToSearch = {
@@ -740,7 +705,7 @@ fun App(
                         },
                     )
                 }
-                composable<AppDestination.Stats> { backStackEntry ->
+                screens.screen<AppDestination.Stats>(interruptibleByShare = true) { backStackEntry ->
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
                     ) {
@@ -765,7 +730,7 @@ fun App(
                         hasFavoritesToReview = hasFavoritesToReview,
                     )
                 }
-                composable<AppDestination.StudySession> { backStackEntry ->
+                screens.screen<AppDestination.StudySession>(interruptibleByShare = false) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.StudySession>()
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
@@ -812,7 +777,7 @@ fun App(
                         },
                     )
                 }
-                composable<AppDestination.Settings> {
+                screens.screen<AppDestination.Settings>(interruptibleByShare = true) {
                     SettingsScreen(
                         viewModel = settingsViewModel,
                         onAddTranslationLanguage = { language ->
@@ -838,7 +803,7 @@ fun App(
                         hasFavoritesToReview = hasFavoritesToReview,
                     )
                 }
-                composable<AppDestination.Developer> { backStackEntry ->
+                screens.screen<AppDestination.Developer>(interruptibleByShare = true) { backStackEntry ->
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         DeveloperViewModel(
                             favoritesRepository = container.favoritesRepository,
@@ -857,7 +822,7 @@ fun App(
                         onBack = { navController.popBackStack() },
                     )
                 }
-                composable<AppDestination.WordDetail> { backStackEntry ->
+                screens.screen<AppDestination.WordDetail>(interruptibleByShare = true) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.WordDetail>()
 
                     wordDetailViewModels[args]?.let { cached ->
@@ -942,7 +907,7 @@ fun App(
                         hasFavoritesToReview = hasFavoritesToReview,
                     )
                 }
-                composable<AppDestination.TextReader> { backStackEntry ->
+                screens.screen<AppDestination.TextReader>(interruptibleByShare = true) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.TextReader>()
                     val language = Language.fromCodeOrNull(args.languageCode) ?: run {
                         LaunchedEffect(Unit) {
@@ -950,7 +915,7 @@ fun App(
                                 popUpTo<AppDestination.TextReader> { inclusive = true }
                             }
                         }
-                        return@composable
+                        return@screen
                     }
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
                         TextReaderViewModel(container.dictionaryRepository, container.favoritesRepository, language)
@@ -976,7 +941,7 @@ fun App(
                         onBack = { navController.popBackStack() }
                     )
                 }
-                composable<AppDestination.DataVersionMismatch> {
+                screens.screen<AppDestination.DataVersionMismatch>(interruptibleByShare = false) {
                     val coroutineScope = rememberCoroutineScope()
                     DataVersionMismatchScreen(
                         onRedownload = {
@@ -1004,7 +969,7 @@ fun App(
                         }
                     )
                 }
-                composable<AppDestination.Error> { backStackEntry ->
+                screens.screen<AppDestination.Error>(interruptibleByShare = false) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.Error>()
                     val coroutineScope = rememberCoroutineScope()
                     val viewModel = viewModel(

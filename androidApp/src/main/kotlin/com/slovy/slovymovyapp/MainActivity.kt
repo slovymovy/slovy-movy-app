@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
         offerSharedText(intent)
     }
 
-    private fun offerSharedText(intent: Intent?) {
+    private fun offerSharedText(intent: Intent) {
         val (text, source) = AndroidSharedTextIntent.read(intent) ?: return
         sharedTextReceiver.offer(text, source)
     }

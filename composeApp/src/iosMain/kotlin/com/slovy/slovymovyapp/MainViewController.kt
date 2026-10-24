@@ -1,11 +1,13 @@
 package com.slovy.slovymovyapp
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
 import com.slovy.slovymovyapp.data.remote.DataDbManager
 import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.generated.AppVersion
+import com.slovy.slovymovyapp.share.SharedTextReceiver
 import platform.Foundation.NSBundle
 
 fun MainViewController() = ComposeUIViewController {
@@ -14,7 +16,7 @@ fun MainViewController() = ComposeUIViewController {
     val settingRepo = SettingsRepository(db)
     val dataDbManager = DataDbManager(platform, settingRepo, GoogleStorageBucketDataProvider())
     val buildConfig = createBuildConfig()
-    App(settingRepo, dataDbManager, platform, buildConfig)
+    App(settingRepo, dataDbManager, platform, buildConfig, sharedTextReceiver = remember { SharedTextReceiver() })
 }
 
 private fun createBuildConfig(): AppBuildConfig {

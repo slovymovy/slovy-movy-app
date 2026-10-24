@@ -58,6 +58,19 @@ class SettingsRepository(private val db: AppDatabase) {
         db.settingsQueries.deleteById(id)
     }
 
+    /** The dictionary language last picked in Search, or null for "any" or an unknown stored code. */
+    suspend fun getSearchLanguage(): Language? =
+        getById(Setting.Name.SEARCH_LANGUAGE)?.value?.jsonPrimitive?.content?.let { Language.fromCodeOrNull(it) }
+
+    /** Saves [language] as the Search language; null clears the choice. */
+    suspend fun setSearchLanguage(language: Language?) {
+        if (language != null) {
+            insert(Setting(Setting.Name.SEARCH_LANGUAGE, JsonPrimitive(language.code)))
+        } else {
+            deleteById(Setting.Name.SEARCH_LANGUAGE)
+        }
+    }
+
     suspend fun getDeveloperMode(default: Boolean): Boolean =
         getById(Setting.Name.DEVELOPER_MODE)?.value?.jsonPrimitive?.booleanOrNull ?: default
 
