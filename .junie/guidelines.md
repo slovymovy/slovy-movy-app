@@ -451,7 +451,8 @@ Provider-specific translations of `AIParameters`:
   pinned to 1.
 - Anthropic maps it to `output_config.effort` (`ReasoningType.EFFORT_LOW_TO_MAX`) on top of always-on adaptive
   thinking, and ignores `temperature`, `topP`, `seed`, and `verbosity` - the current Claude models reject all of them
-  and the SDK no longer exposes them. Because thinking is billed to `max_tokens` along with the answer, the request
+  and the SDK no longer exposes them; `ModelInfo.supportsSampling` is how a tool knows not to offer `seed`/`topP` at
+  all, next to the existing `supportsTemperature`/`supportsVerbosity` flags. Because thinking is billed to `max_tokens` along with the answer, the request
   asks for `maxOutputTokens` plus the `AnthropicEffort.thinkingAllowance` of its effort level (clamped to the 128k
   model ceiling); without that headroom a small ceiling is spent on thinking and the structured output is truncated.
   Responses are accumulated from the event stream, since a 32k ceiling plus thinking can outlive the non-streaming

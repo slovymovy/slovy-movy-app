@@ -143,4 +143,10 @@ data class ModelInfo(
     @SerialName("support_temperature") val supportsTemperature: Boolean,
     @SerialName("support_verbosity") val supportsVerbosity: Boolean,
     @SerialName("reasoning_type") val reasoningType: ReasoningType,
+    /**
+     * Whether the model takes the sampling parameters `seed` and `topP` at all. Default `true`:
+     * every completion API here takes them except Anthropic's, which rejects both outright, so a
+     * tool offering them has nothing to send.
+     */
+    @SerialName("support_sampling") val supportsSampling: Boolean = true,
 )

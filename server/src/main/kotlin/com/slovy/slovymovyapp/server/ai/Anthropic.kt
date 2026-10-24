@@ -257,24 +257,28 @@ class AnthropicProvider : AIProvider {
                 CLAUDE_OPUS_5_5, "Claude Opus 5.5", AIProviderType.ANTHROPIC,
                 supportsTemperature = false,
                 supportsVerbosity = false,
+                supportsSampling = false,
                 reasoningType = ReasoningType.EFFORT_LOW_TO_MAX
             ),
             ModelInfo(
                 CLAUDE_SONNET_5_5, "Claude Sonnet 5.5", AIProviderType.ANTHROPIC,
                 supportsTemperature = false,
                 supportsVerbosity = false,
+                supportsSampling = false,
                 reasoningType = ReasoningType.EFFORT_LOW_TO_MAX
             ),
             ModelInfo(
                 CLAUDE_HAIKU_5_5, "Claude Haiku 5.5", AIProviderType.ANTHROPIC,
                 supportsTemperature = false,
                 supportsVerbosity = false,
+                supportsSampling = false,
                 reasoningType = ReasoningType.EFFORT_LOW_TO_MAX
             ),
             ModelInfo(
                 CLAUDE_FABLE_5_1, "Claude Fable 5.1", AIProviderType.ANTHROPIC,
                 supportsTemperature = false,
                 supportsVerbosity = false,
+                supportsSampling = false,
                 reasoningType = ReasoningType.EFFORT_LOW_TO_MAX
             )
         )
