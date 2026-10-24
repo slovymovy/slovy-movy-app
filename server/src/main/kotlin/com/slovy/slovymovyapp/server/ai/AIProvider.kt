@@ -16,7 +16,7 @@ data class AIParameters(
     val parts: List<String>,
     val temperature: Float = 0f,
     val seed: Int = 1234567890,
-    val reasoningBudget: Int = 2000, // For Gemini: thinkingBudget/thinkingMode, For OpenAI: converted to reasoningEffort
+    val reasoningBudget: Int = 2000, // Gemini: thinkingBudget/thinkingLevel, OpenAI: reasoningEffort, Anthropic: effort
     val model: String,
     val schema: String, // JSON schema string
     val systemPrompt: String,
@@ -27,7 +27,8 @@ data class AIParameters(
 
 enum class AIProviderType {
     GEMINI,
-    OPENAI
+    OPENAI,
+    ANTHROPIC
 }
 
 /**
@@ -126,6 +127,9 @@ enum class ReasoningType {
     HIGH_MEDIUM_LOW_MINIMAL_NONE,
     TOKENS,
     HIGH_LOW,
+
+    /** Anthropic `output_config.effort`: low, medium, high, xhigh, max, on top of adaptive thinking. */
+    EFFORT_LOW_TO_MAX,
 }
 
 /**

@@ -10,6 +10,9 @@ import com.slovy.slovymovyapp.db.AppDatabase
 import com.slovy.slovymovyapp.ingestion.ExtractedWordData
 import com.slovy.slovymovyapp.ingestion.LanguageCardResponse
 import com.slovy.slovymovyapp.server.ServerJson
+import com.slovy.slovymovyapp.server.ai.AIProvider
+import com.slovy.slovymovyapp.server.ai.AnthropicProvider
+import com.slovy.slovymovyapp.server.ai.CLAUDE_OPUS_5_5
 import com.slovy.slovymovyapp.server.ai.GEMINI_3_8_FLASH
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
 import com.slovy.slovymovyapp.server.ai.OpenAIProvider
@@ -519,7 +522,7 @@ private fun parseTranslationCodes(source: String?): List<String> {
 internal val AI_FALLBACK_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
 /**
- * Races between primary (Gemini) and fallback (OpenAI) AI providers.
+ * Races between a primary and a fallback AI provider.
  * - Starts primary immediately
  * - If primary doesn't respond within timeout or fails, starts fallback
  * - Returns first successful result, cancels the other
@@ -534,7 +537,7 @@ internal suspend fun <T> raceWithFallback(
     timeoutMs: Long = AI_FALLBACK_TIMEOUT_MS
 ): T {
     if (!primaryAvailable && !fallbackAvailable) {
-        throw IllegalStateException("No AI provider available (Gemini or OpenAI)")
+        throw IllegalStateException("No AI provider available")
     }
 
     // If only one provider is available, use it directly
@@ -612,13 +615,72 @@ internal suspend fun <T> raceWithFallback(
     }
 }
 
+/**
+ * One attempt in the AI fallback chain: which provider to ask, with which model and how much
+ * reasoning to pay for. [name] is what the logs call it.
+ */
+private data class AiAttempt(
+    val name: String,
+    val provider: AIProvider,
+    val model: String,
+    val reasoningBudget: Int
+)
+
+/**
+ * The provider order every enhancement follows, cheapest and fastest first. Both base and
+ * translation enhancement use the same chain, so a model change lands in one place.
+ */
+private fun aiFallbackChain(): List<AiAttempt> = listOf(
+    AiAttempt("Gemini", GeminiProvider(), GEMINI_3_8_FLASH, reasoningBudget = 1),
+    AiAttempt("OpenAI", OpenAIProvider(), ChatModel.GPT_5_4.asString(), reasoningBudget = 900),
+    AiAttempt("Anthropic", AnthropicProvider(), CLAUDE_OPUS_5_5, reasoningBudget = 900)
+)
+
+/** The chain with the providers that have no credentials configured dropped. */
+private fun availableAiAttempts(): List<AiAttempt> = aiFallbackChain().filter { it.provider.isAvailable() }
+
+/**
+ * Runs [block] against [attempts] in order through [raceWithFallback]: the first attempt starts
+ * immediately, each later one joins the race after [AI_FALLBACK_TIMEOUT_MS] or the failure of the
+ * attempts before it, and the first success wins.
+ *
+ * [attempts] must be non-empty and must already be filtered down to available providers; the last
+ * attempt's failure is the caller's to report, since nothing is left to fall back to.
+ */
+private suspend fun <T> raceAttempts(
+    attempts: List<AiAttempt>,
+    context: String,
+    logger: Logger,
+    block: suspend (AiAttempt) -> T
+): T {
+    val attempt = attempts.first()
+    val rest = attempts.drop(1)
+    return raceWithFallback(
+        primaryAvailable = true,
+        fallbackAvailable = rest.isNotEmpty(),
+        primary = { block(attempt) },
+        fallback = { raceAttempts(rest, context, logger, block) },
+        onPrimaryError = { e ->
+            logger.error("${attempt.name} failed for $context: ${e.message}", e)
+        },
+        onPrimaryTimeout = {
+            logger.warn(
+                "${attempt.name} timed out for $context after ${AI_FALLBACK_TIMEOUT_MS}ms," +
+                        " starting ${rest.first().name}"
+            )
+        }
+    )
+}
+
 private suspend fun enhanceWithAI(
     lang: String,
     word: String,
     logger: Logger
 ): LanguageCardResponse {
-    val geminiProvider = GeminiProvider()
-    val openAIProvider = OpenAIProvider()
+    val attempts = availableAiAttempts()
+    if (attempts.isEmpty()) {
+        throw IllegalStateException("No AI provider available")
+    }
 
     val content = GitHubClient.loadDbExtractContent(lang, "$word.json")
     val extractedData = ServerJson.lenient.decodeFromString(ExtractedWordData.serializer(), content)
@@ -627,32 +689,14 @@ private suspend fun enhanceWithAI(
 
     val enhancer = LanguageCardEnhancer()
 
-    return raceWithFallback(
-        primaryAvailable = geminiProvider.isAvailable(),
-        fallbackAvailable = openAIProvider.isAvailable(),
-        primary = {
-            enhancer.enhance(
-                request = request,
-                provider = geminiProvider,
-                model = GEMINI_3_8_FLASH,
-                reasoningBudget = 1
-            )
-        },
-        fallback = {
-            enhancer.enhance(
-                request = request,
-                provider = openAIProvider,
-                model = ChatModel.GPT_5_4.asString(),
-                reasoningBudget = 900
-            )
-        },
-        onPrimaryError = { e ->
-            logger.error("Gemini failed for $lang/$word: ${e.message}", e)
-        },
-        onPrimaryTimeout = {
-            logger.warn("Gemini timed out for $lang/$word after ${AI_FALLBACK_TIMEOUT_MS}ms, starting OpenAI fallback")
-        }
-    )
+    return raceAttempts(attempts, "$lang/$word", logger) { attempt ->
+        enhancer.enhance(
+            request = request,
+            provider = attempt.provider,
+            model = attempt.model,
+            reasoningBudget = attempt.reasoningBudget
+        )
+    }
 }
 
 private data class WordProcessResult(
@@ -741,9 +785,8 @@ private suspend fun addMissingTranslations(
 
     // The two bail-outs below look exactly like a successful "nothing to translate" from the
     // client's side - base chunk, no translated chunk - so each has to say why it gave up.
-    val geminiProvider = GeminiProvider()
-    val openAIProvider = OpenAIProvider()
-    if (!geminiProvider.isAvailable() && !openAIProvider.isAvailable()) {
+    val attempts = availableAiAttempts()
+    if (attempts.isEmpty()) {
         logger.error("No AI provider configured; cannot translate $lang/$word into $missingLangCodes")
         return TranslationResult(response, updated = false)
     }
@@ -762,8 +805,7 @@ private suspend fun addMissingTranslations(
         word = word,
         lang = lang,
         targetLangCodes = missingLangCodes,
-        geminiProvider = geminiProvider,
-        openAIProvider = openAIProvider,
+        attempts = attempts,
         logger = logger
     )
     // A language that produced nothing must not be reported as an update: that would stream a
@@ -777,8 +819,7 @@ private suspend fun enhanceWithTranslations(
     word: String,
     lang: String,
     targetLangCodes: List<String>,
-    geminiProvider: GeminiProvider,
-    openAIProvider: OpenAIProvider,
+    attempts: List<AiAttempt>,
     logger: Logger
 ): EnhancedTranslations {
     val translationEnhancer = TranslationEnhancer()
@@ -797,8 +838,7 @@ private suspend fun enhanceWithTranslations(
                         word = word,
                         lang = lang,
                         translationEnhancer = translationEnhancer,
-                        geminiProvider = geminiProvider,
-                        openAIProvider = openAIProvider,
+                        attempts = attempts,
                         logger = logger
                     ).let { targetLangCode to it }
                 } catch (e: CancellationException) {
@@ -831,8 +871,7 @@ private suspend fun translateInto(
     word: String,
     lang: String,
     translationEnhancer: TranslationEnhancer,
-    geminiProvider: GeminiProvider,
-    openAIProvider: OpenAIProvider,
+    attempts: List<AiAttempt>,
     logger: Logger
 ): TranslationResponse {
     val targetTranslations = extractedData.sourceFileToEntries.values
@@ -851,34 +890,14 @@ private suspend fun translateInto(
     val targetLangName = targetLanguageName(targetLangCode)
     val targetLangNotes = DbExtractEnhancerUtils.targetLanguageNotes(targetLangCode)
 
-    return raceWithFallback(
-        primaryAvailable = geminiProvider.isAvailable(),
-        fallbackAvailable = openAIProvider.isAvailable(),
-        primary = {
-            translationEnhancer.enhanceWithTranslations(
-                request = translationRequest,
-                provider = geminiProvider,
-                targetLanguageName = targetLangName,
-                targetLanguageNotes = targetLangNotes,
-                model = GEMINI_3_8_FLASH,
-                reasoningBudget = 1
-            )
-        },
-        fallback = {
-            translationEnhancer.enhanceWithTranslations(
-                request = translationRequest,
-                provider = openAIProvider,
-                targetLanguageName = targetLangName,
-                targetLanguageNotes = targetLangNotes,
-                model = ChatModel.GPT_5_4.asString(),
-                reasoningBudget = 900
-            )
-        },
-        onPrimaryError = { e ->
-            logger.error("Gemini translation failed for $lang/$word -> $targetLangCode: ${e.message}", e)
-        },
-        onPrimaryTimeout = {
-            logger.warn("Gemini translation timed out for $lang/$word -> $targetLangCode after ${AI_FALLBACK_TIMEOUT_MS}ms")
-        }
-    )
+    return raceAttempts(attempts, "translation of $lang/$word -> $targetLangCode", logger) { attempt ->
+        translationEnhancer.enhanceWithTranslations(
+            request = translationRequest,
+            provider = attempt.provider,
+            targetLanguageName = targetLangName,
+            targetLanguageNotes = targetLangNotes,
+            model = attempt.model,
+            reasoningBudget = attempt.reasoningBudget
+        )
+    }
 }

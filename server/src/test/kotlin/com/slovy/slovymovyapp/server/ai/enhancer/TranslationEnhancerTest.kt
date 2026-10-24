@@ -48,14 +48,25 @@ class TranslationEnhancerTest : BaseLLMTest() {
                 maxOutputTokens = 2048
             )
 
-            assertTrue(translationResponse.senseTranslations.isNotEmpty(), "Should contain sense translations")
-            assertTrue(translationResponse.exampleTranslations.isNotEmpty(), "Should contain example translations")
+            assertTrue(
+                translationResponse.senseTranslations.isNotEmpty(),
+                "Provider $providerType ($translationModel) returned no sense translations"
+            )
+            // Nothing to translate when the card itself carried no examples, so the count says
+            // whether the card or the translation step is at fault.
+            val cardExamples = languageCard.entries.sumOf { entry -> entry.senses.sumOf { it.examples.size } }
+            assertTrue(
+                translationResponse.exampleTranslations.isNotEmpty(),
+                "Provider $providerType ($translationModel) returned no example translations" +
+                        " for a card carrying $cardExamples examples"
+            )
 
             val merged = TranslationEnhancer().mergeTranslationData(languageCard, translationResponse, "ru")
             val firstSense = merged.entries.first().senses.first()
             assertTrue(
                 firstSense.translations.containsKey("ru"),
-                "Merged card should include target language translations"
+                "Provider $providerType ($translationModel) merged card should include" +
+                        " target language translations"
             )
         }
     }

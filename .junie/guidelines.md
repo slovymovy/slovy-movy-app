@@ -22,13 +22,14 @@ Important namespaces and entry points:
 - Android application ID: `com.slovy.slovymovyapp`; Android app namespace: `com.slovy.slovymovyapp.androidApp`.
 - Shared Compose/library namespace: `com.slovy.slovymovyapp`.
 - Server main class: `com.slovy.slovymovyapp.ApplicationKt`.
-- Shared UI navigation and dependency wiring: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/App.kt`.
+- Shared UI navigation: `composeApp/src/commonMain/kotlin/com/slovy/slovymovyapp/App.kt`; its typed destinations
+  are in `AppDestination.kt` and the app-scoped object graph in `AppContainer.kt`, both alongside it.
 - Versions: `gradle/libs.versions.toml`. The root build derives `versionCode` from the git commit count and
   `versionName` as `1.3.<commit-count>`.
 
 Supported languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, ES, and ZH; see
 `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`. Offline Wiktextract source mappings currently
-exist only for EN, RU, NL, and PL, so only those can be learning languages; the rest are translation targets.
+exist only for EN, RU, NL, PL, and DE, so only those can be learning languages; the rest are translation targets.
 `Language.code` is the `translation_{src}_{tgt}.db` filename segment, the `/word` route's `translations` value, the
 `lang_code`/`target_lang_code` column value, and the TTS locale tag, so every code stays a bare lowercase subtag.
 
@@ -170,7 +171,7 @@ fun Screen(viewModel: ScreenViewModel) {
 - Map domain objects to UI models outside the rendering composable when the mapping contains decisions.
 - Add previews for meaningful content/loading/error/empty states.
 
-`App.kt` uses typed destinations (`AppDestination`) with Compose Navigation. Screen ViewModels are normally created
+`App.kt` uses typed destinations (`AppDestination.kt`) with Compose Navigation. Screen ViewModels are normally created
 with `viewModel(viewModelStoreOwner = backStackEntry) { ... }` so their lifetime matches the navigation entry. The
 current intentional exceptions are app-scoped Favorites/Settings ViewModels and the bounded Word Details ViewModel
 cache. Do not accidentally change those lifetimes when refactoring navigation.
@@ -229,9 +230,12 @@ cannot use Valkyrie; `WordListIcon` renders them through the app's singleton Coi
 
 ## Application services and platform wiring
 
-`App.kt` creates the app/session-level repositories and services, including dictionary/list clients, local/downloaded
-database managers, `WordFetchManager`, lemma recovery, intake/session/stats services, downloads, TTS, and export. Keep
-expensive managers stable across recompositions; do not recreate caches or coordinators in screen content.
+`AppContainer` holds the app/session-level repositories and services, including dictionary/list clients,
+local/downloaded database managers, `WordFetchManager`, lemma recovery, intake/session/stats services, downloads,
+TTS, and export. `rememberAppContainer` builds it and closes `LemmaRecoveryController` and `DownloadCoordinator`
+when the composition leaves. Each service keeps its own `remember` keys, so one is recreated when its own inputs
+change and not when a sibling's do. Take what a screen needs from the container; do not recreate caches or
+coordinators in screen content, and do not add a member to the container until something outside it needs one.
 
 Platform services use expect/actual or injectable interfaces:
 
@@ -391,8 +395,8 @@ explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can disti
 
 `StatsService` owns queue/global/screen snapshots, streak/practice data, and the pipeline stages `QUEUE`, `NEW`,
 `FRESH`, `MIDDLE`, `STRONG`, and `LEARNED`. Its retrievability function is reused in session priority.
-`FavoritesReviewCoordinator` caches a full intake refresh for five minutes per language; `refreshDueCountsOnly` must
-not rerun intake. It also avoids intake during a data-version mismatch.
+`FavoritesReviewCoordinator` (in `data/learning/review`) caches a full intake refresh for five minutes per language;
+`refreshDueCountsOnly` must not rerun intake. It also avoids intake during a data-version mismatch.
 
 ## Curated word lists
 
@@ -416,15 +420,44 @@ Credentials are resolved from environment first, then ignored local files:
 | --- | --- | --- |
 | OpenAI | `OPENAI_API_KEY` | `.openai_api_key` |
 | Gemini | `AISTUDIO_KEY` | `.aistudio_key` |
+| Anthropic | `CLAUDE_API_KEY`, then the SDK's own `ANTHROPIC_API_KEY` | `.claude_api_key` |
 | GitHub | `ACCESS_TO_GH_TOKEN` | `server/.github_key`, then `.github_key` |
 
-Fallback paths are relative to the server process working directory. Never commit key files.
+Fallback paths are relative to the server process working directory. Never commit key files. Gradle runs `:server:test`
+with `server/` as its working directory, so the key files a server test falls back to are `server/.openai_api_key`,
+`server/.aistudio_key`, and `server/.claude_api_key`; a provider whose key is missing there is skipped by the AI tests
+rather than failing them.
 
-AI providers implement the common `AIProvider` contract with caching/retry support. `raceWithFallback` starts Gemini
-first, starts OpenAI after `AI_FALLBACK_TIMEOUT_MS` or a Gemini failure, returns the first success, and cancels the
-loser. If only one provider is configured it uses that provider directly. Base and translation enhancement require
-db-extract source data; translation enhancement can use either configured provider and adds only missing target
+AI providers implement the common `AIProvider` contract with caching/retry support. `aiFallbackChain()` in
+`Application.kt` is the single list of attempts both base and translation enhancement follow - Gemini, then OpenAI,
+then Anthropic, each with its own model and reasoning budget. `raceAttempts` drops the providers with no credentials,
+then nests `raceWithFallback` over what is left: the first attempt starts immediately, each later one joins after
+`AI_FALLBACK_TIMEOUT_MS` or the failure of the attempts before it, the first success wins, and the losers are
+cancelled. A single configured provider is therefore called directly. Base and translation enhancement require
+db-extract source data; translation enhancement can use any configured provider and adds only missing target
 languages. Both enhancers reject response sense IDs absent from the source card.
+
+Enhancer prompts carry one Gemini-dialect JSON schema. `SchemaConverter.geminiToJsonSchema` turns it into the standard
+JSON Schema that OpenAI strict mode and Anthropic structured outputs both take, so a schema change stays in one place.
+Keep `SchemaConverter.toPlainMap` order-preserving: structured outputs generate fields in schema order, so a reordered
+`properties` map makes a model write examples before the definition they illustrate and answer with hollow but
+schema-valid cards. `SchemaConverterTest` pins that order.
+
+Provider-specific translations of `AIParameters`:
+
+- Gemini takes `reasoningBudget` as `thinkingBudget` (`ReasoningType.TOKENS`) or as a `thinkingLevel`
+  (`ReasoningType.HIGH_LOW`).
+- OpenAI maps it to `reasoningEffort` and is the only provider that takes `verbosity`; its enhancer temperature is
+  pinned to 1.
+- Anthropic maps it to `output_config.effort` (`ReasoningType.EFFORT_LOW_TO_MAX`) on top of always-on adaptive
+  thinking, and ignores `temperature`, `topP`, `seed`, and `verbosity` - the current Claude models reject all of them
+  and the SDK no longer exposes them. Because thinking is billed to `max_tokens` along with the answer, the request
+  asks for `maxOutputTokens` plus the `AnthropicEffort.thinkingAllowance` of its effort level (clamped to the 128k
+  model ceiling); without that headroom a small ceiling is spent on thinking and the structured output is truncated.
+  Responses are accumulated from the event stream, since a 32k ceiling plus thinking can outlive the non-streaming
+  HTTP timeout. Server-side refusal `fallbacks` are on: a safety refusal is a realistic answer for dictionary data,
+  and category-based routing retries the word instead of failing it. A refusal that still stops the turn, and a
+  `max_tokens` truncation, both surface as errors rather than as partial JSON.
 
 Important routes and data flow:
 

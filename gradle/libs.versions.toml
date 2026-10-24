@@ -1,5 +1,6 @@
 [versions]
 agp = "9.1.1"
+anthropicJava = "3.3.0"
 android-compileSdk = "37"
 appVersionBase = "1.4"
 android-minSdk = "24"
@@ -20,7 +21,7 @@ googleAuthLibrary = "1.54.0"
 googleCloudLoggingLogback = "0.144.0-alpha"
 googleCloudCore = "2.77.0"
 googleCloudTasks = "2.99.0"
-googleGenai = "1.76.0"
+googleGenai = "1.79.0"
 jtokkit = "1.1.0"
 junit = "4.13.2"
 kotlin = "2.4.21"
@@ -31,7 +32,7 @@ kotlinx-io = "0.9.1"
 kotlinx-serialization = "1.11.0"
 ktor = "3.6.0"
 logback = "1.6.5"
-openaiJava = "4.79.0"
+openaiJava = "4.91.0"
 sqldelight = "2.4.1"
 valkyrie = "0.5.2"
 material3 = '1.12.0-alpha03'
@@ -42,6 +43,7 @@ firebase-perf-plugin = "2.0.2"
 desugarJdkLibs = "2.1.5"
 
 [libraries]
+anthropic-java = { module = "com.anthropic:anthropic-java", version.ref = "anthropicJava" }
 androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }

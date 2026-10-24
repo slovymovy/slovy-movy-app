@@ -51,7 +51,7 @@ object OpenAI {
     @Suppress("UNCHECKED_CAST")
     internal fun buildJsonSchema(jsonObject: JsonObject): JsonSchema.Schema {
         // Convert JsonObject to a map structure
-        val schemaMap = jsonElementToMap(jsonObject) as HashMap<String, Any>
+        val schemaMap = SchemaConverter.toPlainMap(jsonObject) as Map<String, Any>
 
         return JsonSchema.Schema.builder()
             .apply {
@@ -60,33 +60,6 @@ object OpenAI {
                 }
             }
             .build()
-    }
-
-    private fun jsonElementToMap(element: JsonElement): Any {
-        return when (element) {
-            is JsonPrimitive -> {
-                when {
-                    element.isString -> element.content
-                    element.content.equals("true", ignoreCase = true) -> true
-                    element.content.equals("false", ignoreCase = true) -> false
-                    element.content.toIntOrNull() != null -> element.content.toInt()
-                    element.content.toDoubleOrNull() != null -> element.content.toDouble()
-                    else -> element.content
-                }
-            }
-
-            is JsonObject -> {
-                val map = HashMap<String, Any>()
-                element.forEach { (key, value) ->
-                    map[key] = jsonElementToMap(value)
-                }
-                map
-            }
-
-            is JsonArray -> {
-                element.map { jsonElementToMap(it) }
-            }
-        }
     }
 
     fun openAICompletion(
@@ -177,7 +150,7 @@ class OpenAIProvider : AIProvider {
             seed = parameters.seed,
             reasoningEffort = if (model.reasoningType != ReasoningType.NO) convertReasoningBudgetToEffort(parameters.reasoningBudget) else null,
             model = parameters.model,
-            schema = SchemaConverter.geminiToOpenAI(parameters.schema),
+            schema = SchemaConverter.geminiToJsonSchema(parameters.schema),
             systemPrompt = parameters.systemPrompt,
             maxOutputTokens = parameters.maxOutputTokens,
             topP = parameters.topP,
@@ -254,6 +227,30 @@ class OpenAIProvider : AIProvider {
                 reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
             ),
             ModelInfo(
+                ChatModel.GPT_5_4_MINI.asString(),
+                "OpenAI gpt-5.4-mini",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_5_4_NANO.asString(),
+                "OpenAI gpt-5.4-nano",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_5_5.asString(),
+                "OpenAI gpt-5.5",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
                 ChatModel.GPT_5_6_LUNA.asString(),
                 "OpenAI gpt-5.6 luna",
                 AIProviderType.OPENAI,
@@ -279,6 +276,30 @@ class OpenAIProvider : AIProvider {
 
             ),
             ModelInfo(
+                ChatModel.GPT_6_1_SOL.asString(),
+                "OpenAI gpt-6.1 sol",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_6_SOL.asString(),
+                "OpenAI gpt-6 sol",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_6_LUNA.asString(),
+                "OpenAI gpt-6 luna",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
                 ChatModel.GPT_6_ASTRA.asString(),
                 "OpenAI gpt-6 astra",
                 AIProviderType.OPENAI,
@@ -289,6 +310,14 @@ class OpenAIProvider : AIProvider {
             ModelInfo(
                 ChatModel.GPT_5_1.asString(),
                 "OpenAI gpt-5.1",
+                AIProviderType.OPENAI,
+                supportsTemperature = false,
+                supportsVerbosity = true,
+                reasoningType = ReasoningType.HIGH_MEDIUM_LOW_MINIMAL_NONE
+            ),
+            ModelInfo(
+                ChatModel.GPT_5_1_MINI.asString(),
+                "OpenAI gpt-5.1-mini",
                 AIProviderType.OPENAI,
                 supportsTemperature = false,
                 supportsVerbosity = true,
@@ -353,88 +382,5 @@ class OpenAIProvider : AIProvider {
             budget <= 3000 -> ReasoningEffort.Known.MEDIUM
             else -> ReasoningEffort.Known.HIGH
         }
-    }
-}
-
-/**
- * Converts between Gemini Schema format and OpenAI JSON Schema format.
- *
- * Gemini uses a custom Schema format, while OpenAI uses standard JSON Schema.
- * This converter handles the transformation between these two formats.
- */
-object SchemaConverter {
-
-    /**
-     * Converts a Gemini schema string to OpenAI JSON Schema format.
-     *
-     * @param geminiSchema The schema string in Gemini format (JSON string)
-     * @return OpenAI compatible JSON Schema as a JsonObject
-     */
-    fun geminiToOpenAI(geminiSchema: String): JsonObject {
-        val geminiJsonObject = ServerJson.lenient.parseToJsonElement(geminiSchema).jsonObject
-
-        return convertJsonObjectToOpenAI(geminiJsonObject)
-    }
-
-    /**
-     * Recursively converts a Gemini JSON schema object to OpenAI format.
-     */
-    private fun convertJsonObjectToOpenAI(geminiObj: JsonObject): JsonObject {
-        val result = mutableMapOf<String, JsonElement>()
-
-        geminiObj.forEach { (key, value) ->
-            when (key) {
-                "type" -> {
-                    // Type mapping is generally the same
-                    result[key] = value
-                    if (value.jsonPrimitive.content == "object") {
-                        // For objects, we need to add additional properties
-                        result["additionalProperties"] = JsonPrimitive(false)
-                    }
-                }
-
-                "properties" -> {
-                    // Recursively convert properties
-                    val propsObj = value.jsonObject
-                    val convertedProps = mutableMapOf<String, JsonElement>()
-
-                    propsObj.forEach { (propKey, propValue) ->
-                        convertedProps[propKey] = convertJsonObjectToOpenAI(propValue.jsonObject)
-                    }
-
-                    result[key] = JsonObject(convertedProps)
-                }
-
-                "items" -> {
-                    // Convert array items schema
-                    when (value) {
-                        is JsonObject -> {
-                            result[key] = convertJsonObjectToOpenAI(value)
-                        }
-
-                        else -> {
-                            result[key] = value
-                        }
-                    }
-                }
-
-                "enum" -> {
-                    // Enum values are the same in both formats
-                    result[key] = value
-                }
-
-                "required" -> {
-                    // Required fields are the same in both formats
-                    result[key] = value
-                }
-
-                else -> {
-                    // Copy other properties as-is
-                    result[key] = value
-                }
-            }
-        }
-
-        return JsonObject(result)
     }
 }

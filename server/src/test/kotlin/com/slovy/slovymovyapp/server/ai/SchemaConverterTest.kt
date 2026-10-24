@@ -27,7 +27,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         assertEquals("object", (result["type"] as JsonPrimitive).content)
         assertTrue(result.containsKey("properties"))
@@ -61,7 +61,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         val properties = result["properties"] as JsonObject
         val statusProperty = properties["status"] as JsonObject
@@ -95,7 +95,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         val properties = result["properties"] as JsonObject
         val tagsProperty = properties["tags"] as JsonObject
@@ -135,7 +135,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         val properties = result["properties"] as JsonObject
         val usersProperty = properties["users"] as JsonObject
@@ -178,7 +178,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         val properties = result["properties"] as JsonObject
         val userProperty = properties["user"] as JsonObject
@@ -221,7 +221,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         val properties = result["properties"] as JsonObject
         val traitsProperty = properties["traits"] as JsonObject
@@ -265,7 +265,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         val properties = result["properties"] as JsonObject
         val statusesProperty = properties["statuses"] as JsonObject
@@ -316,7 +316,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         assertEquals("object", (result["type"] as JsonPrimitive).content)
 
@@ -359,7 +359,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         assertEquals("object", (result["type"] as JsonPrimitive).content)
         assertEquals(2, result.size) // Should only have the type field + additionalProperties
@@ -382,7 +382,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         assertEquals("object", (result["type"] as JsonPrimitive).content)
         assertTrue(result.containsKey("properties"))
@@ -418,7 +418,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         // Verify the conversion maintains the structure
         assertTrue(result.containsKey("type"))
@@ -509,7 +509,7 @@ class SchemaConverterTest {
         }
         """.trimIndent()
 
-        val result = SchemaConverter.geminiToOpenAI(geminiSchema)
+        val result = SchemaConverter.geminiToJsonSchema(geminiSchema)
 
         // Verify basic structure
         assertEquals("object", (result["type"] as JsonPrimitive).content)
@@ -546,6 +546,61 @@ class SchemaConverterTest {
         assertTrue(enumStrings.contains("technical"))
         assertTrue(enumStrings.contains("formal"))
         assertTrue(enumStrings.contains("informal"))
+    }
+
+    @Test
+    fun toPlainMap_keepsPropertyOrderOfEveryNestedObject() {
+        // Structured outputs generate fields in schema order, so a reordered map makes a model
+        // answer, say, examples before the definition they illustrate.
+        val senseFields = listOf(
+            "sense_id",
+            "sense_definition",
+            "learner_level",
+            "frequency",
+            "semantic_group_id",
+            "name_type",
+            "examples",
+            "synonyms",
+            "antonyms",
+            "common_phrases",
+            "traits"
+        )
+        val senseProperties = senseFields.joinToString(",") { field -> """ "$field": { "type": "string" } """ }
+        val geminiSchema = """
+            {
+              "type": "object",
+              "properties": {
+                "word_family": { "type": "array", "items": { "type": "string" } },
+                "sense": {
+                  "type": "object",
+                  "properties": {
+            $senseProperties
+                  },
+                  "required": [${senseFields.joinToString(", ") { field -> "\"" + field + "\"" }}]
+                }
+              },
+              "required": ["word_family", "sense"]
+            }
+        """.trimIndent()
+
+        @Suppress("UNCHECKED_CAST")
+        val plain = SchemaConverter.toPlainMap(SchemaConverter.geminiToJsonSchema(geminiSchema)) as Map<String, Any>
+
+        @Suppress("UNCHECKED_CAST")
+        val properties = plain["properties"] as Map<String, Any>
+        assertEquals(
+            listOf("word_family", "sense"),
+            properties.keys.toList(),
+            "Top-level property order should survive the conversion"
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        val converted = (properties["sense"] as Map<String, Any>)["properties"] as Map<String, Any>
+        assertEquals(
+            senseFields,
+            converted.keys.toList(),
+            "Nested property order should survive the conversion"
+        )
     }
 
     /**

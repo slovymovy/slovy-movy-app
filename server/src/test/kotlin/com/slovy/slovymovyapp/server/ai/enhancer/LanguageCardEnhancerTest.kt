@@ -31,9 +31,18 @@ class LanguageCardEnhancerTest : BaseLLMTest() {
 
             assertTrue(response.entries.isNotEmpty(), "Provider $providerType should return entries")
             val firstSense = response.entries.first().senses.first()
-            assertTrue(firstSense.senseDefinition.isNotBlank(), "Sense definition should not be blank")
-            assertTrue(firstSense.learnerLevel.isNotBlank(), "Learner level should not be blank")
-            assertTrue(firstSense.frequency.isNotBlank(), "Frequency should not be blank")
+            assertTrue(
+                firstSense.senseDefinition.isNotBlank(),
+                "Provider $providerType ($model) returned a blank sense definition"
+            )
+            assertTrue(
+                firstSense.learnerLevel.isNotBlank(),
+                "Provider $providerType ($model) returned a blank learner level"
+            )
+            assertTrue(
+                firstSense.frequency.isNotBlank(),
+                "Provider $providerType ($model) returned a blank frequency"
+            )
         }
     }
 

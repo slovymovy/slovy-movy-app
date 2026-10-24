@@ -24,4 +24,5 @@ captures
 /androidApp/release/*
 .aistudio_key*
 .openai_api_key
+.claude_api_key
 .github_key

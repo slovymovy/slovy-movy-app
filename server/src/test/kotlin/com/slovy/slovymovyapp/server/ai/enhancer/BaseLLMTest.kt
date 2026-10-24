@@ -8,6 +8,7 @@ abstract class BaseLLMTest {
         when (type) {
             AIProviderType.GEMINI -> GeminiProvider()
             AIProviderType.OPENAI -> OpenAIProvider()
+            AIProviderType.ANTHROPIC -> AnthropicProvider()
         }
 
     fun pickFastModel(provider: AIProvider): String {
@@ -17,6 +18,8 @@ abstract class BaseLLMTest {
             is OpenAIProvider -> listOf(
                 ChatModel.GPT_5_4.asString()
             )
+
+            is AnthropicProvider -> listOf(CLAUDE_HAIKU_5_5)
 
             else -> emptyList()
         }
