@@ -7,12 +7,11 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
 class SharedTextTest {
 
-    private fun route(text: String) = SharedTextReceiver.route(text, Language.DUTCH, serial = 7)
+    private fun route(text: String) = SharedTextReceiver.route(text, Language.DUTCH)
 
     @Test
     fun offer_ignores_blank_text() = runBlocking {
@@ -20,16 +19,6 @@ class SharedTextTest {
         receiver.offer("   ", SharedTextSource.PROCESS_TEXT)
         receiver.offer("woord", SharedTextSource.PROCESS_TEXT)
         assertEquals("woord", receiver.requests.first().text, "blank text must not become a request")
-    }
-
-    @Test
-    fun identical_texts_produce_distinct_requests() = runBlocking {
-        val receiver = SharedTextReceiver()
-        receiver.offer("woord", SharedTextSource.PROCESS_TEXT)
-        val first = receiver.requests.first()
-        receiver.offer("woord", SharedTextSource.PROCESS_TEXT)
-        val second = receiver.requests.first()
-        assertNotEquals(first.serial, second.serial, "a repeated share of the same text must get its own serial")
     }
 
     @Test
@@ -86,8 +75,8 @@ class SharedTextTest {
 
     @Test
     fun several_words_go_to_reader_with_trimmed_text() {
-        assertEquals(SharedTextRoute.Reader("New\n  York.", Language.DUTCH, 7), route("  New\n  York.\n"))
-        assertEquals(SharedTextRoute.Reader("De stad was stil.", Language.DUTCH, 7), route("  De stad was stil.\n"))
+        assertEquals(SharedTextRoute.Reader("New\n  York.", Language.DUTCH), route("  New\n  York.\n"))
+        assertEquals(SharedTextRoute.Reader("De stad was stil.", Language.DUTCH), route("  De stad was stil.\n"))
     }
 
     @Test

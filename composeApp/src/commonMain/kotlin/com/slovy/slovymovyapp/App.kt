@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -88,10 +89,9 @@ fun App(
             .build()
     }
     var pendingSearchQuery by remember { mutableStateOf<String?>(null) }
-    // Shared passages waiting for their Text Reader entry to compose, keyed by request serial.
-    // Keyed rather than a single slot: while a share replaces an open reader, the outgoing
-    // entry is still composed and must not pick up the passage meant for the incoming one.
-    val pendingReaderTexts = remember { mutableMapOf<Long, String>() }
+    // The passage the next Text Reader entry opens with (clipboard or shared text); its
+    // ViewModel takes it once, on creation.
+    var pendingReaderText by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
     var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
     val container = rememberAppContainer(
@@ -308,10 +308,8 @@ fun App(
             when (route) {
                 is SharedTextRoute.Search -> pendingSearchQuery = route.query
                 is SharedTextRoute.Reader -> {
-                    pendingReaderTexts[route.serial] = route.text
-                    navController.navigate(
-                        AppDestination.TextReader(languageCode = route.language.code, sharedTextSerial = route.serial)
-                    )
+                    pendingReaderText = route.text
+                    navController.navigate(AppDestination.TextReader(languageCode = route.language.code))
                 }
             }
         }
@@ -532,6 +530,7 @@ fun App(
                     }
                 }
                 screens.screen<AppDestination.Search>(interruptibleByShare = true) { backStackEntry ->
+                    val clipboard = LocalClipboardManager.current
 
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
@@ -581,9 +580,23 @@ fun App(
                                 navController.navigate(AppDestination.Settings)
                         },
                         onNavigateToTextReader = { language ->
-                            navController.navigate(
-                                AppDestination.TextReader(languageCode = language.code, sharedTextSerial = null)
+                            // Opening the reader is the paste intent, so the clipboard is read
+                            // on this tap; on iOS its paste prompt doubles as the confirmation.
+                            val text = if (runCatching { clipboard.hasText() }.getOrDefault(true)) {
+                                runCatching { clipboard.getText()?.text }.getOrNull().orEmpty()
+                            } else {
+                                ""
+                            }
+                            logEvent(
+                                AnalyticsEvent.READER_PASTE_CLICK,
+                                mapOf(
+                                    "lang" to language.code,
+                                    "has_text" to text.isNotBlank().toString(),
+                                    "auto" to "true",
+                                ),
                             )
+                            pendingReaderText = text.takeIf { it.isNotBlank() }
+                            navController.navigate(AppDestination.TextReader(languageCode = language.code))
                         },
                         hasFavoritesToReview = hasFavoritesToReview,
                         onListClick = { list ->
@@ -917,15 +930,12 @@ fun App(
                         }
                         return@screen
                     }
+                    // The factory runs once per entry, right after the navigate that filled the
+                    // slot; after process death the slot is empty and the paste card shows.
                     val viewModel = viewModel(viewModelStoreOwner = backStackEntry) {
-                        TextReaderViewModel(container.dictionaryRepository, container.favoritesRepository, language)
-                    }
-                    // Runs before TextReaderScreen's own entry effect, so a shared passage wins
-                    // over the clipboard auto-paste. After process death the map is empty and
-                    // the entry falls back to the clipboard like a manually opened reader.
-                    LaunchedEffect(Unit) {
-                        val text = args.sharedTextSerial?.let { pendingReaderTexts.remove(it) } ?: return@LaunchedEffect
-                        viewModel.analyzeExternalText(text)
+                        val initialText = pendingReaderText
+                        pendingReaderText = null
+                        TextReaderViewModel(container.dictionaryRepository, container.favoritesRepository, language, initialText)
                     }
                     TextReaderScreen(
                         viewModel = viewModel,

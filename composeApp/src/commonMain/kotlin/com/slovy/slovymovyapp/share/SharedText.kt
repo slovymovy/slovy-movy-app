@@ -16,13 +16,10 @@ import kotlin.reflect.KClass
 /**
  * Text handed to the app by the platform: an Android text-selection action, a share sheet,
  * or (later) an iOS share extension.
- *
- * [serial] addresses the request's passage when it opens in the Text Reader.
  */
 data class SharedTextRequest(
     val text: String,
     val source: SharedTextSource,
-    val serial: Long,
 )
 
 /** Where the platform got the text from; reported in analytics only. */
@@ -39,8 +36,8 @@ sealed interface SharedTextRoute {
     /** A single word: Search with the query prefilled, in the language Search is set to. */
     data class Search(val query: String) : SharedTextRoute
 
-    /** A passage: the Text Reader in [language], picking the passage up by [serial]. */
-    data class Reader(val text: String, val language: Language, val serial: Long) : SharedTextRoute
+    /** A passage: the Text Reader in [language]. */
+    data class Reader(val text: String, val language: Language) : SharedTextRoute
 }
 
 /**
@@ -55,14 +52,12 @@ class SharedTextReceiver {
 
     val requests: Flow<SharedTextRequest> = channel.receiveAsFlow()
 
-    private var nextSerial = 0L
-
     private val interruptibleRoutes = mutableSetOf<KClass<out AppDestination>>()
 
     /** Ignores blank text; a later offer replaces an undelivered earlier one. */
     fun offer(text: String, source: SharedTextSource) {
         if (text.isBlank()) return
-        channel.trySend(SharedTextRequest(text = text, source = source, serial = nextSerial++))
+        channel.trySend(SharedTextRequest(text = text, source = source))
     }
 
     /**
@@ -88,7 +83,7 @@ class SharedTextReceiver {
     ): SharedTextRoute? {
         if (interruptibleRoutes.none { destination.hasRoute(it) }) return null
         val language = pickLanguage(savedSearchLanguage, activeLanguage, installed) ?: return null
-        val route = route(request.text, language, request.serial) ?: return null
+        val route = route(request.text, language) ?: return null
         logReceived(request, language, route)
         return route
     }
@@ -128,17 +123,17 @@ class SharedTextReceiver {
          * reader's tokenizer, so "arm-rijk" and "don't" count as one. Null for blank text or
          * text without a dictionary word (digits, symbols, emoji).
          */
-        fun route(rawText: String, language: Language, serial: Long): SharedTextRoute? {
+        fun route(rawText: String, language: Language): SharedTextRoute? {
             val text = rawText.trim()
             if (text.isEmpty()) return null
             // The reader rejects oversized passages itself with a "too long" state; tokenizing
             // them here just to reach the same answer would duplicate that work on the UI thread.
-            if (text.length > MAX_CHARS) return SharedTextRoute.Reader(text, language, serial)
+            if (text.length > MAX_CHARS) return SharedTextRoute.Reader(text, language)
             val words = tokenize(text).filter { it.isWord }.map { it.text }
             return when {
                 words.isEmpty() -> null
                 words.size == 1 -> SharedTextRoute.Search(words.single())
-                else -> SharedTextRoute.Reader(text, language, serial)
+                else -> SharedTextRoute.Reader(text, language)
             }
         }
 

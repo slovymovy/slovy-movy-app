@@ -90,16 +90,25 @@ data class TextReaderUiState(
     val hasResults: Boolean get() = tokens.isNotEmpty()
 }
 
+/**
+ * [initialText] is the passage the reader opens with: the clipboard read when the user opened
+ * it, or text shared from another app. Null opens the paste card.
+ */
 class TextReaderViewModel(
     private val repository: DictionaryRepository,
     private val favoritesRepository: FavoritesRepository,
-    val language: Language
+    val language: Language,
+    initialText: String?,
 ) : ViewModel() {
 
     var state by mutableStateOf(TextReaderUiState())
         private set
 
     val scrollState = ScrollState(0)
+
+    init {
+        if (initialText != null) analyzeText(initialText)
+    }
 
     fun analyzeText(text: String) {
         if (text.isBlank()) return
@@ -174,29 +183,6 @@ class TextReaderViewModel(
             state = state.copy(favoriteLemmas = favoriteLemmas)
         }
     }
-
-    // The reader auto-reads the clipboard once per entry (ViewModel lifetime), so the iOS
-    // paste permission dialog doubles as the paste confirmation instead of requiring an
-    // extra tap. Guarded here so recomposition, returning from word details, or a denied
-    // prompt never re-triggers the system dialog; the tap-to-paste card stays as the
-    // manual retry path.
-    private var autoPasteAttempted = false
-
-    fun consumeAutoPasteAttempt(): Boolean {
-        if (autoPasteAttempted || state.hasResults || state.isAnalyzing) return false
-        autoPasteAttempted = true
-        return true
-    }
-
-    /**
-     * Analyzes text the platform handed to the app (a text-selection action or share). It
-     * replaces the clipboard auto-paste for this reader instance: the passage is already
-     * known, so reading the clipboard would only overwrite it or raise the iOS paste prompt.
-     */
-    fun analyzeExternalText(text: String) {
-        autoPasteAttempted = true
-        analyzeText(text)
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -208,13 +194,13 @@ fun TextReaderScreen(
 ) {
     val clipboard = LocalClipboardManager.current
     // Whether the clipboard holds text — checked here in the stateful layer (not in the
-    // stateless content) and refreshed on resume. The clipboard's *content* is read once
-    // automatically on entry (opening the reader is already an explicit paste intent) and
-    // afterwards only when the user taps to paste.
+    // stateless content) and refreshed on resume. The clipboard's *content* is read by
+    // whoever opens the reader (see TextReaderViewModel's initialText), and afterwards only
+    // when the user taps to paste or comes back with a filled clipboard.
     var clipboardHasText by remember { mutableStateOf(runCatching { clipboard.hasText() }.getOrDefault(true)) }
-    // Shared by the entry auto-paste and the empty→filled resume transition below. A blank
-    // auto read (denied prompt or empty clipboard) falls through to the manual tap-to-paste
-    // card, which stays enabled as the retry path.
+    // For the empty→filled resume transition below. A blank auto read (denied prompt or empty
+    // clipboard) falls through to the manual tap-to-paste card, which stays enabled as the
+    // retry path.
     val autoPasteNow = {
         val text = runCatching { clipboard.getText()?.text }.getOrNull().orEmpty()
         Analytics.logEvent(
@@ -239,11 +225,6 @@ fun TextReaderScreen(
             autoPasteNow()
         }
         onPauseOrDispose {}
-    }
-    LaunchedEffect(Unit) {
-        if (clipboardHasText && viewModel.consumeAutoPasteAttempt()) {
-            autoPasteNow()
-        }
     }
     TextReaderContent(
         state = viewModel.state,
