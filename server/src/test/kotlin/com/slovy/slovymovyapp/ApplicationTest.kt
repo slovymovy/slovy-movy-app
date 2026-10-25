@@ -1,7 +1,9 @@
 package com.slovy.slovymovyapp
 
+import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.server.ServerJson
 import com.slovy.slovymovyapp.server.ai.GeminiProvider
+import com.slovy.slovymovyapp.server.ai.enhancer.DbExtractEnhancerUtils
 import com.slovy.slovymovyapp.server.github.GitHubClient
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -204,6 +206,48 @@ class ApplicationTest {
         assertNotNull(translations, "Sense should contain 'translations' field")
         assertTrue(translations.containsKey("ru"), "Translations should contain 'ru' key")
         assertTrue(translations.containsKey("pl"), "Translations should contain 'pl' key")
+    }
+
+    /**
+     * Japanese is generated for English only. A Russian word requested with it - as a client
+     * released before the pair was narrowed could - still gets its base chunk, and nothing is
+     * generated for the dropped target, so this needs no AI provider.
+     */
+    @Test
+    fun testWord_dropsTranslationTargetTheLearningLanguageIsNotTranslatedInto() = testApplication {
+        if (!GitHubClient.isAvailable()) return@testApplication
+
+        application {
+            module()
+        }
+        val response = client.get("/word/ru/дом?translations=ja")
+        assertEquals(HttpStatusCode.OK, response.status, "an unsupported target must not fail the request")
+
+        val chunks = parseNdjson(response.bodyAsText())
+        assertEquals(1, chunks.size, "the dropped target must not produce a translated stage")
+        assertEquals("base", chunks.first()["stage"]?.jsonPrimitive?.content)
+        assertFalse("\"ja\"" in chunks.first().toString(), "no Japanese is generated or served for a Russian word")
+    }
+
+    /**
+     * The positive side cannot go through the route: with a token it would generate en -> ja for
+     * real. So the predicate the route filters with is checked directly, with or without credentials.
+     */
+    @Test
+    fun isRequestableTranslationTarget_passesOnlyPairsTheLearningLanguageIsTranslatedInto() {
+        val check = DbExtractEnhancerUtils::isRequestableTranslationTarget
+        listOf("ja", "pt", "ru", "en", "EN").forEach { code ->
+            assertTrue(
+                check(Language.ENGLISH, code),
+                "$code must pass for English: Japanese and Portuguese are generated for it, and its own code passes in any case"
+            )
+        }
+        assertFalse(check(Language.RUSSIAN, "ja"), "Russian is not translated into Japanese")
+        assertFalse(check(Language.ENGLISH, "xx"), "an unknown code is not requestable")
+        assertFalse(
+            check(Language.ENGLISH, "JA"),
+            "a code is a bare lowercase subtag everywhere; an upper-cased one is not a language"
+        )
     }
 
     @Test

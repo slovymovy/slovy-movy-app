@@ -33,7 +33,14 @@ data class LanguageSetupUiState(
     val languageRequestSubmitting: Boolean = false,
     val languageRequestError: UiText? = null,
     val languageRequestDiscussionUrl: String? = null
-)
+) {
+    /**
+     * Rows of the translation picker: what the chosen learning language is translated into. Before
+     * a choice the (disabled) list previews every target, so the section is never an empty card.
+     */
+    val translationLanguages: List<Language>
+        get() = Language.translationTargetsFor(listOfNotNull(learningLanguage)).sortedBy { it.selfName }
+}
 
 class LanguageSetupViewModel(
     private val dataDbManager: DataDbManager,
@@ -46,7 +53,9 @@ class LanguageSetupViewModel(
     var state by mutableStateOf(
         LanguageSetupUiState(
             learningLanguage = initialLearningLanguage,
-            nativeLanguages = initialNativeLanguages - setOfNotNull(initialLearningLanguage),
+            nativeLanguages = initialLearningLanguage
+                ?.translationTargetsAmong(initialNativeLanguages)?.toSet()
+                ?: initialNativeLanguages,
             // Routing only reaches setup with a learning language after LANGUAGE was persisted,
             // so an empty set here means a saved "no translation" choice (LANGUAGE=[]), not a
             // fresh user who skipped the step.
@@ -89,7 +98,7 @@ class LanguageSetupViewModel(
         if (state.learningLanguage == language) return
         state = state.copy(
             learningLanguage = language,
-            nativeLanguages = state.nativeLanguages.filter { it != language }.toSet(),
+            nativeLanguages = language.translationTargetsAmong(state.nativeLanguages).toSet(),
             noTranslationSelected = false
         )
     }

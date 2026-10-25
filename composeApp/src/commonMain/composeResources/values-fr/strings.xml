@@ -403,6 +403,7 @@
     </plurals>
     <string name="settings_languages_more">+%1$d de plus</string>
     <string name="settings_toggle_translation_for_language">Activer/désactiver la traduction %1$s</string>
+    <string name="settings_translation_unsupported_for">Non disponible pour %1$s</string>
     <string name="settings_remove_language_confirm_title">Supprimer %1$s ?</string>
     <string name="settings_remove_language_confirm_message">Le dictionnaire et toutes ses traductions seront supprimés. Tu peux les retélécharger à tout moment.</string>
     <plurals name="settings_remove_language_warning">

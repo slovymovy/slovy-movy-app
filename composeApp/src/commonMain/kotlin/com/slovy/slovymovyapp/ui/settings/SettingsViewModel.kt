@@ -48,6 +48,13 @@ data class LanguageUiState(
     val enabledVoiceIds: Set<String> = emptySet()
 )
 
+/** One row of the translation-language picker in Settings. */
+data class TranslationLanguageOption(
+    val language: Language,
+    /** Installed learning languages that are not translated into [language]; empty when every one is. */
+    val unsupportedFor: List<Language>
+)
+
 data class SettingsUiState(
     // Languages I learn
     val learningLanguages: List<LearningLanguageUiState> = emptyList(),
@@ -86,7 +93,32 @@ data class SettingsUiState(
 
     // Developer
     val developerModeEnabled: Boolean = false
-)
+) {
+    /**
+     * Rows of the translation-language picker: every target some installed learning language is
+     * translated into, plus whatever is already selected, so a selection no installed language
+     * supports can still be seen and dropped. With one learning language this is exactly its own
+     * target list; with several it is their union, each row naming the languages it does not serve.
+     * A learning language is not named on its own row while the row serves another one (English
+     * is obviously not a translation for English learners); a row that serves none is marked
+     * fully, so a stale selection equal to the only learning language is visibly dead too.
+     * Before any dictionary is installed the full union is listed, as the flat list was.
+     */
+    val translationLanguageOptions: List<TranslationLanguageOption>
+        get() {
+            val learning = learningLanguages.map { it.language }
+            return (Language.translationTargetsFor(learning) + translationLanguages)
+                .distinct()
+                .sortedBy { it.selfName }
+                .map { target ->
+                    val gaps = learning.filter { !target.isTranslationTargetFor(it) }
+                    TranslationLanguageOption(
+                        language = target,
+                        unsupportedFor = if (gaps.size == learning.size) gaps else gaps.filter { it != target }
+                    )
+                }
+        }
+}
 
 data class DeleteConfirmationState(
     val title: UiText,
@@ -247,7 +279,11 @@ class SettingsViewModel(
                         }
                         .toSet()
 
-                    val allTargets = (translationPrefs + downloadedTargetsForLang + activeDownloadTargets)
+                    // A configured target this language is not translated into has no row here, not
+                    // even an "online only" one; a DB that is already on the device keeps its row so
+                    // it can still be deleted.
+                    val allTargets = (language.translationTargetsAmong(translationPrefs) +
+                        downloadedTargetsForLang + activeDownloadTargets)
                         .filter { it != language }
                         .sortedBy { it.ordinal }
 

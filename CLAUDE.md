@@ -30,6 +30,9 @@ Important namespaces and entry points:
 Supported languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, ES, and ZH; see
 `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`. Offline Wiktextract source mappings currently
 exist only for EN, RU, NL, PL, and DE, so only those can be learning languages; the rest are translation targets.
+A target is normally translated from every learning language; one generated for some of them only lists their codes in
+`Language.translationSourceCodes`. Every place that offers, requests or lists a translation decides through
+`Language.isTranslationTargetFor(source)` (onboarding, Settings, word fetches, the remote DB listing, the `/word` route).
 `Language.code` is the `translation_{src}_{tgt}.db` filename segment, the `/word` route's `translations` value, the
 `lang_code`/`target_lang_code` column value, and the TTS locale tag, so every code stays a bare lowercase subtag.
 
@@ -282,8 +285,8 @@ repopulates missing content for favorites and curated-list senses. Recovery item
 normalized lemma, and the controller keeps recovery alive with platform process-keepalive support.
 
 `DataDbManager.VERSION` is currently `v15`. Downloaded DB URLs are under that prefix in the `slovymovy` GCS bucket.
-The remote DB listing only offers dictionaries of `supportedForLearning` languages and translations into
-`supportedForTranslation` targets, so uploading a DB never makes a language downloadable before its `Language` flag
+The remote DB listing only offers dictionaries of `supportedForLearning` languages and translations of pairs that pass
+`Language.isTranslationTargetFor`, so uploading a DB never makes a language downloadable before its `Language` flag
 does; DBs already on the device are kept and listed as they are. Startup removes `.part`, undersized, or
 schema-invalid downloads before routing. Downloads check disk space, use a `.part` file plus atomic move, validate the
 expected schema, and only then record the installed data version.
@@ -469,8 +472,9 @@ Provider-specific translations of `AIParameters`:
 Important routes and data flow:
 
 - `GET /word/{lang}/{word}` returns NDJSON: a base chunk, then an optional translated chunk. Base data comes from the
-  words repo `push` branch, then `main`, then AI enhancement of db-extract. Requested translation codes are validated,
-  self/available translations are filtered, and only missing languages are processed.
+  words repo `push` branch, then `main`, then AI enhancement of db-extract. Requested translation codes the learning
+  language is not translated into are dropped with a warning, not rejected, so an older client still gets its base
+  chunk; self/available translations are filtered, and only missing languages are processed.
 - The `push` query queues a repo update only when base or translation processing changed something.
 - `GET /lists/{lang}` and `/lists/{lang}/version` serve curated list bundles.
 - `POST /feedback` creates a Feedback discussion in `slovymovy/slovy-movy-app`.

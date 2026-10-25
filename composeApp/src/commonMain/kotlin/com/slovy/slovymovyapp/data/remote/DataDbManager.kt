@@ -462,10 +462,10 @@ class DataDbManager(
      * Fetches available languages with their dictionaries and translations grouped by source language.
      * Uses in-memory cache if available.
      *
-     * Only dictionaries of [Language.supportedForLearning] languages and translations into
-     * [Language.supportedForTranslation] targets are offered, so a DB uploaded before its language is
-     * flagged (or a dictionary for a translation-only language) never becomes downloadable. DBs that
-     * are already downloaded are left alone; see [listDownloadedDatabases].
+     * Only dictionaries of [Language.supportedForLearning] languages and translations of pairs that
+     * pass [Language.isTranslationTargetFor] are offered, so a DB uploaded before its language is
+     * flagged never becomes downloadable. DBs that are already downloaded are left alone; see
+     * [listDownloadedDatabases].
      */
     suspend fun fetchAvailableLanguages(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
         // Return cached value if available
@@ -501,9 +501,7 @@ class DataDbManager(
                     if (parts.size == 2) {
                         val srcLang = Language.fromCodeOrNull(parts[0])
                         val tgtLang = Language.fromCodeOrNull(parts[1])
-                        if (srcLang != null && srcLang.supportedForLearning &&
-                            tgtLang != null && tgtLang.supportedForTranslation
-                        ) {
+                        if (srcLang != null && tgtLang != null && tgtLang.isTranslationTargetFor(srcLang)) {
                             translations.getOrPut(srcLang) { mutableListOf() }
                                 .add(AvailableTranslationInfo(tgtLang, size))
                         }

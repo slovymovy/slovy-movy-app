@@ -28,6 +28,12 @@ enum class Language(
      */
     val supportedForTranslation: Boolean = true,
     /**
+     * Codes of the learning languages whose corpus is translated into this one, or `null` for every
+     * one of them; see [isTranslationTargetFor]. Codes rather than entries, because an enum
+     * constant cannot refer to one declared after it.
+     */
+    val translationSourceCodes: Set<String>? = null,
+    /**
      * Extra guidance appended to the AI base-processing prompt for this language, substituted for
      * its `$INPUT_NOTES` placeholder. Describes what the Wiktextract input for this language can
      * actually look like, where that differs from what the generic prompt assumes.
@@ -180,40 +186,114 @@ enum class Language(
     ),
 
     /*
+     * Generated for English only (issue #973): most learners want a translation into their own
+     * language, and translating every learning language into every target does not pay for itself.
+     */
+    JAPANESE(
+        "ja", "日本語", "🇯🇵", "Japanese",
+        translationSourceCodes = setOf("en"),
+        translationPromptNotes = """
+            Write ordinary mixed script - kanji with kana, katakana for loanwords and foreign names
+            (スミス). No furigana, readings or romaji anywhere.
+
+            Japanese has no spaces, so tag precisely: the word itself, with the following particle
+            outside the tag (私は<w>本</w>を読んだ, not <w>本を</w>). For a verb or adjective, tag the
+            whole inflected form in the sentence (<w>走った</w>); the declared translation stays the
+            dictionary form (走る).
+
+            For a する-noun, declare and tag the noun (勉強) when pos is noun and the する verb
+            (勉強する) when pos is verb.
+
+            Plain form in definitions; natural polite speech (です・ます) in examples.
+
+            Articles, number and some prepositions have no Japanese word. Where the sense is carried
+            by structure alone, write the natural sentence and leave it untagged with an empty
+            declared translation and a paraphrase in the clarification; never insert a filler just to
+            tag something. At least one example per sense must still tag a real word where any
+            carries the sense.
+        """.trimIndent()
+    ),
+
+    /**
+     * European Portuguese, decided 2026-10-21. [englishName] is the sole input to the translation
+     * prompt's `$TARGET_LANG` and is never shown in the UI; plain "Portuguese" would let the model
+     * drift between varieties word by word, because the extracted translations do not pick one
+     * (see [translationPromptNotes]). Brazilian would join as a separate entry rather than a
+     * variant of this one.
+     */
+    PORTUGUESE(
+        "pt", "Português", "🇵🇹", "European Portuguese",
+        translationSourceCodes = setOf("en"),
+        translationPromptNotes = """
+            Write European Portuguese throughout - definitions, translations, clarifications and
+            examples: autocarro, telemóvel, comboio, pequeno-almoço, ecrã, casa de banho; "estou a
+            fazer", not "estou fazendo"; clitics after the verb in affirmative clauses (diga-me,
+            vi-o); "tu" for informal address. Spelling as Portugal applies the 1990 Agreement:
+            facto, registo, económico.
+
+            The extracted translations mix varieties, often both for one sense. Take the European
+            form and drop the Brazilian one (registo, not registro beside it); where only a
+            Brazilian form is given (trem, celular, sorvete), replace it with the European word
+            (comboio, telemóvel, gelado).
+        """.trimIndent()
+    ),
+
+    /*
      * Declared, not yet offered. Their extracts are imported (see kaikki-parser's
      * ExtractionUtils.langToSourceFile), so their translations already enrich the languages being
      * generated, but no corpus has been generated in them: supportedForTranslation stays false
      * until one has, and translationPromptNotes are written and measured. See
      * docs/ADDING_A_LANGUAGE.md in kaikki-parser.
      *
-     * englishName is the sole input to the translation prompt's $TARGET_LANG, so for the two below
-     * whose extract covers more than one variety it is the thing to settle before generating:
-     * Portuguese is European or Brazilian, and Kurdish is Kurmanji or Sorani. Both currently carry
-     * the neutral name, which is only safe while nothing generates from it.
+     * englishName is the sole input to the translation prompt's $TARGET_LANG, so for Kurdish,
+     * whose extract covers more than one variety, it is the thing to settle before generating:
+     * Kurmanji or Sorani. It currently carries the neutral name, which is only safe while nothing
+     * generates from it.
      */
     GREEK("el", "Ελληνικά", "🇬🇷", "Greek", supportedForTranslation = false),
     INDONESIAN("id", "Bahasa Indonesia", "🇮🇩", "Indonesian", supportedForTranslation = false),
-    JAPANESE("ja", "日本語", "🇯🇵", "Japanese", supportedForTranslation = false),
     KOREAN("ko", "한국어", "🇰🇷", "Korean", supportedForTranslation = false),
 
     /** No country flag exists for Kurdish, and every neighbouring one would be wrong. */
     KURDISH("ku", "Kurdî", "🌍", "Kurdish", supportedForTranslation = false),
     MALAY("ms", "Bahasa Melayu", "🇲🇾", "Malay", supportedForTranslation = false),
-    PORTUGUESE("pt", "Português", "🇵🇹", "Portuguese", supportedForTranslation = false),
     THAI("th", "ไทย", "🇹🇭", "Thai", supportedForTranslation = false),
     VIETNAMESE("vi", "Tiếng Việt", "🇻🇳", "Vietnamese", supportedForTranslation = false);
+
+    /**
+     * Whether the corpus of [source] is translated into this language, so that this one may be
+     * offered to a learner of [source] and requested from `/word` for words of it. A language is
+     * never a target for itself.
+     *
+     * Every place that offers, requests or lists a translation decides through this pair check -
+     * onboarding, Settings, word fetches, the remote DB listing and the server's `/word` route - so
+     * a target that exists for English only (see [translationSourceCodes]) stays invisible to a
+     * learner of Russian.
+     */
+    fun isTranslationTargetFor(source: Language): Boolean =
+        this != source &&
+            supportedForTranslation &&
+            source.supportedForLearning &&
+            (translationSourceCodes?.contains(source.code) ?: true)
+
+    /**
+     * The [candidates] this language is translated into, deduplicated, in their own order: a
+     * user's selection narrowed down to what a word of this language can be translated into.
+     */
+    fun translationTargetsAmong(candidates: Iterable<Language>): List<Language> =
+        candidates.filter { it.isTranslationTargetFor(this) }.distinct()
 
     /**
      * Separator for enumerating words written in this language, such as the translation glosses
      * that make up a sense title.
      *
-     * Chinese enumerates with the ideographic comma and no trailing space; a Latin `", "` there
-     * reads as foreign punctuation next to the corpus text, which already uses `、` inside its own
-     * definitions. Every other supported language enumerates the Latin/Cyrillic way.
+     * Chinese and Japanese enumerate with the ideographic comma and no trailing space; a Latin
+     * `", "` there reads as foreign punctuation next to the corpus text, which already uses `、`
+     * inside its own definitions. Every other supported language enumerates the Latin/Cyrillic way.
      */
     val wordSeparator: String
         get() = when (this) {
-            CHINESE -> "、"
+            CHINESE, JAPANESE -> "、"
             else -> ", "
         }
 
@@ -221,8 +301,17 @@ enum class Language(
         /** The languages that can be studied. See [supportedForLearning]. */
         val learningLanguages: List<Language> get() = entries.filter { it.supportedForLearning }
 
-        /** The languages that can be picked as a translation target. See [supportedForTranslation]. */
-        val translationTargets: List<Language> get() = entries.filter { it.supportedForTranslation }
+        /** The languages that some learning language is translated into. */
+        val translationTargets: List<Language> get() = translationTargetsFor(learningLanguages)
+
+        /**
+         * The languages that any of [sources] is translated into, in enum order. With no source
+         * chosen yet this is [translationTargets], so a picker is never an empty list.
+         */
+        fun translationTargetsFor(sources: Collection<Language>): List<Language> {
+            val learners = sources.ifEmpty { learningLanguages }
+            return entries.filter { target -> learners.any { target.isTranslationTargetFor(it) } }
+        }
 
         fun fromCode(code: String): Language {
             return entries.find { it.code == code }

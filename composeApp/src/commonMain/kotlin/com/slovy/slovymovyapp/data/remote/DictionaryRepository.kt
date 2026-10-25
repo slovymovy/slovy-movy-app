@@ -400,17 +400,16 @@ class DictionaryRepository(
     }
 
     fun installedTranslationTargets(src: Language): List<Language> = languages.filter { tgt ->
-        tgt != src && dataDbManager.hasTranslation(src, tgt)
+        tgt.isTranslationTargetFor(src) && dataDbManager.hasTranslation(src, tgt)
     }
 
+    /** The configured translation languages that [src] is actually translated into. */
     suspend fun defaultTranslationTargets(src: Language): List<Language> {
         val configuredTargets = settingsRepository
             .getTranslationLanguagesOrNull()
             ?: return installedTranslationTargets(src)
 
-        return configuredTargets
-            .filter { it != src }
-            .distinctBy { it.code }
+        return src.translationTargetsAmong(configuredTargets)
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.

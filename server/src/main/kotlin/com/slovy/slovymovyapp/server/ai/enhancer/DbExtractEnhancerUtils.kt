@@ -79,10 +79,15 @@ object DbExtractEnhancerUtils {
     fun targetLanguageNotes(langCode: String): String = translationTarget(langCode).translationPromptNotes
 
     /**
-     * These two accessors are also where the `/word` route validates the translation codes it was
-     * asked for, so a language that is in the enum but not yet a target has to be rejected here
-     * rather than quietly generated for. See [Language.supportedForTranslation].
+     * Whether [code] may be requested for a word of [source] (see [Language.isTranslationTargetFor]).
+     * The source's own code passes case-insensitively, as the self-skip is; any other code must
+     * match exactly.
      */
+    fun isRequestableTranslationTarget(source: Language, code: String): Boolean =
+        code.equals(source.code, ignoreCase = true) ||
+            Language.fromCodeOrNull(code)?.isTranslationTargetFor(source) == true
+
+    /** Resolves a target code for the prompt's name and notes; the pair is checked by [isRequestableTranslationTarget]. */
     private fun translationTarget(langCode: String): Language {
         val language = Language.fromCodeOrNull(langCode) ?: error("Unsupported language code: $langCode")
         require(language.supportedForTranslation) { "Language is not a translation target: $langCode" }

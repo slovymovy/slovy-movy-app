@@ -204,11 +204,21 @@ fun Application.module() {
 
             // The corpus this route reads and generates only exists for languages that are
             // studied, so reject the rest here rather than letting the words-repo lookup fail
-            // obscurely further in. Requested translation targets are validated separately, by
-            // targetLanguageName.
-            if (Language.fromCodeOrNull(lang)?.supportedForLearning != true) {
+            // obscurely further in.
+            val learningLanguage = Language.fromCodeOrNull(lang)
+            if (learningLanguage?.supportedForLearning != true) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported learning language: $lang")
                 return@get
+            }
+
+            // A target this learning language is not translated into is dropped rather than
+            // rejected, so a client released before a pair was narrowed still gets the base chunk.
+            val (requestedLangCodes, droppedLangCodes) = parseTranslationCodes(translationsParam)
+                .partition { DbExtractEnhancerUtils.isRequestableTranslationTarget(learningLanguage, it) }
+            if (droppedLangCodes.isNotEmpty()) {
+                call.application.environment.log.warn(
+                    "Dropping unsupported translation targets for $lang/$word: ${droppedLangCodes.joinToString()}"
+                )
             }
 
             if (!GitHubClient.isAvailable()) {
@@ -229,10 +239,6 @@ fun Application.module() {
                 call.respondTextWriter(contentType = ContentType.parse("application/x-ndjson")) {
                     val streamLogger = call.application.environment.log
                     try {
-                        // Parse requested language codes for filtering.
-                        // If no translations parameter provided, return empty list (no translations in response).
-                        val requestedLangCodes = parseTranslationCodes(translationsParam)
-
                         // Send filtered base response to client (always filter based on requested codes)
                         val baseResponseToClient = filterTranslations(baseResult.response, requestedLangCodes)
                         val baseChunk = WordStreamChunk(WordStreamStage.BASE, baseResponseToClient)
@@ -776,8 +782,11 @@ private suspend fun addMissingTranslations(
     val targetLangCodes = requestedLangCodes.filterNot { it.equals(lang, ignoreCase = true) }
     if (targetLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
-    // ensure all languages are valid - throws in case of invalid language code
-    targetLangCodes.forEach { targetLanguageName(it) }
+    // The route already dropped these; this keeps any other caller from generating the pair.
+    val source = Language.fromCodeOrNull(lang) ?: error("Unsupported learning language: $lang")
+    targetLangCodes.firstOrNull { !DbExtractEnhancerUtils.isRequestableTranslationTarget(source, it) }?.let { code ->
+        error("Unsupported translation target for $lang: $code")
+    }
 
     val existingLanguages = getExistingTranslationLanguages(response)
     val missingLangCodes = targetLangCodes.filter { it !in existingLanguages }

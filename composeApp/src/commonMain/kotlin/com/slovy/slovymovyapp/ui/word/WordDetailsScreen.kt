@@ -337,13 +337,15 @@ class WordDetailViewModel(
     fun wordAudioPhase(): RowAudioPhase = rowAudio.uiState.phaseFor(RowAudioKeys.word(lemma))
 
     private var hasScrolledToTarget = false
-    private var requestedTranslationLanguages: List<Language> =
-        translationLanguages?.distinctBy { it.code } ?: emptyList()
+    // Navigation hands in the user's whole selection, so it is narrowed like the repository default.
+    private val navigationTranslationLanguages: List<Language>? =
+        translationLanguages?.let(dictionaryLanguage::translationTargetsAmong)
+    private var requestedTranslationLanguages: List<Language> = navigationTranslationLanguages ?: emptyList()
 
     init {
         viewModelScope.launch {
-            val resolvedTranslations = translationLanguages?.distinctBy { it.code }
-                ?: repository.defaultTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+            val resolvedTranslations = navigationTranslationLanguages
+                ?: repository.defaultTranslationTargets(dictionaryLanguage)
             requestedTranslationLanguages = resolvedTranslations
             wordFetchManager.getWord(
                 dictionaryLanguage,
