@@ -24,31 +24,17 @@ class LanguageSupportTest {
     }
 
     /**
-     * The corpus of every learning language is translated into every other one, so each pair of
-     * learning languages must pass the pair check in both directions - that is what makes the
-     * union in Settings equal to the plain target list for the languages that can be studied.
-     */
-    @Test
-    fun everyLearningLanguageIsATranslationTargetForEveryOtherOne() {
-        Language.learningLanguages.forEach { target ->
-            Language.learningLanguages.filter { it != target }.forEach { source ->
-                assertTrue(
-                    target.isTranslationTargetFor(source),
-                    "${target.code} has a generated corpus, so it must be offerable to a learner of ${source.code}"
-                )
-            }
-        }
-    }
-
-    /**
-     * The eleven targets that predate the per-pair model carry no source list, and that must keep
-     * meaning "every learning language": French, Chinese and the rest stay offered to a learner of
-     * any language exactly as the old global flag offered them.
+     * The targets that predate the per-pair model, every learning language among them, carry no
+     * source list, and that must keep meaning "every learning language": French, Chinese and the
+     * rest stay offered to a learner of any language exactly as the old global flag offered them.
      */
     @Test
     fun aTargetWithoutASourceListIsOfferedToEveryLearner() {
         val unrestricted = Language.entries.filter { it.supportedForTranslation && it.translationSourceCodes == null }
-        assertTrue(Language.FRENCH in unrestricted && Language.CHINESE in unrestricted, "the pre-existing targets carry no source list")
+        assertTrue(
+            unrestricted.containsAll(Language.learningLanguages + Language.FRENCH + Language.CHINESE),
+            "the pre-existing targets and every learning language carry no source list"
+        )
         unrestricted.forEach { target ->
             Language.learningLanguages.filter { it != target }.forEach { source ->
                 assertTrue(
@@ -102,9 +88,6 @@ class LanguageSupportTest {
                     "${target.code} is not generated for ${source.code}, so it must not be offered to its learners"
                 )
             }
-            assertTrue(target in Language.translationTargetsFor(Language.ENGLISH), "${target.code} is in English's picker")
-            assertFalse(target in Language.translationTargetsFor(Language.RUSSIAN), "${target.code} is not in Russian's picker")
-            assertTrue(target in Language.translationTargets, "${target.code} is in the union shown with several learning languages")
         }
         assertEquals(
             "European Portuguese",
@@ -114,17 +97,28 @@ class LanguageSupportTest {
     }
 
     @Test
-    fun translationTargetsAreTheUnionOverLearningLanguages() {
-        val union = Language.learningLanguages.flatMap { Language.translationTargetsFor(it) }.toSet()
+    fun translationTargetsForNoSourceIsTheFullUnion() {
         assertEquals(
-            union,
-            Language.translationTargets.toSet(),
-            "translationTargets must be exactly what some learning language is translated into"
+            Language.translationTargetsFor(Language.learningLanguages),
+            Language.translationTargetsFor(emptyList()),
+            "before a learning language is chosen a picker lists everything some learner is translated into"
         )
         assertEquals(
-            Language.translationTargets,
-            Language.translationTargetsFor(Language.learningLanguages),
-            "the collection overload must be the same union, in enum order"
+            listOf(Language.ENGLISH, Language.POLISH),
+            Language.translationTargetsFor(listOf(Language.RUSSIAN))
+                .filter { it in setOf(Language.ENGLISH, Language.POLISH, Language.JAPANESE) },
+            "a single source lists only its own targets, in enum order"
+        )
+    }
+
+    @Test
+    fun translationTargetsAmongNarrowsASelectionInItsOwnOrder() {
+        assertEquals(
+            listOf(Language.POLISH, Language.ENGLISH),
+            Language.RUSSIAN.translationTargetsAmong(
+                listOf(Language.POLISH, Language.RUSSIAN, Language.JAPANESE, Language.ENGLISH, Language.POLISH)
+            ),
+            "the source itself and English-only Japanese are dropped, duplicates collapse, order is kept"
         )
     }
 

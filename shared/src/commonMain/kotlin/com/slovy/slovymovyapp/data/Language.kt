@@ -29,10 +29,8 @@ enum class Language(
     val supportedForTranslation: Boolean = true,
     /**
      * Codes of the learning languages whose corpus is translated into this one, or `null` for every
-     * one of them. A target generated for English only names `setOf("en")` here, and then nothing
-     * offers it to, or requests it for, a learner of another language: see [isTranslationTargetFor].
-     *
-     * Codes rather than entries, because an enum constant cannot refer to one declared after it.
+     * one of them; see [isTranslationTargetFor]. Codes rather than entries, because an enum
+     * constant cannot refer to one declared after it.
      */
     val translationSourceCodes: Set<String>? = null,
     /**
@@ -189,9 +187,7 @@ enum class Language(
 
     /*
      * Generated for English only (issue #973): most learners want a translation into their own
-     * language, and translating every learning language into every target does not pay for
-     * itself. Both carry translationSourceCodes = setOf("en"), so no learner of another language
-     * is offered them and no Russian word is ever requested with them.
+     * language, and translating every learning language into every target does not pay for itself.
      */
     JAPANESE(
         "ja", "日本語", "🇯🇵", "Japanese",
@@ -281,6 +277,13 @@ enum class Language(
             (translationSourceCodes?.contains(source.code) ?: true)
 
     /**
+     * The [candidates] this language is translated into, deduplicated, in their own order: a
+     * user's selection narrowed down to what a word of this language can be translated into.
+     */
+    fun translationTargetsAmong(candidates: Iterable<Language>): List<Language> =
+        candidates.filter { it.isTranslationTargetFor(this) }.distinct()
+
+    /**
      * Separator for enumerating words written in this language, such as the translation glosses
      * that make up a sense title.
      *
@@ -298,19 +301,17 @@ enum class Language(
         /** The languages that can be studied. See [supportedForLearning]. */
         val learningLanguages: List<Language> get() = entries.filter { it.supportedForLearning }
 
-        /**
-         * The languages that some learning language is translated into. This is the union over all
-         * learning languages; a picker for a particular learner uses [translationTargetsFor].
-         */
+        /** The languages that some learning language is translated into. */
         val translationTargets: List<Language> get() = translationTargetsFor(learningLanguages)
 
-        /** The languages a learner of [source] can be offered as translation targets, in enum order. */
-        fun translationTargetsFor(source: Language): List<Language> =
-            entries.filter { it.isTranslationTargetFor(source) }
-
-        /** The union of [translationTargetsFor] over [sources], in enum order. */
-        fun translationTargetsFor(sources: Collection<Language>): List<Language> =
-            entries.filter { target -> sources.any { target.isTranslationTargetFor(it) } }
+        /**
+         * The languages that any of [sources] is translated into, in enum order. With no source
+         * chosen yet this is [translationTargets], so a picker is never an empty list.
+         */
+        fun translationTargetsFor(sources: Collection<Language>): List<Language> {
+            val learners = sources.ifEmpty { learningLanguages }
+            return entries.filter { target -> learners.any { target.isTranslationTargetFor(it) } }
+        }
 
         fun fromCode(code: String): Language {
             return entries.find { it.code == code }

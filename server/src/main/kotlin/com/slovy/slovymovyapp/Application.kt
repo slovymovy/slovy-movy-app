@@ -211,8 +211,7 @@ fun Application.module() {
                 return@get
             }
 
-            // Likewise a target this learning language is not translated into; see
-            // DbExtractEnhancerUtils.unsupportedTranslationTarget.
+            // Likewise a target this learning language is not translated into.
             val unsupportedTarget = DbExtractEnhancerUtils.unsupportedTranslationTarget(
                 learningLanguage,
                 parseTranslationCodes(translationsParam)
@@ -787,13 +786,11 @@ private suspend fun addMissingTranslations(
     val targetLangCodes = requestedLangCodes.filterNot { it.equals(lang, ignoreCase = true) }
     if (targetLangCodes.isEmpty()) return TranslationResult(response, updated = false)
 
-    // Ensure every target is valid and generated for this source - throws otherwise. The route
-    // already answered 400 on these; this keeps any other caller from generating the pair.
+    // The route already answered 400 on these; this keeps any other caller from generating the pair.
     val source = Language.fromCodeOrNull(lang) ?: error("Unsupported learning language: $lang")
     DbExtractEnhancerUtils.unsupportedTranslationTarget(source, targetLangCodes)?.let { code ->
         error("Unsupported translation target for $lang: $code")
     }
-    targetLangCodes.forEach { targetLanguageName(it) }
 
     val existingLanguages = getExistingTranslationLanguages(response)
     val missingLangCodes = targetLangCodes.filter { it !in existingLanguages }

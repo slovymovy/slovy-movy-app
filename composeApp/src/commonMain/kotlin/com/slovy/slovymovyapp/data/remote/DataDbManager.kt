@@ -464,9 +464,8 @@ class DataDbManager(
      *
      * Only dictionaries of [Language.supportedForLearning] languages and translations of pairs that
      * pass [Language.isTranslationTargetFor] are offered, so a DB uploaded before its language is
-     * flagged (or a dictionary for a translation-only language, or a translation into a target that
-     * exists for English only) never becomes downloadable. DBs that are already downloaded are left
-     * alone; see [listDownloadedDatabases].
+     * flagged never becomes downloadable. DBs that are already downloaded are left alone; see
+     * [listDownloadedDatabases].
      */
     suspend fun fetchAvailableLanguages(): List<AvailableLanguageInfo> = withContext(Dispatchers.IO) {
         // Return cached value if available

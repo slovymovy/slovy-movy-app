@@ -337,21 +337,15 @@ class WordDetailViewModel(
     fun wordAudioPhase(): RowAudioPhase = rowAudio.uiState.phaseFor(RowAudioKeys.word(lemma))
 
     private var hasScrolledToTarget = false
-    private var requestedTranslationLanguages: List<Language> =
-        translationLanguages?.let(::supportedTargets) ?: emptyList()
-
-    /**
-     * Keeps only the targets [dictionaryLanguage] is translated into. The list handed in through
-     * navigation is the user's whole selection, which may hold a target that exists for English
-     * only; the repository default is already filtered the same way.
-     */
-    private fun supportedTargets(languages: List<Language>): List<Language> =
-        languages.filter { it.isTranslationTargetFor(dictionaryLanguage) }.distinctBy { it.code }
+    // Navigation hands in the user's whole selection, so it is narrowed like the repository default.
+    private val navigationTranslationLanguages: List<Language>? =
+        translationLanguages?.let(dictionaryLanguage::translationTargetsAmong)
+    private var requestedTranslationLanguages: List<Language> = navigationTranslationLanguages ?: emptyList()
 
     init {
         viewModelScope.launch {
-            val resolvedTranslations = translationLanguages?.let(::supportedTargets)
-                ?: repository.defaultTranslationTargets(dictionaryLanguage).distinctBy { it.code }
+            val resolvedTranslations = navigationTranslationLanguages
+                ?: repository.defaultTranslationTargets(dictionaryLanguage)
             requestedTranslationLanguages = resolvedTranslations
             wordFetchManager.getWord(
                 dictionaryLanguage,

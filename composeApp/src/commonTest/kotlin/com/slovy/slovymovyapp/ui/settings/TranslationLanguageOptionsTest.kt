@@ -20,7 +20,7 @@ class TranslationLanguageOptionsTest {
         val state = SettingsUiState(learningLanguages = learning(Language.ENGLISH))
 
         assertEquals(
-            Language.translationTargetsFor(Language.ENGLISH).sortedBy { it.selfName },
+            Language.translationTargetsFor(listOf(Language.ENGLISH)).sortedBy { it.selfName },
             state.translationLanguageOptions.map { it.language },
             "an English learner sees every target English is translated into, Japanese and Portuguese included"
         )
@@ -29,16 +29,6 @@ class TranslationLanguageOptionsTest {
             state.translationLanguageOptions.flatMap { it.unsupportedFor },
             "nothing is unsupported when every row comes from the single learning language"
         )
-    }
-
-    @Test
-    fun russianLearnerIsNotOfferedAnEnglishOnlyTarget() {
-        val state = SettingsUiState(learningLanguages = learning(Language.RUSSIAN))
-
-        val offered = state.translationLanguageOptions.map { it.language }
-        assertEquals(false, Language.JAPANESE in offered, "Japanese is generated for English only")
-        assertEquals(false, Language.PORTUGUESE in offered, "Portuguese is generated for English only")
-        assertEquals(true, Language.ENGLISH in offered, "English is a target for a Russian learner")
     }
 
     @Test

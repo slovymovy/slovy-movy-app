@@ -79,13 +79,9 @@ object DbExtractEnhancerUtils {
     fun targetLanguageNotes(langCode: String): String = translationTarget(langCode).translationPromptNotes
 
     /**
-     * The first of [codes] that [source] is not translated into, or null when every code passes.
-     * The pair decides, not the target alone, so a target generated for English only is never
-     * generated for a Russian word. The `/word` route answers 400 on it before loading anything,
-     * and [unsupportedTranslationTarget] is checked again where generation starts, so a caller
-     * that bypasses the route cannot generate the pair either. The source's own code is tolerated
-     * (case-insensitively, as the self-skip is) and skipped later. Any other code is compared as
-     * it is: a code is a bare lowercase subtag everywhere.
+     * The first of [codes] that [source] is not translated into (see [Language.isTranslationTargetFor]),
+     * or null when every code passes. The source's own code is tolerated case-insensitively, as the
+     * self-skip is; any other code must match exactly.
      */
     fun unsupportedTranslationTarget(source: Language, codes: List<String>): String? =
         codes.firstOrNull { code ->
@@ -93,11 +89,7 @@ object DbExtractEnhancerUtils {
                 Language.fromCodeOrNull(code)?.isTranslationTargetFor(source) != true
         }
 
-    /**
-     * Resolves a target code on its own, for the prompt's name and notes. Whether the target is
-     * generated for the given source is decided by [unsupportedTranslationTarget]; this only
-     * rejects a language that is in the enum but not a target for anyone.
-     */
+    /** Resolves a target code for the prompt's name and notes; the pair is checked by [unsupportedTranslationTarget]. */
     private fun translationTarget(langCode: String): Language {
         val language = Language.fromCodeOrNull(langCode) ?: error("Unsupported language code: $langCode")
         require(language.supportedForTranslation) { "Language is not a translation target: $langCode" }

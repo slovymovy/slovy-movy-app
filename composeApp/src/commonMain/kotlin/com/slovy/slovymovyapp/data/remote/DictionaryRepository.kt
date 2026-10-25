@@ -403,19 +403,13 @@ class DictionaryRepository(
         tgt.isTranslationTargetFor(src) && dataDbManager.hasTranslation(src, tgt)
     }
 
-    /**
-     * The configured translation languages that [src] is actually translated into. A configured
-     * target the pair does not support is dropped here, so a Russian word is never searched for or
-     * requested from the server with a target that exists for English only.
-     */
+    /** The configured translation languages that [src] is actually translated into. */
     suspend fun defaultTranslationTargets(src: Language): List<Language> {
         val configuredTargets = settingsRepository
             .getTranslationLanguagesOrNull()
             ?: return installedTranslationTargets(src)
 
-        return configuredTargets
-            .filter { it.isTranslationTargetFor(src) }
-            .distinctBy { it.code }
+        return src.translationTargetsAmong(configuredTargets)
     }
 
     // Search within all installed dictionaries by default; if dictionaryLanguage provided, restrict to it.

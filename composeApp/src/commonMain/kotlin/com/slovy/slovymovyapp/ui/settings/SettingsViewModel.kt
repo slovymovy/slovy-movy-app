@@ -51,10 +51,7 @@ data class LanguageUiState(
 /** One row of the translation-language picker in Settings. */
 data class TranslationLanguageOption(
     val language: Language,
-    /**
-     * Installed learning languages that are not translated into [language], shown on the row so the
-     * user can see why, say, Japanese does nothing for their Russian. Empty when every one is.
-     */
+    /** Installed learning languages that are not translated into [language]; empty when every one is. */
     val unsupportedFor: List<Language>
 )
 
@@ -110,8 +107,7 @@ data class SettingsUiState(
     val translationLanguageOptions: List<TranslationLanguageOption>
         get() {
             val learning = learningLanguages.map { it.language }
-            val offered = if (learning.isEmpty()) Language.translationTargets else Language.translationTargetsFor(learning)
-            return (offered + translationLanguages)
+            return (Language.translationTargetsFor(learning) + translationLanguages)
                 .distinct()
                 .sortedBy { it.selfName }
                 .map { target ->
@@ -286,7 +282,7 @@ class SettingsViewModel(
                     // A configured target this language is not translated into has no row here, not
                     // even an "online only" one; a DB that is already on the device keeps its row so
                     // it can still be deleted.
-                    val allTargets = (translationPrefs.filter { it.isTranslationTargetFor(language) } +
+                    val allTargets = (language.translationTargetsAmong(translationPrefs) +
                         downloadedTargetsForLang + activeDownloadTargets)
                         .filter { it != language }
                         .sortedBy { it.ordinal }
