@@ -50,6 +50,43 @@ open class SettingsRepositoryTest : BaseTest() {
     }
 
     @Test
+    fun saved_search_language_wins_when_installed() {
+        assertEquals(
+            Language.GERMAN,
+            SettingsRepository.pickLanguage(Language.GERMAN, Language.DUTCH, listOf(Language.DUTCH, Language.GERMAN)),
+            "the saved Search language must win when its dictionary is installed",
+        )
+    }
+
+    @Test
+    fun language_falls_back_to_last_then_any_installed() {
+        assertEquals(
+            Language.DUTCH,
+            SettingsRepository.pickLanguage(Language.GERMAN, Language.DUTCH, listOf(Language.ENGLISH, Language.DUTCH)),
+            "a saved language without its dictionary must yield to the last learning language",
+        )
+        assertEquals(
+            Language.ENGLISH,
+            SettingsRepository.pickLanguage(Language.GERMAN, Language.DUTCH, listOf(Language.ENGLISH)),
+            "with neither installed, any installed dictionary must be used",
+        )
+        assertNull(
+            SettingsRepository.pickLanguage(Language.GERMAN, Language.DUTCH, emptyList()),
+            "without an installed dictionary no language can be picked",
+        )
+    }
+
+    @Test
+    fun last_learning_language_round_trips() = runBlocking {
+        val repo = SettingsRepository(testAppDatabaseHolder().database)
+        repo.setLastLearningLanguage(Language.DUTCH)
+        assertEquals(Language.DUTCH, repo.getLastLearningLanguage(), "A picked learning language must be read back")
+
+        repo.setLastLearningLanguage(Language.GERMAN)
+        assertEquals(Language.GERMAN, repo.getLastLearningLanguage(), "A later pick must replace the earlier one")
+    }
+
+    @Test
     fun study_autoplay_is_off_until_saved_and_survives_a_new_repository() = runBlocking {
         val database = testAppDatabaseHolder().database
         val repo = SettingsRepository(database)

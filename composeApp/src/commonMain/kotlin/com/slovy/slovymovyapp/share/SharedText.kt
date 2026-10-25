@@ -6,6 +6,7 @@ import com.slovy.slovymovyapp.AppDestination
 import com.slovy.slovymovyapp.analytics.Analytics
 import com.slovy.slovymovyapp.analytics.AnalyticsEvent
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.ui.reader.MAX_CHARS
 import com.slovy.slovymovyapp.ui.reader.tokenize
 import kotlinx.coroutines.channels.Channel
@@ -78,11 +79,11 @@ class SharedTextReceiver {
         request: SharedTextRequest,
         destination: NavDestination,
         savedSearchLanguage: Language?,
-        activeLanguage: Language?,
+        lastLearningLanguage: Language?,
         installed: List<Language>,
     ): SharedTextRoute? {
         if (interruptibleRoutes.none { destination.hasRoute(it) }) return null
-        val language = pickLanguage(savedSearchLanguage, activeLanguage, installed) ?: return null
+        val language = SettingsRepository.pickLanguage(savedSearchLanguage, lastLearningLanguage, installed) ?: return null
         val route = route(request.text, language) ?: return null
         logReceived(request, language, route)
         return route
@@ -109,15 +110,6 @@ class SharedTextReceiver {
     }
 
     internal companion object {
-        /**
-         * Mirrors `SearchViewModel`: the [saved] Search language when its dictionary is
-         * installed, else the [active] learning language, else any installed dictionary.
-         */
-        fun pickLanguage(saved: Language?, active: Language?, installed: List<Language>): Language? =
-            saved?.takeIf { it in installed }
-                ?: active?.takeIf { it in installed }
-                ?: installed.firstOrNull()
-
         /**
          * A single word is a lookup, anything longer is a passage. Words are counted with the
          * reader's tokenizer, so "arm-rijk" and "don't" count as one. Null for blank text or

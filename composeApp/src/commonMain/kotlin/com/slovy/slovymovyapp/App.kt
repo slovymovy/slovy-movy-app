@@ -93,7 +93,7 @@ fun App(
     // ViewModel takes it once, on creation.
     var pendingReaderText by remember { mutableStateOf<String?>(null) }
     var nativeLanguages by remember { mutableStateOf<List<Language>>(emptyList()) }
-    var dictionaryLanguage by remember { mutableStateOf<Language?>(null) }
+    var lastLearningLanguage by remember { mutableStateOf<Language?>(null) }
     val container = rememberAppContainer(
         settingsRepository = settingsRepository,
         dataManager = dataManager,
@@ -190,12 +190,12 @@ fun App(
         refreshFavoritesReviewState()
     }
 
-    // Keep nativeLanguages and dictionaryLanguage in sync with settings changes from SettingsScreen
+    // Keep nativeLanguages and lastLearningLanguage in sync with settings changes from SettingsScreen
     // Only sync after settings have successfully loaded at least once
     val settingsState = settingsViewModel.state
     val learningLanguagesForStats = settingsState.learningLanguages
         .map { it.language }
-        .ifEmpty { dictionaryLanguage?.let { listOf(it) }.orEmpty() }
+        .ifEmpty { lastLearningLanguage?.let { listOf(it) }.orEmpty() }
     LaunchedEffect(buildConfig.isDebug, settingsState.developerModeEnabled) {
         AppLogger.debugLoggingEnabled = buildConfig.isDebug || settingsState.developerModeEnabled
     }
@@ -204,10 +204,10 @@ fun App(
             nativeLanguages = settingsState.translationLanguages.sortedBy { it.ordinal }
         }
     }
-    LaunchedEffect(settingsState.activeDictionaryLanguage, settingsState.settingsLoaded) {
+    LaunchedEffect(settingsState.lastLearningLanguage, settingsState.settingsLoaded) {
         if (settingsState.settingsLoaded) {
-            dictionaryLanguage = settingsState.activeDictionaryLanguage
-            Analytics.setUserProperty("learning_lang", dictionaryLanguage?.code)
+            lastLearningLanguage = settingsState.lastLearningLanguage
+            Analytics.setUserProperty("learning_lang", lastLearningLanguage?.code)
         }
     }
 
@@ -245,7 +245,7 @@ fun App(
             val dictionaryCode = settingsRepository.getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content
             val dictionary = dictionaryCode?.let { Language.fromCodeOrNull(it) }
             if (dictionary != null) {
-                dictionaryLanguage = dictionary
+                lastLearningLanguage = dictionary
                 val downloadableTargets = try {
                     dataManager.downloadableTranslationTargets(dictionary, natives)
                 } catch (e: CancellationException) {
@@ -286,15 +286,18 @@ fun App(
     // Open platform-shared text. A share the current screen cannot take is dropped; the app was
     // still brought forward. Waiting for the first back stack entry lets a share that
     // cold-started the app see the start destination.
-    val currentDictionaryLanguage by rememberUpdatedState(dictionaryLanguage)
     LaunchedEffect(sharedTextReceiver) {
         sharedTextReceiver.requests.collect { request ->
+            // Suspending reads come first: nothing may suspend between taking the destination
+            // and navigating away from it, or a screen opened meanwhile would be torn down.
+            val savedSearchLanguage = settingsRepository.getSearchLanguage()
+            val storedLastLearningLanguage = settingsRepository.getLastLearningLanguage()
             val currentDestination = navController.currentBackStackEntryFlow.first().destination
             val route = sharedTextReceiver.routeFor(
                 request = request,
                 destination = currentDestination,
-                savedSearchLanguage = settingsRepository.getSearchLanguage(),
-                activeLanguage = currentDictionaryLanguage,
+                savedSearchLanguage = savedSearchLanguage,
+                lastLearningLanguage = storedLastLearningLanguage,
                 installed = container.dictionaryRepository.installedDictionaries(),
             ) ?: return@collect
             // Land on Search first (same pattern as Favorites' "search in dictionary"), so the
@@ -364,7 +367,7 @@ fun App(
                         LanguageSetupViewModel(
                             dataManager,
                             container.dictionaryClient,
-                            initialLearningLanguage = dictionaryLanguage,
+                            initialLearningLanguage = lastLearningLanguage,
                             initialNativeLanguages = nativeLanguages.toSet()
                         )
                     }
@@ -386,7 +389,7 @@ fun App(
                                     )
                                 )
                                 nativeLanguages = native
-                                dictionaryLanguage = learning
+                                lastLearningLanguage = learning
                                 navController.navigate(AppDestination.DownloadSetup(addedTranslationCode = null))
                             }
                         }
@@ -395,7 +398,7 @@ fun App(
                 screens.screen<AppDestination.DownloadSetup>(interruptibleByShare = false) { backStackEntry ->
                     val args = backStackEntry.toRoute<AppDestination.DownloadSetup>()
                     val addedTranslation = args.addedTranslationCode?.let { Language.fromCodeOrNull(it) }
-                    val dictLang = dictionaryLanguage
+                    val dictLang = lastLearningLanguage
                     if (addedTranslation == null && dictLang == null) {
                         LaunchedEffect(Unit) {
                             navController.navigate(AppDestination.SetupLanguages) {

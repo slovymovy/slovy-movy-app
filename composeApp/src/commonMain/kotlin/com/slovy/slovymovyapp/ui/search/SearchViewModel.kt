@@ -84,6 +84,7 @@ class SearchViewModel(
     val noDictionaryScrollState = ScrollState(0)
     private var suggestionsInitialized = false
     private var savedSearchLanguage: Language? = null
+    private var lastLearningLanguage: Language? = null
     private var listsJob: Job? = null
 
     private val suggestionsLoadedForLanguage = MutableStateFlow<Language?>(null)
@@ -139,19 +140,20 @@ class SearchViewModel(
                 }
         }
         viewModelScope.launch {
-            // Restore saved language before loading suggestions so they load for the right language.
-            val savedLang = settingsRepository.getSearchLanguage()
-            savedSearchLanguage = savedLang
-            if (savedLang != null && savedLang in state.availableLanguages && savedLang != state.selectedLanguage) {
+            // Restore the language before loading suggestions so they load for the right one.
+            savedSearchLanguage = settingsRepository.getSearchLanguage()
+            lastLearningLanguage = settingsRepository.getLastLearningLanguage()
+            val restored = SettingsRepository.pickLanguage(savedSearchLanguage, lastLearningLanguage, state.availableLanguages)
+            if (restored != null && restored != state.selectedLanguage) {
                 // This bypasses setSelectedLanguage (the preference must not be re-saved),
                 // so drop anything the screen-open refresh loaded for the pre-restore
                 // language and reload lists for the restored one.
                 state = state.copy(
-                    selectedLanguage = savedLang,
+                    selectedLanguage = restored,
                     curatedLists = emptyList(),
                     isEmptyStateLoading = true
                 )
-                queryFlow.value = queryFlow.value.copy(language = savedLang)
+                queryFlow.value = queryFlow.value.copy(language = restored)
                 refreshLists()
             }
             loadSuggestionsForCurrentLanguage()
@@ -305,7 +307,7 @@ class SearchViewModel(
         val target = when {
             currentLanguage in installed && (preferred == null || preferred == currentLanguage) -> currentLanguage
             currentLanguage in installed && preferred != null -> preferred
-            else -> preferred ?: installed.firstOrNull()
+            else -> SettingsRepository.pickLanguage(savedSearchLanguage, lastLearningLanguage, installed)
         }
         val languageChanged = currentLanguage != target
         // Do not call setSelectedLanguage — that would overwrite the saved preference.
@@ -332,8 +334,11 @@ class SearchViewModel(
         val langChanged = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
         savedSearchLanguage = language
+        val learning = language?.takeIf { it in state.availableLanguages }
+        if (learning != null) lastLearningLanguage = learning
         viewModelScope.launch {
             settingsRepository.setSearchLanguage(language)
+            if (learning != null) settingsRepository.setLastLearningLanguage(learning)
             Analytics.logEvent(
                 AnalyticsEvent.SETTING_CHANGED,
                 mapOf("setting" to "search_language", "value" to (language?.code ?: "any")),

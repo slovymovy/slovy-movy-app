@@ -30,33 +30,6 @@ class SharedTextTest {
     }
 
     @Test
-    fun saved_search_language_wins_when_installed() {
-        assertEquals(
-            Language.GERMAN,
-            SharedTextReceiver.pickLanguage(Language.GERMAN, Language.DUTCH, listOf(Language.DUTCH, Language.GERMAN)),
-            "the language Search is set to must be used, like the Search screen does",
-        )
-    }
-
-    @Test
-    fun language_falls_back_to_active_then_any_installed() {
-        assertEquals(
-            Language.DUTCH,
-            SharedTextReceiver.pickLanguage(Language.GERMAN, Language.DUTCH, listOf(Language.ENGLISH, Language.DUTCH)),
-            "a saved language without its dictionary must yield to the active learning language",
-        )
-        assertEquals(
-            Language.ENGLISH,
-            SharedTextReceiver.pickLanguage(Language.GERMAN, Language.DUTCH, listOf(Language.ENGLISH)),
-            "with neither installed, any installed dictionary must be used",
-        )
-        assertNull(
-            SharedTextReceiver.pickLanguage(Language.GERMAN, Language.DUTCH, emptyList()),
-            "without an installed dictionary a share has no language to open in",
-        )
-    }
-
-    @Test
     fun blank_text_has_no_route() {
         assertNull(route(""), "empty text must not route anywhere")
         assertNull(route(" \n\t "), "whitespace-only text must not route anywhere")
