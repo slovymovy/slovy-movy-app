@@ -79,17 +79,15 @@ object DbExtractEnhancerUtils {
     fun targetLanguageNotes(langCode: String): String = translationTarget(langCode).translationPromptNotes
 
     /**
-     * The first of [codes] that [source] is not translated into (see [Language.isTranslationTargetFor]),
-     * or null when every code passes. The source's own code is tolerated case-insensitively, as the
-     * self-skip is; any other code must match exactly.
+     * Whether [code] may be requested for a word of [source] (see [Language.isTranslationTargetFor]).
+     * The source's own code passes case-insensitively, as the self-skip is; any other code must
+     * match exactly.
      */
-    fun unsupportedTranslationTarget(source: Language, codes: List<String>): String? =
-        codes.firstOrNull { code ->
-            !code.equals(source.code, ignoreCase = true) &&
-                Language.fromCodeOrNull(code)?.isTranslationTargetFor(source) != true
-        }
+    fun isRequestableTranslationTarget(source: Language, code: String): Boolean =
+        code.equals(source.code, ignoreCase = true) ||
+            Language.fromCodeOrNull(code)?.isTranslationTargetFor(source) == true
 
-    /** Resolves a target code for the prompt's name and notes; the pair is checked by [unsupportedTranslationTarget]. */
+    /** Resolves a target code for the prompt's name and notes; the pair is checked by [isRequestableTranslationTarget]. */
     private fun translationTarget(langCode: String): Language {
         val language = Language.fromCodeOrNull(langCode) ?: error("Unsupported language code: $langCode")
         require(language.supportedForTranslation) { "Language is not a translation target: $langCode" }
