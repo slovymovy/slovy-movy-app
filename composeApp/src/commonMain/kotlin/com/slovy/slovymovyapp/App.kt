@@ -20,6 +20,8 @@ import coil3.svg.SvgDecoder
 import com.slovy.slovymovyapp.analytics.*
 import com.slovy.slovymovyapp.analytics.Analytics.logEvent
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.learning.SpellingCardBackfill
+import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.review.FavoritesReviewCoordinator
 import com.slovy.slovymovyapp.data.learning.review.FavoritesReviewState
 import com.slovy.slovymovyapp.data.remote.*
@@ -222,6 +224,21 @@ fun App(
         // Sweep any zero-byte / partial downloaded DBs left behind by past interrupted downloads
         // so the routing below sees an accurate `hasDictionary` / `hasTranslation` picture.
         dataManager.cleanupCorruptDownloadedDbs()
+
+        // Before any session can unlock spelling the regular way; it reads only app.db. A failure
+        // leaves the marker unset, so the next launch retries.
+        try {
+            SpellingCardBackfill(
+                container.favoritesRepository,
+                settingsRepository,
+                FsrsDefaults.UNLOCK_RULES,
+                Clock.System,
+            ).runOnce()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.warn("App", "Spelling backfill failed", e)
+        }
 
         // Check if data version is current (before welcome, so existing users see mismatch).
         // The coordinator defaults to disabled, so returning DataVersionMismatch here keeps

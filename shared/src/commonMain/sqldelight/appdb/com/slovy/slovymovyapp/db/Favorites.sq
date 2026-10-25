@@ -661,6 +661,54 @@ countAllCards:
 SELECT COUNT(*)
 FROM card;
 
+-- Developer tool: the active cards of every sense that has no card of :family yet.
+selectActiveCardsOfSensesWithoutFamily:
+SELECT c.sense_id, c.lemma_id, c.lang_code, c.answer_key, c.stability, c.difficulty
+FROM card c
+WHERE c.suspended = 0
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card t INDEXED BY idx_card_unique_task
+    WHERE t.sense_id = c.sense_id
+      AND t.lang_code = c.lang_code
+      AND t.family = :family
+  );
+
+-- One-time backfill of a new family: the active cards of every sense whose :source_family card
+-- has already passed the unlock gate and that has no :target_family card yet, each row with
+-- that source card's due time and difficulty.
+selectActiveCardsOfSensesPastUnlockGate:
+SELECT c.sense_id, c.lemma_id, c.lang_code, c.answer_key, c.stability, c.available_after,
+       s.due AS source_due, s.difficulty AS source_difficulty
+FROM card c
+JOIN card s INDEXED BY idx_card_unique_task
+  ON s.sense_id = c.sense_id
+  AND s.lang_code = c.lang_code
+  AND s.family = :source_family
+WHERE c.suspended = 0
+  AND s.suspended = 0
+  AND s.stability >= :min_source_stability
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card t INDEXED BY idx_card_unique_task
+    WHERE t.sense_id = c.sense_id
+      AND t.lang_code = c.lang_code
+      AND t.family = :target_family
+  );
+
+countActiveCardsOfFamily:
+SELECT COUNT(*)
+FROM card
+WHERE family = :family
+  AND suspended = 0;
+
+rescheduleActiveCardsOfFamily:
+UPDATE card
+SET due = :due,
+    available_after = NULL
+WHERE family = :family
+  AND suspended = 0;
+
 deleteReviewLogsForSuspendedCards:
 DELETE FROM review_log
 WHERE card_id IN (

@@ -245,6 +245,32 @@ class LearningTaskFactoryTest {
         )
     }
 
+    @Test
+    fun spellWord_buildsTypedVariantPerTargetWithTranslationWords() {
+        val variants = buildTaskVariants(
+            family = CardFamily.SPELL_WORD,
+            sense = sense(definition = "a feeling of warmth and comfort"),
+            translationTargets = listOf(Language.ENGLISH),
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.TRANSLATION_TO_WORD_TYPED, targetLang = Language.ENGLISH.code)),
+            variants,
+            "The typed card is cued by translation words, one variant per configured target",
+        )
+    }
+
+    @Test
+    fun spellWord_buildsNothingWithoutTranslationWords() {
+        val variants = buildTaskVariants(
+            family = CardFamily.SPELL_WORD,
+            sense = senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort"),
+            translationTargets = listOf(Language.ENGLISH),
+        )
+
+        assertEquals(emptyList(), variants, "A translated definition alone cannot cue a typed word")
+    }
+
     private fun sense(definition: String): LanguageCardResponseSense =
         LanguageCardResponseSense(
             senseId = "00000000-0000-0000-0000-000000000001",

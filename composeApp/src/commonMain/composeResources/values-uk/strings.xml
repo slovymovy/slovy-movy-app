@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Активувати очікувані збережені слова для кожної встановленої мови навчання.</string>
     <string name="developer_intake_daily">Щоденно</string>
     <string name="developer_intake_continue_now">Продовжити зараз</string>
+    <string name="developer_study_title">Навчання</string>
+    <string name="developer_schedule_spelling_button">Поставити картки написання першими</string>
+    <string name="developer_schedule_spelling_description">Створює картку написання для кожного слова, що вивчається, і робить усі картки написання терміновими, попереду інших.</string>
     <string name="developer_caches_title">Кеші</string>
     <string name="developer_caches_description">Очистити локально кешовані дані сервера; їх буде завантажено знову під час наступної синхронізації.</string>
     <string name="developer_clear_lists_cache">Очистити кеш списків слів</string>
@@ -403,6 +406,7 @@
     </plurals>
     <string name="settings_languages_more">+%1$d ще</string>
     <string name="settings_toggle_translation_for_language">Перемкнути переклад %1$s</string>
+    <string name="settings_translation_unsupported_for">Недоступно для %1$s</string>
     <string name="settings_remove_language_confirm_title">Видалити %1$s?</string>
     <string name="settings_remove_language_confirm_message">Словник і всі його переклади буде видалено. Ви зможете завантажити їх знову будь-коли.</string>
     <plurals name="settings_remove_language_warning">
@@ -701,6 +705,16 @@
     <string name="study_chip_source_only">лише %1$s</string>
     <string name="study_chip_fill_in">Пропуск</string>
     <string name="study_chip_listen">Аудіювання</string>
+    <string name="study_chip_type">Введення</string>
+    <string name="study_typed_placeholder">Початкова форма</string>
+    <string name="study_typed_check">Перевірити</string>
+    <string name="study_typed_show_answer">Просто показати відповідь</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Підказка: відкрити наступну літеру</string>
+    <string name="study_typed_you_typed">Ви ввели</string>
+    <string name="study_typed_correct_spelling">Правильне написання</string>
+    <string name="study_typed_synonym">Ви ввели синонім</string>
+    <string name="study_typed_expected">Очікувалося</string>
     <string name="study_prompt_recall_word">Пригадайте слово</string>
     <string name="study_chip_recall">Пригадати %1$s</string>
     <string name="study_prompt_translate_to">Перекладіть: %1$s</string>

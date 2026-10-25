@@ -379,13 +379,19 @@ The shared learning domain is under `shared/.../data/learning`; app intake/sessi
 `composeApp/.../data/learning`.
 
 - `Card` identifies a sense/lemma/language, a `CardFamily`, an answer key, and scheduling data.
-- Families are `RECOGNIZE_SENSE`, `PRODUCE_WORD`, `PRODUCE_WORD_IN_CONTEXT`, and `RECOGNIZE_VOICE`. Every family except
+- Families are `RECOGNIZE_SENSE`, `PRODUCE_WORD`, `PRODUCE_WORD_IN_CONTEXT`, `RECOGNIZE_VOICE`, and `SPELL_WORD`
+  (the typed spelling card). They are stored by ordinal: append only, and the order fixes the forward/backward
+  direction of cross-family credit (`CardPersistenceOrderTest`). Every family except
   `RECOGNIZE_SENSE` tests word recall.
 - `CardKind` is a playable presentation variant with translation/cloze requirements, family, priority, and a minimum
   stability gate.
 - `FsrsScheduler` converts between app scheduling data and the vendored `external.fsrs` implementation and produces
   outcomes for Again/Hard/Good/Easy.
 - `FsrsDefaults.config()` owns scheduling, cross-family credit, cooldown, unlocking, exposure, and intake tuning.
+  Unlocks are the `UNLOCK_RULES` list (source family, target family, stability gate); an unlocked card inherits
+  stability from its cross-family credit only. Senses already past the spelling gate when spelling shipped get their
+  card once, at startup, from `SpellingCardBackfill` (`Setting.Name.SPELLING_BACKFILL_DONE`): it starts at the
+  sense's weakest card, so existing progress keeps its pipeline stage, and is due with the produce-word card.
   Change those policies there rather than adding a threshold at a call site. Stats pipeline display thresholds are a
   separate concern currently owned by `StatsService`.
 

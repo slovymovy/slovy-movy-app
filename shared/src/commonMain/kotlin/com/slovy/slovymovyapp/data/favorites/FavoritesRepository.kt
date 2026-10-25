@@ -3,6 +3,7 @@ package com.slovy.slovymovyapp.data.favorites
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardState
+import com.slovy.slovymovyapp.data.learning.fsrs.UnlockRule
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -11,6 +12,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.Uuid
 
@@ -44,6 +46,11 @@ data class CardTableDebugRow(
 data class CardFamilyDebugCount(
     val family: CardFamily,
     val cardCount: Long,
+)
+
+data class FamilyScheduleDebugResult(
+    val created: Long,
+    val rescheduled: Long,
 )
 
 data class NewFavorite(
@@ -348,6 +355,87 @@ class FavoritesRepository(private val db: AppDatabase) {
         }
         cardCount
     }
+
+    /**
+     * Creates the [rule]'s target card for every sense whose source card has already passed the
+     * rule's gate, as if the family had existed when it did. The card starts in LEARNING at the
+     * sense's weakest stability, so the sense keeps its pipeline stage, and is due with its source
+     * card, so a large backlog spreads over the existing schedule. A paused word stays paused: the
+     * card takes the latest `available_after` of the sense's cards. Returns the number created.
+     */
+    suspend fun backfillUnlockedFamily(rule: UnlockRule, now: Long): Long = withContext(Dispatchers.IO) {
+        val q = db.favoritesQueries
+        q.transactionWithResult {
+            val senses = q.selectActiveCardsOfSensesPastUnlockGate(
+                source_family = rule.sourceFamily,
+                min_source_stability = rule.minStability.toDouble(DurationUnit.DAYS),
+                target_family = rule.targetFamily,
+            ).executeAsList()
+                .groupBy { it.sense_id to it.lang_code }
+                .values
+            senses.forEach { cards ->
+                val weakest = cards.minBy { it.stability }
+                q.insertCard(
+                    id = Uuid.random(),
+                    sense_id = weakest.sense_id,
+                    lemma_id = weakest.lemma_id,
+                    lang_code = weakest.lang_code,
+                    family = rule.targetFamily,
+                    state = CardState.LEARNING,
+                    stability = weakest.stability,
+                    difficulty = weakest.source_difficulty,
+                    due = weakest.source_due,
+                    last_review = null,
+                    reps = 0,
+                    lapses = 0,
+                    created_at = now,
+                    available_after = cards.mapNotNull { it.available_after }.maxOrNull(),
+                    answer_key = weakest.answer_key,
+                    suspended = false,
+                )
+            }
+            senses.size.toLong()
+        }
+    }
+
+    // Debug only: puts [family] in front of a session. Its existing active cards become due at [due]
+    // with no cooldown, and every active sense without one gets a LEARNING card due at [due] too.
+    // A new card starts at its sense's weakest stability, as the backfill does, so the sense's
+    // pipeline stage does not move. Playable variants are not checked; a session buries a card it
+    // cannot show.
+    suspend fun scheduleFamilyForAllSenses(family: CardFamily, due: Long, now: Long): FamilyScheduleDebugResult =
+        withContext(Dispatchers.IO) {
+            val q = db.favoritesQueries
+            q.transactionWithResult {
+                val rescheduled = q.countActiveCardsOfFamily(family).executeAsOne()
+                q.rescheduleActiveCardsOfFamily(due = due, family = family)
+                val weakestBySense = q.selectActiveCardsOfSensesWithoutFamily(family).executeAsList()
+                    .groupBy { it.sense_id to it.lang_code }
+                    .values
+                    .map { cards -> cards.minBy { it.stability } }
+                weakestBySense.forEach { weakest ->
+                    q.insertCard(
+                        id = Uuid.random(),
+                        sense_id = weakest.sense_id,
+                        lemma_id = weakest.lemma_id,
+                        lang_code = weakest.lang_code,
+                        family = family,
+                        state = CardState.LEARNING,
+                        stability = weakest.stability,
+                        difficulty = weakest.difficulty,
+                        due = due,
+                        last_review = null,
+                        reps = 0,
+                        lapses = 0,
+                        created_at = now,
+                        available_after = null,
+                        answer_key = weakest.answer_key,
+                        suspended = false,
+                    )
+                }
+                FamilyScheduleDebugResult(created = weakestBySense.size.toLong(), rescheduled = rescheduled)
+            }
+        }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {
         db.favoritesQueries.transaction {

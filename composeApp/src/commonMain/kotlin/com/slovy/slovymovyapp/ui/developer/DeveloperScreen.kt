@@ -109,6 +109,7 @@ fun DeveloperScreen(
         onRunIntake = viewModel::runIntake,
         onClearListsCache = viewModel::clearListsCache,
         onClearClipboard = { viewModel.clearClipboard(clipboard) },
+        onScheduleSpellingCards = viewModel::scheduleSpellingCardsFirst,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -133,6 +134,7 @@ fun DeveloperScreenContent(
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onClearListsCache: () -> Unit = {},
     onClearClipboard: () -> Unit = {},
+    onScheduleSpellingCards: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -233,6 +235,19 @@ fun DeveloperScreenContent(
                         modes = intakeModes,
                         isBusy = state.isBusy,
                         onRun = onRunIntake,
+                    )
+                }
+
+                item {
+                    SectionHeader(
+                        title = stringResource(Res.string.developer_study_title),
+                        modifier = Modifier.padding(top = AppSpacing.sm),
+                    )
+                }
+                item {
+                    DeveloperStudyCard(
+                        isBusy = state.isBusy,
+                        onScheduleSpellingCards = onScheduleSpellingCards,
                     )
                 }
 

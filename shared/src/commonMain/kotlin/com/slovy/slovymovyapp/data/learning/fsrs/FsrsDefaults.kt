@@ -24,6 +24,7 @@ object FsrsDefaults {
     val MATURE_STABILITY: Duration = 21.days
     val PRODUCTION_UNLOCK_STABILITY: Duration = 48.hours
     val CONTEXT_UNLOCK_STABILITY: Duration = 72.hours
+    val SPELLING_UNLOCK_STABILITY: Duration = 72.hours
     val BURY_FAILED_SESSION_CARDS_FOR: Duration = 10.minutes
     const val SAME_SENSE_COOLDOWN_RATIO: Double = 0.30
     const val SAME_LEMMA_COOLDOWN_RATIO: Double = 0.02
@@ -46,6 +47,31 @@ object FsrsDefaults {
 
     val DEFAULT_INTAKE_FAMILIES: List<CardFamily> = listOf(
         CardFamily.RECOGNIZE_SENSE,
+    )
+
+    // Spelling unlocks in parallel with the in-context family. Senses that were already past this
+    // gate when spelling shipped get their card once from SpellingCardBackfill instead.
+    val UNLOCK_RULES: List<UnlockRule> = listOf(
+        UnlockRule(
+            sourceFamily = CardFamily.RECOGNIZE_SENSE,
+            targetFamily = CardFamily.PRODUCE_WORD,
+            minStability = PRODUCTION_UNLOCK_STABILITY,
+        ),
+        UnlockRule(
+            sourceFamily = CardFamily.PRODUCE_WORD,
+            targetFamily = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            minStability = CONTEXT_UNLOCK_STABILITY,
+        ),
+        UnlockRule(
+            sourceFamily = CardFamily.PRODUCE_WORD,
+            targetFamily = CardFamily.SPELL_WORD,
+            minStability = SPELLING_UNLOCK_STABILITY,
+        ),
+        UnlockRule(
+            sourceFamily = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            targetFamily = CardFamily.RECOGNIZE_VOICE,
+            minStability = CONTEXT_UNLOCK_STABILITY,
+        ),
     )
 
     val CROSS_FAMILY_CREDITS: List<CrossFamilyCredit> = listOf(
@@ -103,6 +129,33 @@ object FsrsDefaults {
             goodFactor = 0.80,
             easyFactor = 0.95,
         ),
+        // Spelling mirrors the voice family: modest credit into it from produce-word, strong credit
+        // back out, since spelling a word is strong evidence of being able to produce it, in
+        // context too, and to recognise it. Nothing but produce-word feeds spelling.
+        CrossFamilyCredit(
+            sourceFamily = CardFamily.PRODUCE_WORD,
+            targetFamily = CardFamily.SPELL_WORD,
+            goodFactor = 0.35,
+            easyFactor = 0.55,
+        ),
+        CrossFamilyCredit(
+            sourceFamily = CardFamily.SPELL_WORD,
+            targetFamily = CardFamily.PRODUCE_WORD,
+            goodFactor = 0.85,
+            easyFactor = 1.00,
+        ),
+        CrossFamilyCredit(
+            sourceFamily = CardFamily.SPELL_WORD,
+            targetFamily = CardFamily.PRODUCE_WORD_IN_CONTEXT,
+            goodFactor = 0.75,
+            easyFactor = 0.90,
+        ),
+        CrossFamilyCredit(
+            sourceFamily = CardFamily.SPELL_WORD,
+            targetFamily = CardFamily.RECOGNIZE_SENSE,
+            goodFactor = 0.75,
+            easyFactor = 1.00,
+        ),
     )
 
     private val config = FsrsConfig(
@@ -118,8 +171,7 @@ object FsrsDefaults {
         pauseIntakeIfRetentionBelow = PAUSE_INTAKE_IF_RETENTION_BELOW,
         matureStability = MATURE_STABILITY,
         defaultIntakeFamilies = DEFAULT_INTAKE_FAMILIES,
-        productionUnlockStability = PRODUCTION_UNLOCK_STABILITY,
-        contextUnlockStability = CONTEXT_UNLOCK_STABILITY,
+        unlockRules = UNLOCK_RULES,
         crossFamilyCredits = CROSS_FAMILY_CREDITS,
         buryFailedSessionCardsFor = BURY_FAILED_SESSION_CARDS_FOR,
         sameSenseCooldownRatio = SAME_SENSE_COOLDOWN_RATIO,

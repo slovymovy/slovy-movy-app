@@ -415,6 +415,77 @@ open class FavoritesRepositoryTest : BaseTest() {
         }
     }
 
+    @Test
+    fun scheduleFamilyForAllSenses_creates_missing_cards_at_sense_floor_and_makes_all_due() = runBlocking {
+        val app = openApp()
+        try {
+            val repo = FavoritesRepository(app.database)
+            val q = app.database.favoritesQueries
+            val lang = Language.DUTCH.code
+            val now = 1_700_000_000_000L
+            val due = now - 30.days.inWholeMilliseconds
+            val withoutSpelling = Uuid.parse(sense1)
+            val withSpelling = Uuid.parse(sense2)
+            val removed = Uuid.parse(sense3)
+            val lemmaId = Uuid.random()
+
+            fun insert(sense: Uuid, family: CardFamily, stability: Double, difficulty: Double, suspended: Boolean) =
+                Uuid.random().also { id ->
+                    q.insertCard(
+                        id = id,
+                        sense_id = sense,
+                        lemma_id = lemmaId,
+                        lang_code = lang,
+                        family = family,
+                        state = CardState.REVIEW,
+                        stability = stability,
+                        difficulty = difficulty,
+                        due = now + 10.days.inWholeMilliseconds,
+                        last_review = now - 1.days.inWholeMilliseconds,
+                        reps = 4,
+                        lapses = 0,
+                        created_at = now - 20.days.inWholeMilliseconds,
+                        available_after = now + 1.days.inWholeMilliseconds,
+                        answer_key = "fiets",
+                        suspended = suspended,
+                    )
+                }
+            insert(withoutSpelling, CardFamily.RECOGNIZE_SENSE, stability = 60.0, difficulty = 3.0, suspended = false)
+            insert(withoutSpelling, CardFamily.PRODUCE_WORD, stability = 40.0, difficulty = 5.0, suspended = false)
+            insert(withSpelling, CardFamily.PRODUCE_WORD, stability = 10.0, difficulty = 4.0, suspended = false)
+            val existingSpelling =
+                insert(withSpelling, CardFamily.SPELL_WORD, stability = 8.0, difficulty = 4.0, suspended = false)
+            insert(removed, CardFamily.PRODUCE_WORD, stability = 10.0, difficulty = 4.0, suspended = true)
+
+            val result = repo.scheduleFamilyForAllSenses(CardFamily.SPELL_WORD, due = due, now = now)
+
+            assertEquals(1, result.created, "Only the active sense without a spelling card gets one")
+            assertEquals(1, result.rescheduled, "The one existing active spelling card is rescheduled")
+
+            val created = q.selectCardBySenseAndFamily(withoutSpelling, lang, CardFamily.SPELL_WORD).executeAsOne()
+            assertEquals(CardState.LEARNING, created.state, "A created card starts in LEARNING")
+            assertEquals(40.0, created.stability, "A created card starts at the sense's weakest stability")
+            assertEquals(5.0, created.difficulty, "A created card takes the weakest card's difficulty")
+            assertEquals(due, created.due, "A created card is due at the requested time")
+            assertNull(created.available_after, "A created card has no cooldown")
+            assertEquals(now, created.created_at, "A created card is stamped with now")
+            assertEquals(lemmaId, created.lemma_id, "A created card keeps the sense's lemma")
+            assertEquals("fiets", created.answer_key, "A created card keeps the sense's answer key")
+
+            val rescheduled = q.selectCardById(existingSpelling).executeAsOne()
+            assertEquals(due, rescheduled.due, "An existing spelling card is due at the requested time")
+            assertNull(rescheduled.available_after, "An existing spelling card loses its cooldown")
+            assertEquals(8.0, rescheduled.stability, "Rescheduling keeps the existing card's memory state")
+
+            assertNull(
+                q.selectCardBySenseAndFamily(removed, lang, CardFamily.SPELL_WORD).executeAsOneOrNull(),
+                "A sense with only suspended cards gets no spelling card",
+            )
+        } finally {
+            app.close()
+        }
+    }
+
     private class AppHandle(
         private val driver: SqlDriver,
         val database: AppDatabase,

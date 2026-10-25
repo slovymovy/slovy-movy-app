@@ -94,6 +94,13 @@ class SettingsRepository(private val db: AppDatabase) {
         insert(Setting(Setting.Name.LEGACY_VOICE_MIGRATION_DONE, JsonPrimitive(true)))
     }
 
+    suspend fun isSpellingBackfillDone(): Boolean =
+        getById(Setting.Name.SPELLING_BACKFILL_DONE)?.value?.jsonPrimitive?.booleanOrNull ?: false
+
+    suspend fun setSpellingBackfillDone() {
+        insert(Setting(Setting.Name.SPELLING_BACKFILL_DONE, JsonPrimitive(true)))
+    }
+
     /** Whether study sessions speak each card's word on their own. Off until the user turns it on. */
     suspend fun getStudyAutoplay(): Boolean =
         getById(Setting.Name.STUDY_AUTOPLAY)?.value?.jsonPrimitive?.booleanOrNull ?: false

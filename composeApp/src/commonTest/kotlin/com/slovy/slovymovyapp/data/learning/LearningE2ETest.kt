@@ -808,7 +808,9 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun again_review_does_not_unlock_next_family_even_when_stability_is_eligible() = runBlocking {
         val config = FsrsDefaults.config().copy(
-            productionUnlockStability = 0.minutes,
+            unlockRules = FsrsDefaults.UNLOCK_RULES.map { rule ->
+                if (rule.targetFamily == CardFamily.PRODUCE_WORD) rule.copy(minStability = 0.minutes) else rule
+            },
         )
         withEnv(includeTranslation = false, config = config) { env ->
             val fixture = env.seedSense(lemma = "againunlockfixture")
@@ -833,6 +835,103 @@ class LearningE2ETest : BaseTest() {
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
             assertEquals(1, cards.size)
             assertEquals(CardFamily.RECOGNIZE_SENSE, cards.single().family)
+        }
+    }
+
+    @Test
+    fun production_good_unlocks_spelling_from_the_credit_factor_even_for_a_learned_sense() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "spellunlock")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            val farFuture = (start + 365.days).toEpochMilliseconds()
+            val yesterday = (start - 1.days).toEpochMilliseconds()
+            // A LEARNED sense: every card past the 90-day maturity line, only the produce-word card due.
+            env.insertTask(fixture, CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 200.0, due = farFuture, lastReview = yesterday, reps = 8)
+            env.insertTask(fixture, CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 150.0, lastReview = yesterday, reps = 6)
+            env.insertTask(fixture, CardFamily.PRODUCE_WORD_IN_CONTEXT, state = CardState.REVIEW, stability = 120.0, due = farFuture, lastReview = yesterday, reps = 5)
+            val stabilitiesBefore = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
+                .executeAsList().associate { it.family to it.stability }
+
+            val production = env.nextLoadedCard("en")
+            assertEquals(CardFamily.PRODUCE_WORD, production.card.family, "Only the produce-word card is due")
+            val reviewed = env.session.submitReview(
+                production,
+                env.session.previewRatings(production).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            val spelling = cards.single { it.family == CardFamily.SPELL_WORD }
+            assertClose(reviewed.card.scheduling.stability * 0.35, spelling.stability)
+            assertEquals(CardState.LEARNING, spelling.state, "An unlocked card starts in LEARNING like every unlock")
+            assertTrue(spelling.due <= (start + 4.days).toEpochMilliseconds(), "The new card is due within days")
+            cards.filter { it.family != CardFamily.SPELL_WORD }.forEach { sibling ->
+                assertTrue(
+                    sibling.stability >= stabilitiesBefore.getValue(sibling.family),
+                    "${sibling.family} must not lose stability when spelling is unlocked",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun production_good_below_the_spelling_threshold_does_not_unlock_spelling() = runBlocking {
+        val config = FsrsDefaults.config().copy(
+            cooldownJitterRatio = 0.0,
+            unlockRules = FsrsDefaults.UNLOCK_RULES.map { rule ->
+                if (rule.targetFamily == CardFamily.SPELL_WORD) rule.copy(minStability = 30.days) else rule
+            },
+        )
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "spellthreshold")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.insertTask(fixture, CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 10.0, lastReview = (start - 1.days).toEpochMilliseconds(), reps = 3)
+
+            val production = env.nextLoadedCard("en")
+            env.session.submitReview(
+                production,
+                env.session.previewRatings(production).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val families = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family }
+            assertFalse(CardFamily.SPELL_WORD in families, "Below the spelling threshold no spelling card is created")
+            assertTrue(CardFamily.PRODUCE_WORD_IN_CONTEXT in families, "The in-context unlock at 72 h is unaffected")
+        }
+    }
+
+    @Test
+    fun spelling_good_credits_weaker_siblings_and_never_lowers_stronger_ones() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            val fixture = env.seedSense(lemma = "spellcredit")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            val farFuture = (start + 365.days).toEpochMilliseconds()
+            val yesterday = (start - 1.days).toEpochMilliseconds()
+            env.insertTask(fixture, CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 50.0, due = farFuture, lastReview = yesterday, reps = 8)
+            env.insertTask(fixture, CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 2.0, due = farFuture, lastReview = yesterday, reps = 2)
+            env.insertTask(fixture, CardFamily.PRODUCE_WORD_IN_CONTEXT, state = CardState.REVIEW, stability = 3.0, due = farFuture, lastReview = yesterday, reps = 2)
+            val spellingId = env.insertTask(fixture, CardFamily.SPELL_WORD, state = CardState.REVIEW, stability = 10.0, lastReview = yesterday, reps = 3).id
+
+            val spelling = env.nextLoadedCard("en")
+            assertEquals(CardFamily.SPELL_WORD, spelling.card.family, "Only the spelling card is due")
+            assertEquals(CardKind.TRANSLATION_TO_WORD_TYPED, spelling.variant.kind, "The spelling family plays as the typed card")
+            val reviewed = env.session.submitReview(
+                spelling,
+                env.session.previewRatings(spelling).first { it.rating == Rating.GOOD },
+                durationMs = 1.seconds.inWholeMilliseconds,
+            )
+
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().associateBy { it.family }
+            assertClose(reviewed.card.scheduling.stability * 0.85, cards.getValue(CardFamily.PRODUCE_WORD).stability)
+            assertClose(reviewed.card.scheduling.stability * 0.75, cards.getValue(CardFamily.PRODUCE_WORD_IN_CONTEXT).stability)
+            assertEquals(50.0, cards.getValue(CardFamily.RECOGNIZE_SENSE).stability, "A stronger sibling is never lowered")
+            val lastReview = env.app.favoritesQueries.selectLastReviewVariantByCard(spellingId).executeAsOne()
+            assertEquals(CardKind.TRANSLATION_TO_WORD_TYPED, lastReview.variant_kind, "The review log records the typed kind")
         }
     }
 

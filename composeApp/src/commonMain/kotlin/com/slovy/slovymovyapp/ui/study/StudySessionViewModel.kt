@@ -7,6 +7,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.analytics.Analytics
@@ -141,6 +142,7 @@ class StudySessionViewModel(
     private var isExitingSession: Boolean = false
     private var cardLoadJob: Job? = null
     private var reviewJob: Job? = null
+    private var revealInFlight: Boolean = false
     private val snackbarMutex = Mutex()
 
     init {
@@ -642,19 +644,46 @@ class StudySessionViewModel(
     }
 
     fun reveal() {
-        if (isExitingSession) return
-        val active = state as? StudySessionUiState.Active ?: return
-        if (active.side == StudyCardSide.BACK) return
+        startTurnOver { front -> front.card }
+    }
 
+    /**
+     * The active card while it is on its front, no reveal is in flight and the session is not
+     * closing; null otherwise.
+     */
+    private fun revealableFront(): StudySessionUiState.Active? {
+        if (isExitingSession || revealInFlight) return null
+        val active = state as? StudySessionUiState.Active ?: return null
+        return active.takeIf { it.side == StudyCardSide.FRONT }
+    }
+
+    /**
+     * Turns the card over: previews the ratings and shows the back, whose card is [backCard] of the
+     * front as it stands at that moment (the front's own card, or the typed card with its result).
+     * The in-flight flag is raised before anything is launched, so a Go key and a Check tap in the
+     * same frame, or a Show answer racing a Check, cannot turn the card over twice; the state is
+     * re-read inside, so nothing written in between is clobbered by a stale snapshot.
+     */
+    private fun startTurnOver(backCard: (StudySessionUiState.Active) -> StudyCardUiState) {
+        revealableFront() ?: return
+        revealInFlight = true
         viewModelScope.launch {
-            val card = currentCard ?: return@launch
-            currentOutcomes = sessionService.previewRatings(card)
-            state = active.copy(
-                side = StudyCardSide.BACK,
-                ratingOptions = currentOutcomes.toStudyRatings(),
-            )
-            if (autoplayEnabled) {
-                autoplayBackAudioText(active.card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
+            try {
+                val sessionCard = currentCard ?: return@launch
+                currentOutcomes = sessionService.previewRatings(sessionCard)
+                val front = state as? StudySessionUiState.Active ?: return@launch
+                if (front.side != StudyCardSide.FRONT) return@launch
+                val card = backCard(front)
+                state = front.copy(
+                    card = card,
+                    side = StudyCardSide.BACK,
+                    ratingOptions = currentOutcomes.toStudyRatings(),
+                )
+                if (autoplayEnabled) {
+                    autoplayBackAudioText(card)?.let { playAudio(key = StudyAudioKeys.WORD, text = it, logClick = false) }
+                }
+            } finally {
+                revealInFlight = false
             }
         }
     }
@@ -679,6 +708,41 @@ class StudySessionViewModel(
         state = active.copy(card = updatedCard)
         logHintRevealed(updatedCard.id, updatedCard.back.headline, hintKind = "first_letter")
     }
+
+    /** The learner edited the spelling field. */
+    fun updateTypedInput(value: TextFieldValue) {
+        val card = typedCardAwaitingAnswer() ?: return
+        val active = state as StudySessionUiState.Active
+        state = active.copy(card = card.withInput(value))
+    }
+
+    /** Reveals the next letter of the word, discarding a wrong tail first. */
+    fun revealTypedHint() {
+        val card = typedCardAwaitingAnswer() ?: return
+        val active = state as StudySessionUiState.Active
+        val hinted = card.withNextLetterHint() ?: return
+        state = active.copy(card = hinted)
+        if (hinted.input.hintsUsed > card.input.hintsUsed) {
+            logHintRevealed(card.id, card.lemma, hintKind = "next_letter")
+        }
+    }
+
+    /** Compares the field with the word and turns the card over with the comparison on its back. */
+    fun checkTypedAnswer() {
+        val card = typedCardAwaitingAnswer() ?: return
+        if (!card.canCheck) return
+        startTurnOver { front -> (front.card as? StudyCardUiState.Typed)?.checked() ?: front.card }
+    }
+
+    /** The learner gives up on typing; the back shows the word, with the comparison if they typed. */
+    fun showTypedAnswer() {
+        typedCardAwaitingAnswer() ?: return
+        startTurnOver { front -> (front.card as? StudyCardUiState.Typed)?.answerShown() ?: front.card }
+    }
+
+    /** The typed card on a revealable front; null otherwise. */
+    private fun typedCardAwaitingAnswer(): StudyCardUiState.Typed? =
+        revealableFront()?.card as? StudyCardUiState.Typed
 
     fun revealTranslationHint() {
         val active = state as? StudySessionUiState.Active ?: return
@@ -935,6 +999,7 @@ class StudySessionViewModel(
             is StudyCardUiState.Listening -> card.promptAudioText
             is StudyCardUiState.Production,
             is StudyCardUiState.Cloze,
+            is StudyCardUiState.Typed,
                 -> null
         }
 

@@ -12,6 +12,7 @@ import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
+import com.slovy.slovymovyapp.data.learning.fsrs.UnlockRule
 import com.slovy.slovymovyapp.data.learning.stats.retrievability
 import com.slovy.slovymovyapp.data.remote.LanguageCard
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
@@ -664,47 +665,56 @@ class SessionService(
         now: Long,
     ) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
-        val unlockFamily = when (card.card.family) {
-            CardFamily.RECOGNIZE_SENSE if stability >= config.productionUnlockStability -> CardFamily.PRODUCE_WORD
-            CardFamily.PRODUCE_WORD if stability >= config.contextUnlockStability -> CardFamily.PRODUCE_WORD_IN_CONTEXT
-            CardFamily.PRODUCE_WORD_IN_CONTEXT if stability >= config.contextUnlockStability -> CardFamily.RECOGNIZE_VOICE
+        val rules = config.unlockRules.filter { rule ->
+            rule.sourceFamily == card.card.family && stability >= rule.minStability
+        }
+        if (rules.isEmpty()) return
+        val sense = card.wordResult.card?.findSense(card.senseId)
+        if (sense == null) {
+            AppLogger.debug(TAG, null) {
+                "Unlock skipped: sense missing source=${card.card.id} sense=${card.senseId} " +
+                    "to=${rules.map { it.targetFamily }}"
+            }
+            return
+        }
+        rules.forEach { rule -> unlockFamily(card, after, rating, now, rule, sense) }
+    }
 
-            else -> null
-        } ?: return
-        val credit = crossFamilyCredit(card.card.family, unlockFamily, rating)
+    private fun unlockFamily(
+        card: SessionCard,
+        after: CardScheduling,
+        rating: Rating,
+        now: Long,
+        rule: UnlockRule,
+        sense: LanguageCardResponseSense,
+    ) {
+        val target = rule.targetFamily
+        val credit = crossFamilyCredit(card.card.family, target, rating)
         if (credit == null) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no cross-family credit source=${card.card.id} " +
-                    "from=${card.card.family} to=$unlockFamily rating=$rating"
+                    "from=${card.card.family} to=$target rating=$rating"
+            }
+            return
+        }
+        val variants = buildTaskVariants(target, sense, card.translationTargets)
+        if (variants.isEmpty()) {
+            AppLogger.debug(TAG, null) {
+                "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$target"
             }
             return
         }
         val inheritedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
-
-        val sense = card.wordResult.card?.findSense(card.senseId)
-        if (sense == null) {
-            AppLogger.debug(TAG, null) {
-                "Unlock skipped: sense missing source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
-            }
-            return
-        }
-        val variants = buildTaskVariants(unlockFamily, sense, card.translationTargets)
-        if (variants.isEmpty()) {
-            AppLogger.debug(TAG, null) {
-                "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$unlockFamily"
-            }
-            return
-        }
         val due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD))
         val availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after))
         AppLogger.debug(TAG, null) {
-            "Unlock eligible source=${card.card.id} sense=${card.senseId} from=${card.card.family} to=$unlockFamily " +
+            "Unlock eligible source=${card.card.id} sense=${card.senseId} from=${card.card.family} to=$target " +
                 "rating=$rating inheritedStability=${formatDouble(inheritedStability)} " +
                 "dueIn=${formatDelay(due, now)} availableAfterIn=${formatDelay(availableAfter, now)}"
         }
         insertTaskIfMissing(
             source = card.card,
-            family = unlockFamily,
+            family = target,
             now = now,
             due = due,
             state = CardState.LEARNING,
