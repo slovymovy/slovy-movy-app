@@ -313,6 +313,10 @@ class FavoritesViewModel(
         if (started) {
             viewModelScope.launch {
                 settingsRepository.insert(Setting(Setting.Name.FAVORITES_LANGUAGE, JsonPrimitive(language.code)))
+                // Favorites can outlive their dictionary; only an installed one is a learning language.
+                if (language in dictionaryRepository.installedDictionaries()) {
+                    settingsRepository.setLastPickedLanguage(language)
+                }
                 Analytics.logEvent(
                     AnalyticsEvent.SETTING_CHANGED,
                     mapOf("setting" to "favorites_language", "value" to language.code),

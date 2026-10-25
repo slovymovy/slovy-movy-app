@@ -58,6 +58,28 @@ class SettingsRepository(private val db: AppDatabase) {
         db.settingsQueries.deleteById(id)
     }
 
+    /** The dictionary language last picked in Search, or null for "any" or an unknown stored code. */
+    suspend fun getSearchLanguage(): Language? =
+        getById(Setting.Name.SEARCH_LANGUAGE)?.value?.jsonPrimitive?.content?.let { Language.fromCodeOrNull(it) }
+
+    /** Saves [language] as the Search language; null clears the choice. */
+    suspend fun setSearchLanguage(language: Language?) {
+        if (language != null) {
+            insert(Setting(Setting.Name.SEARCH_LANGUAGE, JsonPrimitive(language.code)))
+        } else {
+            deleteById(Setting.Name.SEARCH_LANGUAGE)
+        }
+    }
+
+    /** The learning language the user last picked; see [Setting.Name.DICTIONARY]. */
+    suspend fun getLastPickedLanguage(): Language? =
+        getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content?.let { Language.fromCodeOrNull(it) }
+
+    /** Records [language], explicitly picked on a screen, as the last picked language. */
+    suspend fun setLastPickedLanguage(language: Language) {
+        insert(Setting(Setting.Name.DICTIONARY, JsonPrimitive(language.code)))
+    }
+
     suspend fun getDeveloperMode(default: Boolean): Boolean =
         getById(Setting.Name.DEVELOPER_MODE)?.value?.jsonPrimitive?.booleanOrNull ?: default
 
@@ -78,5 +100,14 @@ class SettingsRepository(private val db: AppDatabase) {
 
     suspend fun setStudyAutoplay(enabled: Boolean) {
         insert(Setting(Setting.Name.STUDY_AUTOPLAY, JsonPrimitive(enabled)))
+    }
+
+    companion object {
+        /**
+         * The first of [preferred] whose dictionary is [installed], else any installed
+         * dictionary; null when none is installed.
+         */
+        fun pickLanguage(installed: List<Language>, vararg preferred: Language?): Language? =
+            preferred.firstOrNull { it != null && it in installed } ?: installed.firstOrNull()
     }
 }

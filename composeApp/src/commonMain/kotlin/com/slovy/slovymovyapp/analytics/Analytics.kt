@@ -57,7 +57,8 @@ enum class AnalyticsEvent {
     READER_ANALYZE_DONE,
     READER_ANALYZE_FAILED,
     READER_TEXT_TOO_LONG,
-    READER_WORD_CLICK
+    READER_WORD_CLICK,
+    SHARED_TEXT_RECEIVED
 }
 
 expect object Analytics {

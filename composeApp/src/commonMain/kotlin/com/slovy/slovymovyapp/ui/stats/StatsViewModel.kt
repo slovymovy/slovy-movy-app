@@ -100,6 +100,8 @@ class StatsViewModel(
         }
         viewModelScope.launch {
             settingsRepository.insert(Setting(Setting.Name.STATS_LANGUAGE, JsonPrimitive(language.code)))
+            // Stats offers only learning languages, so the pick is one by construction.
+            settingsRepository.setLastPickedLanguage(language)
             Analytics.logEvent(
                 AnalyticsEvent.SETTING_CHANGED,
                 mapOf("setting" to "stats_language", "value" to language.code),

@@ -311,6 +311,7 @@
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Efface les données serveur en cache local ; elles seront rechargées à la prochaine synchro.</string>
     <string name="developer_clear_lists_cache">Effacer le cache des listes de mots</string>
+    <string name="developer_clear_clipboard">Vider le presse-papiers</string>
     <string name="developer_danger_title">Danger</string>
     <string name="developer_danger_description">Supprime des lignes de cartes d'apprentissage pour le débogage. Ces actions sont irréversibles.</string>
     <string name="developer_remove_suspended_cards">Supprimer les suspendues</string>

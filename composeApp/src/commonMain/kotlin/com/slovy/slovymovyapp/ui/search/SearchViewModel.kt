@@ -19,10 +19,7 @@ import com.slovy.slovymovyapp.analytics.useWithResult
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.remote.DictionaryClient
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
-import com.slovy.slovymovyapp.data.settings.Setting
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
 import com.slovy.slovymovyapp.i18n.UiText
 import com.slovy.slovymovyapp.i18n.networkErrorUiText
 import kotlinx.coroutines.CancellationException
@@ -87,6 +84,7 @@ class SearchViewModel(
     val noDictionaryScrollState = ScrollState(0)
     private var suggestionsInitialized = false
     private var savedSearchLanguage: Language? = null
+    private var lastPickedLanguage: Language? = null
     private var listsJob: Job? = null
 
     private val suggestionsLoadedForLanguage = MutableStateFlow<Language?>(null)
@@ -142,21 +140,20 @@ class SearchViewModel(
                 }
         }
         viewModelScope.launch {
-            // Restore saved language before loading suggestions so they load for the right language.
-            val savedCode = settingsRepository.getById(Setting.Name.SEARCH_LANGUAGE)
-                ?.value?.jsonPrimitive?.content
-            val savedLang = savedCode?.let { Language.fromCodeOrNull(it) }
-            savedSearchLanguage = savedLang
-            if (savedLang != null && savedLang in state.availableLanguages && savedLang != state.selectedLanguage) {
+            // Restore the language before loading suggestions so they load for the right one.
+            savedSearchLanguage = settingsRepository.getSearchLanguage()
+            lastPickedLanguage = settingsRepository.getLastPickedLanguage()
+            val restored = SettingsRepository.pickLanguage(state.availableLanguages, savedSearchLanguage, lastPickedLanguage)
+            if (restored != null && restored != state.selectedLanguage) {
                 // This bypasses setSelectedLanguage (the preference must not be re-saved),
                 // so drop anything the screen-open refresh loaded for the pre-restore
                 // language and reload lists for the restored one.
                 state = state.copy(
-                    selectedLanguage = savedLang,
+                    selectedLanguage = restored,
                     curatedLists = emptyList(),
                     isEmptyStateLoading = true
                 )
-                queryFlow.value = queryFlow.value.copy(language = savedLang)
+                queryFlow.value = queryFlow.value.copy(language = restored)
                 refreshLists()
             }
             loadSuggestionsForCurrentLanguage()
@@ -310,7 +307,7 @@ class SearchViewModel(
         val target = when {
             currentLanguage in installed && (preferred == null || preferred == currentLanguage) -> currentLanguage
             currentLanguage in installed && preferred != null -> preferred
-            else -> preferred ?: installed.firstOrNull()
+            else -> SettingsRepository.pickLanguage(installed, savedSearchLanguage, lastPickedLanguage)
         }
         val languageChanged = currentLanguage != target
         // Do not call setSelectedLanguage — that would overwrite the saved preference.
@@ -337,12 +334,11 @@ class SearchViewModel(
         val langChanged = state.selectedLanguage != language
         state = state.copy(selectedLanguage = language)
         savedSearchLanguage = language
+        val learning = language?.takeIf { it in state.availableLanguages }
+        if (learning != null) lastPickedLanguage = learning
         viewModelScope.launch {
-            if (language != null) {
-                settingsRepository.insert(Setting(Setting.Name.SEARCH_LANGUAGE, JsonPrimitive(language.code)))
-            } else {
-                settingsRepository.deleteById(Setting.Name.SEARCH_LANGUAGE)
-            }
+            settingsRepository.setSearchLanguage(language)
+            if (learning != null) settingsRepository.setLastPickedLanguage(learning)
             Analytics.logEvent(
                 AnalyticsEvent.SETTING_CHANGED,
                 mapOf("setting" to "search_language", "value" to (language?.code ?: "any")),

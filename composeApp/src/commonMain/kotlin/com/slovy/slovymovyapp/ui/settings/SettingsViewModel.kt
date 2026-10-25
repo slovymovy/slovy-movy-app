@@ -54,7 +54,7 @@ data class SettingsUiState(
     val addableLanguages: List<AvailableLanguageInfo> = emptyList(),
     val translationLanguages: Set<Language> = emptySet(),
     val isTranslationLanguagesExpanded: Boolean = false,
-    val activeDictionaryLanguage: Language? = null,
+    val lastPickedLanguage: Language? = null,
 
     // Voice section
     val languages: Map<Text2SpeechLanguage, LanguageUiState> = emptyMap(),
@@ -310,7 +310,7 @@ class SettingsViewModel(
                     learningLanguages = mergedStates.sortedBy { it.language.selfName },
                     addableLanguages = addable.sortedBy { it.language.selfName },
                     translationLanguages = translationPrefs,
-                    activeDictionaryLanguage = activeDict,
+                    lastPickedLanguage = activeDict,
                     isLoadingAvailable = false,
                     isLoading = false,
                     settingsLoaded = true,

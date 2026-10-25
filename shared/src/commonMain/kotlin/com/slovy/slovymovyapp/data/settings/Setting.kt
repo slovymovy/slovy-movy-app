@@ -14,6 +14,15 @@ data class Setting(
         WELCOME_MESSAGE,
         WELCOME_COMPLETED,
         LANGUAGE,
+
+        /**
+         * The last picked learning language: set during onboarding, then whenever a language
+         * with an installed dictionary is picked in Search, Favorites, or Stats, and moved to
+         * another language when its dictionary is deleted. Shared text opens in it. It decides
+         * the startup download check and the `learning_lang` analytics property, and is the
+         * fallback where a screen has no saved language. Stored by name, so renaming the
+         * constant needs an app DB migration.
+         */
         DICTIONARY,
         DATA_VERSION,
         ENABLED_VOICES,

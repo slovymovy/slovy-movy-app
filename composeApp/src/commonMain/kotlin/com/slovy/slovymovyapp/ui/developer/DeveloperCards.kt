@@ -311,6 +311,7 @@ internal fun IntakeCard(
 internal fun DeveloperCachesCard(
     isBusy: Boolean,
     onClearListsCache: () -> Unit,
+    onClearClipboard: () -> Unit,
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -337,6 +338,13 @@ internal fun DeveloperCachesCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(Res.string.developer_clear_lists_cache))
+            }
+            FilledTonalButton(
+                onClick = onClearClipboard,
+                enabled = !isBusy,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(Res.string.developer_clear_clipboard))
             }
         }
     }

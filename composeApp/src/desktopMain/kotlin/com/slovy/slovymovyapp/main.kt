@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp
 
+import androidx.compose.runtime.remember
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.slovy.slovymovyapp.data.remote.DataDbManager
@@ -7,6 +8,7 @@ import com.slovy.slovymovyapp.data.remote.PlatformDbSupport
 import com.slovy.slovymovyapp.data.remote.provider.GoogleStorageBucketDataProvider
 import com.slovy.slovymovyapp.data.settings.SettingsRepository
 import com.slovy.slovymovyapp.generated.AppVersion
+import com.slovy.slovymovyapp.share.SharedTextReceiver
 
 fun main() = application {
     val buildConfig = AppBuildConfig(
@@ -25,6 +27,6 @@ fun main() = application {
         val db = DataDbManager.openAppDatabase(platform)
         val settingRepo = SettingsRepository(db)
         val dataDbManager = DataDbManager(platform, settingRepo, GoogleStorageBucketDataProvider())
-        App(settingRepo, dataDbManager, platform, buildConfig)
+        App(settingRepo, dataDbManager, platform, buildConfig, sharedTextReceiver = remember { SharedTextReceiver() })
     }
 }

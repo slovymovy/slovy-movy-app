@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui.developer
 
+import androidx.compose.ui.platform.Clipboard
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
@@ -214,6 +215,14 @@ class DeveloperViewModel(
         runAction(actionName = "Clear lists cache") {
             val removed = listsService.clearCache()
             "Cleared word lists cache ($removed lists); next sync refetches from the server"
+        }
+    }
+
+    /** Empties the system clipboard, to try the reader's empty-clipboard paths. */
+    fun clearClipboard(clipboard: Clipboard) {
+        runAction(actionName = "Clear clipboard") {
+            clipboard.setClipEntry(null)
+            "Cleared the clipboard"
         }
     }
 

@@ -311,6 +311,7 @@
     <string name="developer_caches_title">缓存</string>
     <string name="developer_caches_description">清除本地缓存的服务器数据，下次同步时会重新获取。</string>
     <string name="developer_clear_lists_cache">清除词单缓存</string>
+    <string name="developer_clear_clipboard">清空剪贴板</string>
     <string name="developer_danger_title">危险操作</string>
     <string name="developer_danger_description">删除学习卡片记录以便调试。这些操作无法撤销。</string>
     <string name="developer_remove_suspended_cards">删除已暂停的</string>
