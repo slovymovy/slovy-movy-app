@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Подсказка: открыть следующую букву</string>
     <string name="study_typed_you_typed">Вы ввели</string>
     <string name="study_typed_correct_spelling">Правильное написание</string>
+    <string name="study_typed_synonym">Вы ввели синоним</string>
+    <string name="study_typed_expected">Ожидалось</string>
     <string name="study_prompt_recall_word">Вспомните слово</string>
     <string name="study_prompt_translate_to">Переведите на %1$s</string>
     <string name="study_chip_recall">Вспомни %1$s</string>

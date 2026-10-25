@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">提示：揭示下一个字母</string>
     <string name="study_typed_you_typed">你输入的</string>
     <string name="study_typed_correct_spelling">正确拼写</string>
+    <string name="study_typed_synonym">你输入了同义词</string>
+    <string name="study_typed_expected">本卡单词</string>
     <string name="study_prompt_recall_word">回忆这个词</string>
     <string name="study_chip_recall">回忆 %1$s</string>
     <string name="study_prompt_translate_to">翻译成 %1$s</string>

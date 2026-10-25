@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Indice : révéler la lettre suivante</string>
     <string name="study_typed_you_typed">Tu as écrit</string>
     <string name="study_typed_correct_spelling">Orthographe correcte</string>
+    <string name="study_typed_synonym">Tu as écrit un synonyme</string>
+    <string name="study_typed_expected">Attendu</string>
     <string name="study_prompt_recall_word">Retrouve le mot</string>
     <string name="study_chip_recall">Rappel %1$s</string>
     <string name="study_prompt_translate_to">Traduis en %1$s</string>

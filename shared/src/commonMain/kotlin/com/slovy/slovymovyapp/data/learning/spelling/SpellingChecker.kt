@@ -15,12 +15,16 @@ data class SpellingHint(
 /**
  * Where an attempt and the expected word disagree. [missed] and [accentOnly] index the expected
  * word: letters the attempt lacks or got wrong, and letters it got right except for the accent.
- * [extra] indexes the trimmed attempt: letters the expected word has no place for.
+ * [extra] indexes the trimmed attempt: letters the expected word has no place for. [related] says
+ * whether the attempt is a version of the expected word at all: at least three letters in common,
+ * covering at least half of the shorter word. A correct prefix or a correct word with a tail is
+ * related; a different word, or one or two stray letters, is not.
  */
 data class SpellingDiff(
     val missed: Set<Int>,
     val accentOnly: Set<Int>,
     val extra: Set<Int>,
+    val related: Boolean,
 )
 
 /**
@@ -130,14 +134,23 @@ object SpellingChecker {
         val typed = attempt.trim().map(::fold)
         val target = expected.map(::fold)
         val matched = align(typed, target)
+        val shared = matched.pairs.size
+        val shorter = minOf(typed.size, target.size)
         return SpellingDiff(
             missed = target.indices.filterTo(linkedSetOf()) { it !in matched.target },
             accentOnly = matched.pairs
                 .filter { (i, j) -> typed[i] != target[j] }
                 .mapTo(linkedSetOf()) { (_, j) -> j },
             extra = typed.indices.filterTo(linkedSetOf()) { it !in matched.source },
+            related = shared >= RELATED_MIN_SHARED_LETTERS && shared >= shorter * RELATED_MIN_SHARE,
         )
     }
+
+    /** Fewer letters in common than this say nothing about the word, whatever the ratio. */
+    private const val RELATED_MIN_SHARED_LETTERS = 3
+
+    /** Share of the shorter word's letters that must be in common for the two to be related. */
+    private const val RELATED_MIN_SHARE = 0.5
 
     /** The letter without its accent when that is a single character; ligatures stay as they are. */
     private fun baseLetter(c: Char): Char =

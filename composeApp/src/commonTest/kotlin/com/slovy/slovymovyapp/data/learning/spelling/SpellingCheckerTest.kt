@@ -180,6 +180,17 @@ class SpellingCheckerTest {
     }
 
     @Test
+    fun diff_relatedNeedsThreeSharedLettersCoveringHalfTheShorterWord() {
+        assertTrue(SpellingChecker.diff("gezelig", lemma).related, "A dropped letter is still the word")
+        assertTrue(SpellingChecker.diff("gez", lemma).related, "A correct three-letter prefix is a start of the word")
+        assertTrue(SpellingChecker.diff("fieeeets", "fiets").related, "Surplus letters around the whole word")
+        assertTrue(SpellingChecker.diff("auto", "automobile").related, "A shorter form of the word")
+        assertFalse(SpellingChecker.diff("auto", "fiets").related, "One coincidental letter of four")
+        assertFalse(SpellingChecker.diff("ei", lemma).related, "Two letters that happen to occur in the word say nothing")
+        assertFalse(SpellingChecker.diff("quok", lemma).related, "Nothing in common")
+    }
+
+    @Test
     fun diff_unrelatedAttemptMarksEverything() {
         val diff = SpellingChecker.diff("quok", lemma)
         assertEquals((0 until lemma.length).toSet(), diff.missed, "Nothing matched, so every lemma letter is marked")

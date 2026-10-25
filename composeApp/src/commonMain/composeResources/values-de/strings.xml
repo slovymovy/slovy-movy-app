@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Hinweis: nächsten Buchstaben aufdecken</string>
     <string name="study_typed_you_typed">Deine Eingabe</string>
     <string name="study_typed_correct_spelling">Richtige Schreibweise</string>
+    <string name="study_typed_synonym">Du hast ein Synonym getippt</string>
+    <string name="study_typed_expected">Erwartet</string>
     <string name="study_prompt_recall_word">Erinnere dich an das Wort</string>
     <string name="study_chip_recall">%1$s abrufen</string>
     <string name="study_prompt_translate_to">Übersetze auf %1$s</string>

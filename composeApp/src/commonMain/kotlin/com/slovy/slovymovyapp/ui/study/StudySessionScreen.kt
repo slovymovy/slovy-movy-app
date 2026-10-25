@@ -66,6 +66,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -134,6 +135,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -141,6 +143,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.slovy.slovymovyapp.data.learning.spelling.SpellingChecker
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
@@ -192,6 +195,8 @@ import slovymovyapp.composeapp.generated.resources.study_chip_listen
 import slovymovyapp.composeapp.generated.resources.study_chip_type
 import slovymovyapp.composeapp.generated.resources.study_typed_check
 import slovymovyapp.composeapp.generated.resources.study_typed_correct_spelling
+import slovymovyapp.composeapp.generated.resources.study_typed_expected
+import slovymovyapp.composeapp.generated.resources.study_typed_synonym
 import slovymovyapp.composeapp.generated.resources.study_typed_hint_description
 import slovymovyapp.composeapp.generated.resources.study_typed_hint_more
 import slovymovyapp.composeapp.generated.resources.study_typed_placeholder
@@ -238,6 +243,7 @@ private val TypedLengthSlotGap = 6.dp
 private val TypedMissUnderlineHeight = 3.dp
 private const val TypedPromptMaxLines = 3
 private val TypedFieldMinFontSize = 14.sp
+private val TypedResultLineMinFontSize = 16.sp
 private val TypedLengthSlotMinWidth = 3.dp
 private val TypedCheckMinSize = 18.dp
 private val TypedCheckMaxSize = 30.dp
@@ -1426,7 +1432,7 @@ private fun ProductionFront(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        StudyEyebrow(text = card.promptLabel.resolve(), textAlign = TextAlign.Center)
+        StudyEyebrow(text = card.promptLabel.resolve(), textAlign = TextAlign.Center, compact = false)
         Spacer(Modifier.height(AppSpacing.md))
         StudyTaggedText(
             text = card.promptText,
@@ -1462,7 +1468,7 @@ private fun ClozeFront(
         Column(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
         ) {
-            StudyEyebrow(text = stringResource(Res.string.guess_by_context), textAlign = TextAlign.Start)
+            StudyEyebrow(text = stringResource(Res.string.guess_by_context), textAlign = TextAlign.Start, compact = false)
             StudyClozeText(
                 cloze = card.prompt,
                 style = MaterialTheme.typography.headlineSmall.copy(
@@ -1892,10 +1898,24 @@ private fun TypedCorrectCheck(
 private fun StudyEyebrow(
     text: String,
     textAlign: TextAlign,
+    // A tight line box for a caption right above a display line: inheriting the body line height
+    // would leave most of a 24sp band empty under an 11sp caption, which reads as a gap.
+    compact: Boolean,
 ) {
+    val base = LocalTextStyle.current.copy(fontSize = 11.sp)
     Text(
         text = text.uppercase(),
-        fontSize = 11.sp,
+        style = if (compact) {
+            base.copy(
+                lineHeight = 13.sp,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+            )
+        } else {
+            base
+        },
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.4.sp,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1903,9 +1923,66 @@ private fun StudyEyebrow(
     )
 }
 
+/**
+ * The display line under a caption, with its line box trimmed to the glyphs: at this size the
+ * default line height leaves a visible band of empty space between the caption and the word. The
+ * line height is relative so it follows whatever size auto-sizing settles on for a long word.
+ */
 @Composable
 private fun typedResultLineStyle(): TextStyle =
-    MaterialTheme.typography.displaySmall.copy(fontFamily = MaterialTheme.serifFontFamily)
+    MaterialTheme.typography.displaySmall.copy(
+        fontFamily = MaterialTheme.serifFontFamily,
+        lineHeight = 1.15.em,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.Both,
+        ),
+    )
+
+/**
+ * One captioned line of a typed result: the caption, the word, and what sits after the word.
+ * [trailing] receives the height the word actually rendered at, so a mark beside it can scale.
+ */
+@Composable
+private fun TypedResultLine(
+    caption: String,
+    text: AnnotatedString,
+    style: TextStyle,
+    trailing: @Composable (lineHeight: Dp) -> Unit,
+) {
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val textMeasurer = rememberTextMeasurer()
+    Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
+        StudyEyebrow(text = caption, textAlign = TextAlign.Start, compact = true)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Measured and shrunk by hand: TextAutoSize does not shrink on iOS, and a long word
+            // must not push the check or the speaker off the row.
+            BoxWithConstraints(modifier = Modifier.weight(1f, fill = false)) {
+                val availablePx = with(LocalDensity.current) { maxWidth.toPx() }
+                val fitted = remember(text, style, availablePx) {
+                    val naturalPx = textMeasurer.measure(text, style).size.width.toFloat()
+                    if (naturalPx <= availablePx) {
+                        style
+                    } else {
+                        val scaled = style.fontSize * (availablePx / naturalPx)
+                        style.copy(fontSize = if (scaled < TypedResultLineMinFontSize) TypedResultLineMinFontSize else scaled)
+                    }
+                }
+                Text(
+                    text = text,
+                    style = fitted,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    onTextLayout = { layout = it },
+                )
+            }
+            trailing(with(LocalDensity.current) { (layout?.size?.height ?: 0).toDp() })
+        }
+    }
+}
 
 /**
  * "You typed" over the attempt exactly as entered, then "Correct spelling" over the lemma with the
@@ -1919,61 +1996,76 @@ private fun TypedComparisonBlock(
     speaker: @Composable () -> Unit,
 ) {
     val style = typedResultLineStyle()
-    val autoSize = TextAutoSize.StepBased(minFontSize = 16.sp, maxFontSize = style.fontSize, stepSize = 1.sp)
-    Column(verticalArrangement = Arrangement.spacedBy(TypedComparisonGap)) {
-        val missColor = MaterialTheme.colorScheme.primary
-        val accentColor = MaterialTheme.colorScheme.tertiary
-        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
-            StudyEyebrow(text = stringResource(Res.string.study_typed_you_typed), textAlign = TextAlign.Start)
-            // Letters the lemma has no place for are struck through here: there is nothing on the
-            // lemma line to point at for them.
-            Text(
-                text = buildAnnotatedString {
-                    append(result.attempt)
-                    result.extraPositions.filter { it < result.attempt.length }.forEach { index ->
-                        addStyle(
-                            SpanStyle(color = missColor, textDecoration = TextDecoration.LineThrough),
-                            index,
-                            index + 1,
-                        )
-                    }
-                },
-                style = style,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                autoSize = autoSize,
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
-            StudyEyebrow(text = stringResource(Res.string.study_typed_correct_spelling), textAlign = TextAlign.Start)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        append(markedWord(word = lemma, positions = result.missedPositions, color = missColor, underline = true))
-                        // Right letter, wrong accent: a second colour so it reads as a near miss.
-                        result.accentOnlyPositions.filter { it < lemma.length }.forEach { index ->
-                            addStyle(
-                                SpanStyle(color = accentColor, textDecoration = TextDecoration.Underline),
-                                index,
-                                index + 1,
-                            )
-                        }
-                    },
-                    style = style,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    autoSize = autoSize,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-                speaker()
+    val missColor = MaterialTheme.colorScheme.primary
+    val accentColor = MaterialTheme.colorScheme.tertiary
+    // Letters the lemma has no place for are struck through here: there is nothing on the lemma
+    // line to point at for them. A different word altogether is struck through whole.
+    val struck = SpanStyle(color = missColor, textDecoration = TextDecoration.LineThrough)
+    TypedResultLine(
+        caption = stringResource(Res.string.study_typed_you_typed),
+        text = buildAnnotatedString {
+            append(result.attempt)
+            if (result.related) {
+                result.extraPositions.filter { it < result.attempt.length }.forEach { index ->
+                    addStyle(struck, index, index + 1)
+                }
+            } else {
+                addStyle(struck, 0, result.attempt.length)
             }
-        }
-    }
-    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+        },
+        style = style,
+        trailing = {},
+    )
+    TypedResultLine(
+        caption = stringResource(Res.string.study_typed_correct_spelling),
+        text = if (result.related) {
+            buildAnnotatedString {
+                append(markedWord(word = lemma, positions = result.missedPositions, color = missColor, underline = true))
+                // Right letter, wrong accent: a second colour so it reads as a near miss.
+                result.accentOnlyPositions.filter { it < lemma.length }.forEach { index ->
+                    addStyle(
+                        SpanStyle(color = accentColor, textDecoration = TextDecoration.Underline),
+                        index,
+                        index + 1,
+                    )
+                }
+            }
+        } else {
+            AnnotatedString(lemma)
+        },
+        style = style,
+        trailing = { speaker() },
+    )
 }
+
+/**
+ * "You typed a synonym" over the attempt with a check, then "Expected" over the lemma: a valid
+ * word, but not the one this card teaches. The lemma keeps the larger size and the speaker.
+ */
+@Composable
+private fun TypedSynonymBlock(
+    result: StudyTypedResultUiState.Synonym,
+    lemma: String,
+    speaker: @Composable () -> Unit,
+) {
+    val lemmaStyle = typedResultLineStyle()
+    TypedResultLine(
+        caption = stringResource(Res.string.study_typed_synonym),
+        text = AnnotatedString(result.attempt),
+        style = lemmaStyle.copy(fontSize = MaterialTheme.typography.headlineMedium.fontSize),
+        trailing = { lineHeight -> TypedCorrectCheck(checkSize = typedCheckSize(lineHeight)) },
+    )
+    TypedResultLine(
+        caption = stringResource(Res.string.study_typed_expected),
+        text = AnnotatedString(lemma),
+        style = lemmaStyle,
+        trailing = { speaker() },
+    )
+}
+
+/** The check beside a word, scaled to the line the word rendered at, within sensible bounds. */
+private fun typedCheckSize(lineHeight: Dp): Dp =
+    (lineHeight * 0.72f).coerceIn(TypedCheckMinSize, TypedCheckMaxSize)
 
 /** [word] with the characters at [positions] in [color], underlined when asked. */
 private fun markedWord(
@@ -2165,12 +2257,28 @@ private fun StudyCardBackContent(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
     ) {
-        if (typedResult is StudyTypedResultUiState.Incorrect) {
-            TypedComparisonBlock(
-                result = typedResult,
-                lemma = back.headline,
-                speaker = speaker,
+        // A comparison block carries the lemma itself, so when there is one the standard headline
+        // is left out.
+        val comparison: (@Composable () -> Unit)? = when (typedResult) {
+            is StudyTypedResultUiState.Incorrect -> {
+                { TypedComparisonBlock(result = typedResult, lemma = back.headline, speaker = speaker) }
+            }
+
+            is StudyTypedResultUiState.Synonym -> {
+                { TypedSynonymBlock(result = typedResult, lemma = back.headline, speaker = speaker) }
+            }
+
+            is StudyTypedResultUiState.Correct,
+            StudyTypedResultUiState.Shown,
+            null,
+                -> null
+        }
+        if (comparison != null) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(TypedComparisonGap),
+                content = { comparison() },
             )
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
         }
         back.cloze?.let { cloze ->
             Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.xsPlus)) {
@@ -2193,9 +2301,7 @@ private fun StudyCardBackContent(
         }
 
         val headlineIsLemma = back.isLemmaHeadline
-        // The comparison block above already carries the lemma, so this headline would repeat it.
-        val showHeadline = typedResult !is StudyTypedResultUiState.Incorrect
-        if (showHeadline) Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (comparison == null) Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             // A correct typed answer is a one-line lemma with a check and the speaker beside it;
             // those sit on the text's centre line, which may have shrunk to make room for them.
             var headlineLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -2245,9 +2351,7 @@ private fun StudyCardBackContent(
                     val lineHeight = with(LocalDensity.current) {
                         (headlineLayout?.size?.height ?: 0).toDp()
                     }
-                    TypedCorrectCheck(
-                        checkSize = (lineHeight * 0.72f).coerceIn(TypedCheckMinSize, TypedCheckMaxSize),
-                    )
+                    TypedCorrectCheck(checkSize = typedCheckSize(lineHeight))
                 } else {
                     StudyTaggedText(
                         text = back.headline,
@@ -3570,10 +3674,54 @@ private fun StudySessionTypedBackTypoPreview(
                 typedCard().copy(
                     result = StudyTypedResultUiState.Incorrect(
                         attempt = "gezeelig",
+                        related = true,
                         missedPositions = setOf(5),
                         extraPositions = setOf(4),
                     ),
                 ),
+                StudyCardSide.BACK,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedBackUnrelatedPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(
+                    result = StudyTypedResultUiState.Incorrect(
+                        attempt = "fiets",
+                        related = false,
+                        missedPositions = setOf(0, 1, 2, 3, 4, 5, 6, 7),
+                        extraPositions = setOf(0, 1, 2, 3, 4),
+                    ),
+                ),
+                StudyCardSide.BACK,
+                current = 6,
+            ),
+            onCancel = {},
+            onEnd = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun StudySessionTypedBackSynonymPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
+) {
+    ThemedPreview(darkTheme = isDark) {
+        StudySessionScreenContent(
+            state = activeState(
+                typedCard().copy(result = StudyTypedResultUiState.Synonym(attempt = "knus")),
                 StudyCardSide.BACK,
                 current = 6,
             ),

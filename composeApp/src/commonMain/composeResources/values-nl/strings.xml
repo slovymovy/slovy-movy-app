@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Hint: volgende letter onthullen</string>
     <string name="study_typed_you_typed">Je typte</string>
     <string name="study_typed_correct_spelling">Juiste spelling</string>
+    <string name="study_typed_synonym">Je typte een synoniem</string>
+    <string name="study_typed_expected">Verwacht</string>
     <string name="study_prompt_recall_word">Bedenk het woord</string>
     <string name="study_prompt_translate_to">Vertaal naar %1$s</string>
     <string name="study_chip_recall">Herinner %1$s</string>

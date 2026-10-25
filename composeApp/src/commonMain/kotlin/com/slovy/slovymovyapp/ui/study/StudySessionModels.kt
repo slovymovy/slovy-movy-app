@@ -214,9 +214,18 @@ sealed interface StudyCardUiState {
             if (SpellingChecker.isCorrect(attempt, lemma)) {
                 return StudyTypedResultUiState.Correct(hintedPositions = input.hintedPositions)
             }
+            val trimmed = attempt.trim()
+            // A word from the sense's own synonym list is a valid answer, just not this card's.
+            // Hints reveal the lemma's letters, so a synonym mostly assembled from them was not
+            // recalled; a hint that merely coincides with the synonym's first letter still is.
+            val synonym = back.synonyms.firstOrNull { SpellingChecker.isCorrect(attempt, it.word) }
+            if (synonym != null && input.hintedPositions.size * 2 < synonym.word.length) {
+                return StudyTypedResultUiState.Synonym(attempt = trimmed)
+            }
             val diff = SpellingChecker.diff(attempt, lemma)
             return StudyTypedResultUiState.Incorrect(
-                attempt = attempt.trim(),
+                attempt = trimmed,
+                related = diff.related,
                 missedPositions = diff.missed,
                 accentOnlyPositions = diff.accentOnly,
                 extraPositions = diff.extra,
@@ -239,14 +248,20 @@ sealed interface StudyTypedResultUiState {
     /**
      * [attempt] is the field trimmed, otherwise as typed. [missedPositions] and
      * [accentOnlyPositions] index the lemma: letters to underline as wrong, and letters right but
-     * for the accent. [extraPositions] index [attempt]: letters the lemma has no place for.
+     * for the accent. [extraPositions] index [attempt]: letters the lemma has no place for. When
+     * [related] is false the attempt is a different word altogether and the back strikes it
+     * through whole instead of pointing at coincidental letters; the positions stay truthful.
      */
     data class Incorrect(
         val attempt: String,
+        val related: Boolean,
         val missedPositions: Set<Int>,
         val accentOnlyPositions: Set<Int> = emptySet(),
         val extraPositions: Set<Int> = emptySet(),
     ) : StudyTypedResultUiState
+
+    /** [attempt] matched one of the sense's synonyms: a valid word, shown beside the expected lemma. */
+    data class Synonym(val attempt: String) : StudyTypedResultUiState
 
     /** The learner gave up; the back shows the lemma alone. */
     data object Shown : StudyTypedResultUiState

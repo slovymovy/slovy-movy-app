@@ -730,7 +730,7 @@ class StudySessionViewModel(
     /** Compares the field with the word and turns the card over with the comparison on its back. */
     fun checkTypedAnswer() {
         val card = typedCardAwaitingAnswer() ?: return
-        if (card.checked() == null) return
+        if (!card.canCheck) return
         startTurnOver { front -> (front.card as? StudyCardUiState.Typed)?.checked() ?: front.card }
     }
 

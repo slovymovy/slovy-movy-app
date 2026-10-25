@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Hint: reveal next letter</string>
     <string name="study_typed_you_typed">You typed</string>
     <string name="study_typed_correct_spelling">Correct spelling</string>
+    <string name="study_typed_synonym">You typed a synonym</string>
+    <string name="study_typed_expected">Expected</string>
     <string name="study_prompt_recall_word">Recall the word</string>
     <string name="study_chip_recall">Recall %1$s</string>
     <string name="study_prompt_translate_to">Translate to %1$s</string>

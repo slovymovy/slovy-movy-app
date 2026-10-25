@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Suggerimento: rivela la lettera successiva</string>
     <string name="study_typed_you_typed">Hai scritto</string>
     <string name="study_typed_correct_spelling">Ortografia corretta</string>
+    <string name="study_typed_synonym">Hai scritto un sinonimo</string>
+    <string name="study_typed_expected">Parola attesa</string>
     <string name="study_prompt_recall_word">Ricorda la parola</string>
     <string name="study_chip_recall">Ricorda %1$s</string>
     <string name="study_prompt_translate_to">Traduci in %1$s</string>

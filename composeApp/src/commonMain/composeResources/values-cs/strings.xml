@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Nápověda: odkrýt další písmeno</string>
     <string name="study_typed_you_typed">Tvoje odpověď</string>
     <string name="study_typed_correct_spelling">Správný pravopis</string>
+    <string name="study_typed_synonym">Tvoje slovo je synonymum</string>
+    <string name="study_typed_expected">Očekávané slovo</string>
     <string name="study_prompt_recall_word">Vybav si slovo</string>
     <string name="study_chip_recall">Vybav si %1$s</string>
     <string name="study_prompt_translate_to">Přelož do %1$s</string>

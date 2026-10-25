@@ -19,7 +19,11 @@ class StudyTypedCardTest {
         partOfSpeech = null,
         lemma = "gezellig",
         languageCode = "nl",
-        back = StudyCardBackUiState(headline = "gezellig", isLemmaHeadline = true),
+        back = StudyCardBackUiState(
+            headline = "gezellig",
+            isLemmaHeadline = true,
+            synonyms = listOf(StudySynonymUiState("knus", known = true), StudySynonymUiState("prettig")),
+        ),
     )
 
     private fun typed(text: String) = TextFieldValue(text, TextRange(text.length))
@@ -125,6 +129,82 @@ class StudyTypedCardTest {
     fun answerShown_withOnlyHintLetters_showsTheWordAlone() {
         val result = card().withNextLetterHint()!!.answerShown().result
         assertEquals(StudyTypedResultUiState.Shown, result, "Hint letters are not the learner's attempt, as for Check")
+    }
+
+    @Test
+    fun checked_unrelatedWord_isFlaggedUnrelatedWithTruthfulPositions() {
+        val card = card().copy(lemma = "fiets").withInput(typed("auto")).checked()!!
+        val result = assertIs<StudyTypedResultUiState.Incorrect>(card.result)
+        assertEquals("auto", result.attempt, "The attempt is still shown")
+        assertFalse(result.related, "One coincidental letter does not make the words related")
+        assertEquals(setOf(0, 1, 2, 4), result.missedPositions, "The positions still describe the real alignment")
+    }
+
+    @Test
+    fun checked_correctPrefix_isRelated() {
+        val result = assertIs<StudyTypedResultUiState.Incorrect>(card().withInput(typed("gez")).checked()!!.result)
+        assertTrue(result.related, "Three correct letters of a word are a start, not a different word")
+        assertEquals((3..7).toSet(), result.missedPositions, "The rest of the lemma is what was missed")
+        assertEquals(emptySet(), result.extraPositions, "Nothing typed was wrong")
+    }
+
+    @Test
+    fun checked_twoLettersInCommon_isNotRelated() {
+        val result = assertIs<StudyTypedResultUiState.Incorrect>(
+            card().withNextLetterHint()!!.withInput(typed("gaz")).checked()!!.result,
+        )
+        assertFalse(result.related, "Two letters in common are too few to call it a version of the word")
+    }
+
+    @Test
+    fun checked_synonymSharingItsFirstLetterWithAHint_isStillASynonym() {
+        val card = card().copy(
+            back = StudyCardBackUiState(headline = "gezellig", isLemmaHeadline = true, synonyms = listOf(StudySynonymUiState("gemoedelijk"))),
+        )
+        val result = card.withNextLetterHint()!!.withInput(typed("gemoedelijk")).checked()!!.result
+        assertIs<StudyTypedResultUiState.Synonym>(result, "One hinted g out of eleven letters does not make the synonym a hint product")
+    }
+
+    @Test
+    fun checked_synonym_isRecognised() {
+        val card = card().withInput(typed(" Knus")).checked()!!
+        val result = assertIs<StudyTypedResultUiState.Synonym>(card.result)
+        assertEquals("Knus", result.attempt, "The synonym is shown as typed, trimmed")
+    }
+
+    @Test
+    fun checked_nearMissOfASynonym_isComparedWithTheLemma() {
+        val card = card().withInput(typed("knuss")).checked()!!
+        assertIs<StudyTypedResultUiState.Incorrect>(card.result, "Only an exact synonym counts; otherwise the lemma is the reference")
+    }
+
+    @Test
+    fun answerShown_withASynonymTyped_recognisesIt() {
+        assertIs<StudyTypedResultUiState.Synonym>(
+            card().withInput(typed("prettig")).answerShown().result,
+            "Giving up with a synonym in the field still recognises it",
+        )
+    }
+
+    @Test
+    fun checked_synonymAssembledFromHints_isNotASynonym() {
+        // Lemma "automobile", synonym "auto": three hinted letters and one typed one spell the synonym.
+        val card = card().copy(
+            lemma = "automobile",
+            back = StudyCardBackUiState(headline = "automobile", isLemmaHeadline = true, synonyms = listOf(StudySynonymUiState("auto"))),
+        )
+        val hinted = (1..3).fold(card) { c, _ -> c.withNextLetterHint()!! }.withInput(typed("auto"))
+        val result = assertIs<StudyTypedResultUiState.Incorrect>(hinted.checked()!!.result, "Hint letters are the lemma's, not a recalled synonym")
+        assertTrue(result.related, "auto is the start of automobile")
+        assertEquals(emptySet(), result.extraPositions, "The hinted letters are not struck through")
+    }
+
+    @Test
+    fun checked_nearMiss_isRelatedAndKeepsItsMarks() {
+        val card = card().withInput(typed("gezelig")).checked()!!
+        val result = assertIs<StudyTypedResultUiState.Incorrect>(card.result)
+        assertTrue(result.related, "A dropped letter is a near miss")
+        assertEquals(setOf(5), result.missedPositions, "A near miss still points at the dropped letter")
     }
 
     @Test

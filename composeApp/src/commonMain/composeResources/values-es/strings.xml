@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">Pista: revelar la siguiente letra</string>
     <string name="study_typed_you_typed">Escribiste</string>
     <string name="study_typed_correct_spelling">Ortografía correcta</string>
+    <string name="study_typed_synonym">Escribiste un sinónimo</string>
+    <string name="study_typed_expected">Se esperaba</string>
     <string name="study_prompt_recall_word">Recuerda la palabra</string>
     <string name="study_chip_recall">Recordar %1$s</string>
     <string name="study_prompt_translate_to">Traduce a %1$s</string>

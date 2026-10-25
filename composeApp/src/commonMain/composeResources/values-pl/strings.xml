@@ -712,6 +712,8 @@
     <string name="study_typed_hint_description">Podpowiedź: odkryj następną literę</string>
     <string name="study_typed_you_typed">Twoja odpowiedź</string>
     <string name="study_typed_correct_spelling">Poprawna pisownia</string>
+    <string name="study_typed_synonym">Twoje słowo to synonim</string>
+    <string name="study_typed_expected">Oczekiwane</string>
     <string name="study_prompt_recall_word">Przypomnij sobie słowo</string>
     <string name="study_prompt_translate_to">Przetłumacz na %1$s</string>
     <string name="study_chip_recall">Przypomnij %1$s</string>

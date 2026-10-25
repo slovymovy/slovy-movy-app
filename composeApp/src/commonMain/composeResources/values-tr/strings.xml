@@ -713,6 +713,8 @@
     <string name="study_typed_hint_description">İpucu: sonraki harfi göster</string>
     <string name="study_typed_you_typed">Yazdığın</string>
     <string name="study_typed_correct_spelling">Doğru yazım</string>
+    <string name="study_typed_synonym">Bir eş anlamlı yazdın</string>
+    <string name="study_typed_expected">Beklenen</string>
     <string name="study_prompt_recall_word">Kelimeyi hatırla</string>
     <string name="study_chip_recall">Hatırla: %1$s</string>
     <string name="study_prompt_translate_to">%1$s diline çevir</string>
