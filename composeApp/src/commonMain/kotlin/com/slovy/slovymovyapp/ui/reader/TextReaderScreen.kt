@@ -20,7 +20,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -41,6 +42,7 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
 import com.slovy.slovymovyapp.data.remote.DictionaryRepository
 import com.slovy.slovymovyapp.data.remote.SenseFrequency
+import com.slovy.slovymovyapp.ui.ClipboardText
 import com.slovy.slovymovyapp.ui.ThemePreviewProvider
 import com.slovy.slovymovyapp.ui.ThemedPreview
 import com.slovy.slovymovyapp.ui.components.SpinningProgressIndicator
@@ -52,6 +54,7 @@ import com.slovy.slovymovyapp.ui.word.FavoriteAccentColor
 import com.slovy.slovymovyapp.ui.word.colorsForFrequency
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -86,8 +89,7 @@ data class TextReaderUiState(
     val isAnalyzing: Boolean = false,
     val isError: Boolean = false,
     val isTooLong: Boolean = false,
-    // Whether the clipboard holds text, refreshed on every resume. Only hasText() is asked, so
-    // checking it never reads the content (no iOS paste prompt); an unknown answer counts as true.
+    // Whether the clipboard holds text, refreshed on every resume without reading the content.
     val clipboardHasText: Boolean = true,
 ) {
     val hasResults: Boolean get() = tokens.isNotEmpty()
@@ -180,17 +182,16 @@ class TextReaderViewModel(
     }
 
     /**
-     * Records the clipboard check made on resume. Returns true when the clipboard went from
-     * empty to filled while the paste card is showing: that card says "copy a text in another
-     * app, then come back here", so the screen pastes right away instead of demanding a tap.
+     * Records the clipboard check made on resume. Returns true when the screen should paste
+     * now: the clipboard holds text and the paste card is showing, so the user came back to an
+     * empty reader, which the card asks them to do after copying a text in another app.
      */
     fun updateClipboardHasText(hasText: Boolean): Boolean {
-        val filled = !state.clipboardHasText && hasText
         state = state.copy(clipboardHasText = hasText)
-        return filled && !state.hasResults && !state.isAnalyzing
+        return hasText && !state.hasResults && !state.isAnalyzing
     }
 
-    /** A tap on the paste card: analyzes [text], or marks the clipboard empty when it was blank. */
+    /** Analyzes pasted [text], or marks the clipboard empty when nothing could be read. */
     fun pasteText(text: String) {
         if (text.isNotBlank()) analyzeText(text) else state = state.copy(clipboardHasText = false)
     }
@@ -212,49 +213,39 @@ fun TextReaderScreen(
     onBack: () -> Unit
 ) {
     // The clipboard's content is read by whoever opens the reader (see TextReaderViewModel's
-    // initialText), and afterwards only when the user taps to paste or comes back with a
-    // filled clipboard.
-    val clipboard = LocalClipboardManager.current
-    // For the empty→filled resume transition below. A blank auto read (denied prompt or empty
-    // clipboard) falls through to the manual tap-to-paste card, which stays enabled as the
-    // retry path.
-    val autoPasteNow = {
-        val text = runCatching { clipboard.getText()?.text }.getOrNull().orEmpty()
+    // initialText), and afterwards only when the user taps to paste or comes back to the
+    // paste card with text on the clipboard. A blank read (denied iOS prompt or empty
+    // clipboard) leaves the paste card up as the retry path.
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    val paste: suspend (auto: Boolean) -> Unit = { auto ->
+        val text = ClipboardText.read(clipboard).orEmpty()
         Analytics.logEvent(
             AnalyticsEvent.READER_PASTE_CLICK,
             mapOf(
                 "lang" to viewModel.language.code,
                 "has_text" to text.isNotBlank().toString(),
-                "auto" to "true",
+                "auto" to auto.toString(),
             ),
         )
-        if (text.isNotBlank()) viewModel.analyzeText(text)
+        viewModel.pasteText(text)
     }
+    val windowInfo = LocalWindowInfo.current
     LifecycleResumeEffect(Unit) {
         viewModel.refreshFavorites()
-        // Denied iOS prompts leave clipboardHasText true, so they never re-trigger the paste
-        // on app switches.
-        if (viewModel.updateClipboardHasText(runCatching { clipboard.hasText() }.getOrDefault(true))) {
-            autoPasteNow()
+        val check = scope.launch {
+            // Android 10+ hides the clipboard from an app until its window has focus, which
+            // comes after ON_RESUME; asking earlier reports an empty clipboard.
+            snapshotFlow { windowInfo.isWindowFocused }.first { it }
+            if (viewModel.updateClipboardHasText(ClipboardText.has(clipboard))) paste(true)
         }
-        onPauseOrDispose {}
+        onPauseOrDispose { check.cancel() }
     }
     TextReaderContent(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         language = viewModel.language,
-        onPaste = {
-            val text = clipboard.getText()?.text.orEmpty()
-            Analytics.logEvent(
-                AnalyticsEvent.READER_PASTE_CLICK,
-                mapOf(
-                    "lang" to viewModel.language.code,
-                    "has_text" to text.isNotBlank().toString(),
-                    "auto" to "false",
-                ),
-            )
-            viewModel.pasteText(text)
-        },
+        onPaste = { scope.launch { paste(false) } },
         onWordClick = { language, token ->
             token.lemma?.let { lemma ->
                 Analytics.logEvent(

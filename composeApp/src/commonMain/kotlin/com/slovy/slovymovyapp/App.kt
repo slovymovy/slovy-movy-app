@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -531,7 +531,8 @@ fun App(
                     }
                 }
                 screens.screen<AppDestination.Search>(interruptibleByShare = true) { backStackEntry ->
-                    val clipboard = LocalClipboardManager.current
+                    val clipboard = LocalClipboard.current
+                    val clipboardScope = rememberCoroutineScope()
 
                     val viewModel = viewModel(
                         viewModelStoreOwner = backStackEntry
@@ -583,21 +584,19 @@ fun App(
                         onNavigateToTextReader = { language ->
                             // Opening the reader is the paste intent, so the clipboard is read
                             // on this tap; on iOS its paste prompt doubles as the confirmation.
-                            val text = if (runCatching { clipboard.hasText() }.getOrDefault(true)) {
-                                runCatching { clipboard.getText()?.text }.getOrNull().orEmpty()
-                            } else {
-                                ""
+                            clipboardScope.launch {
+                                val text = ClipboardText.read(clipboard).orEmpty()
+                                logEvent(
+                                    AnalyticsEvent.READER_PASTE_CLICK,
+                                    mapOf(
+                                        "lang" to language.code,
+                                        "has_text" to text.isNotBlank().toString(),
+                                        "auto" to "true",
+                                    ),
+                                )
+                                pendingReaderText = text.takeIf { it.isNotBlank() }
+                                navController.navigate(AppDestination.TextReader(languageCode = language.code))
                             }
-                            logEvent(
-                                AnalyticsEvent.READER_PASTE_CLICK,
-                                mapOf(
-                                    "lang" to language.code,
-                                    "has_text" to text.isNotBlank().toString(),
-                                    "auto" to "true",
-                                ),
-                            )
-                            pendingReaderText = text.takeIf { it.isNotBlank() }
-                            navController.navigate(AppDestination.TextReader(languageCode = language.code))
                         },
                         hasFavoritesToReview = hasFavoritesToReview,
                         onListClick = { list ->

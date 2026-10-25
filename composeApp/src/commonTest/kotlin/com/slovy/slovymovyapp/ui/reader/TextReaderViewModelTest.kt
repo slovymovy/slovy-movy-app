@@ -37,14 +37,12 @@ class TextReaderViewModelTest : BaseTest() {
     }
 
     @Test
-    fun only_an_empty_to_filled_clipboard_asks_for_a_paste() {
+    fun returning_to_the_paste_card_with_text_asks_for_a_paste() {
         val vm = viewModel()
-        assertFalse(vm.updateClipboardHasText(true), "a clipboard that already had text must not trigger a paste")
-
-        assertFalse(vm.updateClipboardHasText(false), "an emptied clipboard must not trigger a paste")
+        assertFalse(vm.updateClipboardHasText(false), "an empty clipboard must not trigger a paste")
         assertFalse(vm.state.clipboardHasText, "an empty clipboard must be shown as empty")
 
-        assertTrue(vm.updateClipboardHasText(true), "a clipboard filled while away must trigger a paste")
+        assertTrue(vm.updateClipboardHasText(true), "text on the clipboard must be pasted onto the paste card")
         assertTrue(vm.state.clipboardHasText, "a filled clipboard must be shown as filled")
     }
 
@@ -52,7 +50,6 @@ class TextReaderViewModelTest : BaseTest() {
     fun a_blank_paste_marks_the_clipboard_empty() {
         val vm = viewModel()
         vm.pasteText("   ")
-        assertFalse(vm.state.clipboardHasText, "a tap that read nothing must disable the paste card")
-        assertTrue(vm.updateClipboardHasText(true), "copying a text afterwards must paste it on return")
+        assertFalse(vm.state.clipboardHasText, "a paste that read nothing must disable the paste card")
     }
 }
