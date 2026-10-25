@@ -311,6 +311,7 @@
     <string name="developer_caches_title">Cachés</string>
     <string name="developer_caches_description">Borra los datos del servidor en caché local; se vuelven a obtener en la próxima sincronización.</string>
     <string name="developer_clear_lists_cache">Borrar caché de listas de palabras</string>
+    <string name="developer_clear_clipboard">Vaciar el portapapeles</string>
     <string name="developer_danger_title">Peligro</string>
     <string name="developer_danger_description">Elimina filas de tarjetas de aprendizaje para depuración. Estas acciones no se pueden deshacer.</string>
     <string name="developer_remove_suspended_cards">Quitar suspendidas</string>

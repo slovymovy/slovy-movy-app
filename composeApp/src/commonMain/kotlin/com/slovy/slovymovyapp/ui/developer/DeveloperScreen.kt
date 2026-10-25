@@ -1,5 +1,6 @@
 package com.slovy.slovymovyapp.ui.developer
 
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +95,7 @@ fun DeveloperScreen(
     isDebugBuild: Boolean,
     onBack: () -> Unit = {},
 ) {
+    val clipboard = LocalClipboard.current
     DeveloperScreenContent(
         state = viewModel.state,
         isDebugBuild = isDebugBuild,
@@ -106,6 +108,7 @@ fun DeveloperScreen(
         onShiftTimeBack = viewModel::shiftTimeBack,
         onRunIntake = viewModel::runIntake,
         onClearListsCache = viewModel::clearListsCache,
+        onClearClipboard = { viewModel.clearClipboard(clipboard) },
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -129,6 +132,7 @@ fun DeveloperScreenContent(
     onShiftTimeBack: (TimeShiftOption) -> Unit = {},
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onClearListsCache: () -> Unit = {},
+    onClearClipboard: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -242,6 +246,7 @@ fun DeveloperScreenContent(
                     DeveloperCachesCard(
                         isBusy = state.isBusy,
                         onClearListsCache = onClearListsCache,
+                        onClearClipboard = onClearClipboard,
                     )
                 }
 

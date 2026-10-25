@@ -311,6 +311,7 @@
     <string name="developer_caches_title">Cache</string>
     <string name="developer_caches_description">Cancella i dati del server memorizzati localmente; vengono recuperati di nuovo alla prossima sincronizzazione.</string>
     <string name="developer_clear_lists_cache">Cancella la cache degli elenchi di parole</string>
+    <string name="developer_clear_clipboard">Svuota gli appunti</string>
     <string name="developer_danger_title">Pericolo</string>
     <string name="developer_danger_description">Elimina le righe delle schede di apprendimento per il debug. Queste azioni non possono essere annullate.</string>
     <string name="developer_remove_suspended_cards">Rimuovi sospese</string>

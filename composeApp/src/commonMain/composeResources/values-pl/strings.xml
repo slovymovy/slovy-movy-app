@@ -310,6 +310,7 @@
     <string name="developer_caches_title">Pamięć podręczna</string>
     <string name="developer_caches_description">Wyczyść lokalnie zapisane dane z serwera; zostaną pobrane ponownie przy następnej synchronizacji.</string>
     <string name="developer_clear_lists_cache">Wyczyść pamięć podręczną list słów</string>
+    <string name="developer_clear_clipboard">Wyczyść schowek</string>
     <string name="developer_danger_title">Niebezpieczne</string>
     <string name="developer_danger_description">Usuń wiersze kart nauki do debugowania. Tych akcji nie można cofnąć.</string>
     <string name="developer_remove_suspended_cards">Usuń wstrzymane</string>

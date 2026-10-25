@@ -311,6 +311,7 @@
     <string name="developer_caches_title">Mezipaměti</string>
     <string name="developer_caches_description">Smaže lokálně uložená data ze serveru; při další synchronizaci se stáhnou znovu.</string>
     <string name="developer_clear_lists_cache">Smazat mezipaměť seznamů slov</string>
+    <string name="developer_clear_clipboard">Vymazat schránku</string>
     <string name="developer_danger_title">Nebezpečí</string>
     <string name="developer_danger_description">Smaže řádky učebních karet pro ladění. Tyto akce nelze vrátit.</string>
     <string name="developer_remove_suspended_cards">Odebrat pozastavené</string>

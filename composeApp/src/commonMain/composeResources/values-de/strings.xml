@@ -311,6 +311,7 @@
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Lösche lokal zwischengespeicherte Serverdaten; sie werden bei der nächsten Synchronisierung neu geladen.</string>
     <string name="developer_clear_lists_cache">Wortlisten-Cache leeren</string>
+    <string name="developer_clear_clipboard">Zwischenablage leeren</string>
     <string name="developer_danger_title">Gefahr</string>
     <string name="developer_danger_description">Lösche Lernkarten-Zeilen zum Debuggen. Diese Aktionen können nicht rückgängig gemacht werden.</string>
     <string name="developer_remove_suspended_cards">Pausierte entfernen</string>

@@ -311,6 +311,7 @@
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Wis lokaal gecachte servergegevens; ze worden bij de volgende synchronisatie opnieuw opgehaald.</string>
     <string name="developer_clear_lists_cache">Cache met woordenlijsten wissen</string>
+    <string name="developer_clear_clipboard">Klembord wissen</string>
     <string name="developer_danger_title">Gevaar</string>
     <string name="developer_danger_description">Verwijder leerkaartregels voor debugging. Deze acties kunnen niet ongedaan worden gemaakt.</string>
     <string name="developer_remove_suspended_cards">Verwijder opgeschort</string>
