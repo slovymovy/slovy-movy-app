@@ -17,6 +17,8 @@
             <string>cs</string>
             <string>tr</string>
             <string>zh-Hans</string>
+            <string>uk</string>
+            <string>be</string>
         </array>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
