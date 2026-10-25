@@ -108,6 +108,17 @@ tasks.register("connectedMinifiedAndroidTest") {
     dependsOn("connectedMinifiedTestAndroidTest")
 }
 
+// androidx.test pulls java.time into the test APK, so the app APK and the test APK both ship a
+// desugared j$ library, and the instrumentation class loader takes each j$ class from whichever APK
+// has it. Two copies shrunk and renamed separately do not fit together (NoSuchMethodError,
+// "implements non-interface class"), so the minifiedTest build ships the whole library under its own
+// names in both. AGP has no DSL for the library's keep rules, hence its L8 tasks.
+tasks.withType<com.android.build.gradle.internal.tasks.L8DexDesugarLibTask>().configureEach {
+    if (name.startsWith("l8DexDesugarLibMinifiedTest")) {
+        keepRulesConfigurations.addAll("-keep class j$.** { *; }", "-dontobfuscate")
+    }
+}
+
 val testServer = registerTestServer(testServerPort)
 configureTasksToUseTestServer(
     testServer,

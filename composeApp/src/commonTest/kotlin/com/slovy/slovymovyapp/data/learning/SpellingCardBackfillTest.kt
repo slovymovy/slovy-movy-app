@@ -44,6 +44,7 @@ class SpellingCardBackfillTest : BaseTest() {
         difficulty: Double = 5.0,
         due: Long = now.toEpochMilliseconds() + 10.days.inWholeMilliseconds,
         suspended: Boolean = false,
+        availableAfter: Long? = null,
     ) {
         favoritesQueries.insertCard(
             id = Uuid.random(),
@@ -59,7 +60,7 @@ class SpellingCardBackfillTest : BaseTest() {
             reps = 5,
             lapses = 0,
             created_at = now.toEpochMilliseconds() - 100.days.inWholeMilliseconds,
-            available_after = null,
+            available_after = availableAfter,
             answer_key = "fiets",
             suspended = suspended,
         )
@@ -88,6 +89,21 @@ class SpellingCardBackfillTest : BaseTest() {
         assertEquals(produceDue, spelling.due, "A backfilled card is due with its produce-word card")
         assertEquals(0, spelling.reps, "A backfilled card has never been reviewed")
         assertEquals("fiets", spelling.answer_key, "A backfilled card keeps the sense's answer key")
+        assertNull(spelling.available_after, "A sense that is not paused gives no cooldown")
+    }
+
+    @Test
+    fun a_paused_word_keeps_its_pause_on_the_backfilled_card() = withDatabase { db ->
+        val paused = Uuid.random()
+        val pausedUntil = now.toEpochMilliseconds() + 30.days.inWholeMilliseconds
+        val overdue = now.toEpochMilliseconds() - 5.days.inWholeMilliseconds
+        db.insert(paused, CardFamily.RECOGNIZE_SENSE, stability = 40.0, availableAfter = pausedUntil)
+        db.insert(paused, CardFamily.PRODUCE_WORD, stability = 30.0, due = overdue, availableAfter = pausedUntil)
+
+        db.backfill().runOnce()
+
+        val spelling = assertNotNull(db.spellingCard(paused), "A paused sense past the gate still gets its card")
+        assertEquals(pausedUntil, spelling.available_after, "The backfilled card waits out the word's pause")
     }
 
     @Test

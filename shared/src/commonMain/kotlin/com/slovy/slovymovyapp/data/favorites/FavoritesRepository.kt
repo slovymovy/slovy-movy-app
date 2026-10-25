@@ -360,20 +360,21 @@ class FavoritesRepository(private val db: AppDatabase) {
      * Creates the [rule]'s target card for every sense whose source card has already passed the
      * rule's gate, as if the family had existed when it did. The card starts in LEARNING at the
      * sense's weakest stability, so the sense keeps its pipeline stage, and is due with its source
-     * card, so a large backlog spreads over the existing schedule. Returns the number created.
+     * card, so a large backlog spreads over the existing schedule. A paused word stays paused: the
+     * card takes the latest `available_after` of the sense's cards. Returns the number created.
      */
     suspend fun backfillUnlockedFamily(rule: UnlockRule, now: Long): Long = withContext(Dispatchers.IO) {
         val q = db.favoritesQueries
         q.transactionWithResult {
-            val weakestBySense = q.selectActiveCardsOfSensesPastUnlockGate(
+            val senses = q.selectActiveCardsOfSensesPastUnlockGate(
                 source_family = rule.sourceFamily,
                 min_source_stability = rule.minStability.toDouble(DurationUnit.DAYS),
                 target_family = rule.targetFamily,
             ).executeAsList()
                 .groupBy { it.sense_id to it.lang_code }
                 .values
-                .map { cards -> cards.minBy { it.stability } }
-            weakestBySense.forEach { weakest ->
+            senses.forEach { cards ->
+                val weakest = cards.minBy { it.stability }
                 q.insertCard(
                     id = Uuid.random(),
                     sense_id = weakest.sense_id,
@@ -388,12 +389,12 @@ class FavoritesRepository(private val db: AppDatabase) {
                     reps = 0,
                     lapses = 0,
                     created_at = now,
-                    available_after = null,
+                    available_after = cards.mapNotNull { it.available_after }.maxOrNull(),
                     answer_key = weakest.answer_key,
                     suspended = false,
                 )
             }
-            weakestBySense.size.toLong()
+            senses.size.toLong()
         }
     }
 
