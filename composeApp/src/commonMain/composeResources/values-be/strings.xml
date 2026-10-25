@@ -308,6 +308,9 @@
     <string name="developer_intake_description">Актываваць захаваныя словы, якія чакаюць, для кожнай усталяванай мовы вывучэння.</string>
     <string name="developer_intake_daily">Штодня</string>
     <string name="developer_intake_continue_now">Працягнуць зараз</string>
+    <string name="developer_study_title">Навучанне</string>
+    <string name="developer_typed_playground_button">Паспрабаваць картку з уводам</string>
+    <string name="developer_typed_playground_description">Адкрывае картку з уводам на некалькіх прыкладах слоў. Без даных навучання, нічога не захоўваецца.</string>
     <string name="developer_caches_title">Кэшы</string>
     <string name="developer_caches_description">Ачысціць лакальна кэшаваныя даныя сервера; яны будуць загружаны нанава пры наступнай сінхранізацыі.</string>
     <string name="developer_clear_lists_cache">Ачысціць кэш спісаў слоў</string>
@@ -403,6 +406,7 @@
     </plurals>
     <string name="settings_languages_more">+%1$d яшчэ</string>
     <string name="settings_toggle_translation_for_language">Пераключыць пераклад %1$s</string>
+    <string name="settings_translation_unsupported_for">Недаступна для %1$s</string>
     <string name="settings_remove_language_confirm_title">Выдаліць %1$s?</string>
     <string name="settings_remove_language_confirm_message">Слоўнік і ўсе яго пераклады будуць выдалены. Вы зможаце спампаваць іх зноў у любы час.</string>
     <plurals name="settings_remove_language_warning">
@@ -701,6 +705,16 @@
     <string name="study_chip_source_only">толькі %1$s</string>
     <string name="study_chip_fill_in">Пропуск</string>
     <string name="study_chip_listen">Слуханне</string>
+    <string name="study_chip_type">Увод</string>
+    <string name="study_typed_placeholder">Пачатковая форма</string>
+    <string name="study_typed_check">Праверыць</string>
+    <string name="study_typed_show_answer">Проста паказаць адказ</string>
+    <string name="study_typed_hint_more">+1</string>
+    <string name="study_typed_hint_description">Падказка: адкрыць наступную літару</string>
+    <string name="study_typed_you_typed">Вы ўвялі</string>
+    <string name="study_typed_correct_spelling">Правільнае напісанне</string>
+    <string name="study_typed_synonym">Вы ўвялі сінонім</string>
+    <string name="study_typed_expected">Чакалася</string>
     <string name="study_prompt_recall_word">Прыгадайце слова</string>
     <string name="study_chip_recall">Прыгадай %1$s</string>
     <string name="study_prompt_translate_to">Перакладзіце на %1$s</string>
