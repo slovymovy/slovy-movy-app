@@ -85,7 +85,10 @@ data class TextReaderUiState(
     val favoriteLemmas: Set<String> = emptySet(),
     val isAnalyzing: Boolean = false,
     val isError: Boolean = false,
-    val isTooLong: Boolean = false
+    val isTooLong: Boolean = false,
+    // Whether the clipboard holds text, refreshed on every resume. Only hasText() is asked, so
+    // checking it never reads the content (no iOS paste prompt); an unknown answer counts as true.
+    val clipboardHasText: Boolean = true,
 ) {
     val hasResults: Boolean get() = tokens.isNotEmpty()
 }
@@ -176,6 +179,22 @@ class TextReaderViewModel(
         }
     }
 
+    /**
+     * Records the clipboard check made on resume. Returns true when the clipboard went from
+     * empty to filled while the paste card is showing: that card says "copy a text in another
+     * app, then come back here", so the screen pastes right away instead of demanding a tap.
+     */
+    fun updateClipboardHasText(hasText: Boolean): Boolean {
+        val filled = !state.clipboardHasText && hasText
+        state = state.copy(clipboardHasText = hasText)
+        return filled && !state.hasResults && !state.isAnalyzing
+    }
+
+    /** A tap on the paste card: analyzes [text], or marks the clipboard empty when it was blank. */
+    fun pasteText(text: String) {
+        if (text.isNotBlank()) analyzeText(text) else state = state.copy(clipboardHasText = false)
+    }
+
     fun refreshFavorites() {
         if (state.tokens.isEmpty()) return
         viewModelScope.launch {
@@ -192,12 +211,10 @@ fun TextReaderScreen(
     onWordClick: (language: Language, lemma: String) -> Unit,
     onBack: () -> Unit
 ) {
+    // The clipboard's content is read by whoever opens the reader (see TextReaderViewModel's
+    // initialText), and afterwards only when the user taps to paste or comes back with a
+    // filled clipboard.
     val clipboard = LocalClipboardManager.current
-    // Whether the clipboard holds text — checked here in the stateful layer (not in the
-    // stateless content) and refreshed on resume. The clipboard's *content* is read by
-    // whoever opens the reader (see TextReaderViewModel's initialText), and afterwards only
-    // when the user taps to paste or comes back with a filled clipboard.
-    var clipboardHasText by remember { mutableStateOf(runCatching { clipboard.hasText() }.getOrDefault(true)) }
     // For the empty→filled resume transition below. A blank auto read (denied prompt or empty
     // clipboard) falls through to the manual tap-to-paste card, which stays enabled as the
     // retry path.
@@ -215,13 +232,9 @@ fun TextReaderScreen(
     }
     LifecycleResumeEffect(Unit) {
         viewModel.refreshFavorites()
-        val hadText = clipboardHasText
-        clipboardHasText = runCatching { clipboard.hasText() }.getOrDefault(true)
-        // The empty-clipboard card says "copy a text in another app, then come back here" —
-        // honor that: if the clipboard went from empty to filled while we sat on the input
-        // card, paste right away instead of demanding another tap. Denied iOS prompts leave
-        // clipboardHasText true, so they never re-trigger this on app switches.
-        if (!hadText && clipboardHasText && !viewModel.state.hasResults && !viewModel.state.isAnalyzing) {
+        // Denied iOS prompts leave clipboardHasText true, so they never re-trigger the paste
+        // on app switches.
+        if (viewModel.updateClipboardHasText(runCatching { clipboard.hasText() }.getOrDefault(true))) {
             autoPasteNow()
         }
         onPauseOrDispose {}
@@ -230,7 +243,6 @@ fun TextReaderScreen(
         state = viewModel.state,
         scrollState = viewModel.scrollState,
         language = viewModel.language,
-        clipboardHasText = clipboardHasText,
         onPaste = {
             val text = clipboard.getText()?.text.orEmpty()
             Analytics.logEvent(
@@ -241,7 +253,7 @@ fun TextReaderScreen(
                     "auto" to "false",
                 ),
             )
-            if (text.isNotBlank()) viewModel.analyzeText(text) else clipboardHasText = false
+            viewModel.pasteText(text)
         },
         onWordClick = { language, token ->
             token.lemma?.let { lemma ->
@@ -267,7 +279,6 @@ fun TextReaderContent(
     state: TextReaderUiState,
     scrollState: ScrollState = rememberScrollState(),
     language: Language = Language.DUTCH,
-    clipboardHasText: Boolean = true,
     onPaste: () -> Unit = {},
     onWordClick: (language: Language, token: TextToken) -> Unit = { _, _ -> },
     onBack: () -> Unit = {}
@@ -318,7 +329,7 @@ fun TextReaderContent(
                 isAnalyzing = state.isAnalyzing,
                 isError = state.isError,
                 isTooLong = state.isTooLong,
-                clipboardHasText = clipboardHasText,
+                clipboardHasText = state.clipboardHasText,
                 onPaste = onPaste,
                 modifier = Modifier.padding(innerPadding)
             )
@@ -623,6 +634,19 @@ private fun TextReaderInputEmptyPreview(
     ThemedPreview(darkTheme = isDark) {
         TextReaderContent(
             state = TextReaderUiState(),
+            language = Language.DUTCH
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun TextReaderInputClipboardEmptyPreview(
+    @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean
+) {
+    ThemedPreview(darkTheme = isDark) {
+        TextReaderContent(
+            state = TextReaderUiState(clipboardHasText = false),
             language = Language.DUTCH
         )
     }

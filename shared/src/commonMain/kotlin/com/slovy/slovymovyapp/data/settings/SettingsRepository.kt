@@ -71,12 +71,12 @@ class SettingsRepository(private val db: AppDatabase) {
         }
     }
 
-    /** The learning language the user last worked in; see [Setting.Name.DICTIONARY]. */
-    suspend fun getLastLearningLanguage(): Language? =
+    /** The learning language the user last picked; see [Setting.Name.DICTIONARY]. */
+    suspend fun getLastPickedLanguage(): Language? =
         getById(Setting.Name.DICTIONARY)?.value?.jsonPrimitive?.content?.let { Language.fromCodeOrNull(it) }
 
-    /** Records [language], explicitly picked on a screen, as the last learning language. */
-    suspend fun setLastLearningLanguage(language: Language) {
+    /** Records [language], explicitly picked on a screen, as the last picked language. */
+    suspend fun setLastPickedLanguage(language: Language) {
         insert(Setting(Setting.Name.DICTIONARY, JsonPrimitive(language.code)))
     }
 
@@ -104,13 +104,10 @@ class SettingsRepository(private val db: AppDatabase) {
 
     companion object {
         /**
-         * The dictionary language Search and shared text open in: the [saved] Search language,
-         * else the [last] learning language, else any [installed] dictionary. A language is
-         * only taken when its dictionary is installed; null when none is.
+         * The first of [preferred] whose dictionary is [installed], else any installed
+         * dictionary; null when none is installed.
          */
-        fun pickLanguage(saved: Language?, last: Language?, installed: List<Language>): Language? =
-            saved?.takeIf { it in installed }
-                ?: last?.takeIf { it in installed }
-                ?: installed.firstOrNull()
+        fun pickLanguage(installed: List<Language>, vararg preferred: Language?): Language? =
+            preferred.firstOrNull { it != null && it in installed } ?: installed.firstOrNull()
     }
 }

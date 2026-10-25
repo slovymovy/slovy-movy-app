@@ -78,12 +78,11 @@ class SharedTextReceiver {
     internal fun routeFor(
         request: SharedTextRequest,
         destination: NavDestination,
-        savedSearchLanguage: Language?,
-        lastLearningLanguage: Language?,
+        lastPickedLanguage: Language?,
         installed: List<Language>,
     ): SharedTextRoute? {
         if (interruptibleRoutes.none { destination.hasRoute(it) }) return null
-        val language = SettingsRepository.pickLanguage(savedSearchLanguage, lastLearningLanguage, installed) ?: return null
+        val language = SettingsRepository.pickLanguage(installed, lastPickedLanguage) ?: return null
         val route = route(request.text, language) ?: return null
         logReceived(request, language, route)
         return route
