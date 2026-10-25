@@ -183,12 +183,13 @@ class TextReaderViewModel(
 
     /**
      * Records the clipboard check made on resume. Returns true when the screen should paste
-     * now: the clipboard holds text and the paste card is showing, so the user came back to an
-     * empty reader, which the card asks them to do after copying a text in another app.
+     * now: the clipboard holds text and the reader is still empty, so the user came back after
+     * copying a text in another app, as the paste card asks. A failed or oversized passage
+     * keeps its error until the user taps to paste: the clipboard may hold an unrelated text.
      */
     fun updateClipboardHasText(hasText: Boolean): Boolean {
         state = state.copy(clipboardHasText = hasText)
-        return hasText && !state.hasResults && !state.isAnalyzing
+        return hasText && !state.hasResults && !state.isAnalyzing && !state.isError && !state.isTooLong
     }
 
     /** Analyzes pasted [text], or marks the clipboard empty when nothing could be read. */
