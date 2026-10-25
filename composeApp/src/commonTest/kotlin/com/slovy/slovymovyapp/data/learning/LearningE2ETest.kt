@@ -17,7 +17,6 @@ import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
 import com.slovy.slovymovyapp.data.learning.session.SessionCard
 import com.slovy.slovymovyapp.data.learning.session.SessionCardLoadState
 import com.slovy.slovymovyapp.data.learning.session.SessionService
-import com.slovy.slovymovyapp.data.learning.stats.StatsPipelineStageId
 import com.slovy.slovymovyapp.data.learning.stats.StatsService
 import com.slovy.slovymovyapp.data.local.LocalDbManager
 import com.slovy.slovymovyapp.data.remote.*
@@ -840,10 +839,10 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun production_good_unlocks_spelling_at_the_sense_floor_and_keeps_the_stage() = runBlocking {
+    fun production_good_unlocks_spelling_from_the_credit_factor_even_for_a_learned_sense() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
         withEnv(includeTranslation = true, config = config) { env ->
-            val fixture = env.seedSense(lemma = "spellfloor")
+            val fixture = env.seedSense(lemma = "spellunlock")
             env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
             val farFuture = (start + 365.days).toEpochMilliseconds()
@@ -852,11 +851,8 @@ class LearningE2ETest : BaseTest() {
             env.insertTask(fixture, CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 200.0, due = farFuture, lastReview = yesterday, reps = 8)
             env.insertTask(fixture, CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 150.0, lastReview = yesterday, reps = 6)
             env.insertTask(fixture, CardFamily.PRODUCE_WORD_IN_CONTEXT, state = CardState.REVIEW, stability = 120.0, due = farFuture, lastReview = yesterday, reps = 5)
-            env.insertTask(fixture, CardFamily.RECOGNIZE_VOICE, state = CardState.REVIEW, stability = 100.0, due = farFuture, lastReview = yesterday, reps = 4)
             val stabilitiesBefore = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
                 .executeAsList().associate { it.family to it.stability }
-            val pipelineBefore = env.stats.pipelineSnapshot("en")
-            assertEquals(1, pipelineBefore.single { it.id == StatsPipelineStageId.LEARNED }.count, "The sense starts LEARNED")
 
             val production = env.nextLoadedCard("en")
             assertEquals(CardFamily.PRODUCE_WORD, production.card.family, "Only the produce-word card is due")
@@ -868,50 +864,15 @@ class LearningE2ETest : BaseTest() {
 
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
             val spelling = cards.single { it.family == CardFamily.SPELL_WORD }
-            val others = cards.filter { it.family != CardFamily.SPELL_WORD }
-            val senseFloor = others.minOf { it.stability }
-            assertTrue(
-                reviewed.card.scheduling.stability * 0.35 < senseFloor,
-                "Precondition: the credit factor alone would start the card below the sense's weakest card",
-            )
-            assertClose(senseFloor, spelling.stability)
+            assertClose(reviewed.card.scheduling.stability * 0.35, spelling.stability)
             assertEquals(CardState.LEARNING, spelling.state, "An unlocked card starts in LEARNING like every unlock")
-            assertTrue(spelling.due <= (start + 4.days).toEpochMilliseconds(), "The new card is still due within days")
-            others.forEach { sibling ->
+            assertTrue(spelling.due <= (start + 4.days).toEpochMilliseconds(), "The new card is due within days")
+            cards.filter { it.family != CardFamily.SPELL_WORD }.forEach { sibling ->
                 assertTrue(
                     sibling.stability >= stabilitiesBefore.getValue(sibling.family),
                     "${sibling.family} must not lose stability when spelling is unlocked",
                 )
             }
-            assertEquals(pipelineBefore, env.stats.pipelineSnapshot("en"), "Creating the spelling card moves no sense between stages")
-        }
-    }
-
-    @Test
-    fun production_good_unlocks_spelling_from_the_credit_factor_when_the_sense_is_weaker() = runBlocking {
-        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
-        withEnv(includeTranslation = true, config = config) { env ->
-            val fixture = env.seedSense(lemma = "spellfactor")
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
-            env.addFavorite(fixture)
-            val farFuture = (start + 365.days).toEpochMilliseconds()
-            val yesterday = (start - 1.days).toEpochMilliseconds()
-            // Voice receives no credit from produce-word, so it stays the sense's weakest card.
-            env.insertTask(fixture, CardFamily.RECOGNIZE_VOICE, state = CardState.REVIEW, stability = 1.0, due = farFuture, lastReview = yesterday, reps = 2)
-            env.insertTask(fixture, CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 5.0, lastReview = yesterday, reps = 3)
-            val pipelineBefore = env.stats.pipelineSnapshot("en")
-
-            val production = env.nextLoadedCard("en")
-            val reviewed = env.session.submitReview(
-                production,
-                env.session.previewRatings(production).first { it.rating == Rating.GOOD },
-                durationMs = 1.seconds.inWholeMilliseconds,
-            )
-
-            val spelling = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en")
-                .executeAsList().single { it.family == CardFamily.SPELL_WORD }
-            assertClose(reviewed.card.scheduling.stability * 0.35, spelling.stability)
-            assertEquals(pipelineBefore, env.stats.pipelineSnapshot("en"), "A young sense keeps its stage too")
         }
     }
 

@@ -677,10 +677,7 @@ class SessionService(
             }
             return
         }
-        // The floor is the sense as it stands before this pass inserts anything, so it does not
-        // depend on the order of the rules; sibling credit has already been applied by now.
-        val senseFloor = if (rules.any { it.floorToSenseMinimum }) senseMinimumStability(card.card) else 0.0
-        rules.forEach { rule -> unlockFamily(card, after, rating, now, rule, sense, senseFloor) }
+        rules.forEach { rule -> unlockFamily(card, after, rating, now, rule, sense) }
     }
 
     private fun unlockFamily(
@@ -690,7 +687,6 @@ class SessionService(
         now: Long,
         rule: UnlockRule,
         sense: LanguageCardResponseSense,
-        senseFloor: Double,
     ) {
         val target = rule.targetFamily
         val credit = crossFamilyCredit(card.card.family, target, rating)
@@ -708,17 +704,12 @@ class SessionService(
             }
             return
         }
-        // With the floor, the new card starts no weaker than the sense's weakest card, so the
-        // sense's pipeline stage is the same before and after it exists.
-        val floor = if (rule.floorToSenseMinimum) senseFloor else 0.0
-        val inheritedStability = maxOf(after.stability * credit.factor, floor)
-            .coerceAtLeast(MIN_INHERITED_STABILITY)
+        val inheritedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
         val due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD))
         val availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after))
         AppLogger.debug(TAG, null) {
             "Unlock eligible source=${card.card.id} sense=${card.senseId} from=${card.card.family} to=$target " +
                 "rating=$rating inheritedStability=${formatDouble(inheritedStability)} " +
-                "floor=${formatDouble(floor)} " +
                 "dueIn=${formatDelay(due, now)} availableAfterIn=${formatDelay(availableAfter, now)}"
         }
         insertTaskIfMissing(
@@ -732,11 +723,6 @@ class SessionService(
             availableAfter = availableAfter,
         )
     }
-
-    /** The weakest stability among the sense's unsuspended cards; what its pipeline stage is read from. */
-    private fun senseMinimumStability(source: Card): Double =
-        learning.selectCardsBySense(source.senseId, source.langCode).executeAsList()
-            .minOfOrNull { it.stability } ?: 0.0
 
     private fun insertTaskIfMissing(
         source: Card,

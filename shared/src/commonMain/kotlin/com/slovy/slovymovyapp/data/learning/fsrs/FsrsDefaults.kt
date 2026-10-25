@@ -49,33 +49,28 @@ object FsrsDefaults {
         CardFamily.RECOGNIZE_SENSE,
     )
 
-    // Spelling unlocks in parallel with the in-context family and starts no weaker than the sense's
-    // weakest card: learners who already had a word in LEARNED keep it there until they actually
-    // fail to spell it.
+    // Spelling unlocks in parallel with the in-context family. Senses that were already past this
+    // gate when spelling shipped get their card once from SpellingCardBackfill instead.
     val UNLOCK_RULES: List<UnlockRule> = listOf(
         UnlockRule(
             sourceFamily = CardFamily.RECOGNIZE_SENSE,
             targetFamily = CardFamily.PRODUCE_WORD,
             minStability = PRODUCTION_UNLOCK_STABILITY,
-            floorToSenseMinimum = false,
         ),
         UnlockRule(
             sourceFamily = CardFamily.PRODUCE_WORD,
             targetFamily = CardFamily.PRODUCE_WORD_IN_CONTEXT,
             minStability = CONTEXT_UNLOCK_STABILITY,
-            floorToSenseMinimum = false,
         ),
         UnlockRule(
             sourceFamily = CardFamily.PRODUCE_WORD,
             targetFamily = CardFamily.SPELL_WORD,
             minStability = SPELLING_UNLOCK_STABILITY,
-            floorToSenseMinimum = true,
         ),
         UnlockRule(
             sourceFamily = CardFamily.PRODUCE_WORD_IN_CONTEXT,
             targetFamily = CardFamily.RECOGNIZE_VOICE,
             minStability = CONTEXT_UNLOCK_STABILITY,
-            floorToSenseMinimum = false,
         ),
     )
 
@@ -136,9 +131,7 @@ object FsrsDefaults {
         ),
         // Spelling mirrors the voice family: modest credit into it from produce-word, strong credit
         // back out, since spelling a word is strong evidence of being able to produce it, in
-        // context too, and to recognise it. Nothing but produce-word feeds spelling. Note that the
-        // unlock floors the new card at the sense's weakest card, so the 0.35/0.55 inheritance only
-        // sets the start when a sibling weaker than that exists; the floor usually does.
+        // context too, and to recognise it. Nothing but produce-word feeds spelling.
         CrossFamilyCredit(
             sourceFamily = CardFamily.PRODUCE_WORD,
             targetFamily = CardFamily.SPELL_WORD,

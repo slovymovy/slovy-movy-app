@@ -42,14 +42,12 @@ data class FsrsConfig(
 /**
  * A successful review of a [sourceFamily] card whose stability has reached [minStability] creates
  * the sense's [targetFamily] card, if it does not exist yet. The new card inherits stability through
- * the matching [CrossFamilyCredit]; with [floorToSenseMinimum] it also starts no weaker than the
- * sense's weakest existing card, so creating it never changes the sense's pipeline stage.
+ * the matching [CrossFamilyCredit].
  */
 data class UnlockRule(
     val sourceFamily: CardFamily,
     val targetFamily: CardFamily,
     val minStability: Duration,
-    val floorToSenseMinimum: Boolean,
 )
 
 data class CrossFamilyCredit(
