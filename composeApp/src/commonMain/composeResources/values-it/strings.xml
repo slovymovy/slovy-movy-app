@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Giornaliera</string>
     <string name="developer_intake_continue_now">Continua ora</string>
     <string name="developer_study_title">Studio</string>
-    <string name="developer_typed_playground_button">Prova la carta scritta</string>
-    <string name="developer_typed_playground_description">Apre la carta scritta su alcune parole di esempio. Nessun dato di apprendimento, nulla viene salvato.</string>
+    <string name="developer_schedule_spelling_button">Pianifica prima le carte di ortografia</string>
+    <string name="developer_schedule_spelling_description">Crea una carta di ortografia per ogni parola in studio e rende tutte le carte di ortografia da ripassare subito, prima delle altre.</string>
     <string name="developer_caches_title">Cache</string>
     <string name="developer_caches_description">Cancella i dati del server memorizzati localmente; vengono recuperati di nuovo alla prossima sincronizzazione.</string>
     <string name="developer_clear_lists_cache">Cancella la cache degli elenchi di parole</string>

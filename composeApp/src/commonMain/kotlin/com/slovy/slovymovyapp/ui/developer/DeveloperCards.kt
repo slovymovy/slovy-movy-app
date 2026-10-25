@@ -309,7 +309,8 @@ internal fun IntakeCard(
 
 @Composable
 internal fun DeveloperStudyCard(
-    onOpenTypedPlayground: () -> Unit,
+    isBusy: Boolean,
+    onScheduleSpellingCards: () -> Unit,
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -326,15 +327,16 @@ internal fun DeveloperStudyCard(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
         ) {
             Text(
-                text = stringResource(Res.string.developer_typed_playground_description),
+                text = stringResource(Res.string.developer_schedule_spelling_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             FilledTonalButton(
-                onClick = onOpenTypedPlayground,
+                onClick = onScheduleSpellingCards,
+                enabled = !isBusy,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(stringResource(Res.string.developer_typed_playground_button))
+                Text(stringResource(Res.string.developer_schedule_spelling_button))
             }
         }
     }

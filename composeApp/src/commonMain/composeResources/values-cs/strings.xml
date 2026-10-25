@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Denní</string>
     <string name="developer_intake_continue_now">Pokračovat teď</string>
     <string name="developer_study_title">Studium</string>
-    <string name="developer_typed_playground_button">Vyzkoušet psanou kartu</string>
-    <string name="developer_typed_playground_description">Otevře psanou kartu na několika ukázkových slovech. Bez dat učení, nic se neukládá.</string>
+    <string name="developer_schedule_spelling_button">Naplánovat kartičky pravopisu jako první</string>
+    <string name="developer_schedule_spelling_description">Vytvoří kartičku pravopisu pro každé učené slovo a nastaví všechny kartičky pravopisu k opakování hned, před ostatními.</string>
     <string name="developer_caches_title">Mezipaměti</string>
     <string name="developer_caches_description">Smaže lokálně uložená data ze serveru; při další synchronizaci se stáhnou znovu.</string>
     <string name="developer_clear_lists_cache">Smazat mezipaměť seznamů slov</string>

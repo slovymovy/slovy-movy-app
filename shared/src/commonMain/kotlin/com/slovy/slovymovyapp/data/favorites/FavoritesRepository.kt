@@ -46,6 +46,11 @@ data class CardFamilyDebugCount(
     val cardCount: Long,
 )
 
+data class FamilyScheduleDebugResult(
+    val created: Long,
+    val rescheduled: Long,
+)
+
 data class NewFavorite(
     val senseId: String,
     val lemma: String,
@@ -348,6 +353,45 @@ class FavoritesRepository(private val db: AppDatabase) {
         }
         cardCount
     }
+
+    // Debug only: puts [family] in front of a session. Its existing active cards become due at [due]
+    // with no cooldown, and every active sense without one gets a LEARNING card due at [due] too.
+    // A new card starts at its sense's weakest stability, as an unlock with a floor does, so the
+    // sense's pipeline stage does not move. Playable variants are not checked; a session buries a
+    // card it cannot show.
+    suspend fun scheduleFamilyForAllSenses(family: CardFamily, due: Long, now: Long): FamilyScheduleDebugResult =
+        withContext(Dispatchers.IO) {
+            val q = db.favoritesQueries
+            q.transactionWithResult {
+                val rescheduled = q.countActiveCardsOfFamily(family).executeAsOne()
+                q.rescheduleActiveCardsOfFamily(due = due, family = family)
+                val weakestBySense = q.selectActiveCardsOfSensesWithoutFamily(family).executeAsList()
+                    .groupBy { it.sense_id to it.lang_code }
+                    .values
+                    .map { cards -> cards.minBy { it.stability } }
+                weakestBySense.forEach { weakest ->
+                    q.insertCard(
+                        id = Uuid.random(),
+                        sense_id = weakest.sense_id,
+                        lemma_id = weakest.lemma_id,
+                        lang_code = weakest.lang_code,
+                        family = family,
+                        state = CardState.LEARNING,
+                        stability = weakest.stability,
+                        difficulty = weakest.difficulty,
+                        due = due,
+                        last_review = null,
+                        reps = 0,
+                        lapses = 0,
+                        created_at = now,
+                        available_after = null,
+                        answer_key = weakest.answer_key,
+                        suspended = false,
+                    )
+                }
+                FamilyScheduleDebugResult(created = weakestBySense.size.toLong(), rescheduled = rescheduled)
+            }
+        }
 
     suspend fun deleteAll() = withContext(Dispatchers.IO) {
         db.favoritesQueries.transaction {

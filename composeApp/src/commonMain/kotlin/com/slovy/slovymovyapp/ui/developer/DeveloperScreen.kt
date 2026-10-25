@@ -93,7 +93,6 @@ fun DeveloperOptionsCard(onClick: () -> Unit) {
 fun DeveloperScreen(
     viewModel: DeveloperViewModel,
     isDebugBuild: Boolean,
-    onOpenTypedPlayground: () -> Unit,
     onBack: () -> Unit = {},
 ) {
     val clipboard = LocalClipboard.current
@@ -110,7 +109,7 @@ fun DeveloperScreen(
         onRunIntake = viewModel::runIntake,
         onClearListsCache = viewModel::clearListsCache,
         onClearClipboard = { viewModel.clearClipboard(clipboard) },
-        onOpenTypedPlayground = onOpenTypedPlayground,
+        onScheduleSpellingCards = viewModel::scheduleSpellingCardsFirst,
         onRemoveSuspendedCards = viewModel::removeSuspendedLearningCards,
         onRemoveAllLearningCards = viewModel::removeAllLearningCards,
         onClearTerminalLogs = viewModel::clearTerminalLogs,
@@ -135,7 +134,7 @@ fun DeveloperScreenContent(
     onRunIntake: (IntakeRunMode) -> Unit = {},
     onClearListsCache: () -> Unit = {},
     onClearClipboard: () -> Unit = {},
-    onOpenTypedPlayground: () -> Unit = {},
+    onScheduleSpellingCards: () -> Unit = {},
     onRemoveSuspendedCards: () -> Unit = {},
     onRemoveAllLearningCards: () -> Unit = {},
     onClearTerminalLogs: () -> Unit = {},
@@ -246,7 +245,10 @@ fun DeveloperScreenContent(
                     )
                 }
                 item {
-                    DeveloperStudyCard(onOpenTypedPlayground = onOpenTypedPlayground)
+                    DeveloperStudyCard(
+                        isBusy = state.isBusy,
+                        onScheduleSpellingCards = onScheduleSpellingCards,
+                    )
                 }
 
                 item {

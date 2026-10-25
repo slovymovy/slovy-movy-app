@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">每日</string>
     <string name="developer_intake_continue_now">立即继续</string>
     <string name="developer_study_title">学习</string>
-    <string name="developer_typed_playground_button">试用拼写卡片</string>
-    <string name="developer_typed_playground_description">用几个示例单词打开拼写卡片。不涉及学习数据，不会保存任何内容。</string>
+    <string name="developer_schedule_spelling_button">优先安排拼写卡片</string>
+    <string name="developer_schedule_spelling_description">为每个正在学习的单词创建拼写卡片，并让所有拼写卡片立即到期，排在其他卡片之前。</string>
     <string name="developer_caches_title">缓存</string>
     <string name="developer_caches_description">清除本地缓存的服务器数据，下次同步时会重新获取。</string>
     <string name="developer_clear_lists_cache">清除词单缓存</string>

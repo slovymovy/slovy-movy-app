@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Quotidien</string>
     <string name="developer_intake_continue_now">Continuer maintenant</string>
     <string name="developer_study_title">Étude</string>
-    <string name="developer_typed_playground_button">Essayer la carte saisie</string>
-    <string name="developer_typed_playground_description">Ouvre la carte saisie sur quelques mots d’exemple. Sans données d’apprentissage, rien n’est enregistré.</string>
+    <string name="developer_schedule_spelling_button">Planifier d'abord les cartes d'orthographe</string>
+    <string name="developer_schedule_spelling_description">Crée une carte d'orthographe pour chaque mot en cours d'apprentissage et rend toutes ces cartes à réviser maintenant, avant les autres.</string>
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Efface les données serveur en cache local ; elles seront rechargées à la prochaine synchro.</string>
     <string name="developer_clear_lists_cache">Effacer le cache des listes de mots</string>

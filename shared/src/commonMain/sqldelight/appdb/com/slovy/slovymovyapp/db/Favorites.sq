@@ -661,6 +661,32 @@ countAllCards:
 SELECT COUNT(*)
 FROM card;
 
+-- Developer tool: the active cards of every sense that has no card of :family yet.
+selectActiveCardsOfSensesWithoutFamily:
+SELECT c.sense_id, c.lemma_id, c.lang_code, c.answer_key, c.stability, c.difficulty
+FROM card c
+WHERE c.suspended = 0
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card t INDEXED BY idx_card_unique_task
+    WHERE t.sense_id = c.sense_id
+      AND t.lang_code = c.lang_code
+      AND t.family = :family
+  );
+
+countActiveCardsOfFamily:
+SELECT COUNT(*)
+FROM card
+WHERE family = :family
+  AND suspended = 0;
+
+rescheduleActiveCardsOfFamily:
+UPDATE card
+SET due = :due,
+    available_after = NULL
+WHERE family = :family
+  AND suspended = 0;
+
 deleteReviewLogsForSuspendedCards:
 DELETE FROM review_log
 WHERE card_id IN (

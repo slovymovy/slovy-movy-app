@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Täglich</string>
     <string name="developer_intake_continue_now">Jetzt fortfahren</string>
     <string name="developer_study_title">Lernen</string>
-    <string name="developer_typed_playground_button">Getippte Karte ausprobieren</string>
-    <string name="developer_typed_playground_description">Öffnet die getippte Karte mit ein paar Beispielwörtern. Keine Lerndaten, nichts wird gespeichert.</string>
+    <string name="developer_schedule_spelling_button">Schreibkarten zuerst einplanen</string>
+    <string name="developer_schedule_spelling_description">Erstellt für jedes Lernwort eine Schreibkarte und macht alle Schreibkarten sofort fällig, vor allen anderen Karten.</string>
     <string name="developer_caches_title">Caches</string>
     <string name="developer_caches_description">Lösche lokal zwischengespeicherte Serverdaten; sie werden bei der nächsten Synchronisierung neu geladen.</string>
     <string name="developer_clear_lists_cache">Wortlisten-Cache leeren</string>

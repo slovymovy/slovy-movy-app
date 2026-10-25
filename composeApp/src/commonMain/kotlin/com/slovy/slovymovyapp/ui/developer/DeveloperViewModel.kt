@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.CardFamilyDebugCount
+import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.favorites.CardScheduleDebugStats
 import com.slovy.slovymovyapp.data.favorites.CardTableDebugRow
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
@@ -56,6 +57,9 @@ internal val TimeShiftOptions: List<TimeShiftOption> = listOf(
     TimeShiftOption("+1d", 1.days),
     TimeShiftOption("+10d", 10.days),
 )
+
+// Overdue enough to reach the session's capped overdue bonus, so the cards rank ahead of others.
+private val FirstInSessionOverdue: Duration = 30.days
 
 internal const val CardTablePageSize = 50
 
@@ -194,6 +198,18 @@ class DeveloperViewModel(
                 val results = languages.map { lang -> lang.code to runIntakeFor(mode, lang.code) }
                 "${mode.displayLabel} - ${formatIntakeSummary(results)}"
             }
+        }
+    }
+
+    fun scheduleSpellingCardsFirst() {
+        runAction(actionName = "Schedule spelling cards") {
+            val now = Clock.System.now()
+            val result = favoritesRepository.scheduleFamilyForAllSenses(
+                family = CardFamily.SPELL_WORD,
+                due = (now - FirstInSessionOverdue).toEpochMilliseconds(),
+                now = now.toEpochMilliseconds(),
+            )
+            "Spelling cards due now: ${result.created} created, ${result.rescheduled} rescheduled"
         }
     }
 

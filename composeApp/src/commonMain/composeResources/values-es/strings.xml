@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Diaria</string>
     <string name="developer_intake_continue_now">Continuar ahora</string>
     <string name="developer_study_title">Estudio</string>
-    <string name="developer_typed_playground_button">Probar tarjeta escrita</string>
-    <string name="developer_typed_playground_description">Abre la tarjeta escrita con unas palabras de ejemplo. Sin datos de aprendizaje, no se guarda nada.</string>
+    <string name="developer_schedule_spelling_button">Programar primero las tarjetas de ortografía</string>
+    <string name="developer_schedule_spelling_description">Crea una tarjeta de ortografía para cada palabra en estudio y hace que todas las tarjetas de ortografía venzan ya, antes que las demás.</string>
     <string name="developer_caches_title">Cachés</string>
     <string name="developer_caches_description">Borra los datos del servidor en caché local; se vuelven a obtener en la próxima sincronización.</string>
     <string name="developer_clear_lists_cache">Borrar caché de listas de palabras</string>

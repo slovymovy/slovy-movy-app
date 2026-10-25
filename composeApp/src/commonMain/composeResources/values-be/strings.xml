@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Штодня</string>
     <string name="developer_intake_continue_now">Працягнуць зараз</string>
     <string name="developer_study_title">Навучанне</string>
-    <string name="developer_typed_playground_button">Паспрабаваць картку з уводам</string>
-    <string name="developer_typed_playground_description">Адкрывае картку з уводам на некалькіх прыкладах слоў. Без даных навучання, нічога не захоўваецца.</string>
+    <string name="developer_schedule_spelling_button">Паставіць карткі напісання першымі</string>
+    <string name="developer_schedule_spelling_description">Стварае картку напісання для кожнага слова, якое вывучаецца, і робіць усе карткі напісання тэрміновымі, наперадзе іншых.</string>
     <string name="developer_caches_title">Кэшы</string>
     <string name="developer_caches_description">Ачысціць лакальна кэшаваныя даныя сервера; яны будуць загружаны нанава пры наступнай сінхранізацыі.</string>
     <string name="developer_clear_lists_cache">Ачысціць кэш спісаў слоў</string>

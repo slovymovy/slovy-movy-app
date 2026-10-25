@@ -309,8 +309,8 @@
     <string name="developer_intake_daily">Ежедневно</string>
     <string name="developer_intake_continue_now">Продолжить сейчас</string>
     <string name="developer_study_title">Учёба</string>
-    <string name="developer_typed_playground_button">Попробовать карточку с вводом</string>
-    <string name="developer_typed_playground_description">Открывает карточку с вводом на нескольких примерах слов. Без данных обучения, ничего не сохраняется.</string>
+    <string name="developer_schedule_spelling_button">Поставить карточки написания первыми</string>
+    <string name="developer_schedule_spelling_description">Создаёт карточку написания для каждого изучаемого слова и делает все карточки написания срочными, впереди остальных.</string>
     <string name="developer_caches_title">Кэши</string>
     <string name="developer_caches_description">Очистить локально кэшированные данные сервера; они будут загружены заново при следующей синхронизации.</string>
     <string name="developer_clear_lists_cache">Очистить кэш списков слов</string>

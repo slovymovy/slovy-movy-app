@@ -308,8 +308,8 @@
     <string name="developer_intake_daily">Codziennie</string>
     <string name="developer_intake_continue_now">Kontynuuj teraz</string>
     <string name="developer_study_title">Nauka</string>
-    <string name="developer_typed_playground_button">Wypróbuj pisaną kartę</string>
-    <string name="developer_typed_playground_description">Otwiera pisaną kartę na kilku przykładowych słowach. Bez danych nauki, nic nie jest zapisywane.</string>
+    <string name="developer_schedule_spelling_button">Zaplanuj karty pisowni jako pierwsze</string>
+    <string name="developer_schedule_spelling_description">Tworzy kartę pisowni dla każdego uczonego słowa i ustawia wszystkie karty pisowni jako zaległe, przed innymi kartami.</string>
     <string name="developer_caches_title">Pamięć podręczna</string>
     <string name="developer_caches_description">Wyczyść lokalnie zapisane dane z serwera; zostaną pobrane ponownie przy następnej synchronizacji.</string>
     <string name="developer_clear_lists_cache">Wyczyść pamięć podręczną list słów</string>
