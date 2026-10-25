@@ -9,7 +9,7 @@ class StatsCountFormatterTest {
     @Test
     fun formatsCountsWithLocaleGroupingSeparator() {
         assertEquals("33,319", formatCountForLanguage(33319, "en"))
-        for (language in listOf("nl", "de", "es", "it", "tr", "ru", "pl", "cs", "fr", "zh")) {
+        for (language in listOf("nl", "de", "es", "it", "tr", "ru", "pl", "cs", "fr", "zh", "uk", "be")) {
             assertGrouped(language)
         }
     }
