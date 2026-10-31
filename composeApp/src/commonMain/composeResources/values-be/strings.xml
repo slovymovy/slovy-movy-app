@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">Фарматы заняткаў</string>
     <string name="study_actions_explainer_description">Розныя фарматы паўтарэння слова</string>
     <string name="study_explainer_title">Як вы будзеце займацца</string>
-    <string name="study_explainer_intro">Фарматы ўскладняюцца па меры запамінання слова. Першы або апошні крок можна прапусціць.</string>
+    <string name="study_explainer_intro">Фарматы ўскладняюцца па меры запамінання слова. Самы просты і самы складаны можна ўключаць і выключаць пад свой узровень.</string>
     <string name="study_explainer_word_to_translation_title">Слова → пераклад</string>
     <string name="study_explainer_word_to_translation">Бачыце слова, узгадваеце пераклад.</string>
     <string name="study_explainer_translation_to_word_title">Пераклад → слова</string>

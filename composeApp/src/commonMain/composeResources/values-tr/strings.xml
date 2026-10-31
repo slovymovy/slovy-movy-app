@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">Çalışma biçimleri</string>
     <string name="study_actions_explainer_description">Bir kelimeyi tekrarlamanın farklı yolları</string>
     <string name="study_explainer_title">Nasıl pratik yapacaksın</string>
-    <string name="study_explainer_intro">Her kelime yerleştikçe biçimler zorlaşır. İstersen ilk veya son adımı atla.</string>
+    <string name="study_explainer_intro">Her kelime yerleştikçe biçimler zorlaşır. En kolay ve en zoru seviyene göre açıp kapatabilirsin.</string>
     <string name="study_explainer_word_to_translation_title">Kelime → çeviri</string>
     <string name="study_explainer_word_to_translation">Kelimeyi gör, çevirisini hatırla.</string>
     <string name="study_explainer_translation_to_word_title">Çeviri → kelime</string>

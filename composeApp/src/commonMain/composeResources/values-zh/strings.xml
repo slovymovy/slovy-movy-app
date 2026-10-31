@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">学习形式</string>
     <string name="study_actions_explainer_description">复习单词的几种方式</string>
     <string name="study_explainer_title">你将如何练习</string>
-    <string name="study_explainer_intro">单词记得越牢，形式就越难。第一步或最后一步可以跳过。</string>
+    <string name="study_explainer_intro">单词记得越牢，形式就越难。最简单和最难的可以按你的水平开启或关闭。</string>
     <string name="study_explainer_word_to_translation_title">单词 → 翻译</string>
     <string name="study_explainer_word_to_translation">看到单词，回想翻译。</string>
     <string name="study_explainer_translation_to_word_title">翻译 → 单词</string>

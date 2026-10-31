@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">Formáty učení</string>
     <string name="study_actions_explainer_description">Různé způsoby opakování slovíček</string>
     <string name="study_explainer_title">Jak budeš procvičovat</string>
-    <string name="study_explainer_intro">Formáty jsou těžší, jak si slovo upevňuješ. První nebo poslední krok můžeš vynechat.</string>
+    <string name="study_explainer_intro">Formáty jsou těžší, jak si slovo upevňuješ. Nejsnazší a nejtěžší si můžeš zapnout nebo vypnout podle své úrovně.</string>
     <string name="study_explainer_word_to_translation_title">Slovo → překlad</string>
     <string name="study_explainer_word_to_translation">Vidíš slovo, vybavíš si překlad.</string>
     <string name="study_explainer_translation_to_word_title">Překlad → slovo</string>

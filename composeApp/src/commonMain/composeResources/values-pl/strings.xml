@@ -628,7 +628,7 @@
     <string name="study_actions_explainer">Formaty nauki</string>
     <string name="study_actions_explainer_description">Różne sposoby powtarzania słówek</string>
     <string name="study_explainer_title">Jak będziesz ćwiczyć</string>
-    <string name="study_explainer_intro">Formaty stają się trudniejsze, w miarę jak słowo się utrwala. Możesz pominąć pierwszy lub ostatni krok.</string>
+    <string name="study_explainer_intro">Formaty stają się trudniejsze, w miarę jak słowo się utrwala. Najłatwiejszy i najtrudniejszy możesz włączyć lub wyłączyć według swojego poziomu.</string>
     <string name="study_explainer_word_to_translation_title">Słowo → tłumaczenie</string>
     <string name="study_explainer_word_to_translation">Widzisz słowo, przypominasz sobie tłumaczenie.</string>
     <string name="study_explainer_translation_to_word_title">Tłumaczenie → słowo</string>

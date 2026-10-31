@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">Formatos de estudio</string>
     <string name="study_actions_explainer_description">Las distintas formas de repasar una palabra</string>
     <string name="study_explainer_title">Así practicarás</string>
-    <string name="study_explainer_intro">Los formatos se vuelven más difíciles a medida que cada palabra se afianza. Si quieres, sáltate el primer o el último paso.</string>
+    <string name="study_explainer_intro">Los formatos se vuelven más difíciles a medida que cada palabra se afianza. Activa o desactiva el más fácil y el más difícil según tu nivel.</string>
     <string name="study_explainer_word_to_translation_title">Palabra → traducción</string>
     <string name="study_explainer_word_to_translation">Ves la palabra, recuerdas la traducción.</string>
     <string name="study_explainer_translation_to_word_title">Traducción → palabra</string>

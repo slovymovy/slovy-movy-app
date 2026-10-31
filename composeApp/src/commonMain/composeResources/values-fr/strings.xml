@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">Formats d’étude</string>
     <string name="study_actions_explainer_description">Les différentes façons de revoir un mot</string>
     <string name="study_explainer_title">Comment tu vas t’entraîner</string>
-    <string name="study_explainer_intro">Les formats se corsent à mesure que chaque mot s’ancre. Saute la première ou la dernière étape si tu veux.</string>
+    <string name="study_explainer_intro">Les formats se corsent à mesure que chaque mot s’ancre. Active ou désactive le plus facile et le plus difficile selon ton niveau.</string>
     <string name="study_explainer_word_to_translation_title">Mot → traduction</string>
     <string name="study_explainer_word_to_translation">Tu vois le mot, tu retrouves la traduction.</string>
     <string name="study_explainer_translation_to_word_title">Traduction → mot</string>
