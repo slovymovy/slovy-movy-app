@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.imePadding
@@ -104,6 +106,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
@@ -929,6 +932,14 @@ private fun StudySessionOverflowSheet(
     onRequestRemoveFromLibrary: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // The typed card keeps its field focused, so the keyboard would stay up and cover the sheet.
+    // Dropping focus closes it; the learner taps the field again afterwards, as after any
+    // interruption. The sheet also pads against the keyboard, so it is never drawn under it
+    // while the keyboard is still going down.
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(Unit) {
+        focusManager.clearFocus()
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -946,7 +957,7 @@ private fun StudySessionOverflowSheet(
         ) {
             Column(
                 modifier = Modifier
-                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                     .padding(top = AppSpacing.sm, bottom = AppSpacing.lg),
             ) {
                 Box(
