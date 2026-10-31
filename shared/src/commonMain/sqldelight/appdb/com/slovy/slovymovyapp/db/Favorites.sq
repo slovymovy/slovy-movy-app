@@ -235,6 +235,40 @@ WHERE sense_id = :sense_id
   AND lang_code = :lang_code
   AND family = :family;
 
+-- The strongest active card of each sense that has no card at all, suspended or not, in an
+-- enabled family, so a word the learner can no longer be shown can be re-entered in a family they
+-- still study. One row per sense, read a page at a time from :after_sense_id on, so one run never
+-- scans a whole vocabulary and inserting along the way cannot shift the next page.
+selectStrongestCardOfSensesWithoutFamilies:
+SELECT c.id, c.sense_id, c.lemma_id, c.lang_code, c.family, c.state,
+       c.stability, c.difficulty, c.due, c.last_review, c.reps, c.lapses, c.created_at,
+       c.available_after, c.answer_key, c.suspended
+FROM card c
+WHERE c.lang_code = :lang_code
+  AND c.suspended = 0
+  AND c.sense_id > :after_sense_id
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card s
+    WHERE s.sense_id = c.sense_id
+      AND s.lang_code = c.lang_code
+      AND s.family IN :allowed_families
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM card b
+    WHERE b.sense_id = c.sense_id
+      AND b.lang_code = c.lang_code
+      AND b.suspended = 0
+      AND (
+        b.stability > c.stability
+        OR (b.stability = c.stability AND b.created_at < c.created_at)
+        OR (b.stability = c.stability AND b.created_at = c.created_at AND b.id < c.id)
+      )
+  )
+ORDER BY c.sense_id ASC
+LIMIT :limit;
+
 selectCardsBySense:
 SELECT id, sense_id, lemma_id, lang_code, family, state,
        stability, difficulty, due, last_review, reps, lapses, created_at,
@@ -309,6 +343,7 @@ SELECT COUNT(*)
 FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
@@ -335,11 +370,14 @@ WHERE lang_code = :lang_code
   AND suspended = 0
   AND (available_after IS NULL OR available_after <= :now);
 
+-- Delayed, next-review and continue-now queries take the studied families so the "study done"
+-- card and "review more" never describe or release a card a session could not serve.
 countDelayedDueLemmasByLang:
 SELECT COUNT(DISTINCT lemma_id)
 FROM card INDEXED BY idx_card_active_lemma_due
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND available_after IS NOT NULL
   AND available_after > :now;
@@ -349,6 +387,7 @@ SELECT COUNT(*)
 FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
   AND due <= :now
+  AND family IN :allowed_families
   AND suspended = 0
   AND available_after IS NOT NULL
   AND available_after > :now;
@@ -362,6 +401,7 @@ SELECT MIN(
 ) AS next_review_at
 FROM card INDEXED BY idx_card_due_session
 WHERE lang_code = :lang_code
+  AND family IN :allowed_families
   AND suspended = 0;
 
 countNewCardsCreatedSince:
@@ -460,6 +500,7 @@ SET available_after = NULL
 WHERE lang_code = :lang_code
   AND suspended = 0
   AND due <= :now
+  AND family IN :allowed_families
   AND available_after IS NOT NULL
   AND available_after > :now
   AND lemma_id IN (
@@ -468,6 +509,7 @@ WHERE lang_code = :lang_code
     WHERE lang_code = :lang_code
       AND suspended = 0
       AND due <= :now
+      AND family IN :allowed_families
       AND available_after IS NOT NULL
       AND available_after > :now
     GROUP BY lemma_id
@@ -603,7 +645,7 @@ WHERE c.lang_code = :lang_code
 ORDER BY r.reviewed_at ASC;
 
 selectCardSchedulingByLang:
-SELECT sense_id, lemma_id, state, stability
+SELECT sense_id, lemma_id, family, state, stability
 FROM card
 WHERE lang_code = :lang_code
   AND suspended = 0;
