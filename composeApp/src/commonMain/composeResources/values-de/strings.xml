@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Aus „Meine Wörter“ entfernen</string>
     <string name="study_actions_explainer">Lernformate</string>
     <string name="study_actions_explainer_description">Verschiedene Wege, ein Wort zu wiederholen</string>
-    <string name="study_explainer_title">Wähle deine Lernformate</string>
-    <string name="study_explainer_intro">Sobald ein Wort sitzt, schalten sich schwerere Formate von selbst frei.</string>
+    <string name="study_explainer_title">So übst du</string>
+    <string name="study_explainer_intro">Die Formate werden schwerer, je besser ein Wort sitzt. Den ersten oder letzten Schritt kannst du auslassen.</string>
     <string name="study_explainer_word_to_translation_title">Wort → Übersetzung</string>
     <string name="study_explainer_word_to_translation">Wort sehen, Übersetzung abrufen.</string>
     <string name="study_explainer_translation_to_word_title">Übersetzung → Wort</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">Nur %1$s</string>
     <string name="study_explainer_source_only">Erklärt ganz ohne Übersetzung.</string>
     <string name="study_explainer_label_easiest">Am einfachsten</string>
-    <string name="study_explainer_label_not_for_beginners">Nichts für Anfänger</string>
+    <string name="study_explainer_label_hardest">Am schwersten</string>
     <string name="study_explainer_done">Fertig</string>
     <string name="study_remove_title">„%1$s“ aus „Meine Wörter“ entfernen?</string>
     <string name="study_remove_message">Diese bestimmte Bedeutung erscheint nicht mehr in deinen Lernsitzungen. Andere Bedeutungen von „%1$s“ bleiben in „Meine Wörter“. Du kannst es jederzeit wieder hinzufügen, ohne deinen Fortschritt zu verlieren.</string>

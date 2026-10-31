@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Retirer de Mes mots</string>
     <string name="study_actions_explainer">Formats d’étude</string>
     <string name="study_actions_explainer_description">Les différentes façons de revoir un mot</string>
-    <string name="study_explainer_title">Choisissez vos formats d’étude</string>
-    <string name="study_explainer_intro">Une fois qu'un mot est acquis, les formats plus difficiles se débloquent tout seuls.</string>
+    <string name="study_explainer_title">Comment tu vas t’entraîner</string>
+    <string name="study_explainer_intro">Les formats se corsent à mesure que chaque mot s’ancre. Saute la première ou la dernière étape si tu veux.</string>
     <string name="study_explainer_word_to_translation_title">Mot → traduction</string>
     <string name="study_explainer_word_to_translation">Tu vois le mot, tu retrouves la traduction.</string>
     <string name="study_explainer_translation_to_word_title">Traduction → mot</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">%1$s uniquement</string>
     <string name="study_explainer_source_only">Expliqué sans aucune traduction.</string>
     <string name="study_explainer_label_easiest">Le plus facile</string>
-    <string name="study_explainer_label_not_for_beginners">Pas pour les débutants</string>
+    <string name="study_explainer_label_hardest">Le plus difficile</string>
     <string name="study_explainer_done">Terminé</string>
     <string name="study_remove_title">Retirer « %1$s » de Mes mots ?</string>
     <string name="study_remove_message">Ce sens précis n'apparaîtra plus dans tes sessions d'étude. Les autres sens de « %1$s » resteront dans Mes mots. Tu peux le rajouter plus tard sans perdre ta progression.</string>

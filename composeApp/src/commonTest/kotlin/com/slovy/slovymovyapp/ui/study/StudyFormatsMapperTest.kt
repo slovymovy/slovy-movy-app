@@ -15,7 +15,7 @@ import slovymovyapp.composeapp.generated.resources.Res
 import slovymovyapp.composeapp.generated.resources.study_explainer_fill_gap
 import slovymovyapp.composeapp.generated.resources.study_explainer_intro
 import slovymovyapp.composeapp.generated.resources.study_explainer_label_easiest
-import slovymovyapp.composeapp.generated.resources.study_explainer_label_not_for_beginners
+import slovymovyapp.composeapp.generated.resources.study_explainer_label_hardest
 import slovymovyapp.composeapp.generated.resources.study_explainer_listen
 import slovymovyapp.composeapp.generated.resources.study_explainer_source_only
 import slovymovyapp.composeapp.generated.resources.study_explainer_source_only_title
@@ -50,6 +50,7 @@ class StudyFormatsMapperTest {
         )
         val intro = assertIs<UiText.Resource>(page.intro)
         assertEquals(Res.string.study_explainer_intro, intro.key)
+        assertEquals("nl", page.languageCode, "The source-only row's glyph is the studied language's code")
     }
 
     @Test
@@ -84,7 +85,7 @@ class StudyFormatsMapperTest {
         val easiest = assertIs<UiText.Resource>(page.row(StudyFormatRow.WORD_TO_TRANSLATION).label)
         assertEquals(Res.string.study_explainer_label_easiest, easiest.key)
         val hardest = assertIs<UiText.Resource>(page.row(StudyFormatRow.SOURCE_ONLY).label)
-        assertEquals(Res.string.study_explainer_label_not_for_beginners, hardest.key)
+        assertEquals(Res.string.study_explainer_label_hardest, hardest.key)
         StudyFormatRow.entries.filter { it.format == null }.forEach { row ->
             assertEquals(null, page.row(row).label, "$row carries no label")
         }

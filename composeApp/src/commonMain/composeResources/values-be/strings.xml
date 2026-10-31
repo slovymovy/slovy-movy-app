@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Выдаліць з «Маіх слоў»</string>
     <string name="study_actions_explainer">Фарматы заняткаў</string>
     <string name="study_actions_explainer_description">Розныя фарматы паўтарэння слова</string>
-    <string name="study_explainer_title">Выберыце фарматы заняткаў</string>
-    <string name="study_explainer_intro">Па меры запамінання слова больш складаныя фарматы адкрываюцца самі.</string>
+    <string name="study_explainer_title">Як вы будзеце займацца</string>
+    <string name="study_explainer_intro">Фарматы ўскладняюцца па меры запамінання слова. Першы або апошні крок можна прапусціць.</string>
     <string name="study_explainer_word_to_translation_title">Слова → пераклад</string>
     <string name="study_explainer_word_to_translation">Бачыце слова, узгадваеце пераклад.</string>
     <string name="study_explainer_translation_to_word_title">Пераклад → слова</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">Толькі %1$s</string>
     <string name="study_explainer_source_only">Тлумачэнне без перакладу.</string>
     <string name="study_explainer_label_easiest">Самы просты</string>
-    <string name="study_explainer_label_not_for_beginners">Не для пачаткоўцаў</string>
+    <string name="study_explainer_label_hardest">Самы складаны</string>
     <string name="study_explainer_done">Гатова</string>
     <string name="study_remove_title">Выдаліць «%1$s» з «Маіх слоў»?</string>
     <string name="study_remove_message">Гэта значэнне больш не з'явіцца ў трэніроўках. Іншыя значэнні слова «%1$s» застануцца ў «Маіх словах». Вы зможаце вярнуць яго ў любы момант без страты прагрэсу.</string>

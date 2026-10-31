@@ -10,6 +10,8 @@ import com.slovy.slovymovyapp.i18n.UiText
  */
 data class StudyFormatsUiState(
     val intro: UiText,
+    /** The studied language's code, shown as the glyph of the source-only row. */
+    val languageCode: String,
     val rows: List<StudyFormatRowUiState>,
 )
 

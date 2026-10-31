@@ -18,6 +18,7 @@ fun studyFormatsUiState(language: Language, selection: StudyFormatSelection): St
         )
     return StudyFormatsUiState(
         intro = UiText.Resource(Res.string.study_explainer_intro),
+        languageCode = language.code,
         rows = listOf(
             row(
                 StudyFormatRow.WORD_TO_TRANSLATION,
@@ -53,7 +54,7 @@ fun studyFormatsUiState(language: Language, selection: StudyFormatSelection): St
                 StudyFormatRow.SOURCE_ONLY,
                 UiText.Resource(Res.string.study_explainer_source_only_title, listOf(language.selfName)),
                 UiText.Resource(Res.string.study_explainer_source_only),
-                UiText.Resource(Res.string.study_explainer_label_not_for_beginners),
+                UiText.Resource(Res.string.study_explainer_label_hardest),
             ),
         ),
     )

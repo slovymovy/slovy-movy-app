@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Quitar de Mis palabras</string>
     <string name="study_actions_explainer">Formatos de estudio</string>
     <string name="study_actions_explainer_description">Las distintas formas de repasar una palabra</string>
-    <string name="study_explainer_title">Elige tus formatos de estudio</string>
-    <string name="study_explainer_intro">Cuanto mejor te sabes una palabra, los formatos más difíciles se desbloquean solos.</string>
+    <string name="study_explainer_title">Así practicarás</string>
+    <string name="study_explainer_intro">Los formatos se vuelven más difíciles a medida que cada palabra se afianza. Si quieres, sáltate el primer o el último paso.</string>
     <string name="study_explainer_word_to_translation_title">Palabra → traducción</string>
     <string name="study_explainer_word_to_translation">Ves la palabra, recuerdas la traducción.</string>
     <string name="study_explainer_translation_to_word_title">Traducción → palabra</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">Solo %1$s</string>
     <string name="study_explainer_source_only">Explicado sin ninguna traducción.</string>
     <string name="study_explainer_label_easiest">El más fácil</string>
-    <string name="study_explainer_label_not_for_beginners">No para principiantes</string>
+    <string name="study_explainer_label_hardest">El más difícil</string>
     <string name="study_explainer_done">Listo</string>
     <string name="study_remove_title">¿Quitar «%1$s» de Mis palabras?</string>
     <string name="study_remove_message">Este significado concreto dejará de aparecer en tus sesiones de estudio. Los demás significados de «%1$s» seguirán en Mis palabras. Siempre puedes volver a añadirlo más tarde sin perder tu progreso.</string>

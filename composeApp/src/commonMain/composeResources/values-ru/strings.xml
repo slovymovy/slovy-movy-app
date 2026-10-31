@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Удалить из «Моих слов»</string>
     <string name="study_actions_explainer">Форматы занятий</string>
     <string name="study_actions_explainer_description">Разные форматы повторения слова</string>
-    <string name="study_explainer_title">Выберите форматы занятий</string>
-    <string name="study_explainer_intro">По мере запоминания слова более сложные форматы открываются сами.</string>
+    <string name="study_explainer_title">Как вы будете заниматься</string>
+    <string name="study_explainer_intro">Форматы усложняются по мере запоминания слова. Первый или последний шаг можно пропустить.</string>
     <string name="study_explainer_word_to_translation_title">Слово → перевод</string>
     <string name="study_explainer_word_to_translation">Видите слово, вспоминаете перевод.</string>
     <string name="study_explainer_translation_to_word_title">Перевод → слово</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">Только %1$s</string>
     <string name="study_explainer_source_only">Объяснение без перевода.</string>
     <string name="study_explainer_label_easiest">Самый простой</string>
-    <string name="study_explainer_label_not_for_beginners">Не для начинающих</string>
+    <string name="study_explainer_label_hardest">Самый сложный</string>
     <string name="study_explainer_done">Готово</string>
     <string name="study_remove_title">Удалить «%1$s» из «Моих слов»?</string>
     <string name="study_remove_message">Это значение больше не появится в тренировках. Другие значения слова «%1$s» останутся в «Моих словах». Вы сможете вернуть его в любой момент без потери прогресса.</string>

@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Odebrat z Mých slov</string>
     <string name="study_actions_explainer">Formáty učení</string>
     <string name="study_actions_explainer_description">Různé způsoby opakování slovíček</string>
-    <string name="study_explainer_title">Vyberte si formáty učení</string>
-    <string name="study_explainer_intro">Jakmile se slovo zafixuje, těžší formáty se odemknou samy.</string>
+    <string name="study_explainer_title">Jak budeš procvičovat</string>
+    <string name="study_explainer_intro">Formáty jsou těžší, jak si slovo upevňuješ. První nebo poslední krok můžeš vynechat.</string>
     <string name="study_explainer_word_to_translation_title">Slovo → překlad</string>
     <string name="study_explainer_word_to_translation">Vidíš slovo, vybavíš si překlad.</string>
     <string name="study_explainer_translation_to_word_title">Překlad → slovo</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">Jen %1$s</string>
     <string name="study_explainer_source_only">Vysvětleno bez překladu.</string>
     <string name="study_explainer_label_easiest">Nejsnazší</string>
-    <string name="study_explainer_label_not_for_beginners">Ne pro začátečníky</string>
+    <string name="study_explainer_label_hardest">Nejtěžší</string>
     <string name="study_explainer_done">Hotovo</string>
     <string name="study_remove_title">Odebrat „%1$s“ z Mých slov?</string>
     <string name="study_remove_message">Tento konkrétní význam se přestane objevovat v učebních relacích. Ostatní významy slova „%1$s“ zůstanou v Mých slovech. Kdykoli ho můžeš přidat zpět bez ztráty pokroku.</string>

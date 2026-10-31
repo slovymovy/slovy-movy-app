@@ -628,8 +628,8 @@
     <string name="study_actions_remove">Uit Mijn lijst verwijderen</string>
     <string name="study_actions_explainer">Oefenvormen</string>
     <string name="study_actions_explainer_description">De verschillende manieren om een woord te herhalen</string>
-    <string name="study_explainer_title">Kies je oefenvormen</string>
-    <string name="study_explainer_intro">Zodra een woord blijft hangen, komen moeilijkere oefenvormen vanzelf vrij.</string>
+    <string name="study_explainer_title">Zo ga je oefenen</string>
+    <string name="study_explainer_intro">De formats worden moeilijker naarmate een woord beter blijft hangen. Sla de eerste of laatste stap over als je wilt.</string>
     <string name="study_explainer_word_to_translation_title">Woord → vertaling</string>
     <string name="study_explainer_word_to_translation">Zie het woord, haal de vertaling op.</string>
     <string name="study_explainer_translation_to_word_title">Vertaling → woord</string>
@@ -643,7 +643,7 @@
     <string name="study_explainer_source_only_title">Alleen %1$s</string>
     <string name="study_explainer_source_only">Uitgelegd zonder vertaling.</string>
     <string name="study_explainer_label_easiest">Makkelijkst</string>
-    <string name="study_explainer_label_not_for_beginners">Niet voor beginners</string>
+    <string name="study_explainer_label_hardest">Moeilijkst</string>
     <string name="study_explainer_done">Klaar</string>
     <string name="study_remove_title">"%1$s" verwijderen uit Mijn woorden?</string>
     <string name="study_remove_message">Alleen deze specifieke betekenis komt niet meer voorbij tijdens het oefenen. Andere betekenissen van "%1$s" blijven gewoon in Mijn woorden staan. Je kunt de betekenis later weer toevoegen met behoud van je voortgang.</string>
