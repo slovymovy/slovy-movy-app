@@ -1987,9 +1987,10 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun reroute_skips_a_sense_with_no_playable_variant_in_the_studied_family() = runBlocking {
         withEnv(includeTranslation = true) { env ->
-            // No translation data at all and the source-only format off, so no studied family
-            // can play the sense.
-            val fixture = env.seedSense(lemma = "unplayablesense")
+            // No translation data, and a definition that gives the word away, so neither the
+            // translated nor the source-only production card can be built; with recognition off
+            // no studied family can play the sense.
+            val fixture = env.seedSense(lemma = "unplayablesense", definition = "to <w>unplayablesense</w> something")
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 10.0)
@@ -2180,10 +2181,10 @@ class LearningE2ETest : BaseTest() {
     fun reroute_walks_past_unplayable_senses_to_the_ones_behind_them() = runBlocking {
         val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 1)
         withEnv(includeTranslation = true, config = config) { env ->
-            // Several senses with no translation data: never playable in production, and with a
-            // page size of one they would each fill a page.
+            // Several senses with no translation data and a definition that gives the word away:
+            // never playable in production, and with a page size of one they would each fill a page.
             val unplayable = (1..3).map { index ->
-                val fixture = env.seedSense(lemma = "unplayable$index")
+                val fixture = env.seedSense(lemma = "unplayable$index", definition = "to <w>unplayable$index</w> something")
                 env.addFavorite(fixture)
                 env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
                 env.insertTask(
@@ -2298,7 +2299,12 @@ class LearningE2ETest : BaseTest() {
         val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 3)
         withEnv(includeTranslation = true, config = config) { env ->
             fun stranded(lemma: String, withTranslation: Boolean): SenseFixture {
-                val fixture = env.seedSense(lemma = lemma)
+                // Without a translation, a definition that gives the word away keeps the sense
+                // unplayable in production too.
+                val fixture = env.seedSense(
+                    lemma = lemma,
+                    definition = if (withTranslation) "to learn something" else "to <w>$lemma</w> something",
+                )
                 if (withTranslation) env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
                 return fixture
             }
@@ -2392,9 +2398,10 @@ class LearningE2ETest : BaseTest() {
     fun reroute_takes_the_first_studied_family_that_can_play_the_sense() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
         withEnv(includeTranslation = true, config = config) { env ->
-            // A translated cloze example but no translation words: with both formats off,
-            // production cannot be cued, while the translated cloze can be played.
-            val fixture = env.seedSense(lemma = "clozeonlyword")
+            // A translated cloze example but no translation words, and a definition that gives the
+            // word away: production cannot be cued either way, while the translated cloze can be
+            // played.
+            val fixture = env.seedSense(lemma = "clozeonlyword", definition = "to <w>clozeonlyword</w> something")
             env.translation!!.translationQueries.insertExampleTranslation(fixture.senseId, "en", "ru", 1, "Я <w>учусь</w> каждый день.")
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
@@ -2432,7 +2439,7 @@ class LearningE2ETest : BaseTest() {
         withEnv(includeTranslation = true) { env ->
             // Playable in context only, like the reviewed word above, but never reviewed: it has
             // earned no step on the ladder, so it must not start at fill-the-gap.
-            val fixture = env.seedSense(lemma = "freshclozeonly")
+            val fixture = env.seedSense(lemma = "freshclozeonly", definition = "to <w>freshclozeonly</w> something")
             env.translation!!.translationQueries.insertExampleTranslation(fixture.senseId, "en", "ru", 1, "Я <w>учусь</w> каждый день.")
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
@@ -2458,9 +2465,30 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun an_untranslated_word_is_still_served_source_only_when_source_only_is_off() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            // No translation into the configured target at all: before this, the card would be
+            // buried for the formats rest every two hours while My words kept counting it due.
+            val fixture = env.seedSense(lemma = "untranslatedword")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
+            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.WORD_TO_TRANSLATION))
+
+            val card = env.nextLoadedCard("en")
+
+            assertEquals(CardFamily.RECOGNIZE_SENSE, card.card.family)
+            assertEquals(CardKind.WORD_TO_SOURCE_DEFINITION, card.variant.kind, "Its only playable form is the source-only one")
+            val stored = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
+            assertNull(stored.available_after, "Nothing to bury: the card was served")
+        }
+    }
+
+    @Test
     fun reroute_looks_again_once_missing_data_arrives() = runBlocking {
         withEnv(includeTranslation = true) { env ->
-            val fixture = env.seedSense(lemma = "dataarriveslater")
+            // The definition gives the word away, so production waits for translation words.
+            val fixture = env.seedSense(lemma = "dataarriveslater", definition = "to <w>dataarriveslater</w> something")
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             env.insertTask(
@@ -2482,30 +2510,6 @@ class LearningE2ETest : BaseTest() {
             val after = env.intake.runIntake("en")
 
             assertEquals(1, after.rerouted, "A sense rejected for missing data is looked at again once the data is there")
-        }
-    }
-
-    @Test
-    fun a_failed_translation_fetch_keeps_the_short_cooldown_even_when_formats_would_block_it() = runBlocking {
-        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
-        withEnv(includeTranslation = true, config = config) { env ->
-            // No translation data anywhere and the test server does not know the word, so the
-            // translation fetch ends in an error: the data may still arrive on a later attempt.
-            val fixture = env.seedSense(lemma = "fetchfailsword")
-            env.addFavorite(fixture)
-            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
-            val card = env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
-            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.WORD_TO_TRANSLATION))
-
-            val served = env.session.nextCard("en", start, emptySet()).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
-
-            assertNull(served)
-            val buried = env.app.favoritesQueries.selectCardById(card.id).executeAsOne()
-            assertEquals(
-                (start + config.buryFailedSessionCardsFor).toEpochMilliseconds(),
-                buried.available_after,
-                "After a failed fetch the card gets the short retry cooldown, not the formats rest",
-            )
         }
     }
 

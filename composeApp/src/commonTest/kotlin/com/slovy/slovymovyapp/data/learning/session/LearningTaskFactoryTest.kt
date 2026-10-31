@@ -160,6 +160,37 @@ class LearningTaskFactoryTest {
     }
 
     @Test
+    fun buildTaskVariants_keepsAnUntranslatedSensePlayableSourceOnly() {
+        val untranslated = senseWithoutTranslations(definition = "a feeling of warmth and comfort")
+        val sourceOnlyOff = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION), playsTranslationKinds = true)
+
+        assertEquals(
+            listOf(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null)),
+            buildTaskVariants(CardFamily.RECOGNIZE_SENSE, untranslated, listOf(Language.ENGLISH), sourceOnlyOff),
+            "With no translation anywhere the source-only switch means 'prefer translated', not 'never study this word'",
+        )
+        assertEquals(
+            listOf(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null)),
+            buildTaskVariants(CardFamily.PRODUCE_WORD, untranslated, listOf(Language.ENGLISH), sourceOnlyOff),
+        )
+        assertEquals(
+            emptyList(),
+            buildTaskVariants(
+                CardFamily.RECOGNIZE_SENSE,
+                untranslated,
+                listOf(Language.ENGLISH),
+                StudyFormatSelection(emptySet(), playsTranslationKinds = true),
+            ),
+            "The family switch still holds: recognition stays off when the learner skipped that step",
+        )
+        assertEquals(
+            listOf(CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code)),
+            buildTaskVariants(CardFamily.RECOGNIZE_SENSE, sense(definition = "a feeling of warmth and comfort"), listOf(Language.ENGLISH), sourceOnlyOff),
+            "A translated sense obeys the switch",
+        )
+    }
+
+    @Test
     fun selectVariantsForReview_startsProductionWithTheTranslationKindWhenTheEasiestIsOff() {
         val sense = sense(definition = "a feeling of warmth and comfort")
 

@@ -7,7 +7,9 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardVariant
+import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
+import com.slovy.slovymovyapp.data.learning.format
 import com.slovy.slovymovyapp.data.remote.LanguageCardExample
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
@@ -16,7 +18,8 @@ import kotlin.time.Duration
 /**
  * The variants of [family] this sense can be played in, in the learner's configured translation
  * languages and chosen [studyFormats]. Intake, review-time selection and the unlock ladder all
- * build from here, so a format the learner switched off is never created, served or unlocked.
+ * build from here, so a format the learner switched off is never created, served or unlocked,
+ * with one exception: an untranslated sense keeps its source-only kinds, see below.
  */
 fun buildTaskVariants(
     family: CardFamily,
@@ -68,7 +71,16 @@ fun buildTaskVariants(
                 .forEach { add(CardVariant(CardKind.TRANSLATION_TO_WORD_TYPED, targetLang = it.code)) }
         }
     }
-    return all.filter { studyFormats.allows(it.kind) }
+    // A sense with no translation into any of the configured targets can only be played
+    // source-only, as every sense of a language without targets is. For it the source-only switch
+    // does not apply: it means "prefer translated cards", not "never study this word". The family
+    // switch still does, so recognition stays off when the learner skipped that step. (A language
+    // without targets never gets here with a switch: its selection plays source-only alone.)
+    val untranslated = targets.isNotEmpty() && targets.none { sense.hasTranslationWords(it) }
+    return all.filter { variant ->
+        studyFormats.allows(variant.kind) ||
+            (untranslated && variant.kind.format == StudyFormat.SOURCE_ONLY && variant.kind.family in studyFormats.families)
+    }
 }
 
 // The data a variant needs before it is playable in a given target language. This is the single

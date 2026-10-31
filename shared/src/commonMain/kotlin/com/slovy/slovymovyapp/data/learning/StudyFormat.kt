@@ -47,8 +47,9 @@ val CardKind.format: StudyFormat?
  * The first switch is a family switch and the last a kind switch: with [StudyFormat.WORD_TO_TRANSLATION]
  * off the recognition family is not studied at all, so a new word starts at production instead of
  * meeting the hard source-only recognition card first; with [StudyFormat.SOURCE_ONLY] off the two
- * source-only kinds are dropped wherever they live. Both may be off: the always-on kinds keep
- * every language studiable.
+ * source-only kinds are dropped wherever they live, except for a sense with no translation into
+ * any target, which `buildTaskVariants` keeps playable source-only. Both may be off: the always-on
+ * kinds keep every language studiable.
  *
  * Without translation targets ([playsTranslationKinds] false) only the source-only kinds can be
  * played, since every other kind cues or answers with a translation; the stored choice does not

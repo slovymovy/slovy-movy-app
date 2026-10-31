@@ -411,7 +411,8 @@ explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can disti
 Study formats (`StudyFormat`, `StudyFormatSelection` in `shared/.../data/learning`) are the learner's per-language
 choice over the two formats that can be switched off: the easiest, `WORD_TO_TRANSLATION`, which is a family switch
 (off, `RECOGNIZE_SENSE` is not studied at all, its source-only kind included, and new words start at production),
-and the hardest, `SOURCE_ONLY`, which is a kind switch over the two definition kinds. Every other kind, the typed
+and the hardest, `SOURCE_ONLY`, which is a kind switch over the two definition kinds (a sense with no translation into
+any target keeps them, so an untranslated word is still studied). Every other kind, the typed
 spelling card included, is always on (`CardKind.format` is null). The formats switched on are stored under
 `Setting.Name.STUDY_FORMATS`; both may be off. Read and write them only through `StudyFormatsRepository`
 (`composeApp/.../data/learning`): for a language without translation targets it resolves to every format with
