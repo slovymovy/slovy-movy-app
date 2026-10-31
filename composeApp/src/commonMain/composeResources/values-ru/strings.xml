@@ -637,7 +637,7 @@
     <string name="study_explainer_fill_gap_title">Заполните пропуск</string>
     <string name="study_explainer_fill_gap">Дополните предложение.</string>
     <string name="study_explainer_spelling_title">Написание</string>
-    <string name="study_explainer_spelling">Напечатайте слово по переводу.</string>
+    <string name="study_explainer_spelling">Наберите слово по переводу.</string>
     <string name="study_explainer_listen_title">На слух</string>
     <string name="study_explainer_listen">Только на слух, без текста.</string>
     <string name="study_explainer_source_only_title">Только %1$s</string>
