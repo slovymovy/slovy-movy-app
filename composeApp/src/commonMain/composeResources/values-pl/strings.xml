@@ -635,6 +635,8 @@
     <string name="study_explainer_translation_to_word">Widzisz tłumaczenie, przypominasz sobie słowo.</string>
     <string name="study_explainer_fill_gap_title">Uzupełnij lukę</string>
     <string name="study_explainer_fill_gap">Uzupełnij zdanie.</string>
+    <string name="study_explainer_spelling_title">Pisownia</string>
+    <string name="study_explainer_spelling">Wpisz słowo na podstawie tłumaczenia.</string>
     <string name="study_explainer_listen_title">Słuchaj</string>
     <string name="study_explainer_listen">Tylko słyszysz, bez tekstu.</string>
     <string name="study_explainer_source_only_title">Tylko %1$s</string>

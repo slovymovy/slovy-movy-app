@@ -636,6 +636,8 @@
     <string name="study_explainer_translation_to_word">Übersetzung sehen, Wort abrufen.</string>
     <string name="study_explainer_fill_gap_title">Lücke füllen</string>
     <string name="study_explainer_fill_gap">Vervollständige den Satz.</string>
+    <string name="study_explainer_spelling_title">Rechtschreibung</string>
+    <string name="study_explainer_spelling">Tipp das Wort zur Übersetzung ein.</string>
     <string name="study_explainer_listen_title">Hören</string>
     <string name="study_explainer_listen">Nur hören, kein Text.</string>
     <string name="study_explainer_source_only_title">Nur %1$s</string>

@@ -1,73 +1,76 @@
 package com.slovy.slovymovyapp.data.learning
 
 /**
- * The ways a word can come back in a study session, as the learner sees them. The declaration
- * order is the ladder: a word unlocks these from top to bottom as it sticks.
- *
- * The two definition kinds share the source-only format: to the learner they are one idea, "no
- * translation anywhere". The source-sentence cloze is not one of them: it needs a translation
- * target for its hint and its back, so it is a way of filling the gap.
+ * The card formats a learner may switch off: the easiest way a word comes back and the hardest.
+ * Every other way is always on; see [CardKind.format].
  */
 enum class StudyFormat {
+    /** The word is shown and its translation recalled: the first card a word gets. */
     WORD_TO_TRANSLATION,
-    TRANSLATION_TO_WORD,
-    FILL_THE_GAP,
-    LISTEN,
+
+    /**
+     * The two definition kinds: explained in the studied language, with no translation anywhere.
+     * To the learner they are one idea. The source-sentence cloze is not one of them: it needs a
+     * translation target for its hint and its back.
+     */
     SOURCE_ONLY,
 }
 
-val CardKind.format: StudyFormat
+/** The format that switches this kind off, or null for a kind that is always on. */
+val CardKind.format: StudyFormat?
     get() = when (this) {
         CardKind.WORD_TO_TRANSLATION -> StudyFormat.WORD_TO_TRANSLATION
-        CardKind.TRANSLATION_TO_WORD -> StudyFormat.TRANSLATION_TO_WORD
-        CardKind.CLOZE_TRANSLATION,
-        CardKind.CLOZE_SOURCE,
-            -> StudyFormat.FILL_THE_GAP
-
-        CardKind.LISTENING_TRANSLATION -> StudyFormat.LISTEN
         CardKind.WORD_TO_SOURCE_DEFINITION,
         CardKind.SOURCE_DEFINITION_TO_WORD,
             -> StudyFormat.SOURCE_ONLY
+
+        CardKind.TRANSLATION_TO_WORD,
+        CardKind.CLOZE_TRANSLATION,
+        CardKind.CLOZE_SOURCE,
+        CardKind.LISTENING_TRANSLATION,
+        CardKind.TRANSLATION_TO_WORD_TYPED,
+            -> null
     }
 
 /**
  * The formats a learner studies a language with. It filters what a session serves and what the
- * ladder creates; it never touches a card that already exists, so switching a format off and on
- * leaves every card, review and stability exactly as it was.
+ * unlock rules create; it never touches a card that already exists, so switching a format off and
+ * on leaves every card, review and stability exactly as it was.
  *
- * At least one format is always enabled: a selection with none would make a language unstudiable.
+ * Both formats may be off: the always-on kinds keep every language studiable. Without translation
+ * targets ([playsTranslationKinds] false) only the source-only kinds can be played, since every
+ * other kind cues or answers with a translation; then the source-only format is the whole
+ * selection, whatever is stored.
  */
-data class StudyFormatSelection(val enabled: Set<StudyFormat>) {
-    init {
-        require(enabled.isNotEmpty()) { "A study format selection needs at least one format" }
+data class StudyFormatSelection(
+    val enabled: Set<StudyFormat>,
+    val playsTranslationKinds: Boolean,
+) {
+    fun allows(kind: CardKind): Boolean {
+        val format = kind.format
+        if (format != null && format !in enabled) return false
+        return playsTranslationKinds || format == StudyFormat.SOURCE_ONLY
     }
 
-    fun allows(kind: CardKind): Boolean = kind.format in enabled
-
-    /** The task families with at least one enabled kind, in ladder order. */
+    /** The task families with at least one playable kind, in ladder order. */
     val families: List<CardFamily> = CardFamily.entries.filter { family ->
-        CardKind.entries.any { it.family == family && it.format in enabled }
+        CardKind.entries.any { it.family == family && allows(it) }
     }
 
     val excludedFamilies: Set<CardFamily> = CardFamily.entries.toSet() - families.toSet()
 
-    /** The next enabled family after [family] on the ladder, if any. */
-    fun nextFamilyAfter(family: CardFamily): CardFamily? =
-        families.firstOrNull { it.ordinal > family.ordinal }
-
     /**
-     * The families a new word starts in: the [preferred] ones that are enabled, or the first
-     * enabled family of the ladder when none of them is.
+     * The families a new word starts in: the [preferred] ones that are studied, or the first
+     * studied family of the ladder when none of them is.
      */
     fun intakeFamilies(preferred: List<CardFamily>): List<CardFamily> =
         preferred.filter { it in families }.ifEmpty { families.take(1) }
 
-    fun with(format: StudyFormat, enabled: Boolean): StudyFormatSelection? {
-        val next = if (enabled) this.enabled + format else this.enabled - format
-        return if (next.isEmpty()) null else StudyFormatSelection(next)
-    }
+    fun with(format: StudyFormat, enabled: Boolean): StudyFormatSelection =
+        copy(enabled = if (enabled) this.enabled + format else this.enabled - format)
 
     companion object {
-        val ALL: StudyFormatSelection = StudyFormatSelection(StudyFormat.entries.toSet())
+        /** Every format on, for a language with translation targets. */
+        val ALL: StudyFormatSelection = StudyFormatSelection(StudyFormat.entries.toSet(), playsTranslationKinds = true)
     }
 }

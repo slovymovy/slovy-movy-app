@@ -133,7 +133,7 @@ class LearningTaskFactoryTest {
     @Test
     fun buildTaskVariants_dropsKindsOfSwitchedOffFormats() {
         val sense = sense(definition = "a feeling of warmth and comfort")
-        val noSourceOnly = StudyFormatSelection(StudyFormat.entries.toSet() - StudyFormat.SOURCE_ONLY)
+        val noSourceOnly = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION), playsTranslationKinds = true)
 
         val variants = buildTaskVariants(
             family = CardFamily.PRODUCE_WORD,
@@ -150,10 +150,10 @@ class LearningTaskFactoryTest {
         assertEquals(
             emptyList(),
             buildTaskVariants(
-                family = CardFamily.PRODUCE_WORD,
+                family = CardFamily.RECOGNIZE_SENSE,
                 sense = sense,
                 translationTargets = listOf(Language.ENGLISH),
-                studyFormats = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION)),
+                studyFormats = StudyFormatSelection(emptySet(), playsTranslationKinds = true),
             ),
             "A family none of whose kinds is studied has no variant at all",
         )
@@ -167,7 +167,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = emptyList(),
-            studyFormats = StudyFormatSelection(StudyFormat.entries.toSet() - StudyFormat.SOURCE_ONLY),
+            studyFormats = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION), playsTranslationKinds = true),
             cardStability = 1.days,
             lastVariant = null,
         )
@@ -313,6 +313,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.SPELL_WORD,
             sense = sense(definition = "a feeling of warmth and comfort"),
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(
@@ -328,6 +329,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.SPELL_WORD,
             sense = senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort"),
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(emptyList(), variants, "A translated definition alone cannot cue a typed word")

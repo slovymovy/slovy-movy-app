@@ -636,6 +636,8 @@
     <string name="study_explainer_translation_to_word">Zie de vertaling, haal het woord op.</string>
     <string name="study_explainer_fill_gap_title">Vul het gat in</string>
     <string name="study_explainer_fill_gap">Maak de zin af.</string>
+    <string name="study_explainer_spelling_title">Spelling</string>
+    <string name="study_explainer_spelling">Typ het woord bij de vertaling.</string>
     <string name="study_explainer_listen_title">Luister</string>
     <string name="study_explainer_listen">Alleen horen, geen tekst.</string>
     <string name="study_explainer_source_only_title">Alleen %1$s</string>

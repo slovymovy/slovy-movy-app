@@ -1,32 +1,46 @@
 package com.slovy.slovymovyapp.data.learning
 
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
+import com.slovy.slovymovyapp.data.learning.fsrs.backwardCreditDelay
 import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
-import com.slovy.slovymovyapp.data.learning.fsrs.ladderCreditFactor
-import com.slovy.slovymovyapp.data.learning.fsrs.unlockStabilityGate
+import com.slovy.slovymovyapp.data.learning.fsrs.forwardCreditDelay
+import com.slovy.slovymovyapp.data.learning.fsrs.inheritedStability
+import com.slovy.slovymovyapp.data.learning.fsrs.reentryScheduling
+import com.slovy.slovymovyapp.data.learning.fsrs.unlockPathCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.unlocksEventually
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 
 class StudyFormatSelectionTest {
 
+    private val bothOff = StudyFormatSelection(emptySet(), playsTranslationKinds = true)
+
     @Test
-    fun sourceOnlyIsTheDefinitionKindsAndBothClozesFillTheGap() {
+    fun onlyTheEasiestAndTheHardestKindsHaveAFormat() {
+        assertEquals(
+            setOf(CardKind.WORD_TO_TRANSLATION),
+            CardKind.entries.filter { it.format == StudyFormat.WORD_TO_TRANSLATION }.toSet(),
+        )
         assertEquals(
             setOf(CardKind.WORD_TO_SOURCE_DEFINITION, CardKind.SOURCE_DEFINITION_TO_WORD),
             CardKind.entries.filter { it.format == StudyFormat.SOURCE_ONLY }.toSet(),
             "Only the kinds that render without a translation target are source-only",
         )
         assertEquals(
-            setOf(CardKind.CLOZE_TRANSLATION, CardKind.CLOZE_SOURCE),
-            CardKind.entries.filter { it.format == StudyFormat.FILL_THE_GAP }.toSet(),
-            "The source-sentence cloze needs a target for its hint and back, so it fills the gap",
+            setOf(
+                CardKind.TRANSLATION_TO_WORD,
+                CardKind.CLOZE_TRANSLATION,
+                CardKind.CLOZE_SOURCE,
+                CardKind.LISTENING_TRANSLATION,
+                CardKind.TRANSLATION_TO_WORD_TYPED,
+            ),
+            CardKind.entries.filter { it.format == null }.toSet(),
+            "Every other kind, the typed spelling card included, is always on",
         )
-        listOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.TRANSLATION_TO_WORD, StudyFormat.LISTEN).forEach { format ->
-            assertEquals(1, CardKind.entries.count { it.format == format }, "One kind for $format")
-        }
     }
 
     @Test
@@ -36,25 +50,35 @@ class StudyFormatSelectionTest {
     }
 
     @Test
-    fun aFamilyIsStudiedWhenAnyOfItsKindsIs() {
-        val sourceOnly = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY))
+    fun withBothFormatsOffOnlyRecognitionIsLeftOut() {
+        assertEquals(
+            CardFamily.entries - CardFamily.RECOGNIZE_SENSE,
+            bothOff.families,
+            "Recognition is the one family whose every kind can be switched off",
+        )
+        assertEquals(setOf(CardFamily.RECOGNIZE_SENSE), bothOff.excludedFamilies)
+        assertTrue(bothOff.allows(CardKind.TRANSLATION_TO_WORD))
+        assertTrue(bothOff.allows(CardKind.TRANSLATION_TO_WORD_TYPED))
+        assertFalse(bothOff.allows(CardKind.WORD_TO_TRANSLATION))
+        assertFalse(bothOff.allows(CardKind.SOURCE_DEFINITION_TO_WORD))
+    }
+
+    @Test
+    fun withoutTranslationTargetsOnlyTheSourceOnlyKindsPlay() {
+        val sourceOnly = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY), playsTranslationKinds = false)
 
         assertEquals(
             listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
             sourceOnly.families,
-            "Context and listening have no source-only kind, so they are the families left out",
+            "Context, listening and spelling have no source-only kind, so they are the families left out",
         )
-        assertEquals(setOf(CardFamily.PRODUCE_WORD_IN_CONTEXT, CardFamily.RECOGNIZE_VOICE), sourceOnly.excludedFamilies)
-        assertTrue(sourceOnly.allows(CardKind.SOURCE_DEFINITION_TO_WORD))
-        assertTrue(!sourceOnly.allows(CardKind.CLOZE_SOURCE))
-    }
-
-    @Test
-    fun theLadderStepsOverSwitchedOffFamilies() {
-        val selection = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.LISTEN))
-
-        assertEquals(CardFamily.RECOGNIZE_VOICE, selection.nextFamilyAfter(CardFamily.RECOGNIZE_SENSE))
-        assertNull(selection.nextFamilyAfter(CardFamily.RECOGNIZE_VOICE))
+        assertTrue(sourceOnly.allows(CardKind.WORD_TO_SOURCE_DEFINITION))
+        assertFalse(sourceOnly.allows(CardKind.TRANSLATION_TO_WORD), "An always-on kind still needs a translation")
+        assertEquals(
+            sourceOnly.families,
+            StudyFormatSelection(StudyFormat.entries.toSet(), playsTranslationKinds = false).families,
+            "Word-to-translation cannot be played without a target, whatever is enabled",
+        )
     }
 
     @Test
@@ -63,57 +87,71 @@ class StudyFormatSelectionTest {
 
         assertEquals(preferred, StudyFormatSelection.ALL.intakeFamilies(preferred))
         assertEquals(
-            listOf(CardFamily.PRODUCE_WORD_IN_CONTEXT),
-            StudyFormatSelection(setOf(StudyFormat.FILL_THE_GAP, StudyFormat.LISTEN)).intakeFamilies(preferred),
+            listOf(CardFamily.PRODUCE_WORD),
+            bothOff.intakeFamilies(preferred),
             "With recognition off, a new word starts in the first family still studied",
         )
     }
 
     @Test
-    fun theLastFormatCannotBeSwitchedOff() {
-        val single = StudyFormatSelection(setOf(StudyFormat.LISTEN))
+    fun eitherFormatCanBeSwitchedOffAndOnAgain() {
+        val withoutEasiest = StudyFormatSelection.ALL.with(StudyFormat.WORD_TO_TRANSLATION, enabled = false)
 
-        assertNull(single.with(StudyFormat.LISTEN, enabled = false))
-        assertEquals(
-            setOf(StudyFormat.LISTEN, StudyFormat.FILL_THE_GAP),
-            single.with(StudyFormat.FILL_THE_GAP, enabled = true)?.enabled,
-        )
-        assertFailsWith<IllegalArgumentException> { StudyFormatSelection(emptySet()) }
+        assertEquals(setOf(StudyFormat.SOURCE_ONLY), withoutEasiest.enabled)
+        assertEquals(bothOff, withoutEasiest.with(StudyFormat.SOURCE_ONLY, enabled = false), "Both may be off")
+        assertEquals(StudyFormatSelection.ALL, bothOff.with(StudyFormat.WORD_TO_TRANSLATION, enabled = true).with(StudyFormat.SOURCE_ONLY, enabled = true))
     }
 
     @Test
-    fun siblingCreditStaysDirectWhileUnlockCreditChainsTheSkippedSteps() {
+    fun siblingCreditStaysDirectWhileUnlockCreditChainsTheRules() {
         val config = FsrsDefaults.config()
         val recognizeToProduce = config.crossFamilyCreditFactor(
             CardFamily.RECOGNIZE_SENSE,
             CardFamily.PRODUCE_WORD,
             Rating.GOOD,
-        )
+        )!!
         val produceToContext = config.crossFamilyCreditFactor(
             CardFamily.PRODUCE_WORD,
             CardFamily.PRODUCE_WORD_IN_CONTEXT,
             Rating.GOOD,
-        )
+        )!!
+        val produceToSpelling = config.crossFamilyCreditFactor(
+            CardFamily.PRODUCE_WORD,
+            CardFamily.SPELL_WORD,
+            Rating.GOOD,
+        )!!
 
         assertNull(
             config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT, Rating.GOOD),
             "A pair without a configured credit passes nothing to an existing sibling",
         )
         assertEquals(
-            recognizeToProduce!! * produceToContext!!,
-            config.ladderCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT, Rating.GOOD)!!,
+            recognizeToProduce * produceToContext,
+            config.unlockPathCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT, Rating.GOOD)!!,
             absoluteTolerance = 1e-9,
-            message = "Unlocking over a skipped family inherits no more than climbing through it would",
+            message = "Reaching a far family directly inherits no more than climbing through the rules would",
+        )
+        assertEquals(
+            recognizeToProduce * produceToSpelling,
+            config.unlockPathCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.SPELL_WORD, Rating.GOOD)!!,
+            absoluteTolerance = 1e-9,
+            message = "Spelling branches off production, so recognition reaches it through production",
         )
         assertEquals(
             recognizeToProduce,
-            config.ladderCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.GOOD),
-            "An adjacent step is its own credit",
+            config.unlockPathCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.GOOD),
+            "A direct rule is its own credit",
         )
         assertNull(
-            config.ladderCreditFactor(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_SENSE, Rating.GOOD),
-            "The ladder only climbs",
+            config.unlockPathCreditFactor(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_SENSE, Rating.GOOD),
+            "The rules only climb",
         )
+        assertNull(
+            config.unlockPathCreditFactor(CardFamily.RECOGNIZE_VOICE, CardFamily.SPELL_WORD, Rating.GOOD),
+            "No rule leads from listening to spelling",
+        )
+        assertTrue(config.unlocksEventually(CardFamily.RECOGNIZE_SENSE, CardFamily.RECOGNIZE_VOICE))
+        assertFalse(config.unlocksEventually(CardFamily.SPELL_WORD, CardFamily.RECOGNIZE_VOICE))
         assertNull(
             config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.HARD),
             "Hard carries no credit",
@@ -126,22 +164,40 @@ class StudyFormatSelectionTest {
     }
 
     @Test
-    fun unlockingOverSkippedFamiliesTakesTheStrictestGate() {
+    fun reentryInheritsAlongTheRulesForwardAndThroughTheDirectCreditBack() {
         val config = FsrsDefaults.config()
 
-        assertEquals(
-            config.productionUnlockStability,
-            config.unlockStabilityGate(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
+        val forward = config.reentryScheduling(
+            sourceFamily = CardFamily.RECOGNIZE_SENSE,
+            sourceState = CardState.REVIEW,
+            sourceStability = 10.0,
+            sourceDifficulty = 5.0,
+            targetFamily = CardFamily.PRODUCE_WORD_IN_CONTEXT,
         )
-        assertEquals(
-            maxOf(config.productionUnlockStability, config.contextUnlockStability),
-            config.unlockStabilityGate(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT),
-            "Stepping over production must not reach context sooner than the ladder would",
+        val chained = config.unlockPathCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT, Rating.GOOD)!!
+        assertEquals(CardState.LEARNING, forward.state)
+        assertEquals(config.inheritedStability(10.0, chained), forward.stability, absoluteTolerance = 1e-9)
+        assertEquals(5.0, forward.difficulty)
+        assertEquals(config.forwardCreditDelay(forward.stability), forward.delay)
+
+        val back = config.reentryScheduling(
+            sourceFamily = CardFamily.RECOGNIZE_VOICE,
+            sourceState = CardState.REVIEW,
+            sourceStability = 30.0,
+            sourceDifficulty = 5.0,
+            targetFamily = CardFamily.RECOGNIZE_SENSE,
         )
-        assertEquals(
-            config.contextUnlockStability,
-            config.unlockStabilityGate(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_VOICE),
+        assertEquals(config.inheritedStability(30.0, 0.80), back.stability, absoluteTolerance = 1e-9)
+        assertEquals(config.backwardCreditDelay(back.stability), back.delay, "Back down the ladder waits the backward delay")
+
+        val fresh = config.reentryScheduling(
+            sourceFamily = CardFamily.RECOGNIZE_SENSE,
+            sourceState = CardState.NEW,
+            sourceStability = 0.0,
+            sourceDifficulty = 0.0,
+            targetFamily = CardFamily.PRODUCE_WORD,
         )
-        assertNull(config.unlockStabilityGate(CardFamily.RECOGNIZE_VOICE, CardFamily.RECOGNIZE_SENSE))
+        assertEquals(CardState.NEW, fresh.state, "Nothing earned yet, so nothing is inherited")
+        assertEquals(Duration.ZERO, fresh.delay)
     }
 }

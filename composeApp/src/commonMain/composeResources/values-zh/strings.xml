@@ -636,6 +636,8 @@
     <string name="study_explainer_translation_to_word">看到翻译，回想单词。</string>
     <string name="study_explainer_fill_gap_title">填空</string>
     <string name="study_explainer_fill_gap">把句子补完整。</string>
+    <string name="study_explainer_spelling_title">拼写</string>
+    <string name="study_explainer_spelling">根据翻译把单词打出来。</string>
     <string name="study_explainer_listen_title">听</string>
     <string name="study_explainer_listen">只听发音，不显示文字。</string>
     <string name="study_explainer_source_only_title">只用%1$s</string>

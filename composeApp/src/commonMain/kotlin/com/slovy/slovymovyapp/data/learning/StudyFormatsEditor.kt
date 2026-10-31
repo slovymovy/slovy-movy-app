@@ -46,7 +46,7 @@ class StudyFormatsEditor(
 
     fun toggle(format: StudyFormat) {
         val current = selection ?: return
-        val next = current.with(format, enabled = format !in current.enabled) ?: return
+        val next = current.with(format, enabled = format !in current.enabled)
         selection = next
         onSelectionChanged(next)
         val previousWrite = write

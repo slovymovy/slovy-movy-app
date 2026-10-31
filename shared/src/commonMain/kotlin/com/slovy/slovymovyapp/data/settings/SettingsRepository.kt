@@ -2,7 +2,6 @@ package com.slovy.slovymovyapp.data.settings
 
 import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.StudyFormat
-import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -114,23 +113,22 @@ class SettingsRepository(private val db: AppDatabase) {
     }
 
     /**
-     * The study formats chosen for [language]; every format when none has been stored. Names
-     * that no longer exist are dropped, and a selection left empty by that falls back to all,
-     * since a language with no format could not be studied.
+     * The study formats switched on for [language], or null when no choice has been stored.
+     * Names that no longer exist are dropped; a stored choice may be empty, since the always-on
+     * kinds keep a language studiable.
      */
-    suspend fun getStudyFormats(language: Language): StudyFormatSelection {
-        val json = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: return StudyFormatSelection.ALL
-        val names = json[language.code] as? JsonArray ?: return StudyFormatSelection.ALL
-        val formats = names
+    suspend fun getStudyFormats(language: Language): Set<StudyFormat>? {
+        val json = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: return null
+        val names = json[language.code] as? JsonArray ?: return null
+        return names
             .mapNotNull { element -> (element as? JsonPrimitive)?.contentOrNull }
             .mapNotNull { name -> StudyFormat.entries.firstOrNull { it.name == name } }
             .toSet()
-        return if (formats.isEmpty()) StudyFormatSelection.ALL else StudyFormatSelection(formats)
     }
 
-    suspend fun setStudyFormats(language: Language, selection: StudyFormatSelection) {
+    suspend fun setStudyFormats(language: Language, enabled: Set<StudyFormat>) {
         val existing = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: JsonObject(emptyMap())
-        val names = StudyFormat.entries.filter { it in selection.enabled }.map { JsonPrimitive(it.name) }
+        val names = StudyFormat.entries.filter { it in enabled }.map { JsonPrimitive(it.name) }
         val updated = JsonObject(existing + (language.code to JsonArray(names)))
         insert(Setting(Setting.Name.STUDY_FORMATS, updated))
     }

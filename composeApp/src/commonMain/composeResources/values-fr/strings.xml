@@ -636,6 +636,8 @@
     <string name="study_explainer_translation_to_word">Tu vois la traduction, tu retrouves le mot.</string>
     <string name="study_explainer_fill_gap_title">Texte à trous</string>
     <string name="study_explainer_fill_gap">Complète la phrase.</string>
+    <string name="study_explainer_spelling_title">Orthographe</string>
+    <string name="study_explainer_spelling">Tape le mot à partir de la traduction.</string>
     <string name="study_explainer_listen_title">Écoute</string>
     <string name="study_explainer_listen">Tu l’entends, sans texte.</string>
     <string name="study_explainer_source_only_title">%1$s uniquement</string>

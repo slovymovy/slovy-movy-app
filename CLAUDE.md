@@ -409,15 +409,19 @@ the last-shown kind. `ExamplePicker` favors examples that were not seen recently
 explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can distinguish retry from skip.
 
 Study formats (`StudyFormat`, `StudyFormatSelection` in `shared/.../data/learning`) are the learner's per-language
-choice of the five card formats, stored under `Setting.Name.STUDY_FORMATS`. Read and write them only through
-`StudyFormatsRepository` (`composeApp/.../data/learning`): it forces the source-only format on for a language
-without translation targets and serialises writes. The selection is a filter, never a mutation: `buildTaskVariants`
-drops kinds of switched-off formats, `SessionService.nextCard` excludes families with no enabled kind, the unlock
-ladder steps over them with the strictest skipped gate and the chained credit (`FsrsConfig.unlockStabilityGate`,
-`ladderCreditFactor`; sibling credit stays direct), intake starts new words in the first enabled family and
+choice over the two formats that can be switched off: the easiest, `WORD_TO_TRANSLATION`, and the hardest,
+`SOURCE_ONLY` (the two definition kinds). Every other kind, the typed spelling card included, is always on
+(`CardKind.format` is null). The formats switched on are stored under `Setting.Name.STUDY_FORMATS`; both may be off.
+Read and write them only through `StudyFormatsRepository` (`composeApp/.../data/learning`): for a language without
+translation targets it resolves to the source-only format alone with `playsTranslationKinds = false`, and it
+serialises writes. The selection is a filter, never a mutation: `buildTaskVariants` drops kinds it does not allow,
+`SessionService.nextCard` excludes families with no playable kind (with both formats off that is `RECOGNIZE_SENSE`),
+unlocks follow `FsrsConfig.unlockRules` and skip a target with no playable variant, re-entry inherits along the rule
+path (`unlockPathCreditFactor`; sibling credit stays direct), intake starts new words in the first studied family and
 re-enters stranded senses under the daily budget, and the stats, due, delayed and next-review queries judge a sense
 on its studied families only. Toggling a format must not create, delete, suspend or reschedule an existing card.
-At least one format is always enabled; a language without translation targets gets no formats page.
+The formats page lists every format, a spelling row included, with a switch on the first and the last row only;
+a language without translation targets gets no page.
 
 `StatsService` owns queue/global/screen snapshots, streak/practice data, and the pipeline stages `QUEUE`, `NEW`,
 `FRESH`, `MIDDLE`, `STRONG`, and `LEARNED`. Its retrievability function is reused in session priority.

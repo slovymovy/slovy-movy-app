@@ -82,7 +82,7 @@ fun CrossFamilyCredit.factorFor(rating: Rating): Double? =
 /**
  * The stability factor a [rating] on [sourceFamily] passes to a [targetFamily] card that already
  * exists: the configured credit for that pair, or none. Pairs without a credit get nothing; the
- * ladder's chaining is only for unlocking, see [ladderCreditFactor].
+ * chaining along the unlock rules is only for unlocking, see [unlockPathCreditFactor].
  */
 fun FsrsConfig.crossFamilyCreditFactor(
     sourceFamily: CardFamily,
@@ -94,49 +94,48 @@ fun FsrsConfig.crossFamilyCreditFactor(
         ?.factorFor(rating)
 
 /**
- * The stability factor a new [targetFamily] card inherits when [sourceFamily] unlocks it. An
- * adjacent step uses its own credit. A step over families the learner switched off multiplies the
- * credits of every step it skips, so a word reaching a far family directly inherits no more than it
- * would have climbing through the ladder. Null when the target is not ahead of the source or a
- * step in between carries no credit.
+ * Whether a card of [sourceFamily] leads to [targetFamily] through the unlock rules, directly or
+ * through the families it unlocks first.
  */
-fun FsrsConfig.ladderCreditFactor(
+fun FsrsConfig.unlocksEventually(sourceFamily: CardFamily, targetFamily: CardFamily): Boolean =
+    unlockPath(sourceFamily, targetFamily) != null
+
+/**
+ * The stability factor a new [targetFamily] card inherits from [sourceFamily] when it is reached
+ * along the unlock rules without the families in between: the credits of every step on that path
+ * multiplied, so a word reaching a far family directly inherits no more than it would have
+ * climbing through them. A direct rule is its own credit. Null when the rules never lead from the
+ * source to the target, or a step on the way carries no credit.
+ */
+fun FsrsConfig.unlockPathCreditFactor(
     sourceFamily: CardFamily,
     targetFamily: CardFamily,
     rating: Rating,
 ): Double? {
-    if (targetFamily.ordinal <= sourceFamily.ordinal) return null
+    val path = unlockPath(sourceFamily, targetFamily) ?: return null
     var factor = 1.0
-    var from = sourceFamily
-    for (next in CardFamily.entries) {
-        if (next.ordinal <= sourceFamily.ordinal || next.ordinal > targetFamily.ordinal) continue
-        factor *= crossFamilyCreditFactor(from, next, rating) ?: return null
-        from = next
+    for (step in 1 until path.size) {
+        factor *= crossFamilyCreditFactor(path[step - 1], path[step], rating) ?: return null
     }
     return factor
 }
 
 /**
- * The stability a [sourceFamily] card must reach before it unlocks [targetFamily]. Each step of the
- * ladder has its own gate; a step over switched-off families takes the strictest of the gates it
- * skips, so a limited selection never reaches a far family sooner than the full ladder would.
- * Null when the target is not ahead of the source.
+ * The families from [sourceFamily] to [targetFamily] along the unlock rules, both included, or
+ * null when the rules never lead there. The rules form a tree, so the first path found is the one.
  */
-fun FsrsConfig.unlockStabilityGate(sourceFamily: CardFamily, targetFamily: CardFamily): Duration? {
-    if (targetFamily.ordinal <= sourceFamily.ordinal) return null
-    return CardFamily.entries
-        .filter { it.ordinal >= sourceFamily.ordinal && it.ordinal < targetFamily.ordinal }
-        .maxOf { step ->
-            when (step) {
-                CardFamily.RECOGNIZE_SENSE -> productionUnlockStability
-                CardFamily.PRODUCE_WORD,
-                CardFamily.PRODUCE_WORD_IN_CONTEXT,
-                    -> contextUnlockStability
-
-                // Nothing lies beyond listening; the filter above never yields it.
-                CardFamily.RECOGNIZE_VOICE -> Duration.INFINITE
-            }
+private fun FsrsConfig.unlockPath(sourceFamily: CardFamily, targetFamily: CardFamily): List<CardFamily>? {
+    if (sourceFamily == targetFamily) return null
+    fun walk(from: CardFamily, visited: List<CardFamily>): List<CardFamily>? {
+        for (rule in unlockRules) {
+            if (rule.sourceFamily != from || rule.targetFamily in visited) continue
+            val path = visited + rule.targetFamily
+            if (rule.targetFamily == targetFamily) return path
+            walk(rule.targetFamily, path)?.let { return it }
         }
+        return null
+    }
+    return walk(sourceFamily, listOf(sourceFamily))
 }
 
 /** What a card re-entered in another family starts with; see [FsrsConfig.reentryScheduling]. */
@@ -150,10 +149,10 @@ data class ReentryScheduling(
 
 /**
  * The scheduling of a card that re-enters a sense in [targetFamily] from its strongest existing
- * card, the way an unlock would: forward along the ladder it inherits through the chained credit
- * and waits the forward delay, back from a family further up it inherits through that pair's
- * credit and waits the backward delay. A source never reviewed, or a pair without credit, starts
- * the new card fresh.
+ * card, the way an unlock would: forward along the unlock rules it inherits through the chained
+ * credit and waits the forward delay, back from a family further up it inherits through that
+ * pair's credit and waits the backward delay. A source never reviewed, or a pair without credit,
+ * starts the new card fresh.
  */
 fun FsrsConfig.reentryScheduling(
     sourceFamily: CardFamily,
@@ -162,9 +161,9 @@ fun FsrsConfig.reentryScheduling(
     sourceDifficulty: Double,
     targetFamily: CardFamily,
 ): ReentryScheduling {
-    val forward = targetFamily.ordinal > sourceFamily.ordinal
+    val forward = unlocksEventually(sourceFamily, targetFamily)
     val factor = if (forward) {
-        ladderCreditFactor(sourceFamily, targetFamily, Rating.GOOD)
+        unlockPathCreditFactor(sourceFamily, targetFamily, Rating.GOOD)
     } else {
         crossFamilyCreditFactor(sourceFamily, targetFamily, Rating.GOOD)
     }

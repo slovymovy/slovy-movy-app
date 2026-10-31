@@ -12,7 +12,7 @@ import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
 import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
-import com.slovy.slovymovyapp.data.learning.fsrs.ladderCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.unlockPathCreditFactor
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
 import com.slovy.slovymovyapp.data.learning.intake.SkipReason
 import com.slovy.slovymovyapp.data.learning.session.ExamplePicker
@@ -1651,28 +1651,32 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun study_formats_setting_round_trips_per_language_and_ignores_unknown_names() = runBlocking {
         withEnv(includeTranslation = true) { env ->
-            assertEquals(StudyFormatSelection.ALL, env.settings.getStudyFormats(Language.ENGLISH))
+            assertNull(env.settings.getStudyFormats(Language.ENGLISH), "Nothing is stored until the learner chooses")
+            assertEquals(StudyFormatSelection.ALL, env.studyFormats.get(Language.ENGLISH))
 
-            val chosen = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.LISTEN))
+            val chosen = setOf(StudyFormat.WORD_TO_TRANSLATION)
             env.settings.setStudyFormats(Language.ENGLISH, chosen)
 
             assertEquals(chosen, env.settings.getStudyFormats(Language.ENGLISH))
             assertEquals(
-                StudyFormatSelection.ALL,
-                env.settings.getStudyFormats(Language.DUTCH),
-                "The choice is per language",
+                StudyFormatSelection(chosen, playsTranslationKinds = true),
+                env.studyFormats.get(Language.ENGLISH),
             )
+            assertNull(env.settings.getStudyFormats(Language.DUTCH), "The choice is per language")
+
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
+            assertEquals(emptySet(), env.settings.getStudyFormats(Language.ENGLISH), "Both formats may be off")
 
             env.settings.insert(
                 Setting(
                     Setting.Name.STUDY_FORMATS,
-                    JsonObject(mapOf("en" to JsonArray(listOf(JsonPrimitive("NO_SUCH_FORMAT"))))),
+                    JsonObject(mapOf("en" to JsonArray(listOf(JsonPrimitive("NO_SUCH_FORMAT"), JsonPrimitive("SOURCE_ONLY"))))),
                 )
             )
             assertEquals(
-                StudyFormatSelection.ALL,
+                setOf(StudyFormat.SOURCE_ONLY),
                 env.settings.getStudyFormats(Language.ENGLISH),
-                "A stored selection with no known format falls back to all",
+                "A name that no longer exists is dropped and the rest kept",
             )
         }
     }
@@ -1683,18 +1687,15 @@ class LearningE2ETest : BaseTest() {
             val fixture = env.seedSense(lemma = "switchedoff")
             env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
-            env.insertTask(fixture = fixture, family = CardFamily.PRODUCE_WORD, state = CardState.REVIEW, stability = 5.0)
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
-            )
+            env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val card = env.session.nextCard("en", start, emptySet()).first()
 
-            assertNull(card, "A due production card must not be served while production is switched off")
+            assertNull(card, "A due recognition card must not be served while both of its formats are switched off")
             assertEquals(
                 0,
-                env.stats.dueNow("en", env.settings.getStudyFormats(Language.ENGLISH).families),
+                env.stats.dueNow("en", env.studyFormats.get(Language.ENGLISH).families),
                 "The due count must agree with what the session serves",
             )
             assertEquals(
@@ -1731,8 +1732,8 @@ class LearningE2ETest : BaseTest() {
                 stability = 5.0,
                 availableAfter = (start + 1.hours).toEpochMilliseconds(),
             )
-            val selection = StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD, StudyFormat.FILL_THE_GAP))
-            env.settings.setStudyFormats(Language.ENGLISH, selection)
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
+            val selection = env.studyFormats.get(Language.ENGLISH)
 
             val queue = env.stats.reviewQueueStats("en", selection.families)
 
@@ -1751,55 +1752,6 @@ class LearningE2ETest : BaseTest() {
                 stillDelayed.available_after,
                 "Continue-now must not release a card the session could not serve",
             )
-        }
-    }
-
-    @Test
-    fun recognition_good_steps_over_switched_off_production_and_unlocks_context() = runBlocking {
-        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
-        withEnv(includeTranslation = true, config = config) { env ->
-            val fixture = env.seedSense(lemma = "skipproduction")
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
-            env.addFavorite(fixture)
-            env.insertTask(
-                fixture = fixture,
-                family = CardFamily.RECOGNIZE_SENSE,
-                state = CardState.NEW,
-                stability = 0.0,
-                difficulty = 0.0,
-                due = start.toEpochMilliseconds(),
-            )
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
-            )
-
-            val recognition = env.nextLoadedCard("en")
-            val reviewed = env.session.submitReview(
-                recognition,
-                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
-                durationMs = 1.seconds.inWholeMilliseconds,
-            )
-
-            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
-            assertEquals(
-                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT),
-                cards.map { it.family },
-                "The ladder must step over the switched-off production family, not stall on it",
-            )
-            val context = cards.single { it.family == CardFamily.PRODUCE_WORD_IN_CONTEXT }
-            val chainedFactor = config.ladderCreditFactor(
-                CardFamily.RECOGNIZE_SENSE,
-                CardFamily.PRODUCE_WORD_IN_CONTEXT,
-                Rating.GOOD,
-            )!!
-            assertEquals(
-                reviewed.card.scheduling.stability * chainedFactor,
-                context.stability,
-                absoluteTolerance = 1e-9,
-                message = "The far family inherits through the skipped step's credit",
-            )
-            assertEquals(CardState.LEARNING, context.state)
         }
     }
 
@@ -1826,7 +1778,7 @@ class LearningE2ETest : BaseTest() {
                 lastReview = (start - 1.days).toEpochMilliseconds(),
                 reps = 3,
             )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
@@ -1876,7 +1828,7 @@ class LearningE2ETest : BaseTest() {
                 difficulty = 0.0,
                 due = start.toEpochMilliseconds(),
             )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             env.intake.runIntake("en")
 
@@ -1894,17 +1846,18 @@ class LearningE2ETest : BaseTest() {
             val fixture = env.seedSense(lemma = "startinproduction")
             env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             env.addFavorite(fixture)
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD, StudyFormat.LISTEN)),
-            )
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
             assertEquals(1, result.cardsCreated)
             assertEquals(0, result.rerouted)
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
-            assertEquals(listOf(CardFamily.PRODUCE_WORD), cards.map { it.family })
+            assertEquals(
+                listOf(CardFamily.PRODUCE_WORD),
+                cards.map { it.family },
+                "With both formats off recognition is not studied, so the word starts in production",
+            )
             assertEquals(CardState.NEW, cards.single().state)
         }
     }
@@ -1950,42 +1903,6 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun grading_a_card_uses_the_formats_as_they_stand_at_submit_time() = runBlocking {
-        withEnv(includeTranslation = true) { env ->
-            val fixture = env.seedSense(lemma = "latetoggle")
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
-            env.addFavorite(fixture)
-            env.insertTask(
-                fixture = fixture,
-                family = CardFamily.RECOGNIZE_SENSE,
-                state = CardState.NEW,
-                stability = 0.0,
-                difficulty = 0.0,
-                due = start.toEpochMilliseconds(),
-            )
-
-            // Loaded with every format on; production is switched off while it is on screen.
-            val recognition = env.nextLoadedCard("en")
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
-            )
-            env.session.submitReview(
-                recognition,
-                env.session.previewRatings(recognition).first { it.rating == Rating.GOOD },
-                durationMs = 1.seconds.inWholeMilliseconds,
-            )
-
-            val families = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family }
-            assertEquals(
-                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT),
-                families,
-                "A family switched off after the card loaded must not be unlocked by grading it",
-            )
-        }
-    }
-
-    @Test
     fun reroute_is_paid_from_the_daily_budget_and_resumes_the_next_day() = runBlocking {
         val config = FsrsDefaults.config().copy(dailyNewTaskFamilyBudget = 1)
         withEnv(includeTranslation = true, config = config) { env ->
@@ -2004,7 +1921,7 @@ class LearningE2ETest : BaseTest() {
                 )
                 fixture
             }
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val first = env.intake.runIntake("en")
             assertEquals(1, first.rerouted, "One re-entry fits the budget of one")
@@ -2025,12 +1942,13 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun reroute_skips_a_sense_with_no_playable_variant_in_the_studied_family() = runBlocking {
         withEnv(includeTranslation = true) { env ->
-            // No translation data at all, so no listening variant can be built.
-            val fixture = env.seedSense(lemma = "unplayablelisten")
+            // No translation data at all and the source-only format off, so no studied family
+            // can play the sense.
+            val fixture = env.seedSense(lemma = "unplayablesense")
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 10.0)
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.LISTEN)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
@@ -2071,7 +1989,7 @@ class LearningE2ETest : BaseTest() {
                 answer_key = fixture.lemma,
                 suspended = true,
             )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
@@ -2087,7 +2005,7 @@ class LearningE2ETest : BaseTest() {
     @Test
     fun without_translation_targets_the_source_only_format_is_always_on() = runBlocking {
         withEnv(includeTranslation = false) { env ->
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION)))
+            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.WORD_TO_TRANSLATION))
 
             val effective = env.studyFormats.get(Language.ENGLISH)
             assertEquals(
@@ -2095,9 +2013,10 @@ class LearningE2ETest : BaseTest() {
                 effective.enabled,
                 "With no translation language the only playable format is the whole selection: anything else would count families nothing can play",
             )
+            assertFalse(effective.playsTranslationKinds, "The always-on kinds all need a translation")
             assertEquals(
                 setOf(StudyFormat.WORD_TO_TRANSLATION),
-                env.settings.getStudyFormats(Language.ENGLISH).enabled,
+                env.settings.getStudyFormats(Language.ENGLISH),
                 "The stored choice is kept for when a translation language returns",
             )
 
@@ -2135,7 +2054,7 @@ class LearningE2ETest : BaseTest() {
             val newcomer = env.seedSense(lemma = "newcomerword")
             env.seedTranslation(newcomer.senseId, newcomer.lemmaPosId)
             env.addFavorite(newcomer)
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             assertTrue(
                 env.intake.canContinueWithPendingFavoritesNow("en", env.studyFormats.get(Language.ENGLISH).families),
@@ -2165,7 +2084,7 @@ class LearningE2ETest : BaseTest() {
             val pending = env.seedSense(lemma = "pendingword")
             env.seedTranslation(pending.senseId, pending.lemmaPosId)
             env.addFavorite(pending)
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val continueNow = env.intake.continueWithPendingFavoritesNow("en")
             assertEquals(0, continueNow.rerouted, "Continue-now is about the pending words")
@@ -2177,11 +2096,10 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun reroute_back_down_the_ladder_uses_the_backward_delay() = runBlocking {
+    fun without_translation_targets_a_voice_card_is_hidden_and_reentered_back_down_the_ladder() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
-        withEnv(includeTranslation = true, config = config) { env ->
-            val fixture = env.seedSense(lemma = "backwardreroute")
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val fixture = env.seedSense(lemma = "voiceonlyword")
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             env.insertTask(
@@ -2191,13 +2109,17 @@ class LearningE2ETest : BaseTest() {
                 stability = 30.0,
                 createdAt = (start - 2.days).toEpochMilliseconds(),
             )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION)))
+
+            val families = env.studyFormats.get(Language.ENGLISH).families
+            assertFalse(CardFamily.RECOGNIZE_VOICE in families, "Nothing can play listening without a translation")
+            assertEquals(0, env.stats.dueNow("en", families), "A due card nobody can play is not due")
 
             val result = env.intake.runIntake("en")
 
-            assertEquals(1, result.rerouted)
-            val recognition = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
-                .single { it.family == CardFamily.RECOGNIZE_SENSE }
+            assertEquals(1, result.rerouted, "The word comes back in a family the source-only format can play")
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.RECOGNIZE_VOICE), cards.map { it.family })
+            val recognition = cards.single { it.family == CardFamily.RECOGNIZE_SENSE }
             val factor = config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_VOICE, CardFamily.RECOGNIZE_SENSE, Rating.GOOD)!!
             assertEquals(30.0 * factor, recognition.stability, absoluteTolerance = 1e-9)
             val expectedDue = start + stabilityDelay(
@@ -2240,7 +2162,7 @@ class LearningE2ETest : BaseTest() {
                 stability = 10.0,
                 createdAt = (start - 2.days).toEpochMilliseconds(),
             )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
@@ -2279,7 +2201,7 @@ class LearningE2ETest : BaseTest() {
             val pending = env.seedSense(lemma = "pausednewword")
             env.seedTranslation(pending.senseId, pending.lemmaPosId)
             env.addFavorite(pending)
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
@@ -2311,10 +2233,7 @@ class LearningE2ETest : BaseTest() {
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             val card = env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(StudyFormat.entries.toSet() - StudyFormat.SOURCE_ONLY),
-            )
+            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.WORD_TO_TRANSLATION))
 
             val served = env.session.nextCard("en", start, emptySet()).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
 
@@ -2352,7 +2271,7 @@ class LearningE2ETest : BaseTest() {
                     createdAt = (start - 2.days).toEpochMilliseconds(),
                 )
             }
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
@@ -2368,96 +2287,14 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
-    fun without_translation_targets_a_listening_only_choice_hides_voice_cards_and_reenters_the_word() = runBlocking {
-        withEnv(includeTranslation = false) { env ->
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.LISTEN)))
-            val fixture = env.seedSense(lemma = "listeningonlyword")
-            env.addFavorite(fixture)
-            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
-            env.insertTask(
-                fixture = fixture,
-                family = CardFamily.RECOGNIZE_VOICE,
-                state = CardState.REVIEW,
-                stability = 10.0,
-                createdAt = (start - 2.days).toEpochMilliseconds(),
-            )
-
-            val families = env.studyFormats.get(Language.ENGLISH).families
-            assertFalse(CardFamily.RECOGNIZE_VOICE in families, "Nothing can play listening without a translation")
-            assertEquals(0, env.stats.dueNow("en", families), "A due card nobody can play is not due")
-
-            val result = env.intake.runIntake("en")
-
-            assertEquals(1, result.rerouted, "The word comes back in a family the source-only format can play")
-            assertEquals(
-                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.RECOGNIZE_VOICE),
-                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
-            )
-        }
-    }
-
-    @Test
     fun a_card_in_a_studied_family_the_formats_cannot_play_is_reentered_by_the_session() = runBlocking {
         val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
         withEnv(includeTranslation = true, config = config) { env ->
-            // The definition reveals the answer, so with only the source-only format on the
-            // production family has no variant, while recognition can still be played.
-            val fixture = env.seedSense(lemma = "revealed", definition = "to have <w>revealed</w> something")
-            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
-            env.addFavorite(fixture)
-            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
-            val production = env.insertTask(
-                fixture = fixture,
-                family = CardFamily.PRODUCE_WORD,
-                state = CardState.REVIEW,
-                stability = 10.0,
-                difficulty = 5.0,
-                createdAt = (start - 2.days).toEpochMilliseconds(),
-            )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY)))
-
-            val served = env.session.nextCard("en", start, emptySet())
-                .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
-
-            assertNull(served, "The re-entered card waits for its own due time; inferred knowledge is not tested early")
-            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
-            assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD), cards.map { it.family })
-            val recognition = cards.single { it.family == CardFamily.RECOGNIZE_SENSE }
-            val factor = config.crossFamilyCreditFactor(CardFamily.PRODUCE_WORD, CardFamily.RECOGNIZE_SENSE, Rating.GOOD)!!
-            assertEquals(10.0 * factor, recognition.stability, absoluteTolerance = 1e-9)
-            assertEquals(CardState.LEARNING, recognition.state)
-            val expectedDue = start + stabilityDelay(
-                stability = recognition.stability,
-                ratio = config.backwardCreditDelayRatio,
-                floor = config.backwardCreditDelayFloor,
-                cap = config.backwardCreditDelayCap,
-            )
-            assertEquals(expectedDue.toEpochMilliseconds(), recognition.due, "Credit back down the ladder waits the backward delay")
-            val buried = env.app.favoritesQueries.selectCardById(production.id).executeAsOne()
-            assertEquals(
-                (start + config.buryUnplayableUnderFormatsFor).toEpochMilliseconds(),
-                buried.available_after,
-                "The unplayable card rests; its scheduling is otherwise untouched",
-            )
-            assertEquals(production.stability, buried.stability)
-
-            // Once due, the recognition card is served, and the selection adds nothing to the sense.
-            env.clock.advance(7.days)
-            val later = env.nextLoadedCard("en")
-            assertEquals(CardFamily.RECOGNIZE_SENSE, later.card.family)
-            assertEquals(CardKind.WORD_TO_SOURCE_DEFINITION, later.variant.kind)
-            assertEquals(2, env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size)
-        }
-    }
-
-    @Test
-    fun reroute_takes_the_first_studied_family_that_can_play_the_sense() = runBlocking {
-        withEnv(includeTranslation = true) { env ->
-            // Translation words and a tagged source example, but no translated definition: the
-            // word-to-translation variant cannot be built, while the source cloze can.
-            val fixture = env.seedSense(lemma = "clozeonlyword")
-            val q = env.translation!!.translationQueries
-            q.insertSenseTranslation(
+            // A translation word but no translated definition: word-to-translation needs both, so
+            // with source-only off recognition has nothing to play, while production can be cued
+            // from the translation word.
+            val fixture = env.seedSense(lemma = "unplayablerecognition")
+            env.translation!!.translationQueries.insertSenseTranslation(
                 sense_id = fixture.senseId,
                 from_lang_code = "en",
                 target_lang_code = "ru",
@@ -2470,24 +2307,85 @@ class LearningE2ETest : BaseTest() {
             )
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            val recognition = env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                difficulty = 5.0,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.WORD_TO_TRANSLATION))
+
+            val served = env.session.nextCard("en", start, emptySet())
+                .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
+
+            assertNull(served, "The re-entered card waits for its own due time; inferred knowledge is not tested early")
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD), cards.map { it.family })
+            val production = cards.single { it.family == CardFamily.PRODUCE_WORD }
+            val factor = config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.GOOD)!!
+            assertEquals(10.0 * factor, production.stability, absoluteTolerance = 1e-9)
+            assertEquals(CardState.LEARNING, production.state)
+            val expectedDue = start + stabilityDelay(
+                stability = production.stability,
+                ratio = config.forwardCreditDelayRatio,
+                floor = config.forwardCreditDelayFloor,
+                cap = config.forwardCreditDelayCap,
+            )
+            assertEquals(expectedDue.toEpochMilliseconds(), production.due, "Credit up the ladder waits the forward delay")
+            val buried = env.app.favoritesQueries.selectCardById(recognition.id).executeAsOne()
+            assertEquals(
+                (start + config.buryUnplayableUnderFormatsFor).toEpochMilliseconds(),
+                buried.available_after,
+                "The unplayable card rests; its scheduling is otherwise untouched",
+            )
+            assertEquals(recognition.stability, buried.stability)
+
+            // Once due, the production card is served, and the selection adds nothing more to the sense.
+            env.clock.advance(config.forwardCreditDelayCap + 1.days)
+            val later = env.nextLoadedCard("en")
+            assertEquals(CardFamily.PRODUCE_WORD, later.card.family)
+            assertEquals(CardKind.TRANSLATION_TO_WORD, later.variant.kind)
+            assertEquals(2, env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().size)
+        }
+    }
+
+    @Test
+    fun reroute_takes_the_first_studied_family_that_can_play_the_sense() = runBlocking {
+        val config = FsrsDefaults.config().copy(cooldownJitterRatio = 0.0)
+        withEnv(includeTranslation = true, config = config) { env ->
+            // A translated cloze example but no translation words: with both formats off,
+            // production cannot be cued, while the translated cloze can be played.
+            val fixture = env.seedSense(lemma = "clozeonlyword")
+            env.translation!!.translationQueries.insertExampleTranslation(fixture.senseId, "en", "ru", 1, "Я <w>учусь</w> каждый день.")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             env.insertTask(
                 fixture = fixture,
-                family = CardFamily.RECOGNIZE_VOICE,
+                family = CardFamily.RECOGNIZE_SENSE,
                 state = CardState.REVIEW,
                 stability = 10.0,
                 createdAt = (start - 2.days).toEpochMilliseconds(),
             )
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION, StudyFormat.FILL_THE_GAP)),
-            )
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val result = env.intake.runIntake("en")
 
             assertEquals(1, result.rerouted, "The second studied family can play the sense, so it is used")
+            val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+            assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD_IN_CONTEXT), cards.map { it.family })
+            val context = cards.single { it.family == CardFamily.PRODUCE_WORD_IN_CONTEXT }
+            val chainedFactor = config.unlockPathCreditFactor(
+                CardFamily.RECOGNIZE_SENSE,
+                CardFamily.PRODUCE_WORD_IN_CONTEXT,
+                Rating.GOOD,
+            )!!
             assertEquals(
-                listOf(CardFamily.PRODUCE_WORD_IN_CONTEXT, CardFamily.RECOGNIZE_VOICE),
-                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+                10.0 * chainedFactor,
+                context.stability,
+                absoluteTolerance = 1e-9,
+                message = "The far family inherits through the production step it jumped over",
             )
         }
     }
@@ -2500,15 +2398,15 @@ class LearningE2ETest : BaseTest() {
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             env.insertTask(
                 fixture = fixture,
-                family = CardFamily.RECOGNIZE_VOICE,
+                family = CardFamily.RECOGNIZE_SENSE,
                 state = CardState.REVIEW,
                 stability = 10.0,
                 createdAt = (start - 2.days).toEpochMilliseconds(),
             )
-            env.settings.setStudyFormats(Language.ENGLISH, StudyFormatSelection(setOf(StudyFormat.TRANSLATION_TO_WORD)))
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
 
             val before = env.intake.runIntake("en")
-            assertEquals(0, before.rerouted, "No translation words yet, so production cannot be played")
+            assertEquals(0, before.rerouted, "No translation words yet, so no studied family can play the sense")
 
             env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
             // Every path that brings data in, ingestion or recovery, drops the cached sense.
@@ -2530,10 +2428,7 @@ class LearningE2ETest : BaseTest() {
             env.addFavorite(fixture)
             env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
             val card = env.insertTask(fixture = fixture, family = CardFamily.RECOGNIZE_SENSE, state = CardState.REVIEW, stability = 5.0)
-            env.settings.setStudyFormats(
-                Language.ENGLISH,
-                StudyFormatSelection(StudyFormat.entries.toSet() - StudyFormat.SOURCE_ONLY),
-            )
+            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.WORD_TO_TRANSLATION))
 
             val served = env.session.nextCard("en", start, emptySet()).first { it == null || it.loadState() != SessionCardLoadState.LOADING }
 

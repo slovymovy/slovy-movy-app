@@ -636,6 +636,8 @@
     <string name="study_explainer_translation_to_word">Vidíš překlad, vybavíš si slovo.</string>
     <string name="study_explainer_fill_gap_title">Doplň mezeru</string>
     <string name="study_explainer_fill_gap">Doplň větu.</string>
+    <string name="study_explainer_spelling_title">Pravopis</string>
+    <string name="study_explainer_spelling">Napiš slovo podle překladu.</string>
     <string name="study_explainer_listen_title">Poslouchej</string>
     <string name="study_explainer_listen">Jen posloucháš, bez textu.</string>
     <string name="study_explainer_source_only_title">Jen %1$s</string>

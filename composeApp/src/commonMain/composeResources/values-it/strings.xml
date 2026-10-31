@@ -636,6 +636,8 @@
     <string name="study_explainer_translation_to_word">Vedi la traduzione, ricordi la parola.</string>
     <string name="study_explainer_fill_gap_title">Riempi lo spazio</string>
     <string name="study_explainer_fill_gap">Completa la frase.</string>
+    <string name="study_explainer_spelling_title">Ortografia</string>
+    <string name="study_explainer_spelling">Scrivi la parola partendo dalla traduzione.</string>
     <string name="study_explainer_listen_title">Ascolta</string>
     <string name="study_explainer_listen">La senti, senza testo.</string>
     <string name="study_explainer_source_only_title">Solo %1$s</string>

@@ -51,6 +51,7 @@ import com.slovy.slovymovyapp.ui.icons.SlovyIcons
 import com.slovy.slovymovyapp.ui.icons.StudyFormatFillTheGap
 import com.slovy.slovymovyapp.ui.icons.StudyFormatListen
 import com.slovy.slovymovyapp.ui.icons.StudyFormatSourceOnly
+import com.slovy.slovymovyapp.ui.icons.StudyFormatSpelling
 import com.slovy.slovymovyapp.ui.icons.StudyFormatTranslationToWord
 import com.slovy.slovymovyapp.ui.icons.StudyFormatWordToTranslation
 import com.slovy.slovymovyapp.ui.icons.ThinkingOtter
@@ -85,8 +86,9 @@ fun StudyFormatsScreen(
  * The "How studying works" page. In a session it covers the whole screen and leaves through its
  * one button, so the card underneath stays exactly as the learner left it.
  *
- * The formats are a flat, edge-to-edge list under hairlines, each with its switch. Copper stays
- * with the button, so nothing in the list shares a hue with a control.
+ * The formats are a flat, edge-to-edge list under hairlines; the first and the last carry a
+ * switch, the rest only explain. Copper stays with the button, so nothing in the list shares a
+ * hue with a control.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -157,7 +159,7 @@ fun StudyFormatsContent(
                             color = MaterialTheme.colorScheme.outlineVariant,
                         )
                     }
-                    StudyFormatRow(row = row, onToggle = { onToggle(row.format) })
+                    StudyFormatRowItem(row = row, onToggle = onToggle)
                 }
                 Spacer(Modifier.height(AppSpacing.lg))
             }
@@ -180,28 +182,33 @@ fun StudyFormatsContent(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun StudyFormatRow(
+private fun StudyFormatRowItem(
     row: StudyFormatRowUiState,
-    onToggle: () -> Unit,
+    onToggle: (StudyFormat) -> Unit,
 ) {
+    val format = row.row.format
     val contentAlpha = if (row.enabled) 1f else 0.6f
-    // The whole row is the switch: one target for a finger and one node for a screen reader,
-    // read as the format's name with its on/off state.
+    // A switchable row is the switch: one target for a finger and one node for a screen reader,
+    // read as the format's name with its on/off state. An always-on row is plain text.
+    val toggle = if (format != null) {
+        Modifier.toggleable(
+            value = row.enabled,
+            role = Role.Switch,
+            onValueChange = { onToggle(format) },
+        )
+    } else {
+        Modifier
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .toggleable(
-                value = row.enabled,
-                enabled = row.canDisable,
-                role = Role.Switch,
-                onValueChange = { onToggle() },
-            )
+            .then(toggle)
             .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.mdPlus),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.mdPlus),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = row.format.icon(),
+            imageVector = row.row.icon(),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
@@ -253,23 +260,25 @@ private fun StudyFormatRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Switch(
-            checked = row.enabled,
-            // The row carries the semantics and the gesture; the switch only draws the state.
-            onCheckedChange = null,
-            enabled = row.canDisable,
-        )
+        if (format != null) {
+            Switch(
+                checked = row.enabled,
+                // The row carries the semantics and the gesture; the switch only draws the state.
+                onCheckedChange = null,
+            )
+        }
     }
 }
 
-// Strokes of one weight, so the five sit as a set: Material's arrows are filled glyphs and the
+// Strokes of one weight, so the six sit as a set: Material's arrows are filled glyphs and the
 // app's speaker is a solid silhouette, and mixed with a line circle they read as three weights.
-private fun StudyFormat.icon(): ImageVector = when (this) {
-    StudyFormat.WORD_TO_TRANSLATION -> SlovyIcons.StudyFormatWordToTranslation
-    StudyFormat.TRANSLATION_TO_WORD -> SlovyIcons.StudyFormatTranslationToWord
-    StudyFormat.FILL_THE_GAP -> SlovyIcons.StudyFormatFillTheGap
-    StudyFormat.LISTEN -> SlovyIcons.StudyFormatListen
-    StudyFormat.SOURCE_ONLY -> SlovyIcons.StudyFormatSourceOnly
+private fun StudyFormatRow.icon(): ImageVector = when (this) {
+    StudyFormatRow.WORD_TO_TRANSLATION -> SlovyIcons.StudyFormatWordToTranslation
+    StudyFormatRow.TRANSLATION_TO_WORD -> SlovyIcons.StudyFormatTranslationToWord
+    StudyFormatRow.FILL_THE_GAP -> SlovyIcons.StudyFormatFillTheGap
+    StudyFormatRow.SPELLING -> SlovyIcons.StudyFormatSpelling
+    StudyFormatRow.LISTEN -> SlovyIcons.StudyFormatListen
+    StudyFormatRow.SOURCE_ONLY -> SlovyIcons.StudyFormatSourceOnly
 }
 
 private fun previewFormats(): StudyFormatsUiState =
@@ -277,56 +286,53 @@ private fun previewFormats(): StudyFormatsUiState =
         intro = UiText.Plain("As a word sticks, harder formats unlock on their own."),
         rows = listOf(
             StudyFormatRowUiState(
-                format = StudyFormat.WORD_TO_TRANSLATION,
+                row = StudyFormatRow.WORD_TO_TRANSLATION,
                 title = UiText.Plain("Word → translation"),
                 description = UiText.Plain("See the word, recall the translation."),
                 label = UiText.Plain("Easiest"),
                 enabled = true,
-                canDisable = true,
             ),
             StudyFormatRowUiState(
-                format = StudyFormat.TRANSLATION_TO_WORD,
+                row = StudyFormatRow.TRANSLATION_TO_WORD,
                 title = UiText.Plain("Translation → word"),
                 description = UiText.Plain("See the translation, recall the word."),
                 label = null,
                 enabled = true,
-                canDisable = true,
             ),
             StudyFormatRowUiState(
-                format = StudyFormat.FILL_THE_GAP,
+                row = StudyFormatRow.FILL_THE_GAP,
                 title = UiText.Plain("Fill the gap"),
                 description = UiText.Plain("Complete the sentence."),
                 label = null,
                 enabled = true,
-                canDisable = true,
             ),
             StudyFormatRowUiState(
-                format = StudyFormat.LISTEN,
+                row = StudyFormatRow.SPELLING,
+                title = UiText.Plain("Spelling"),
+                description = UiText.Plain("Type the word from its translation."),
+                label = null,
+                enabled = true,
+            ),
+            StudyFormatRowUiState(
+                row = StudyFormatRow.LISTEN,
                 title = UiText.Plain("Listen"),
                 description = UiText.Plain("Hear it, no text shown."),
                 label = null,
-                enabled = false,
-                canDisable = true,
+                enabled = true,
             ),
             StudyFormatRowUiState(
-                format = StudyFormat.SOURCE_ONLY,
+                row = StudyFormatRow.SOURCE_ONLY,
                 title = UiText.Plain("Nederlands only"),
                 description = UiText.Plain("Explained with no translation."),
                 label = UiText.Plain("Not for beginners"),
                 enabled = false,
-                canDisable = true,
             ),
         ),
     )
 
-private fun previewSingleFormat(): StudyFormatsUiState =
+private fun previewBothFormatsOff(): StudyFormatsUiState =
     previewFormats().let { page ->
-        page.copy(
-            rows = page.rows.map { row ->
-                val enabled = row.format == StudyFormat.WORD_TO_TRANSLATION
-                row.copy(enabled = enabled, canDisable = !enabled)
-            },
-        )
+        page.copy(rows = page.rows.map { row -> row.copy(enabled = row.row.format == null) })
     }
 
 @Preview
@@ -346,12 +352,12 @@ private fun StudyFormatsPreview(
 
 @Preview
 @Composable
-private fun StudyFormatsLastEnabledPreview(
+private fun StudyFormatsBothOffPreview(
     @PreviewParameter(ThemePreviewProvider::class) isDark: Boolean,
 ) {
     ThemedPreview(darkTheme = isDark) {
         StudyFormatsContent(
-            state = previewSingleFormat(),
+            state = previewBothFormatsOff(),
             scrollState = ScrollState(0),
             onToggle = {},
             onDismiss = {},
