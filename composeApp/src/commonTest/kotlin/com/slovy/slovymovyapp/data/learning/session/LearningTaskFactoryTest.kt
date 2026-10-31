@@ -160,6 +160,26 @@ class LearningTaskFactoryTest {
     }
 
     @Test
+    fun selectVariantsForReview_startsProductionWithTheTranslationKindWhenTheEasiestIsOff() {
+        val sense = sense(definition = "a feeling of warmth and comfort")
+
+        val variants = selectVariantsForReview(
+            family = CardFamily.PRODUCE_WORD,
+            sense = sense,
+            translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY), playsTranslationKinds = true),
+            cardStability = 1.days,
+            lastVariant = null,
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code)),
+            variants,
+            "The source-only production card waits for its gate; the new card is cued by the translation",
+        )
+    }
+
+    @Test
     fun selectVariantsForReview_neverFallsBackToASwitchedOffKind() {
         val sense = sense(definition = "a feeling of warmth and comfort")
 

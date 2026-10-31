@@ -1841,6 +1841,26 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun intake_starts_a_new_word_at_production_when_the_easiest_format_is_off() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "skiprecognition")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.settings.setStudyFormats(Language.ENGLISH, setOf(StudyFormat.SOURCE_ONLY))
+
+            env.intake.runIntake("en")
+            val card = env.nextLoadedCard("en")
+
+            assertEquals(CardFamily.PRODUCE_WORD, card.card.family, "Recognition is skipped as a whole, its source-only card included")
+            assertEquals(
+                CardKind.TRANSLATION_TO_WORD,
+                card.variant.kind,
+                "The new word is cued by its translation; the source-only card waits for its gate",
+            )
+        }
+    }
+
+    @Test
     fun intake_starts_a_new_word_in_the_first_studied_family() = runBlocking {
         withEnv(includeTranslation = true) { env ->
             val fixture = env.seedSense(lemma = "startinproduction")
@@ -2009,11 +2029,16 @@ class LearningE2ETest : BaseTest() {
 
             val effective = env.studyFormats.get(Language.ENGLISH)
             assertEquals(
-                setOf(StudyFormat.SOURCE_ONLY),
+                StudyFormat.entries.toSet(),
                 effective.enabled,
-                "With no translation language the only playable format is the whole selection: anything else would count families nothing can play",
+                "With no translation language the stored choice does not apply: every format counts as on",
             )
             assertFalse(effective.playsTranslationKinds, "The always-on kinds all need a translation")
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
+                effective.families,
+                "Only the source-only kinds can be played, so only their families are studied",
+            )
             assertEquals(
                 setOf(StudyFormat.WORD_TO_TRANSLATION),
                 env.settings.getStudyFormats(Language.ENGLISH),

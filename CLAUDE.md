@@ -409,13 +409,15 @@ the last-shown kind. `ExamplePicker` favors examples that were not seen recently
 explicit `LOADING`/`READY`/`ERROR` states and load-error reasons so UI can distinguish retry from skip.
 
 Study formats (`StudyFormat`, `StudyFormatSelection` in `shared/.../data/learning`) are the learner's per-language
-choice over the two formats that can be switched off: the easiest, `WORD_TO_TRANSLATION`, and the hardest,
-`SOURCE_ONLY` (the two definition kinds). Every other kind, the typed spelling card included, is always on
-(`CardKind.format` is null). The formats switched on are stored under `Setting.Name.STUDY_FORMATS`; both may be off.
-Read and write them only through `StudyFormatsRepository` (`composeApp/.../data/learning`): for a language without
-translation targets it resolves to the source-only format alone with `playsTranslationKinds = false`, and it
-serialises writes. The selection is a filter, never a mutation: `buildTaskVariants` drops kinds it does not allow,
-`SessionService.nextCard` excludes families with no playable kind (with both formats off that is `RECOGNIZE_SENSE`),
+choice over the two formats that can be switched off: the easiest, `WORD_TO_TRANSLATION`, which is a family switch
+(off, `RECOGNIZE_SENSE` is not studied at all, its source-only kind included, and new words start at production),
+and the hardest, `SOURCE_ONLY`, which is a kind switch over the two definition kinds. Every other kind, the typed
+spelling card included, is always on (`CardKind.format` is null). The formats switched on are stored under
+`Setting.Name.STUDY_FORMATS`; both may be off. Read and write them only through `StudyFormatsRepository`
+(`composeApp/.../data/learning`): for a language without translation targets it resolves to every format with
+`playsTranslationKinds = false`, so only the source-only kinds play, and it serialises writes. The selection is a
+filter, never a mutation: `buildTaskVariants` drops kinds it does not allow, `SessionService.nextCard` excludes
+families with no playable kind,
 unlocks follow `FsrsConfig.unlockRules` and skip a target with no playable variant, re-entry inherits along the rule
 path (`unlockPathCreditFactor`; sibling credit stays direct), intake starts new words in the first studied family and
 re-enters stranded senses under the daily budget, and the stats, due, delayed and next-review queries judge a sense

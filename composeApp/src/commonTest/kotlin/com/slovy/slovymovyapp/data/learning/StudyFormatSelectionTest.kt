@@ -64,21 +64,34 @@ class StudyFormatSelectionTest {
     }
 
     @Test
+    fun switchingTheEasiestOffSkipsRecognitionAltogether() {
+        val withoutEasiest = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY), playsTranslationKinds = true)
+
+        assertEquals(
+            CardFamily.entries - CardFamily.RECOGNIZE_SENSE,
+            withoutEasiest.families,
+            "The first switch is the recognition step itself, not one of its cards",
+        )
+        assertFalse(
+            withoutEasiest.allows(CardKind.WORD_TO_SOURCE_DEFINITION),
+            "Source-only recognition is still recognition: a new word must not meet its hardest card first",
+        )
+        assertTrue(withoutEasiest.allows(CardKind.SOURCE_DEFINITION_TO_WORD), "Source-only production stays, behind its gate")
+        assertTrue(withoutEasiest.allows(CardKind.TRANSLATION_TO_WORD))
+    }
+
+    @Test
     fun withoutTranslationTargetsOnlyTheSourceOnlyKindsPlay() {
-        val sourceOnly = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY), playsTranslationKinds = false)
+        val withoutTargets = StudyFormatSelection(StudyFormat.entries.toSet(), playsTranslationKinds = false)
 
         assertEquals(
             listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD),
-            sourceOnly.families,
+            withoutTargets.families,
             "Context, listening and spelling have no source-only kind, so they are the families left out",
         )
-        assertTrue(sourceOnly.allows(CardKind.WORD_TO_SOURCE_DEFINITION))
-        assertFalse(sourceOnly.allows(CardKind.TRANSLATION_TO_WORD), "An always-on kind still needs a translation")
-        assertEquals(
-            sourceOnly.families,
-            StudyFormatSelection(StudyFormat.entries.toSet(), playsTranslationKinds = false).families,
-            "Word-to-translation cannot be played without a target, whatever is enabled",
-        )
+        assertTrue(withoutTargets.allows(CardKind.WORD_TO_SOURCE_DEFINITION))
+        assertFalse(withoutTargets.allows(CardKind.TRANSLATION_TO_WORD), "An always-on kind still needs a translation")
+        assertFalse(withoutTargets.allows(CardKind.WORD_TO_TRANSLATION), "Word-to-translation cannot be played without a target")
     }
 
     @Test

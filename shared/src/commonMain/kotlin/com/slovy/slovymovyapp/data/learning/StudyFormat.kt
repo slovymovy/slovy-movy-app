@@ -5,7 +5,11 @@ package com.slovy.slovymovyapp.data.learning
  * Every other way is always on; see [CardKind.format].
  */
 enum class StudyFormat {
-    /** The word is shown and its translation recalled: the first card a word gets. */
+    /**
+     * The recognition step, the first card a word gets: the word is shown and its translation
+     * recalled. Off, a word skips recognition altogether, its source-only form included, and
+     * starts at production.
+     */
     WORD_TO_TRANSLATION,
 
     /**
@@ -16,7 +20,10 @@ enum class StudyFormat {
     SOURCE_ONLY,
 }
 
-/** The format that switches this kind off, or null for a kind that is always on. */
+/**
+ * The format that switches this kind off, or null for a kind that is always on. The source-only
+ * recognition kind answers to both ends: see [StudyFormatSelection.allows].
+ */
 val CardKind.format: StudyFormat?
     get() = when (this) {
         CardKind.WORD_TO_TRANSLATION -> StudyFormat.WORD_TO_TRANSLATION
@@ -37,16 +44,22 @@ val CardKind.format: StudyFormat?
  * unlock rules create; it never touches a card that already exists, so switching a format off and
  * on leaves every card, review and stability exactly as it was.
  *
- * Both formats may be off: the always-on kinds keep every language studiable. Without translation
- * targets ([playsTranslationKinds] false) only the source-only kinds can be played, since every
- * other kind cues or answers with a translation; then the source-only format is the whole
- * selection, whatever is stored.
+ * The first switch is a family switch and the last a kind switch: with [StudyFormat.WORD_TO_TRANSLATION]
+ * off the recognition family is not studied at all, so a new word starts at production instead of
+ * meeting the hard source-only recognition card first; with [StudyFormat.SOURCE_ONLY] off the two
+ * source-only kinds are dropped wherever they live. Both may be off: the always-on kinds keep
+ * every language studiable.
+ *
+ * Without translation targets ([playsTranslationKinds] false) only the source-only kinds can be
+ * played, since every other kind cues or answers with a translation; the stored choice does not
+ * apply there and every format counts as on.
  */
 data class StudyFormatSelection(
     val enabled: Set<StudyFormat>,
     val playsTranslationKinds: Boolean,
 ) {
     fun allows(kind: CardKind): Boolean {
+        if (kind.family == CardFamily.RECOGNIZE_SENSE && StudyFormat.WORD_TO_TRANSLATION !in enabled) return false
         val format = kind.format
         if (format != null && format !in enabled) return false
         return playsTranslationKinds || format == StudyFormat.SOURCE_ONLY
