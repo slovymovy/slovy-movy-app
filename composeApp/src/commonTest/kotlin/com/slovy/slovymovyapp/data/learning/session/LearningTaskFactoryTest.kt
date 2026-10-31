@@ -4,6 +4,8 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardVariant
+import com.slovy.slovymovyapp.data.learning.StudyFormat
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
 import com.slovy.slovymovyapp.data.remote.LanguageCardExample
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.remote.LanguageCardTranslation
@@ -26,6 +28,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertContains(variants, CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null))
@@ -40,6 +43,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertFalse(
@@ -60,6 +64,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = emptyList(),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         // An empty <w></w> tag carries no answer-revealing content, so the source-definition
@@ -77,6 +82,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.RECOGNIZE_SENSE,
             sense = sense,
             translationTargets = emptyList(),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(
@@ -96,6 +102,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.RECOGNIZE_SENSE,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(
@@ -113,12 +120,124 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(
             listOf(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null)),
             variants,
             "TRANSLATION_TO_WORD must not be built when the target language has no translation words to cue from",
+        )
+    }
+
+    @Test
+    fun buildTaskVariants_dropsKindsOfSwitchedOffFormats() {
+        val sense = sense(definition = "a feeling of warmth and comfort")
+        val noSourceOnly = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION), playsTranslationKinds = true)
+
+        val variants = buildTaskVariants(
+            family = CardFamily.PRODUCE_WORD,
+            sense = sense,
+            translationTargets = listOf(Language.ENGLISH),
+            studyFormats = noSourceOnly,
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code)),
+            variants,
+            "With the source-only format off, the definition-cued variant must not be built",
+        )
+        assertEquals(
+            emptyList(),
+            buildTaskVariants(
+                family = CardFamily.RECOGNIZE_SENSE,
+                sense = sense,
+                translationTargets = listOf(Language.ENGLISH),
+                studyFormats = StudyFormatSelection(emptySet(), playsTranslationKinds = true),
+            ),
+            "A family none of whose kinds is studied has no variant at all",
+        )
+    }
+
+    @Test
+    fun buildTaskVariants_keepsAnUntranslatedSensePlayableSourceOnly() {
+        val untranslated = senseWithoutTranslations(definition = "a feeling of warmth and comfort")
+        val sourceOnlyOff = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION), playsTranslationKinds = true)
+
+        assertEquals(
+            listOf(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null)),
+            buildTaskVariants(CardFamily.RECOGNIZE_SENSE, untranslated, listOf(Language.ENGLISH), sourceOnlyOff),
+            "With no translation anywhere the source-only switch means 'prefer translated', not 'never study this word'",
+        )
+        assertEquals(
+            listOf(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null)),
+            buildTaskVariants(CardFamily.PRODUCE_WORD, untranslated, listOf(Language.ENGLISH), sourceOnlyOff),
+            "Production keeps its source-only kind for the same reason",
+        )
+        assertEquals(
+            emptyList(),
+            buildTaskVariants(
+                CardFamily.RECOGNIZE_SENSE,
+                senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort"),
+                listOf(Language.ENGLISH),
+                sourceOnlyOff,
+            ),
+            "A sense with any translation data at all obeys the switch",
+        )
+        assertEquals(
+            emptyList(),
+            buildTaskVariants(
+                CardFamily.RECOGNIZE_SENSE,
+                untranslated,
+                listOf(Language.ENGLISH),
+                StudyFormatSelection(emptySet(), playsTranslationKinds = true),
+            ),
+            "The family switch still holds: recognition stays off when the learner skipped that step",
+        )
+        assertEquals(
+            listOf(CardVariant(CardKind.WORD_TO_TRANSLATION, targetLang = Language.ENGLISH.code)),
+            buildTaskVariants(CardFamily.RECOGNIZE_SENSE, sense(definition = "a feeling of warmth and comfort"), listOf(Language.ENGLISH), sourceOnlyOff),
+            "A translated sense obeys the switch",
+        )
+    }
+
+    @Test
+    fun selectVariantsForReview_startsProductionWithTheTranslationKindWhenTheEasiestIsOff() {
+        val sense = sense(definition = "a feeling of warmth and comfort")
+
+        val variants = selectVariantsForReview(
+            family = CardFamily.PRODUCE_WORD,
+            sense = sense,
+            translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection(setOf(StudyFormat.SOURCE_ONLY), playsTranslationKinds = true),
+            cardStability = 1.days,
+            lastVariant = null,
+        )
+
+        assertEquals(
+            listOf(CardVariant(CardKind.TRANSLATION_TO_WORD, targetLang = Language.ENGLISH.code)),
+            variants,
+            "The source-only production card waits for its gate; the new card is cued by the translation",
+        )
+    }
+
+    @Test
+    fun selectVariantsForReview_neverFallsBackToASwitchedOffKind() {
+        val sense = sense(definition = "a feeling of warmth and comfort")
+
+        val variants = selectVariantsForReview(
+            family = CardFamily.PRODUCE_WORD,
+            sense = sense,
+            translationTargets = emptyList(),
+            studyFormats = StudyFormatSelection(setOf(StudyFormat.WORD_TO_TRANSLATION), playsTranslationKinds = true),
+            cardStability = 1.days,
+            lastVariant = null,
+        )
+
+        assertEquals(
+            emptyList(),
+            variants,
+            "The below-gate fallback to every variant must not resurrect a kind the learner switched off",
         )
     }
 
@@ -130,6 +249,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
             cardStability = 1.days,
             lastVariant = null,
         )
@@ -149,6 +269,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
             cardStability = 8.days,
             lastVariant = null,
         )
@@ -189,6 +310,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD_IN_CONTEXT,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
             cardStability = 1.days,
             lastVariant = null,
         )
@@ -208,6 +330,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.RECOGNIZE_SENSE,
             sense = sense,
             translationTargets = emptyList(),
+            studyFormats = StudyFormatSelection.ALL,
             cardStability = Duration.ZERO,
             lastVariant = null,
         )
@@ -229,6 +352,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.PRODUCE_WORD,
             sense = sense,
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
             cardStability = 30.days,
             lastVariant = lastVariant,
         )
@@ -251,6 +375,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.SPELL_WORD,
             sense = sense(definition = "a feeling of warmth and comfort"),
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(
@@ -266,6 +391,7 @@ class LearningTaskFactoryTest {
             family = CardFamily.SPELL_WORD,
             sense = senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort"),
             translationTargets = listOf(Language.ENGLISH),
+            studyFormats = StudyFormatSelection.ALL,
         )
 
         assertEquals(emptyList(), variants, "A translated definition alone cannot cue a typed word")

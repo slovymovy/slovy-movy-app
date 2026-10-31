@@ -42,6 +42,8 @@ fun SettingsScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToDeveloper: () -> Unit = {},
+    /** Required: a Settings row that silently did nothing would be a shipped bug. */
+    onOpenStudyFormats: (Language) -> Unit,
     hasFavoritesToReview: Boolean = false,
 ) {
     LifecycleResumeEffect(Unit) {
@@ -95,6 +97,7 @@ fun SettingsScreen(
         onNavigateToFavorites = onNavigateToFavorites,
         onNavigateToStats = onNavigateToStats,
         onNavigateToDeveloper = onNavigateToDeveloper,
+        onOpenStudyFormats = onOpenStudyFormats,
         hasFavoritesToReview = hasFavoritesToReview,
     )
 }
@@ -133,6 +136,7 @@ fun SettingsScreenContent(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToDeveloper: () -> Unit = {},
+    onOpenStudyFormats: (Language) -> Unit = {},
     hasFavoritesToReview: Boolean = false,
 ) {
     val dismissActionLabel = stringResource(Res.string.common_dismiss)
@@ -237,7 +241,8 @@ fun SettingsScreenContent(
                                         onCancelDownload = onCancelDownload,
                                         onDeleteTranslation = { tgt ->
                                             onDeleteTranslation(langState.language, tgt)
-                                        }
+                                        },
+                                        onOpenStudyFormats = { onOpenStudyFormats(langState.language) },
                                     )
                                 }
 

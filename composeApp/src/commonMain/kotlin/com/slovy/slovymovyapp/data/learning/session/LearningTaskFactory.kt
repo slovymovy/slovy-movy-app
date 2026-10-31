@@ -7,21 +7,31 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.learning.CardFamily
 import com.slovy.slovymovyapp.data.learning.CardKind
 import com.slovy.slovymovyapp.data.learning.CardVariant
+import com.slovy.slovymovyapp.data.learning.StudyFormat
+import com.slovy.slovymovyapp.data.learning.StudyFormatSelection
+import com.slovy.slovymovyapp.data.learning.format
 import com.slovy.slovymovyapp.data.remote.LanguageCardExample
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
 import com.slovy.slovymovyapp.data.util.HtmlTagParser
 import kotlin.time.Duration
 
+/**
+ * The variants of [family] this sense can be played in, in the learner's configured translation
+ * languages and chosen [studyFormats]. Intake, review-time selection and the unlock ladder all
+ * build from here, so a format the learner switched off is never created, served or unlocked,
+ * with one exception: an untranslated sense keeps its source-only kinds, see below.
+ */
 fun buildTaskVariants(
     family: CardFamily,
     sense: LanguageCardResponseSense,
     translationTargets: List<Language>,
+    studyFormats: StudyFormatSelection,
 ): List<CardVariant> {
     // Only the user's configured translation languages may cue a card; languages that merely
     // happen to exist in cached sense data must not be tested.
     val targets = translationTargets.distinctBy { it.code }
 
-    return when (family) {
+    val all = when (family) {
         CardFamily.RECOGNIZE_SENSE -> buildList {
             add(CardVariant(CardKind.WORD_TO_SOURCE_DEFINITION, targetLang = null))
             targets
@@ -61,6 +71,21 @@ fun buildTaskVariants(
                 .forEach { add(CardVariant(CardKind.TRANSLATION_TO_WORD_TYPED, targetLang = it.code)) }
         }
     }
+    // A sense with no translation data of any kind in any of the configured targets, no words,
+    // no definition, no translated example, can only be played source-only, as every sense of a
+    // language without targets is. For it the source-only switch
+    // does not apply: it means "prefer translated cards", not "never study this word". The family
+    // switch still does, so recognition stays off when the learner skipped that step. (A language
+    // without targets never gets here with a switch: its selection plays source-only alone.)
+    val untranslated = targets.isNotEmpty() && targets.none { target ->
+        sense.hasTranslationWords(target) ||
+            sense.hasTranslationDefinition(target) ||
+            sense.examples.any { !it.targetLangTranslations[target].isNullOrBlank() }
+    }
+    return all.filter { variant ->
+        studyFormats.allows(variant.kind) ||
+            (untranslated && variant.kind.format == StudyFormat.SOURCE_ONLY && variant.kind.family in studyFormats.families)
+    }
 }
 
 // The data a variant needs before it is playable in a given target language. This is the single
@@ -89,6 +114,7 @@ fun selectVariantsForReview(
     family: CardFamily,
     sense: LanguageCardResponseSense,
     translationTargets: List<Language>,
+    studyFormats: StudyFormatSelection,
     cardStability: Duration,
     lastVariant: CardVariant?,
 ): List<CardVariant> = PerformanceMonitoring.startTrace("learning_select_variants_for_review").use { trace ->
@@ -102,7 +128,7 @@ fun selectVariantsForReview(
     trace.putMetric("examples", sense.examples.size.toLong())
     trace.putMetric("stability_ms", cardStability.inWholeMilliseconds)
 
-    val all = buildTaskVariants(family, sense, translationTargets)
+    val all = buildTaskVariants(family, sense, translationTargets, studyFormats)
     val gated = all.filter { it.kind.minStability <= cardStability }
     val fallbackToAll = gated.isEmpty() && all.isNotEmpty()
     val pool = if (fallbackToAll) all else gated

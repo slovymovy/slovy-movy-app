@@ -65,6 +65,7 @@ private fun SettingsScreenPreviewWithLanguages(
                         language = Language.DUTCH,
                         isExpanded = true,
                         dictionarySizeBytes = 12 * 1024 * 1024L,
+                        hasStudyFormats = true,
                         translations = listOf(
                             TranslationUiState(
                                 targetLanguage = Language.ENGLISH,
@@ -89,6 +90,7 @@ private fun SettingsScreenPreviewWithLanguages(
                         language = Language.ENGLISH,
                         isExpanded = false,
                         dictionarySizeBytes = 15 * 1024 * 1024L,
+                        hasStudyFormats = true,
                         translations = listOf(
                             TranslationUiState(
                                 targetLanguage = Language.RUSSIAN,
@@ -141,6 +143,7 @@ private fun SettingsScreenPreviewWithExpandedVoice(
                         language = Language.ENGLISH,
                         isExpanded = false,
                         dictionarySizeBytes = 15 * 1024 * 1024L,
+                        hasStudyFormats = true,
                         translations = listOf(
                             TranslationUiState(
                                 targetLanguage = Language.RUSSIAN,
@@ -211,6 +214,7 @@ private fun SettingsScreenPreviewWithError(
                         language = Language.ENGLISH,
                         isExpanded = false,
                         dictionarySizeBytes = 15 * 1024 * 1024L,
+                        hasStudyFormats = true,
                         translations = emptyList()
                     )
                 ),
@@ -235,6 +239,7 @@ private fun SettingsScreenPreviewWithDeleteConfirmation(
                         language = Language.ENGLISH,
                         isExpanded = false,
                         dictionarySizeBytes = 15 * 1024 * 1024L,
+                        hasStudyFormats = true,
                         translations = listOf(
                             TranslationUiState(
                                 targetLanguage = Language.RUSSIAN,
@@ -271,6 +276,7 @@ private fun SettingsScreenPreviewWithMixedStates(
                         language = Language.ENGLISH,
                         isExpanded = true,
                         dictionarySizeBytes = 15 * 1024 * 1024L,
+                        hasStudyFormats = true,
                         translations = listOf(
                             TranslationUiState(
                                 targetLanguage = Language.RUSSIAN,

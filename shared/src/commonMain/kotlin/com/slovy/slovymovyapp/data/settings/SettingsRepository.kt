@@ -1,12 +1,15 @@
 package com.slovy.slovymovyapp.data.settings
 
 import com.slovy.slovymovyapp.data.Language
+import com.slovy.slovymovyapp.data.learning.StudyFormat
 import com.slovy.slovymovyapp.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -107,6 +110,27 @@ class SettingsRepository(private val db: AppDatabase) {
 
     suspend fun setStudyAutoplay(enabled: Boolean) {
         insert(Setting(Setting.Name.STUDY_AUTOPLAY, JsonPrimitive(enabled)))
+    }
+
+    /**
+     * The study formats switched on for [language], or null when no choice has been stored.
+     * Names that no longer exist are dropped; a stored choice may be empty, since the always-on
+     * kinds keep a language studiable.
+     */
+    suspend fun getStudyFormats(language: Language): Set<StudyFormat>? {
+        val json = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: return null
+        val names = json[language.code] as? JsonArray ?: return null
+        return names
+            .mapNotNull { element -> (element as? JsonPrimitive)?.contentOrNull }
+            .mapNotNull { name -> StudyFormat.entries.firstOrNull { it.name == name } }
+            .toSet()
+    }
+
+    suspend fun setStudyFormats(language: Language, enabled: Set<StudyFormat>) {
+        val existing = getById(Setting.Name.STUDY_FORMATS)?.value as? JsonObject ?: JsonObject(emptyMap())
+        val names = StudyFormat.entries.filter { it in enabled }.map { JsonPrimitive(it.name) }
+        val updated = JsonObject(existing + (language.code to JsonArray(names)))
+        insert(Setting(Setting.Name.STUDY_FORMATS, updated))
     }
 
     companion object {
