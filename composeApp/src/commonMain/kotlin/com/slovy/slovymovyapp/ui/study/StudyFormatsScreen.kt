@@ -248,10 +248,14 @@ private fun StudyFormatRowItem(
     // A switchable row is the switch: one target for a finger and one node for a screen reader,
     // read as the format's name with its tag and its on/off state. An always-on row is one node
     // of plain text with no role.
+    // No ripple over the row: the switch moving and the row dimming are the feedback, and a
+    // ripple the width of the row reads as a flash.
     val rowSemantics = if (format != null) {
         Modifier
             .toggleable(
                 value = row.enabled,
+                interactionSource = null,
+                indication = null,
                 role = Role.Switch,
                 onValueChange = { onToggle(format) },
             )
