@@ -155,10 +155,12 @@ fun StudyFormatsContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(AppSpacing.md))
+                    // Larger than the handoff's 64dp: the six rows leave the page room, and at
+                    // 64dp the otter read as an icon rather than an illustration.
                     Image(
                         imageVector = SlovyIcons.ThinkingOtter,
                         contentDescription = null,
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(96.dp),
                     )
                     Spacer(Modifier.height(AppSpacing.sm))
                     Text(
