@@ -286,11 +286,12 @@ class IntakeService(
 
     /**
      * Re-enters stranded senses, whose cards all belong to families the learner switched off,
-     * one at a time in the first studied family that can play it: such a word could never be shown again,
-     * and the ladder, which only runs on a review, could never bring it back. The new card
-     * inherits from the strongest one the way an unlock would, so what the word already earned
-     * carries over; the cards it has keep their scheduling untouched. Word data is fetched once
-     * per lemma and run.
+     * one at a time in the first family open to it that can play it, which for a never-reviewed
+     * word is only where a new word starts: such a word could never be shown again, and the
+     * ladder, which only runs on a review, could never bring it back. The new card inherits from
+     * the strongest one the way an unlock would, so what the word already earned carries over;
+     * the cards it has keep their scheduling untouched. Word data is fetched once per lemma and
+     * run.
      */
     private inner class Rerouter(
         private val langCode: String,
@@ -317,7 +318,7 @@ class IntakeService(
             var after = startedAt
             var wrapped = startedAt == Uuid.NIL
             val pageSize = config.dailyNewTaskFamilyBudget.toLong()
-            for (page in 0 until MAX_REROUTE_PAGES) {
+            for (pageIndex in 0 until MAX_REROUTE_PAGES) {
                 if (inserted >= budget) break
                 val rows = learning.selectStrongestCardOfSensesWithoutFamilies(
                     lang_code = langCode,
@@ -332,13 +333,8 @@ class IntakeService(
                     continue
                 }
                 // After wrapping, the walk ends where this run started, that sense included: it
-                // was the last run's, and the ones after it were scanned in the first pass. Hex
-                // order is the blob order the query pages in.
-                val page = if (wrapped && startedAt != Uuid.NIL) {
-                    rows.filter { it.sense_id.toString() <= startedAt.toString() }
-                } else {
-                    rows
-                }
+                // was the last run's, and the ones after it were scanned in the first pass.
+                val page = if (wrapped && startedAt != Uuid.NIL) rows.filter { it.sense_id <= startedAt } else rows
                 val reachedStart = page.size < rows.size || page.any { it.sense_id == startedAt }
                 scanned += page.size
                 for (source in page) {
@@ -353,7 +349,13 @@ class IntakeService(
                         RerouteOutcome.NOTHING_TO_DO -> Unit
                     }
                 }
-                if (reachedStart) break
+                if (reachedStart || inserted >= budget) break
+                // A short page is the end of the set; no need to ask once more for an empty one.
+                if (rows.size < pageSize) {
+                    if (wrapped) break
+                    wrapped = true
+                    after = Uuid.NIL
+                }
             }
             rerouteCursors[key] = after
             AppLogger.debug(TAG, null) {
@@ -392,12 +394,13 @@ class IntakeService(
             // The first family open to this sense that can play it; a sense that none can play is
             // not remembered across runs, since the data it lacks may arrive with a fetch or a
             // download, and the run after that must look again.
-            val target = formats.reentryFamilies(source.state).firstOrNull { family ->
+            val candidates = formats.reentryFamilies(source.state, config.defaultIntakeFamilies)
+            val target = candidates.firstOrNull { family ->
                 buildTaskVariants(family, sense, translationTargets, formats).isNotEmpty()
             }
             if (target == null) {
                 AppLogger.debug(TAG, null) {
-                    "Intake reroute skipped: no playable variant lang=$langCode sense=$senseId families=${formats.families}"
+                    "Intake reroute skipped: no playable variant lang=$langCode sense=$senseId families=$candidates"
                 }
                 return RerouteOutcome.NOT_PLAYABLE
             }

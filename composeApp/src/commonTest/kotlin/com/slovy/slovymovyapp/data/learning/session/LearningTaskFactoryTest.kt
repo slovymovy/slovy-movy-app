@@ -172,6 +172,17 @@ class LearningTaskFactoryTest {
         assertEquals(
             listOf(CardVariant(CardKind.SOURCE_DEFINITION_TO_WORD, targetLang = null)),
             buildTaskVariants(CardFamily.PRODUCE_WORD, untranslated, listOf(Language.ENGLISH), sourceOnlyOff),
+            "Production keeps its source-only kind for the same reason",
+        )
+        assertEquals(
+            emptyList(),
+            buildTaskVariants(
+                CardFamily.RECOGNIZE_SENSE,
+                senseWithDefinitionOnlyTranslation(definition = "a feeling of warmth and comfort"),
+                listOf(Language.ENGLISH),
+                sourceOnlyOff,
+            ),
+            "A sense with any translation data at all obeys the switch",
         )
         assertEquals(
             emptyList(),

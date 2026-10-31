@@ -71,12 +71,17 @@ fun buildTaskVariants(
                 .forEach { add(CardVariant(CardKind.TRANSLATION_TO_WORD_TYPED, targetLang = it.code)) }
         }
     }
-    // A sense with no translation into any of the configured targets can only be played
-    // source-only, as every sense of a language without targets is. For it the source-only switch
+    // A sense with no translation data of any kind in any of the configured targets, no words,
+    // no definition, no translated example, can only be played source-only, as every sense of a
+    // language without targets is. For it the source-only switch
     // does not apply: it means "prefer translated cards", not "never study this word". The family
     // switch still does, so recognition stays off when the learner skipped that step. (A language
     // without targets never gets here with a switch: its selection plays source-only alone.)
-    val untranslated = targets.isNotEmpty() && targets.none { sense.hasTranslationWords(it) }
+    val untranslated = targets.isNotEmpty() && targets.none { target ->
+        sense.hasTranslationWords(target) ||
+            sense.hasTranslationDefinition(target) ||
+            sense.examples.any { !it.targetLangTranslations[target].isNullOrBlank() }
+    }
     return all.filter { variant ->
         studyFormats.allows(variant.kind) ||
             (untranslated && variant.kind.format == StudyFormat.SOURCE_ONLY && variant.kind.family in studyFormats.families)

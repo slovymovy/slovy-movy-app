@@ -105,9 +105,20 @@ class StudyFormatSelectionTest {
 
     @Test
     fun aNeverReviewedWordReentersOnlyWhereANewWordStarts() {
-        assertEquals(listOf(CardFamily.PRODUCE_WORD), bothOff.reentryFamilies(CardState.NEW), "Nothing earned, so no gate may be skipped")
-        assertEquals(bothOff.families, bothOff.reentryFamilies(CardState.REVIEW), "A reviewed word carries its memory to the first family that can play it")
-        assertEquals(listOf(CardFamily.RECOGNIZE_SENSE), StudyFormatSelection.ALL.reentryFamilies(CardState.NEW))
+        val preferred = FsrsDefaults.DEFAULT_INTAKE_FAMILIES
+
+        assertEquals(listOf(CardFamily.PRODUCE_WORD), bothOff.reentryFamilies(CardState.NEW, preferred), "Nothing earned, so no gate may be skipped")
+        assertEquals(bothOff.families, bothOff.reentryFamilies(CardState.REVIEW, preferred), "A reviewed word carries its memory to the first family that can play it")
+        assertEquals(
+            StudyFormatSelection.ALL.intakeFamilies(preferred),
+            StudyFormatSelection.ALL.reentryFamilies(CardState.NEW, preferred),
+            "A never-reviewed word re-enters exactly where intake would start it",
+        )
+        assertEquals(
+            listOf(CardFamily.PRODUCE_WORD),
+            StudyFormatSelection.ALL.reentryFamilies(CardState.NEW, listOf(CardFamily.PRODUCE_WORD)),
+            "The intake preference, not the ladder's first rung, decides where a new word starts",
+        )
     }
 
     @Test

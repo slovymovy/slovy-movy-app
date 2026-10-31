@@ -82,12 +82,12 @@ data class StudyFormatSelection(
 
     /**
      * The families a sense may re-enter from a card in [sourceState], in order of preference. A
-     * never-reviewed word has earned nothing, so it starts where a new word starts, in the first
-     * studied family alone, and cannot skip the unlock gates; a reviewed word carries its memory
-     * to the first studied family that can play it.
+     * never-reviewed word has earned nothing, so it starts exactly where intake starts a new word
+     * ([intakeFamilies] of the [preferredIntake] families) and cannot skip the unlock gates; a
+     * reviewed word carries its memory to the first studied family that can play it.
      */
-    fun reentryFamilies(sourceState: CardState): List<CardFamily> =
-        if (sourceState == CardState.NEW) families.take(1) else families
+    fun reentryFamilies(sourceState: CardState, preferredIntake: List<CardFamily>): List<CardFamily> =
+        if (sourceState == CardState.NEW) intakeFamilies(preferredIntake) else families
 
     fun with(format: StudyFormat, enabled: Boolean): StudyFormatSelection =
         copy(enabled = if (enabled) this.enabled + format else this.enabled - format)

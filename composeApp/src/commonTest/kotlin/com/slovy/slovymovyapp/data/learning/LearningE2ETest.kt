@@ -2456,10 +2456,11 @@ class LearningE2ETest : BaseTest() {
             val result = env.intake.runIntake("en")
 
             assertEquals(0, result.rerouted, "A new word only starts where new words start")
-            assertTrue(SkipReason.NO_TASKS_VARIANT_AVAILABLE in result.skipped)
+            assertTrue(SkipReason.NO_TASKS_VARIANT_AVAILABLE in result.skipped, "The sense is reported as unplayable, to be looked at again")
             assertEquals(
                 listOf(CardFamily.RECOGNIZE_SENSE),
                 env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+                "No card is created in a family the word has not earned",
             )
         }
     }
@@ -2477,7 +2478,7 @@ class LearningE2ETest : BaseTest() {
 
             val card = env.nextLoadedCard("en")
 
-            assertEquals(CardFamily.RECOGNIZE_SENSE, card.card.family)
+            assertEquals(CardFamily.RECOGNIZE_SENSE, card.card.family, "The existing recognition card is served, not replaced")
             assertEquals(CardKind.WORD_TO_SOURCE_DEFINITION, card.variant.kind, "Its only playable form is the source-only one")
             val stored = env.app.favoritesQueries.selectCardById(card.card.id).executeAsOne()
             assertNull(stored.available_after, "Nothing to bury: the card was served")
