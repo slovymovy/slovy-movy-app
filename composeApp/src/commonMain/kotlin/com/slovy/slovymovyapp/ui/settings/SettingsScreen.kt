@@ -42,7 +42,8 @@ fun SettingsScreen(
     onNavigateToFavorites: () -> Unit = {},
     onNavigateToStats: () -> Unit = {},
     onNavigateToDeveloper: () -> Unit = {},
-    onOpenStudyFormats: (Language) -> Unit = {},
+    /** Required: a Settings row that silently did nothing would be a shipped bug. */
+    onOpenStudyFormats: (Language) -> Unit,
     hasFavoritesToReview: Boolean = false,
 ) {
     LifecycleResumeEffect(Unit) {

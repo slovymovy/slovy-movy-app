@@ -95,6 +95,8 @@ class StudyFormatsEditor(
             // Even the read failed: the tap is simply undone.
             fallback
         }
+        // A tap made during the read owns the selection now; its own write settles the store.
+        if (write !== coroutineContext[Job]) return
         selection = stored
         onSelectionChanged(stored)
     }

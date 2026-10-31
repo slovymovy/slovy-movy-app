@@ -351,7 +351,7 @@ class SessionService(
         formats: StudyFormatSelection,
         now: Long,
     ) {
-        val target = formats.families.firstOrNull { family ->
+        val target = formats.reentryFamilies(card.scheduling.state).firstOrNull { family ->
             family != card.family && buildTaskVariants(family, sense, targets, formats).isNotEmpty()
         } ?: return
         val scheduling = config.reentryScheduling(

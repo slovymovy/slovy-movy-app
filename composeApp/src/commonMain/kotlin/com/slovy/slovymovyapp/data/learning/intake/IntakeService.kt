@@ -331,10 +331,21 @@ class IntakeService(
                     after = Uuid.NIL
                     continue
                 }
-                after = rows.last().sense_id
-                scanned += rows.size
-                for (source in rows) {
+                // After wrapping, the walk ends where this run started, that sense included: it
+                // was the last run's, and the ones after it were scanned in the first pass. Hex
+                // order is the blob order the query pages in.
+                val page = if (wrapped && startedAt != Uuid.NIL) {
+                    rows.filter { it.sense_id.toString() <= startedAt.toString() }
+                } else {
+                    rows
+                }
+                val reachedStart = page.size < rows.size || page.any { it.sense_id == startedAt }
+                scanned += page.size
+                for (source in page) {
                     if (inserted >= budget) break
+                    // The cursor follows the senses actually looked at, so a page cut short by the
+                    // budget is resumed, not skipped, by the next run.
+                    after = source.sense_id
                     when (reenter(source)) {
                         RerouteOutcome.INSERTED -> inserted += 1
                         RerouteOutcome.NOT_PLAYABLE -> notPlayable += 1
@@ -342,6 +353,7 @@ class IntakeService(
                         RerouteOutcome.NOTHING_TO_DO -> Unit
                     }
                 }
+                if (reachedStart) break
             }
             rerouteCursors[key] = after
             AppLogger.debug(TAG, null) {
@@ -377,10 +389,10 @@ class IntakeService(
                 }
                 return RerouteOutcome.DATA_UNAVAILABLE
             }
-            // The first studied family that can play this sense; a sense that none can play is
+            // The first family open to this sense that can play it; a sense that none can play is
             // not remembered across runs, since the data it lacks may arrive with a fetch or a
             // download, and the run after that must look again.
-            val target = formats.families.firstOrNull { family ->
+            val target = formats.reentryFamilies(source.state).firstOrNull { family ->
                 buildTaskVariants(family, sense, translationTargets, formats).isNotEmpty()
             }
             if (target == null) {

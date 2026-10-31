@@ -104,6 +104,13 @@ class StudyFormatSelectionTest {
     }
 
     @Test
+    fun aNeverReviewedWordReentersOnlyWhereANewWordStarts() {
+        assertEquals(listOf(CardFamily.PRODUCE_WORD), bothOff.reentryFamilies(CardState.NEW), "Nothing earned, so no gate may be skipped")
+        assertEquals(bothOff.families, bothOff.reentryFamilies(CardState.REVIEW), "A reviewed word carries its memory to the first family that can play it")
+        assertEquals(listOf(CardFamily.RECOGNIZE_SENSE), StudyFormatSelection.ALL.reentryFamilies(CardState.NEW))
+    }
+
+    @Test
     fun eitherFormatCanBeSwitchedOffAndOnAgain() {
         val withoutEasiest = StudyFormatSelection.ALL.with(StudyFormat.WORD_TO_TRANSLATION, enabled = false)
 

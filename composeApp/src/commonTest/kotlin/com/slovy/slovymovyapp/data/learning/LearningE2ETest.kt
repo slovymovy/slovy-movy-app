@@ -2428,6 +2428,36 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun reroute_does_not_start_a_never_reviewed_word_past_the_first_studied_family() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            // Playable in context only, like the reviewed word above, but never reviewed: it has
+            // earned no step on the ladder, so it must not start at fill-the-gap.
+            val fixture = env.seedSense(lemma = "freshclozeonly")
+            env.translation!!.translationQueries.insertExampleTranslation(fixture.senseId, "en", "ru", 1, "Я <w>учусь</w> каждый день.")
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.NEW,
+                stability = 0.0,
+                difficulty = 0.0,
+                due = start.toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(0, result.rerouted, "A new word only starts where new words start")
+            assertTrue(SkipReason.NO_TASKS_VARIANT_AVAILABLE in result.skipped)
+            assertEquals(
+                listOf(CardFamily.RECOGNIZE_SENSE),
+                env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList().map { it.family },
+            )
+        }
+    }
+
+    @Test
     fun reroute_looks_again_once_missing_data_arrives() = runBlocking {
         withEnv(includeTranslation = true) { env ->
             val fixture = env.seedSense(lemma = "dataarriveslater")
