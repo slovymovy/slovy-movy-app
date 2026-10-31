@@ -629,7 +629,7 @@
     <string name="study_actions_explainer">Oefenvormen</string>
     <string name="study_actions_explainer_description">De verschillende manieren om een woord te herhalen</string>
     <string name="study_explainer_title">Zo ga je oefenen</string>
-    <string name="study_explainer_intro">De formats worden moeilijker naarmate een woord beter blijft hangen. Sla de eerste of laatste stap over als je wilt.</string>
+    <string name="study_explainer_intro">De oefenvormen worden moeilijker naarmate een woord beter blijft hangen. Sla de eerste of laatste stap over als je wilt.</string>
     <string name="study_explainer_word_to_translation_title">Woord → vertaling</string>
     <string name="study_explainer_word_to_translation">Zie het woord, haal de vertaling op.</string>
     <string name="study_explainer_translation_to_word_title">Vertaling → woord</string>
