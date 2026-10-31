@@ -16,13 +16,15 @@ import kotlinx.coroutines.sync.withLock
  * again once a translation language returns.
  *
  * Writes are serialised: the setting is one JSON object for every language, so two quick toggles
- * must not interleave their read-modify-write and persist the older of the two.
+ * must not interleave their read-modify-write and persist the older of the two. Reads take the
+ * same lock, so a screen opened right after a toggle elsewhere sees the toggle, not the value
+ * from before a write still in flight.
  */
 class StudyFormatsRepository(
     private val settingsRepository: SettingsRepository,
     private val translationTargets: suspend (Language) -> List<Language>,
 ) {
-    private val writeMutex = Mutex()
+    private val mutex = Mutex()
 
     private companion object {
         val WITHOUT_TARGETS = StudyFormatSelection(StudyFormat.entries.toSet(), playsTranslationKinds = false)
@@ -34,7 +36,7 @@ class StudyFormatsRepository(
     /** As [get], for a caller that has already resolved the language's translation targets. */
     suspend fun get(language: Language, translationTargets: List<Language>): StudyFormatSelection {
         if (!hasChoice(language, translationTargets)) return WITHOUT_TARGETS
-        val stored = settingsRepository.getStudyFormats(language) ?: return StudyFormatSelection.ALL
+        val stored = mutex.withLock { settingsRepository.getStudyFormats(language) } ?: return StudyFormatSelection.ALL
         return StudyFormatSelection(stored, playsTranslationKinds = true)
     }
 
@@ -57,7 +59,7 @@ class StudyFormatsRepository(
         Language.fromCodeOrNull(langCode)?.let { get(it) } ?: StudyFormatSelection.ALL
 
     suspend fun set(language: Language, selection: StudyFormatSelection) {
-        writeMutex.withLock {
+        mutex.withLock {
             settingsRepository.setStudyFormats(language, selection.enabled)
         }
     }
