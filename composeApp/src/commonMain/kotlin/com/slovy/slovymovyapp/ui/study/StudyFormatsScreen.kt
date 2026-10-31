@@ -175,7 +175,9 @@ fun StudyFormatsContent(
                     Spacer(Modifier.height(AppSpacing.sm))
                     Text(
                         text = state.intro.resolve(),
+                        // The handoff's reading font is the serif, as under the onboarding headers.
                         style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = MaterialTheme.serifFontFamily,
                             fontStyle = MaterialTheme.uiItalic,
                             fontSize = 13.5.sp,
                             lineHeight = 19.5.sp,
