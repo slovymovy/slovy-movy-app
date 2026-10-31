@@ -1794,18 +1794,43 @@ class LearningE2ETest : BaseTest() {
             assertEquals(10.0 * factor, production.stability, absoluteTolerance = 1e-9)
             assertEquals(CardState.LEARNING, production.state)
             assertEquals(5.0, production.difficulty)
-            val expectedDue = start + stabilityDelay(
-                stability = production.stability,
-                ratio = config.forwardCreditDelayRatio,
-                floor = config.forwardCreditDelayFloor,
-                cap = config.forwardCreditDelayCap,
+            assertEquals(
+                start.toEpochMilliseconds(),
+                production.due,
+                "A word that was due stays due: a format change is not a review, so nothing waits",
             )
-            assertEquals(expectedDue.toEpochMilliseconds(), production.due)
             assertEquals(paused, production.available_after, "A paused word stays paused in its new family")
 
             val again = env.intake.runIntake("en")
             assertEquals(0, again.rerouted, "Re-entry happens once; the word now has a card in a studied family")
             assertEquals(0, again.cardsCreated)
+        }
+    }
+
+    @Test
+    fun intake_reentry_keeps_a_future_due_time() = runBlocking {
+        withEnv(includeTranslation = true) { env ->
+            val fixture = env.seedSense(lemma = "laterdueword")
+            env.seedTranslation(fixture.senseId, fixture.lemmaPosId)
+            env.addFavorite(fixture)
+            env.app.favoritesQueries.markFavoriteActivated(start.toEpochMilliseconds(), fixture.senseId.toString(), "en")
+            val later = (start + 3.days).toEpochMilliseconds()
+            env.insertTask(
+                fixture = fixture,
+                family = CardFamily.RECOGNIZE_SENSE,
+                state = CardState.REVIEW,
+                stability = 10.0,
+                due = later,
+                createdAt = (start - 2.days).toEpochMilliseconds(),
+            )
+            env.settings.setStudyFormats(Language.ENGLISH, emptySet())
+
+            val result = env.intake.runIntake("en")
+
+            assertEquals(1, result.rerouted)
+            val production = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
+                .single { it.family == CardFamily.PRODUCE_WORD }
+            assertEquals(later, production.due, "The new card keeps the hidden card's date; it is not brought forward either")
         }
     }
 
@@ -2147,13 +2172,7 @@ class LearningE2ETest : BaseTest() {
             val recognition = cards.single { it.family == CardFamily.RECOGNIZE_SENSE }
             val factor = config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_VOICE, CardFamily.RECOGNIZE_SENSE, Rating.GOOD)!!
             assertEquals(30.0 * factor, recognition.stability, absoluteTolerance = 1e-9)
-            val expectedDue = start + stabilityDelay(
-                stability = recognition.stability,
-                ratio = config.backwardCreditDelayRatio,
-                floor = config.backwardCreditDelayFloor,
-                cap = config.backwardCreditDelayCap,
-            )
-            assertEquals(expectedDue.toEpochMilliseconds(), recognition.due, "Credit back down the ladder waits like backward sibling credit")
+            assertEquals(start.toEpochMilliseconds(), recognition.due, "The voice card was due, so its replacement is due now")
         }
     }
 
@@ -2345,20 +2364,14 @@ class LearningE2ETest : BaseTest() {
             val served = env.session.nextCard("en", start, emptySet())
                 .first { it == null || it.loadState() != SessionCardLoadState.LOADING }
 
-            assertNull(served, "The re-entered card waits for its own due time; inferred knowledge is not tested early")
+            assertNull(served, "This selection goes on with the candidates it had; the re-entered card is for the next")
             val cards = env.app.favoritesQueries.selectCardsByFavorite(fixture.senseId, "en").executeAsList()
             assertEquals(listOf(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD), cards.map { it.family })
             val production = cards.single { it.family == CardFamily.PRODUCE_WORD }
             val factor = config.crossFamilyCreditFactor(CardFamily.RECOGNIZE_SENSE, CardFamily.PRODUCE_WORD, Rating.GOOD)!!
             assertEquals(10.0 * factor, production.stability, absoluteTolerance = 1e-9)
             assertEquals(CardState.LEARNING, production.state)
-            val expectedDue = start + stabilityDelay(
-                stability = production.stability,
-                ratio = config.forwardCreditDelayRatio,
-                floor = config.forwardCreditDelayFloor,
-                cap = config.forwardCreditDelayCap,
-            )
-            assertEquals(expectedDue.toEpochMilliseconds(), production.due, "Credit up the ladder waits the forward delay")
+            assertEquals(start.toEpochMilliseconds(), production.due, "The hidden card was due, so its replacement is due now")
             val buried = env.app.favoritesQueries.selectCardById(recognition.id).executeAsOne()
             assertEquals(
                 (start + config.buryUnplayableUnderFormatsFor).toEpochMilliseconds(),
@@ -2367,8 +2380,7 @@ class LearningE2ETest : BaseTest() {
             )
             assertEquals(recognition.stability, buried.stability)
 
-            // Once due, the production card is served, and the selection adds nothing more to the sense.
-            env.clock.advance(config.forwardCreditDelayCap + 1.days)
+            // The next selection serves the production card at once, and adds nothing more to the sense.
             val later = env.nextLoadedCard("en")
             assertEquals(CardFamily.PRODUCE_WORD, later.card.family)
             assertEquals(CardKind.TRANSLATION_TO_WORD, later.variant.kind)

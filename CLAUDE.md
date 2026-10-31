@@ -419,7 +419,7 @@ spelling card included, is always on (`CardKind.format` is null). The formats sw
 filter, never a mutation: `buildTaskVariants` drops kinds it does not allow, `SessionService.nextCard` excludes
 families with no playable kind,
 unlocks follow `FsrsConfig.unlockRules` and skip a target with no playable variant, re-entry inherits along the rule
-path (`unlockPathCreditFactor`; sibling credit stays direct), intake starts new words in the first studied family and
+path (`unlockPathCreditFactor`; sibling credit stays direct) and keeps the hidden card's due time, intake starts new words in the first studied family and
 re-enters stranded senses under the daily budget, and the stats, due, delayed and next-review queries judge a sense
 on its studied families only. Toggling a format must not create, delete, suspend or reschedule an existing card.
 The formats page lists every format, a spelling row included, with a switch on the first and the last row only;

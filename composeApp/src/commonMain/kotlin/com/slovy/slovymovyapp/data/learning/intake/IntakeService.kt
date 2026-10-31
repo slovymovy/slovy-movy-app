@@ -396,10 +396,12 @@ class IntakeService(
                 sourceDifficulty = source.difficulty,
                 targetFamily = target,
             )
-            val due = now + scheduling.delay.inWholeMilliseconds
+            // The new card takes over the hidden card's due time: a word that was due stays due, one
+            // scheduled for later keeps its date. A new card for a never-reviewed source is due now.
+            val due = if (scheduling.state == CardState.NEW) now else maxOf(now, source.due)
             AppLogger.debug(TAG, null) {
                 "Intake rerouting sense lang=$langCode sense=$senseId from=${source.family} " +
-                    "to=$target inheritedStability=${scheduling.stability} dueIn=${scheduling.delay}"
+                    "to=$target inheritedStability=${scheduling.stability} dueInMs=${due - now}"
             }
             // The query already leaves out senses with any card in a studied family; the check
             // inside the transaction is for a card another writer inserted since that read.

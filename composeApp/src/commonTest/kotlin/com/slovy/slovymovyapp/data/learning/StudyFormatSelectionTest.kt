@@ -1,9 +1,7 @@
 package com.slovy.slovymovyapp.data.learning
 
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
-import com.slovy.slovymovyapp.data.learning.fsrs.backwardCreditDelay
 import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
-import com.slovy.slovymovyapp.data.learning.fsrs.forwardCreditDelay
 import com.slovy.slovymovyapp.data.learning.fsrs.inheritedStability
 import com.slovy.slovymovyapp.data.learning.fsrs.reentryScheduling
 import com.slovy.slovymovyapp.data.learning.fsrs.unlockPathCreditFactor
@@ -13,7 +11,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.time.Duration
 
 class StudyFormatSelectionTest {
 
@@ -178,6 +175,7 @@ class StudyFormatSelectionTest {
 
     @Test
     fun reentryInheritsAlongTheRulesForwardAndThroughTheDirectCreditBack() {
+        // Re-entry carries no delay of its own: the call sites keep the hidden card's due time.
         val config = FsrsDefaults.config()
 
         val forward = config.reentryScheduling(
@@ -191,7 +189,6 @@ class StudyFormatSelectionTest {
         assertEquals(CardState.LEARNING, forward.state)
         assertEquals(config.inheritedStability(10.0, chained), forward.stability, absoluteTolerance = 1e-9)
         assertEquals(5.0, forward.difficulty)
-        assertEquals(config.forwardCreditDelay(forward.stability), forward.delay)
 
         val back = config.reentryScheduling(
             sourceFamily = CardFamily.RECOGNIZE_VOICE,
@@ -200,8 +197,7 @@ class StudyFormatSelectionTest {
             sourceDifficulty = 5.0,
             targetFamily = CardFamily.RECOGNIZE_SENSE,
         )
-        assertEquals(config.inheritedStability(30.0, 0.80), back.stability, absoluteTolerance = 1e-9)
-        assertEquals(config.backwardCreditDelay(back.stability), back.delay, "Back down the ladder waits the backward delay")
+        assertEquals(config.inheritedStability(30.0, 0.80), back.stability, absoluteTolerance = 1e-9, message = "Back down the ladder the pair's own credit applies")
 
         val fresh = config.reentryScheduling(
             sourceFamily = CardFamily.RECOGNIZE_SENSE,
@@ -211,6 +207,6 @@ class StudyFormatSelectionTest {
             targetFamily = CardFamily.PRODUCE_WORD,
         )
         assertEquals(CardState.NEW, fresh.state, "Nothing earned yet, so nothing is inherited")
-        assertEquals(Duration.ZERO, fresh.delay)
+        assertEquals(0.0, fresh.stability)
     }
 }

@@ -143,16 +143,16 @@ data class ReentryScheduling(
     val state: CardState,
     val stability: Double,
     val difficulty: Double,
-    /** How long before the new card is first presented. */
-    val delay: Duration,
 )
 
 /**
- * The scheduling of a card that re-enters a sense in [targetFamily] from its strongest existing
- * card, the way an unlock would: forward along the unlock rules it inherits through the chained
- * credit and waits the forward delay, back from a family further up it inherits through that
- * pair's credit and waits the backward delay. A source never reviewed, or a pair without credit,
- * starts the new card fresh.
+ * The memory of a card that re-enters a sense in [targetFamily] from its strongest existing card,
+ * the way an unlock would: forward along the unlock rules it inherits through the chained credit,
+ * back from a family further up through that pair's credit. A source never reviewed, or a pair
+ * without credit, starts the new card fresh.
+ *
+ * Unlike an unlock, re-entry carries no delay: it follows a format change, not a review, so the
+ * new card takes over the hidden card's due time, and a word that was due stays due.
  */
 fun FsrsConfig.reentryScheduling(
     sourceFamily: CardFamily,
@@ -168,14 +168,12 @@ fun FsrsConfig.reentryScheduling(
         crossFamilyCreditFactor(sourceFamily, targetFamily, Rating.GOOD)
     }
     if (sourceState == CardState.NEW || factor == null) {
-        return ReentryScheduling(CardState.NEW, 0.0, 0.0, Duration.ZERO)
+        return ReentryScheduling(CardState.NEW, 0.0, 0.0)
     }
-    val stability = inheritedStability(sourceStability, factor)
     return ReentryScheduling(
         state = CardState.LEARNING,
-        stability = stability,
+        stability = inheritedStability(sourceStability, factor),
         difficulty = sourceDifficulty,
-        delay = if (forward) forwardCreditDelay(stability) else backwardCreditDelay(stability),
     )
 }
 

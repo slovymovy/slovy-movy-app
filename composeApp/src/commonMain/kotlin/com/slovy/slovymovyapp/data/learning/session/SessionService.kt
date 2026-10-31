@@ -341,7 +341,7 @@ class SessionService(
 
     /**
      * Gives a sense whose [card] cannot be played under the formats a card in the first studied
-     * family that can play it, scheduled from this card the way an unlock would. Nothing happens
+     * family that can play it, with this card's memory and due time. Nothing happens
      * when no studied family can play the sense or the family already has a card.
      */
     private fun reenterInPlayableFamily(
@@ -361,10 +361,11 @@ class SessionService(
             sourceDifficulty = card.scheduling.difficulty,
             targetFamily = target,
         )
-        val due = delayedEpochMs(now, scheduling.delay)
+        // The new card takes over this card's due time; see FsrsConfig.reentryScheduling.
+        val due = if (scheduling.state == CardState.NEW) now else maxOf(now, card.scheduling.dueEpochMs)
         AppLogger.debug(TAG, null) {
             "Re-entering unplayable card=${card.id} sense=${card.senseId} from=${card.family} to=$target " +
-                "inheritedStability=${formatDouble(scheduling.stability)} dueIn=${scheduling.delay}"
+                "inheritedStability=${formatDouble(scheduling.stability)} dueIn=${formatDelay(due, now)}"
         }
         insertTaskIfMissing(
             source = card,
