@@ -370,6 +370,38 @@ class LearningE2ETest : BaseTest() {
     }
 
     @Test
+    fun retention_pause_ignores_reviews_of_removed_favorites() = runBlocking {
+        val config = FsrsDefaults.config().copy(pauseIntakeRetentionMinReviews = 1L)
+        withEnv(includeTranslation = false, config = config) { env ->
+            val removed = env.seedSense(lemma = "retentionremoved")
+            val queued = env.seedSense(lemma = "retentionqueued")
+            env.addFavorite(removed)
+            env.addFavorite(queued, createdAt = (start + 1.milliseconds).toEpochMilliseconds())
+            val card = env.insertTask(
+                fixture = removed,
+                family = CardFamily.RECOGNIZE_SENSE,
+            )
+            env.insertReviewLog(
+                cardId = card.id,
+                variantKind = CardKind.WORD_TO_SOURCE_DEFINITION,
+                rating = Rating.AGAIN,
+            )
+            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en"), "failed review of a kept favorite pauses intake")
+
+            env.favorites.remove(removed.senseId.toString(), Language.ENGLISH)
+
+            assertTrue(env.intake.canContinueWithPendingFavoritesNow("en"), "review of a removed favorite must not pause intake")
+            val result = env.intake.continueWithPendingFavoritesNow("en")
+            assertTrue(result.cardsCreated > 0, "pending favorite activates once the failed word is removed")
+            assertEquals(emptyList(), result.skipped)
+            assertNotNull(
+                env.app.favoritesQueries.selectFavoriteWithActivation(queued.senseId.toString(), "en")
+                    .executeAsOne().activated_at,
+            )
+        }
+    }
+
+    @Test
     fun intake_activates_pending_favorites_of_same_lemma_together() = runBlocking {
         withEnv(includeTranslation = false) { env ->
             val first = env.seedSense(lemma = "polysamefirst")
