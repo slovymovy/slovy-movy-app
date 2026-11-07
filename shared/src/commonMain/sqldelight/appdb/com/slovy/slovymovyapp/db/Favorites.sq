@@ -571,14 +571,11 @@ FROM card
 WHERE sense_id = :sense_id
   AND lang_code = :lang_code;
 
--- Reviews of removed favorites stay in the log but say nothing about the words studied now, so
--- the intake retention gate does not count them; a re-added word counts again.
 countReviewsSince:
 SELECT COUNT(*)
 FROM review_log r INDEXED BY idx_review_log_recent
 JOIN card c ON c.id = r.card_id
 WHERE c.lang_code = :lang_code
-  AND c.suspended = 0
   AND r.reviewed_at >= :since;
 
 countReviewsBetween:
@@ -648,6 +645,25 @@ SELECT COUNT(*)
 FROM card;
 
 countSuccessfulReviewsSince:
+SELECT COUNT(*)
+FROM review_log r INDEXED BY idx_review_log_recent
+JOIN card c ON c.id = r.card_id
+WHERE c.lang_code = :lang_code
+  AND r.reviewed_at >= :since
+  AND r.rating != 1;
+
+-- The intake retention gate judges the words studied now: reviews of removed favorites stay
+-- in the log for the stats above but do not count here, and count again once the word is
+-- re-added. Numerator and denominator must keep the same card filter.
+countActiveCardReviewsSince:
+SELECT COUNT(*)
+FROM review_log r INDEXED BY idx_review_log_recent
+JOIN card c ON c.id = r.card_id
+WHERE c.lang_code = :lang_code
+  AND c.suspended = 0
+  AND r.reviewed_at >= :since;
+
+countActiveCardSuccessfulReviewsSince:
 SELECT COUNT(*)
 FROM review_log r INDEXED BY idx_review_log_recent
 JOIN card c ON c.id = r.card_id

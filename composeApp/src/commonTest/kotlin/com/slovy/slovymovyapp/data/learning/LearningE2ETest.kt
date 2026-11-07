@@ -393,11 +393,16 @@ class LearningE2ETest : BaseTest() {
             assertTrue(env.intake.canContinueWithPendingFavoritesNow("en"), "review of a removed favorite must not pause intake")
             val result = env.intake.continueWithPendingFavoritesNow("en")
             assertTrue(result.cardsCreated > 0, "pending favorite activates once the failed word is removed")
-            assertEquals(emptyList(), result.skipped)
+            assertEquals(emptyList(), result.skipped, "nothing is skipped once the failed word is removed")
             assertNotNull(
                 env.app.favoritesQueries.selectFavoriteWithActivation(queued.senseId.toString(), "en")
                     .executeAsOne().activated_at,
+                "the pending favorite is marked activated",
             )
+
+            env.addFavorite(removed)
+
+            assertFalse(env.intake.canContinueWithPendingFavoritesNow("en"), "re-adding the word counts its failed review again")
         }
     }
 
