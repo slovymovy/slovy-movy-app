@@ -366,10 +366,10 @@ class IntakeService(
         if (due > config.pauseIntakeIfQueueAbove) return SkipReason.QUEUE_TOO_FULL
 
         val weekAgo = (now - 7.days).toEpochMilliseconds()
-        val reviewCount = learning.countReviewsSince(langCode, weekAgo).executeAsOne()
+        val reviewCount = learning.countActiveCardReviewsSince(langCode, weekAgo).executeAsOne()
         if (reviewCount < config.pauseIntakeRetentionMinReviews) return null
 
-        val successful = learning.countSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
+        val successful = learning.countActiveCardSuccessfulReviewsSince(langCode, weekAgo).executeAsOne()
         val retention = successful.toDouble() / reviewCount
         return if (retention < config.pauseIntakeIfRetentionBelow) {
             SkipReason.RETENTION_TOO_LOW
