@@ -70,7 +70,7 @@ class StatsScreenDataTest : BaseTest() {
         )
 
         val service = newService()
-        val data = service.statsScreenData("en", today, tz)
+        val data = service.statsScreenData("en", today, CardFamily.entries, tz)
 
         val counts = data.pipeline.associate { it.id to it.count }
         assertEquals(0, counts[StatsPipelineStageId.QUEUE])
@@ -94,7 +94,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 8.hours)
         insertReviewLog(cardId, today.atStartOfDayIn(tz) - 1.days + 8.hours)
 
-        val snapshot = newService().rewardSnapshot("en", timeZone = tz, today = today)
+        val snapshot = newService().rewardSnapshot("en", CardFamily.entries, timeZone = tz, today = today)
         val counts = snapshot.pipeline.associate { it.id to it.count }
 
         assertEquals(2, snapshot.streakDays)
@@ -109,7 +109,7 @@ class StatsScreenDataTest : BaseTest() {
         insertCard(senseId = Uuid.random(), lemmaId = lemmaA, state = CardState.LEARNING, stability = 0.2)
         insertCard(senseId = Uuid.random(), lemmaId = lemmaB, state = CardState.REVIEW, stability = 5.0)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(2, data.wordsTotal)
     }
 
@@ -134,13 +134,13 @@ class StatsScreenDataTest : BaseTest() {
         insertFavorite(senseId = Uuid.random(), lemma = "activated", activatedAt = nowInstant.toEpochMilliseconds())
         insertFavorite(senseId = Uuid.random(), lemma = "other-language", langCode = "nl")
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         val counts = data.pipeline.associate { it.id to it.count }
 
         assertEquals(3, counts[StatsPipelineStageId.QUEUE])
         assertEquals(3, data.wordsTotal)
 
-        val otherLanguage = newService().statsScreenData("nl", today, tz)
+        val otherLanguage = newService().statsScreenData("nl", today, CardFamily.entries, tz)
         val otherCounts = otherLanguage.pipeline.associate { it.id to it.count }
         assertEquals(1, otherCounts[StatsPipelineStageId.QUEUE])
         assertEquals(1, otherLanguage.wordsTotal)
@@ -163,7 +163,7 @@ class StatsScreenDataTest : BaseTest() {
         // Today noon — counts
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 12.hours)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(2, data.reviewsToday)
     }
 
@@ -183,7 +183,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, LocalDate(2026, 5, 7).atStartOfDayIn(tz) + 8.hours) // Thu — counts
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 12.hours) // today — counts
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(3, data.reviewsWeek)
     }
 
@@ -205,7 +205,7 @@ class StatsScreenDataTest : BaseTest() {
         // gap on day -4
         insertReviewLog(cardId, today.atStartOfDayIn(tz) - 5.days + 12.hours)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(4, data.streakDays)
     }
 
@@ -222,7 +222,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, today.atStartOfDayIn(tz) - 1.days + 12.hours)
         insertReviewLog(cardId, today.atStartOfDayIn(tz) - 2.days + 12.hours)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(2, data.streakDays)
     }
 
@@ -243,7 +243,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, LocalDate(2026, 5, 1).atStartOfDayIn(tz) + 20.hours) // dedup
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 12.hours)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(
             setOf(
                 StatsPracticeDay(2026, 3, 30),
@@ -269,7 +269,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, LocalDate(2025, 8, 12).atStartOfDayIn(tz) + 12.hours)
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 12.hours)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(3, data.activeDaysTotal)
     }
 
@@ -288,7 +288,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 12.hours, durationMs = 1.hours.inWholeMilliseconds)
         insertReviewLog(cardId, today.atStartOfDayIn(tz) + 18.hours, durationMs = 30.seconds.inWholeMilliseconds)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(61, data.minutesToday)
         assertEquals(62, data.minutesWeek)
     }
@@ -316,8 +316,8 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardEn, today.atStartOfDayIn(tz) + 8.hours, durationMs = 120_000)
         insertReviewLog(cardNl, today.atStartOfDayIn(tz) + 9.hours, durationMs = 240_000)
 
-        val en = newService().statsScreenData("en", today, tz)
-        val nl = newService().statsScreenData("nl", today, tz)
+        val en = newService().statsScreenData("en", today, CardFamily.entries, tz)
+        val nl = newService().statsScreenData("nl", today, CardFamily.entries, tz)
 
         assertEquals(2, en.minutesToday)
         assertEquals(4, nl.minutesToday)
@@ -338,7 +338,7 @@ class StatsScreenDataTest : BaseTest() {
             insertReviewLog(cardId, today.atStartOfDayIn(tz) - offset.days + 12.hours)
         }
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(streakLength, data.streakDays)
     }
 
@@ -356,7 +356,7 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardId, LocalDate(2024, 4, 7).atStartOfDayIn(tz) + 12.hours)
         insertReviewLog(cardId, LocalDate(2024, 4, 22).atStartOfDayIn(tz) + 12.hours)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(setOf(7, 22), data.practiceLog.map { it.day }.toSet())
         assertTrue(data.practiceLog.all { it.year == 2024 && it.monthZeroBased == 3 })
     }
@@ -384,11 +384,11 @@ class StatsScreenDataTest : BaseTest() {
         insertReviewLog(cardEn, today.atStartOfDayIn(tz) + 8.hours)
         insertReviewLog(cardNl, today.atStartOfDayIn(tz) + 9.hours)
 
-        val en = newService().statsScreenData("en", today, tz)
+        val en = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(1, en.reviewsToday)
         assertEquals(1, en.wordsTotal)
 
-        val nl = newService().statsScreenData("nl", today, tz)
+        val nl = newService().statsScreenData("nl", today, CardFamily.entries, tz)
         assertEquals(1, nl.reviewsToday)
         assertEquals(1, nl.wordsTotal)
     }
@@ -404,10 +404,46 @@ class StatsScreenDataTest : BaseTest() {
         )
         insertCard(senseId = Uuid.random(), lemmaId = Uuid.random(), state = CardState.REVIEW, stability = 1.0)
 
-        val data = newService().statsScreenData("en", today, tz)
+        val data = newService().statsScreenData("en", today, CardFamily.entries, tz)
         assertEquals(1, data.wordsTotal)
         assertEquals(1, data.pipeline.sumOf { it.count })
     }
+
+    @Test
+    fun pipeline_judges_a_sense_on_its_studied_families_only() {
+        val sense = Uuid.random()
+        val lemma = Uuid.random()
+        insertCard(senseId = sense, lemmaId = lemma, state = CardState.REVIEW, stability = MATURITY_STABILITY_DAYS + 5)
+        insertCard(
+            senseId = sense,
+            lemmaId = lemma,
+            state = CardState.LEARNING,
+            stability = 1.0,
+            family = CardFamily.PRODUCE_WORD,
+        )
+
+        val everything = newService().pipelineSnapshot("en", CardFamily.entries)
+        assertEquals(1, everything.count(StatsPipelineStageId.FRESH), "The weak production card holds the word back")
+
+        val recognitionOnly = newService().pipelineSnapshot("en", listOf(CardFamily.RECOGNIZE_SENSE))
+        assertEquals(
+            1,
+            recognitionOnly.count(StatsPipelineStageId.LEARNED),
+            "With production switched off the word is learned in every format still studied",
+        )
+        assertEquals(0, recognitionOnly.count(StatsPipelineStageId.FRESH))
+
+        val listeningOnly = newService().pipelineSnapshot("en", listOf(CardFamily.RECOGNIZE_VOICE))
+        assertEquals(
+            1,
+            listeningOnly.count(StatsPipelineStageId.QUEUE),
+            "A word with no card in a studied family is waiting to be re-entered",
+        )
+        assertEquals(0, listeningOnly.count(StatsPipelineStageId.LEARNED))
+    }
+
+    private fun List<StatsPipelineStage>.count(id: StatsPipelineStageId): Int =
+        single { it.id == id }.count
 
     private fun newService(): StatsService = StatsService(
         learning = queries,
@@ -424,13 +460,14 @@ class StatsScreenDataTest : BaseTest() {
         cardId: Uuid = Uuid.random(),
         langCode: String = "en",
         suspended: Boolean = false,
+        family: CardFamily = CardFamily.RECOGNIZE_SENSE,
     ) {
         queries.insertCard(
             id = cardId,
             sense_id = senseId,
             lemma_id = lemmaId,
             lang_code = langCode,
-            family = CardFamily.RECOGNIZE_SENSE,
+            family = family,
             state = state,
             stability = stability,
             difficulty = 5.0,

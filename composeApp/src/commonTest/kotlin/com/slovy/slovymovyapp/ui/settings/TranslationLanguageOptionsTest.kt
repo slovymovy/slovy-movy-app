@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 class TranslationLanguageOptionsTest {
 
     private fun learning(vararg languages: Language) = languages.map {
-        LearningLanguageUiState(language = it, dictionarySizeBytes = 1)
+        LearningLanguageUiState(language = it, dictionarySizeBytes = 1, hasStudyFormats = true)
     }
 
     @Test

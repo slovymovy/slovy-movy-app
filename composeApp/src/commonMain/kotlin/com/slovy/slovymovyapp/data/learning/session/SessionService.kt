@@ -8,11 +8,16 @@ import com.slovy.slovymovyapp.data.Language
 import com.slovy.slovymovyapp.data.favorites.CardScheduleSnapshot
 import com.slovy.slovymovyapp.data.favorites.applyCardScheduleSnapshots
 import com.slovy.slovymovyapp.data.learning.*
-import com.slovy.slovymovyapp.data.learning.fsrs.CrossFamilyCredit
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsConfig
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
 import com.slovy.slovymovyapp.data.learning.fsrs.UnlockRule
+import com.slovy.slovymovyapp.data.learning.fsrs.backwardCreditDelay
+import com.slovy.slovymovyapp.data.learning.fsrs.crossFamilyCreditFactor
+import com.slovy.slovymovyapp.data.learning.fsrs.forwardCreditDelay
+import com.slovy.slovymovyapp.data.learning.fsrs.inheritedStability
+import com.slovy.slovymovyapp.data.learning.fsrs.reentryScheduling
+import com.slovy.slovymovyapp.data.learning.fsrs.sameSenseExposureCooldown
 import com.slovy.slovymovyapp.data.learning.stats.retrievability
 import com.slovy.slovymovyapp.data.remote.LanguageCard
 import com.slovy.slovymovyapp.data.remote.LanguageCardResponseSense
@@ -40,6 +45,8 @@ class SessionService(
     private val config: FsrsConfig = FsrsDefaults.config(),
     private val clock: Clock,
     private val translationTargets: suspend (Language) -> List<Language> = { emptyList() },
+    /** The learner's formats for a language, given its already-resolved translation targets. */
+    private val studyFormats: suspend (Language, List<Language>) -> StudyFormatSelection,
 ) {
     fun nextCard(
         langCode: String,
@@ -52,25 +59,46 @@ class SessionService(
             var loadingEmissions = 0L
             try {
                 val now = clock.now().toEpochMilliseconds()
+                val language = Language.fromCodeOrNull(langCode)
+                if (language == null) {
+                    AppLogger.warn(TAG, "Card selection skipped: unknown language lang=$langCode", null)
+                    emit(null)
+                    return@useWithResult
+                }
+                // Resolved once per selection, not per candidate: both are settings reads.
+                val targets = resolveTranslationTargets(language)
+                val formats = studyFormats(language, targets)
                 val candidates = nextCandidates(
                     langCode = langCode,
                     now = now,
                     sessionStartedAt = sessionStartedAt.toEpochMilliseconds(),
-                    excludedFamilies = excludedFamilies,
+                    // A family the learner switched off is never served, whatever it has due.
+                    excludedFamilies = excludedFamilies + formats.excludedFamilies,
                 )
                 putMetric("candidates", candidates.size.toLong())
                 for ((card, priorityScore) in candidates) {
                     attemptedCandidates += 1
-                    val sessionCard = loadUntilTerminal(card) {
+                    val (result, sessionCard) = loadUntilTerminal(card, language, targets, formats) {
                         loadingEmissions += 1
                     }
                     if (sessionCard == null) {
-                        // No playable variant (e.g. the configured translation languages carry no
-                        // data for this sense) or the favorite is gone. Bury the card for the
-                        // standard failed-card cooldown instead of leaving it due and silently
-                        // re-scanned forever; a later attempt may find data (settings changed,
-                        // fetch succeeded online).
-                        setCardAvailableAfter(card)
+                        // No playable variant or the favorite is gone. Bury the card instead of
+                        // leaving it due and silently re-scanned forever. When the sense could be
+                        // played in a format the learner switched off, no fetch will change that,
+                        // so it rests longer, and the sense is re-entered in a studied family that
+                        // can play it, if there is one, since intake only re-enters senses with no
+                        // card in a studied family at all. The new card waits for its own due
+                        // time like any credited card; this selection goes on with the candidates
+                        // it has. Otherwise data may still arrive (settings changed, fetch
+                        // succeeded online) and the standard failed-card cooldown applies.
+                        // Only a fetch that finished cleanly can say so: after a failed one the
+                        // bilingual data may simply not have arrived, and the next attempt may
+                        // bring it.
+                        val sense = result?.takeIf { it.error == null }?.card?.findSense(card.senseId.toString())
+                        val unplayableUnderFormats = sense != null &&
+                            buildTaskVariants(card.family, sense, targets, StudyFormatSelection.ALL).isNotEmpty()
+                        setCardAvailableAfter(card, unplayableUnderFormats)
+                        if (unplayableUnderFormats) reenterInPlayableFamily(card, sense, targets, formats, now)
                         continue
                     }
                     val loadState = sessionCard.loadState()
@@ -120,6 +148,12 @@ class SessionService(
             trace.putMetric("duration_ms", durationMs)
             val now = clock.now()
             val nowMs = now.toEpochMilliseconds()
+            // Read at submit time, not at load time: the learner may have changed the formats
+            // from the session menu while this card was on screen, and the ladder must not
+            // unlock into a family that is off by now.
+            val language = Language.fromCodeOrNull(card.card.langCode)
+                ?: error("Unknown learning card language: ${card.card.langCode}")
+            val formats = studyFormats(language, card.translationTargets)
             val before = card.card.scheduling
             val after = scheduler.apply(before, outcome, now)
             val elapsedDays = scheduler.elapsedDaysForReview(before, now)
@@ -199,7 +233,7 @@ class SessionService(
                     propagateSameSenseCredit(card.card, after, outcome.rating, nowMs)
                 }
                 if (outcome.rating.unlocksNextFamily()) {
-                    unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs)
+                    unlockNextFamilyIfEligible(card, after, outcome.rating, nowMs, formats)
                 }
             }
 
@@ -208,7 +242,7 @@ class SessionService(
     }
 
     suspend fun putCardForLater(card: SessionCard) = withContext(Dispatchers.IO) {
-        setCardAvailableAfter(card.card)
+        setCardAvailableAfter(card.card, unplayableUnderFormats = false)
     }
 
     suspend fun suspendWord(card: SessionCard, duration: Duration): List<CardScheduleSnapshot> =
@@ -242,43 +276,56 @@ class SessionService(
 
     suspend fun continueDelayedCardsNow(langCode: String) = withContext(Dispatchers.IO) {
         val now = clock.now().toEpochMilliseconds()
-        val before = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
+        // Only cards a session can serve are released; a hidden family's delay stays as it is.
+        val language = Language.fromCodeOrNull(langCode) ?: return@withContext
+        val families = studyFormats(language, resolveTranslationTargets(language)).families
+        val before = learning.countDelayedDueCardsByLang(langCode, now, families).executeAsOne()
         learning.clearAvailableAfterForDelayedLemmas(
             lang_code = langCode,
             now = now,
+            allowed_families = families,
             lemma_limit = config.continueNowLemmaLimit.toLong(),
         )
-        val after = learning.countDelayedDueCardsByLang(langCode, now).executeAsOne()
+        val after = learning.countDelayedDueCardsByLang(langCode, now, families).executeAsOne()
         AppLogger.debug(TAG, null) {
             "Continue delayed cards now lang=$langCode lemmaLimit=${config.continueNowLemmaLimit} " +
                 "delayedDueCards=$before->$after unblocked=${(before - after).coerceAtLeast(0)}"
         }
     }
 
-    private suspend fun loadSessionCard(card: Card): Flow<Pair<WordResult, SessionCard?>>? {
+    private suspend fun resolveTranslationTargets(language: Language): List<Language> =
+        translationTargets(language)
+            .filter { it != language }
+            .distinctBy { it.code }
+
+    private suspend fun loadSessionCard(
+        card: Card,
+        language: Language,
+        targets: List<Language>,
+        formats: StudyFormatSelection,
+    ): Flow<Pair<WordResult, SessionCard?>>? {
         val favorite =
             learning.selectFavoriteWithActivation(card.senseId.toString(), card.langCode).executeAsOneOrNull()
                 ?: return null
-        val language = Language.fromCodeOrNull(card.langCode)
-            ?: error("Unknown learning card language: ${card.langCode}")
-        val targets = translationTargets(language)
-            .filter { it != language }
-            .distinctBy { it.code }
 
         return wordFetchManager.getWord(
             language = language,
             lemma = favorite.lemma,
             translationTargets = targets,
         ).map { result ->
-            result to result.toSessionCard(card, targets)
+            result to result.toSessionCard(card, targets, formats)
         }
     }
 
+
     private suspend fun FlowCollector<SessionCard?>.loadUntilTerminal(
         card: Card,
+        language: Language,
+        targets: List<Language>,
+        formats: StudyFormatSelection,
         onLoadingEmission: () -> Unit,
-    ): SessionCard? {
-        val sessionCardFlow = loadSessionCard(card) ?: return null
+    ): Pair<WordResult?, SessionCard?> {
+        val sessionCardFlow = loadSessionCard(card, language, targets, formats) ?: return null to null
         return sessionCardFlow
             .onEach { (result, sessionCard) ->
                 if (sessionCard != null && result.isFetchLoading()) {
@@ -290,15 +337,55 @@ class SessionService(
             // interim emission may still lack the translations that make a variant playable,
             // and burying on it would punish a card whose data was seconds away.
             .first { (result, _) -> !result.isFetchLoading() }
-            .second
+    }
+
+    /**
+     * Gives a sense whose [card] cannot be played under the formats a card in the first studied
+     * family that can play it, with this card's memory and due time. Nothing happens
+     * when no studied family can play the sense or the family already has a card.
+     */
+    private fun reenterInPlayableFamily(
+        card: Card,
+        sense: LanguageCardResponseSense,
+        targets: List<Language>,
+        formats: StudyFormatSelection,
+        now: Long,
+    ) {
+        val target = formats.reentryFamilies(card.scheduling.state, config.defaultIntakeFamilies).firstOrNull { family ->
+            family != card.family && buildTaskVariants(family, sense, targets, formats).isNotEmpty()
+        } ?: return
+        val scheduling = config.reentryScheduling(
+            sourceFamily = card.family,
+            sourceState = card.scheduling.state,
+            sourceStability = card.scheduling.stability,
+            sourceDifficulty = card.scheduling.difficulty,
+            targetFamily = target,
+        )
+        // The new card takes over this card's due time; see FsrsConfig.reentryScheduling.
+        val due = if (scheduling.state == CardState.NEW) now else maxOf(now, card.scheduling.dueEpochMs)
+        AppLogger.debug(TAG, null) {
+            "Re-entering unplayable card=${card.id} sense=${card.senseId} from=${card.family} to=$target " +
+                "inheritedStability=${formatDouble(scheduling.stability)} dueIn=${formatDelay(due, now)}"
+        }
+        insertTaskIfMissing(
+            source = card,
+            family = target,
+            now = now,
+            due = due,
+            state = scheduling.state,
+            stability = scheduling.stability,
+            difficulty = scheduling.difficulty,
+            // A paused word stays paused in its new family.
+            availableAfter = card.scheduling.availableAfterEpochMs,
+        )
     }
 
     private fun WordResult.isFetchLoading(): Boolean =
         isWordLoading || isTranslationLoading
 
     @OptIn(ExperimentalTime::class)
-    private fun setCardAvailableAfter(card: Card) {
-        val delay = config.buryFailedSessionCardsFor
+    private fun setCardAvailableAfter(card: Card, unplayableUnderFormats: Boolean) {
+        val delay = if (unplayableUnderFormats) config.buryUnplayableUnderFormatsFor else config.buryFailedSessionCardsFor
         if (delay <= Duration.ZERO) {
             AppLogger.debug(TAG, null) {
                 "Delay failed/session card skipped: card=${card.id} lang=${card.langCode} family=${card.family} delay=$delay"
@@ -524,40 +611,13 @@ class SessionService(
         return scaled.coerceIn(floor, cap)
     }
 
-    private fun stabilityCooldown(
-        stability: Double,
-        ratio: Double,
-        floor: Duration,
-        cap: Duration,
-    ): Duration {
-        if (ratio <= 0.0) return Duration.ZERO
-        val scaled = stability.toDuration(DurationUnit.DAYS) * ratio
-        return scaled.coerceIn(floor, cap)
-    }
-
     private fun sameSenseExposureCooldown(after: CardScheduling): Duration =
-        stabilityCooldown(
-            after.stability,
-            config.sameSenseExposureRatio,
-            config.sameSenseExposureFloor,
-            config.sameSenseExposureCap,
-        )
+        config.sameSenseExposureCooldown(after.stability)
 
     private fun creditDelay(stability: Double, direction: CreditDirection): Duration =
         when (direction) {
-            CreditDirection.FORWARD -> stabilityCooldown(
-                stability,
-                config.forwardCreditDelayRatio,
-                config.forwardCreditDelayFloor,
-                config.forwardCreditDelayCap,
-            )
-
-            CreditDirection.BACKWARD -> stabilityCooldown(
-                stability,
-                config.backwardCreditDelayRatio,
-                config.backwardCreditDelayFloor,
-                config.backwardCreditDelayCap,
-            )
+            CreditDirection.FORWARD -> config.forwardCreditDelay(stability)
+            CreditDirection.BACKWARD -> config.backwardCreditDelay(stability)
         }
 
     private fun delayedEpochMs(nowMs: Long, delay: Duration): Long =
@@ -593,6 +653,7 @@ class SessionService(
         card: Card,
         sense: LanguageCardResponseSense?,
         translationTargets: List<Language>,
+        studyFormats: StudyFormatSelection,
     ): List<CardVariant> {
         sense ?: return emptyList()
         val lastReview = learning.selectLastReviewVariantByCard(card.id).executeAsOneOrNull()
@@ -601,19 +662,24 @@ class SessionService(
             family = card.family,
             sense = sense,
             translationTargets = translationTargets,
+            studyFormats = studyFormats,
             cardStability = card.scheduling.stability.toDuration(DurationUnit.DAYS),
             lastVariant = lastVariant,
         )
     }
 
-    private fun WordResult.toSessionCard(card: Card, translationTargets: List<Language>): SessionCard? {
+    private fun WordResult.toSessionCard(
+        card: Card,
+        translationTargets: List<Language>,
+        studyFormats: StudyFormatSelection,
+    ): SessionCard? {
         val senseId = card.senseId.toString()
         val sense = this.card?.findSense(senseId)
         val studiedSenseIds = learning.selectActiveSenseIdsByLemma(
             lang_code = card.langCode,
             lemma_id = card.lemmaId,
         ).executeAsList().mapTo(HashSet()) { it.toString() }
-        val sessionCards = sortedVariants(card, sense, translationTargets).map { variant ->
+        val sessionCards = sortedVariants(card, sense, translationTargets, studyFormats).map { variant ->
             toSessionCard(card, variant, senseId, sense, studiedSenseIds, translationTargets)
         }
 
@@ -663,6 +729,7 @@ class SessionService(
         after: CardScheduling,
         rating: Rating,
         now: Long,
+        formats: StudyFormatSelection,
     ) {
         val stability = after.stability.toDuration(DurationUnit.DAYS)
         val rules = config.unlockRules.filter { rule ->
@@ -677,7 +744,7 @@ class SessionService(
             }
             return
         }
-        rules.forEach { rule -> unlockFamily(card, after, rating, now, rule, sense) }
+        rules.forEach { rule -> unlockFamily(card, after, rating, now, rule, sense, formats) }
     }
 
     private fun unlockFamily(
@@ -687,6 +754,7 @@ class SessionService(
         now: Long,
         rule: UnlockRule,
         sense: LanguageCardResponseSense,
+        formats: StudyFormatSelection,
     ) {
         val target = rule.targetFamily
         val credit = crossFamilyCredit(card.card.family, target, rating)
@@ -697,14 +765,17 @@ class SessionService(
             }
             return
         }
-        val variants = buildTaskVariants(target, sense, card.translationTargets)
+        // A format the learner switched off is never created: the variants are built under the
+        // selection, so a family playable only in an off format yields none and stays unlocked
+        // until the format is on again.
+        val variants = buildTaskVariants(target, sense, card.translationTargets, formats)
         if (variants.isEmpty()) {
             AppLogger.debug(TAG, null) {
                 "Unlock skipped: no playable variants source=${card.card.id} sense=${card.senseId} to=$target"
             }
             return
         }
-        val inheritedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+        val inheritedStability = config.inheritedStability(after.stability, credit.factor)
         val due = delayedEpochMs(now, creditDelay(inheritedStability, CreditDirection.FORWARD))
         val availableAfter = delayedEpochMs(now, sameSenseExposureCooldown(after))
         AppLogger.debug(TAG, null) {
@@ -781,7 +852,7 @@ class SessionService(
             .filter { it.id != source.id }
             .forEach { sibling ->
                 val credit = crossFamilyCredit(source.family, sibling.family, rating) ?: return@forEach
-                val propagatedStability = (after.stability * credit.factor).coerceAtLeast(MIN_INHERITED_STABILITY)
+                val propagatedStability = config.inheritedStability(after.stability, credit.factor)
                 // The SQL repeats this guard so concurrent writes cannot lower stability.
                 if (propagatedStability <= sibling.scheduling.stability) {
                     AppLogger.debug(TAG, null) {
@@ -841,10 +912,7 @@ class SessionService(
         targetFamily: CardFamily,
         rating: Rating,
     ): AppliedCredit? {
-        val credit = config.crossFamilyCredits.firstOrNull {
-            it.sourceFamily == sourceFamily && it.targetFamily == targetFamily
-        } ?: return null
-        val factor = credit.factorFor(rating) ?: return null
+        val factor = config.crossFamilyCreditFactor(sourceFamily, targetFamily, rating) ?: return null
         val direction = if (targetFamily.ordinal > sourceFamily.ordinal) {
             CreditDirection.FORWARD
         } else {
@@ -852,15 +920,6 @@ class SessionService(
         }
         return AppliedCredit(factor, direction)
     }
-
-    private fun CrossFamilyCredit.factorFor(rating: Rating): Double? =
-        when (rating) {
-            Rating.GOOD -> goodFactor
-            Rating.EASY -> easyFactor
-            Rating.AGAIN,
-            Rating.HARD,
-                -> null
-        }?.takeIf { it > 0.0 }
 
     private data class AppliedCredit(
         val factor: Double,
@@ -884,7 +943,6 @@ class SessionService(
     private companion object {
         const val TAG: String = "SessionService"
         const val HARD_EXCLUDE: Double = 1_000_000.0
-        const val MIN_INHERITED_STABILITY: Double = 0.001
         const val PROPAGATED_REVIEW_STABILITY_DAYS: Double = 1.0
         val DAY: Duration = 1.days
         const val RECENT_LIMIT: Int = 20

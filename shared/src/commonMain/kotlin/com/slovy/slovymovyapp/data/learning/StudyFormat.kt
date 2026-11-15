@@ -1,0 +1,99 @@
+package com.slovy.slovymovyapp.data.learning
+
+/**
+ * The card formats a learner may switch off: the easiest way a word comes back and the hardest.
+ * Every other way is always on; see [CardKind.format].
+ */
+enum class StudyFormat {
+    /**
+     * The recognition step, the first card a word gets: the word is shown and its translation
+     * recalled. Off, a word skips recognition altogether, its source-only form included, and
+     * starts at production.
+     */
+    WORD_TO_TRANSLATION,
+
+    /**
+     * The two definition kinds: explained in the studied language, with no translation anywhere.
+     * To the learner they are one idea. The source-sentence cloze is not one of them: it needs a
+     * translation target for its hint and its back.
+     */
+    SOURCE_ONLY,
+}
+
+/**
+ * The format that switches this kind off, or null for a kind that is always on. The source-only
+ * recognition kind answers to both ends: see [StudyFormatSelection.allows].
+ */
+val CardKind.format: StudyFormat?
+    get() = when (this) {
+        CardKind.WORD_TO_TRANSLATION -> StudyFormat.WORD_TO_TRANSLATION
+        CardKind.WORD_TO_SOURCE_DEFINITION,
+        CardKind.SOURCE_DEFINITION_TO_WORD,
+            -> StudyFormat.SOURCE_ONLY
+
+        CardKind.TRANSLATION_TO_WORD,
+        CardKind.CLOZE_TRANSLATION,
+        CardKind.CLOZE_SOURCE,
+        CardKind.LISTENING_TRANSLATION,
+        CardKind.TRANSLATION_TO_WORD_TYPED,
+            -> null
+    }
+
+/**
+ * The formats a learner studies a language with. It filters what a session serves and what the
+ * unlock rules create; it never touches a card that already exists, so switching a format off and
+ * on leaves every card, review and stability exactly as it was.
+ *
+ * The first switch is a family switch and the last a kind switch: with [StudyFormat.WORD_TO_TRANSLATION]
+ * off the recognition family is not studied at all, so a new word starts at production instead of
+ * meeting the hard source-only recognition card first; with [StudyFormat.SOURCE_ONLY] off the two
+ * source-only kinds are dropped wherever they live, except for a sense with no translation into
+ * any target, which `buildTaskVariants` keeps playable source-only. Both may be off: the always-on
+ * kinds keep every language studiable.
+ *
+ * Without translation targets ([playsTranslationKinds] false) only the source-only kinds can be
+ * played, since every other kind cues or answers with a translation; the stored choice does not
+ * apply there and every format counts as on.
+ */
+data class StudyFormatSelection(
+    val enabled: Set<StudyFormat>,
+    val playsTranslationKinds: Boolean,
+) {
+    fun allows(kind: CardKind): Boolean {
+        if (kind.family == CardFamily.RECOGNIZE_SENSE && StudyFormat.WORD_TO_TRANSLATION !in enabled) return false
+        val format = kind.format
+        if (format != null && format !in enabled) return false
+        return playsTranslationKinds || format == StudyFormat.SOURCE_ONLY
+    }
+
+    /** The task families with at least one playable kind, in ladder order. */
+    val families: List<CardFamily> = CardFamily.entries.filter { family ->
+        CardKind.entries.any { it.family == family && allows(it) }
+    }
+
+    val excludedFamilies: Set<CardFamily> = CardFamily.entries.toSet() - families.toSet()
+
+    /**
+     * The families a new word starts in: the [preferred] ones that are studied, or the first
+     * studied family of the ladder when none of them is.
+     */
+    fun intakeFamilies(preferred: List<CardFamily>): List<CardFamily> =
+        preferred.filter { it in families }.ifEmpty { families.take(1) }
+
+    /**
+     * The families a sense may re-enter from a card in [sourceState], in order of preference. A
+     * never-reviewed word has earned nothing, so it starts exactly where intake starts a new word
+     * ([intakeFamilies] of the [preferredIntake] families) and cannot skip the unlock gates; a
+     * reviewed word carries its memory to the first studied family that can play it.
+     */
+    fun reentryFamilies(sourceState: CardState, preferredIntake: List<CardFamily>): List<CardFamily> =
+        if (sourceState == CardState.NEW) intakeFamilies(preferredIntake) else families
+
+    fun with(format: StudyFormat, enabled: Boolean): StudyFormatSelection =
+        copy(enabled = if (enabled) this.enabled + format else this.enabled - format)
+
+    companion object {
+        /** Every format on, for a language with translation targets. */
+        val ALL: StudyFormatSelection = StudyFormatSelection(StudyFormat.entries.toSet(), playsTranslationKinds = true)
+    }
+}

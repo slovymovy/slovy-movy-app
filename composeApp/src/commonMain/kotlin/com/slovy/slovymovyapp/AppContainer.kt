@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import com.slovy.slovymovyapp.data.export.AppDataExporter
 import com.slovy.slovymovyapp.data.favorites.FavoritesRepository
+import com.slovy.slovymovyapp.data.learning.StudyFormatsRepository
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsDefaults
 import com.slovy.slovymovyapp.data.learning.fsrs.FsrsScheduler
 import com.slovy.slovymovyapp.data.learning.intake.IntakeService
@@ -46,6 +47,7 @@ internal class AppContainer(
     val wordFetchManager: WordFetchManager,
     val lemmaRecovery: LemmaRecovery,
     val lemmaRecoveryController: LemmaRecoveryController,
+    val studyFormatsRepository: StudyFormatsRepository,
     val intakeService: IntakeService,
     val sessionService: SessionService,
     val statsService: StatsService,
@@ -120,15 +122,22 @@ internal fun rememberAppContainer(
             enableFuzz = fsrsConfig.enableFuzz,
         )
     }
-    val intakeService = remember(appDatabase, dictionaryRepository, fsrsConfig) {
+    val studyFormatsRepository = remember(settingsRepository, dictionaryRepository) {
+        StudyFormatsRepository(
+            settingsRepository = settingsRepository,
+            translationTargets = dictionaryRepository::defaultTranslationTargets,
+        )
+    }
+    val intakeService = remember(appDatabase, dictionaryRepository, fsrsConfig, studyFormatsRepository) {
         IntakeService(
             learning = appDatabase.favoritesQueries,
             dictionary = dictionaryRepository,
             config = fsrsConfig,
             clock = Clock.System,
+            studyFormats = studyFormatsRepository::get,
         )
     }
-    val sessionService = remember(appDatabase, wordFetchManager, fsrsScheduler, fsrsConfig, dictionaryRepository) {
+    val sessionService = remember(appDatabase, wordFetchManager, fsrsScheduler, fsrsConfig, dictionaryRepository, studyFormatsRepository) {
         SessionService(
             learning = appDatabase.favoritesQueries,
             wordFetchManager = wordFetchManager,
@@ -137,6 +146,7 @@ internal fun rememberAppContainer(
             config = fsrsConfig,
             clock = Clock.System,
             translationTargets = dictionaryRepository::defaultTranslationTargets,
+            studyFormats = studyFormatsRepository::get,
         )
     }
     val statsService = remember(appDatabase, fsrsConfig) {
@@ -183,6 +193,7 @@ internal fun rememberAppContainer(
             wordFetchManager = wordFetchManager,
             lemmaRecovery = lemmaRecovery,
             lemmaRecoveryController = lemmaRecoveryController,
+            studyFormatsRepository = studyFormatsRepository,
             intakeService = intakeService,
             sessionService = sessionService,
             statsService = statsService,

@@ -34,5 +34,6 @@ data class Setting(
         LEGACY_VOICE_MIGRATION_DONE,
         STUDY_AUTOPLAY,
         SPELLING_BACKFILL_DONE,
+        STUDY_FORMATS,
     }
 }
