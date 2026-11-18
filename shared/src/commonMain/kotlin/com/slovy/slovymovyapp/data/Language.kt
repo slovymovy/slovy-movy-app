@@ -68,11 +68,11 @@ enum class Language(
     POLISH(
         "pl", "Polski", "🇵🇱", "Polish", supportedForLearning = true,
         translationPromptNotes = """
-            Write Polish in the Latin alphabet only. Never use a Russian word in place of a Polish one,
-            neither whole nor with its first letters in Latin. No Cyrillic letter in any translation,
-            definition, clarification or example, except the source headword cited in a definition
-            about that word. If Polish has no word for the sense, leave the declared translation empty
-            and paraphrase in the example.
+            Use Polish words only. The commonest error is a Russian word written in Latin letters and given a
+            Polish ending; a German or Czech word is the same error. Before you write a less common word, check
+            that Polish speakers use it. No Cyrillic letter anywhere, except a cited source headword.
+            Use swój when the owner is the subject, the genitive after negation, and ze/we before a difficult
+            cluster (ze stołu, we wsi). The subjunctive is "tryb łączący", never "tryb przypuszczający".
         """.trimIndent()
     ),
     FRENCH(
@@ -93,11 +93,13 @@ enum class Language(
     CZECH(
         "cs", "Čeština", "🇨🇿", "Czech",
         translationPromptNotes = """
-            Write Czech in the Latin alphabet only. Never use a Russian word in place of a Czech one,
-            neither whole nor with its first letters in Latin. No Cyrillic letter in any translation,
-            definition, clarification or example, except the source headword cited in a definition
-            about that word. If Czech has no word for the sense, leave the declared translation empty
-            and paraphrase in the example.
+            Use Czech words only. A Polish, Slovak or Russian word with a Czech ending is an error; before you
+            write a less common word, check that Czech speakers use it. No Cyrillic letter anywhere, except a
+            cited source headword.
+            Re-read every sentence for the clitics: se, si, mi, ti, ho, jsem, by stand in second position, and
+            se or si appears once per clause. Use svůj when the owner is the subject, check agreement of verb
+            and adjective with the noun, and write ve, se, ze, ke before a difficult cluster (ve škole, ze
+            stolu).
         """.trimIndent()
     ),
     TURKISH("tr", "Türkçe", "🇹🇷", "Turkish"),
