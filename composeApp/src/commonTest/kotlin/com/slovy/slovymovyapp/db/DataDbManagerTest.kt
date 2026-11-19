@@ -702,12 +702,12 @@ class DataDbManagerTest : BaseTest() {
         val remote = object : RemoteDataProvider {
             override suspend fun listFiles(platform: PlatformDbSupport) = listOf(
                 RemoteFile("dictionary_en.db", 100),
-                RemoteFile("dictionary_fr.db", 100), // French is a translation target only
+                RemoteFile("dictionary_it.db", 100), // Italian is a translation target only
                 RemoteFile("dictionary_el.db", 100), // Greek is declared but not offered at all
                 RemoteFile("dictionary_xx.db", 100), // no such language
-                RemoteFile("translation_en_fr.db", 10),
+                RemoteFile("translation_en_it.db", 10),
                 RemoteFile("translation_en_el.db", 10), // target not offered yet
-                RemoteFile("translation_fr_en.db", 10), // source not studiable
+                RemoteFile("translation_it_en.db", 10), // source not studiable
                 RemoteFile("translation_en_ja.db", 10), // Japanese is generated for English only...
                 RemoteFile("dictionary_ru.db", 100),
                 RemoteFile("translation_ru_ja.db", 10), // ...so this pair is never offered
@@ -727,7 +727,7 @@ class DataDbManagerTest : BaseTest() {
                 "only languages supported for learning are listed, whatever dictionaries the bucket holds"
             )
             assertEquals(
-                listOf(Language.FRENCH, Language.JAPANESE),
+                listOf(Language.ITALIAN, Language.JAPANESE),
                 available.first { it.language == Language.ENGLISH }.availableTranslations.map { it.targetLanguage },
                 "translations are listed only into targets the source language is translated into"
             )
