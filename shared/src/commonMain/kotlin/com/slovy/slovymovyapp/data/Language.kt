@@ -76,7 +76,7 @@ enum class Language(
         """.trimIndent()
     ),
     FRENCH(
-        "fr", "Français", "🇫🇷", "French",
+        "fr", "Français", "🇫🇷", "French", supportedForLearning = true,
         basePromptNotes = """
             French elides le, la, je, me, te, se, de, ne, que and si before a vowel or a mute h, joining
             them to the next word with an apostrophe. Tag only the learned word, never the elided word
