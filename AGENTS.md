@@ -29,7 +29,7 @@ Important namespaces and entry points:
 
 Supported languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, ES, and ZH; see
 `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`. Offline Wiktextract source mappings currently
-exist only for EN, RU, NL, PL, and DE, so only those can be learning languages; the rest are translation targets.
+exist only for EN, RU, NL, PL, DE, and FR, so only those can be learning languages; the rest are translation targets.
 A target is normally translated from every learning language; one generated for some of them only lists their codes in
 `Language.translationSourceCodes`. Every place that offers, requests or lists a translation decides through
 `Language.isTranslationTargetFor(source)` (onboarding, Settings, word fetches, the remote DB listing, the `/word` route).

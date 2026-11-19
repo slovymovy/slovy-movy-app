@@ -5,6 +5,8 @@ import com.slovy.slovymovyapp.data.Language
 private val MESSAGES_BY_LANGUAGE: Map<Language, List<String>> = mapOf(
     Language.ENGLISH to listOf("Well done!", "Great work!", "Nicely done!", "Good job!"),
     Language.GERMAN to listOf("Gut gemacht!", "Super!", "Sehr gut!", "Geschafft!"),
+    // French sets "!" off with a narrow no-break space, which never wraps away from the word
+    Language.FRENCH to listOf("Bien joué !", "Bravo !", "Très bien !", "C'est fait !"),
     Language.DUTCH to listOf("Goed gedaan!", "Goed bezig!", "Netjes!", "Lekker gewerkt!"),
     Language.POLISH to listOf("Dobra robota!", "Brawo!", "Świetnie!", "Udało się!"),
     Language.RUSSIAN to listOf("Отлично!", "Хорошая работа!", "Молодец!", "Готово!"),

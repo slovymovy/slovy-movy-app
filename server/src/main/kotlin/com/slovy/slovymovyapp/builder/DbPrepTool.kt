@@ -283,6 +283,20 @@ private val TEST_MODE_POS_SEEDS_BY_LANG: Map<String, List<PosWordSeed>> = mapOf(
         PosWordSeed("determiner", listOf("dieser", "jener", "kein")),
         PosWordSeed("numeral", listOf("eins", "zwei", "drei"))
     ),
+    "fr" to listOf(
+        PosWordSeed("article", listOf("le", "la", "un")),
+        PosWordSeed("noun", listOf("maison", "livre", "homme")),
+        PosWordSeed("name", listOf("paris", "france", "jean")),
+        PosWordSeed("verb", listOf("aller", "parler", "être")),
+        PosWordSeed("adjective", listOf("bon", "grand", "dernier")),
+        PosWordSeed("adverb", listOf("ici", "ne", "bien")),
+        PosWordSeed("pronoun", listOf("je", "tu", "il")),
+        PosWordSeed("preposition", listOf("de", "à", "dans")),
+        PosWordSeed("conjunction", listOf("et", "ou", "mais")),
+        PosWordSeed("interjection", listOf("ah", "oh", "bonjour")),
+        PosWordSeed("determiner", listOf("ce", "cette", "aucun")),
+        PosWordSeed("numeral", listOf("un", "deux", "trois"))
+    ),
     "pl" to listOf(
         PosWordSeed("article", listOf("ten", "ta", "to")),
         PosWordSeed("noun", listOf("testowanie", "dom", "książka")),
