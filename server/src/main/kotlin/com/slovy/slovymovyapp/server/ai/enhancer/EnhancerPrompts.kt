@@ -119,20 +119,16 @@ Your task is to enrich the LanguageCardResponse with translation data by:
 
 2. For each example in the language card:
    - Provide an accurate translation to ${'$'}TARGET_LANG
-   - Put the translation of the word in <w> </w> tags so it can be highlighted to a learner. Tags come in balanced pairs and are never nested. Tag only the word or words that render the headword in this sentence, always whole words. Auxiliaries, negation, pronouns, objects, prepositions, infinitive markers and neighbouring nouns stay outside. Tag both parts of a separable or reflexive verb. Never bend word order to keep a tag in one piece. Where the input notes above state otherwise for this language, follow the notes instead.
+   - Ensure the translation preserves the meaning and context
+   - Put the translation of the word in <w> </w> tags so it can be highlighted to a learner. A translation that is several words long may be tagged as it stands; what stays outside the tags is anything that merely sits beside the translation in the sentence - an article, a modifier, a neighbouring noun. Where the input notes above state otherwise for this language, follow the notes instead.
 
 Guidelines:
-- Translations: 1 to 3 per sense, lemma form, each a real word of ${'$'}TARGET_LANG that means this sense on its own. Everyday word first. Never coin a word; if none exists, give the short phrase speakers actually use for the headword itself.
-- Translations keep the part of speech and polarity of the headword wherever ${'$'}TARGET_LANG allows.
-- Only provide translations that are accurate, natural, and contextually appropriate for each specific sense_definition. Each translation renders the headword itself in this sense: never the neighbouring word, never a whole collocation or example phrase, never a broader category.
-- Choose translations from the sense definition, not from the examples. An example may naturally use a different word; do not adjust either to match the other.
-- If neither the extracted data nor your own knowledge gives a translation that means this sense on its own, leave translations empty.
-- Definitions should be clear and help learners understand the meaning in ${'$'}TARGET_LANG. One or two sentences in ${'$'}TARGET_LANG, ending with the language's full stop. Usage labels from the source definition are expressed in ${'$'}TARGET_LANG or dropped, never copied in the source language.
-- Example translations should be natural and idiomatic in ${'$'}TARGET_LANG. Translate the meaning, not the words: use the idiom and tense of ${'$'}TARGET_LANG, and the register the situation calls for. First read the source sentence for what it says: who does what to whom, dates, quantities, places and names. Do not add, drop or change facts, and check idioms and words with several meanings against the sense definition.
-- Sense clarifications: A clarification is a user-facing short phrase, under 6 words, always in ${'$'}TARGET_LANG. It names the concrete meaning, field, typical collocation or register of this sense, so a learner can tell it apart from the other senses with the same translation. It never restates the definition and never comments on the translation itself (closeness, lack of an equivalent, spelling, "kept as in the original").
-- Every word in every field must exist in ${'$'}TARGET_LANG with this meaning; proper names and words quoted from the source language stay as they are. A word from a related language, or a term calqued from English, is an error. Translate directly from the source language, not via English.
-- Before answering, re-read each example as a native speaker (word order, agreement, case, clitic placement, articles).
-- Every field is shown to a learner exactly as written; nothing in the output is a note to a reviewer.
+- Only provide translations that are accurate, natural, and contextually appropriate for each specific sense_definition.
+- Prefer the 2–4 most natural and frequent translations. If multiple possible translations overlap semantically, select the clearest and most common one for learners.
+- If a sense has no good translations in the extracted data, leave translations empty
+- Definitions should be clear and help learners understand the meaning in ${'$'}TARGET_LANG
+- Example translations should be natural and idiomatic in ${'$'}TARGET_LANG
+- Sense clarifications should help distinguish between different meanings of the target word
 
 Be precise and educational - this is for language learners who need clear, accurate translations.
         """.trimIndent()
