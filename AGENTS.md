@@ -29,7 +29,7 @@ Important namespaces and entry points:
 
 Supported languages are EN, RU, NL, PL, DE, FR, IT, CS, TR, ES, and ZH; see
 `shared/src/commonMain/kotlin/com/slovy/slovymovyapp/data/Language.kt`. Offline Wiktextract source mappings currently
-exist only for EN, RU, NL, PL, and DE, so only those can be learning languages; the rest are translation targets.
+exist only for EN, RU, NL, PL, DE, and FR, so only those can be learning languages; the rest are translation targets.
 A target is normally translated from every learning language; one generated for some of them only lists their codes in
 `Language.translationSourceCodes`. Every place that offers, requests or lists a translation decides through
 `Language.isTranslationTargetFor(source)` (onboarding, Settings, word fetches, the remote DB listing, the `/word` route).
@@ -349,6 +349,9 @@ Persisted enum/protocol invariants:
   adjectives: base forms and strong declension; nouns: the native cells with articles plus one bare row per word;
   personal pronouns: their own row of the pronoun table) and never merges tags. It drops abbreviations, symbols,
   unparsed rows and grammar that does not fit the part of speech; inflected words a learner can meet all stay.
+  `FrenchFormRules` keeps verbs to one single-word row per cell: it strips subject and reflexive pronouns
+  ("je parle" -> "parle"), adds the person and number the subject pronoun gave (the French edition tags it nowhere
+  else), and drops compound tenses and gerunds; it drops pronunciations and placeholders for every part of speech.
 - Raw-only online lemmas can be ingested first, processed data can later overlay them, and translations-only ingestion
   is supported only after the base senses exist.
 

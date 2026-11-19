@@ -75,7 +75,21 @@ enum class Language(
             and paraphrase in the example.
         """.trimIndent()
     ),
-    FRENCH("fr", "Français", "🇫🇷", "French"),
+    FRENCH(
+        "fr", "Français", "🇫🇷", "French", supportedForLearning = true,
+        basePromptNotes = """
+            French elides le, la, je, me, te, se, de, ne and que before a vowel or a mute h, joining
+            them to the next word with an apostrophe; si is elided only before il and ils (s'il, s'ils,
+            but si elle, si on). Tag only the learned word, never the elided word attached to it:
+            l'<w>homme</w>, j'<w>aime</w>, qu'<w>il</w> vient.
+
+            When the learned word is itself the elided one, tag it with its apostrophe and leave the next
+            word outside: <w>l'</w>homme for le, <w>j'</w>aime for je, <w>qu'</w>il vient for que.
+
+            A word whose apostrophe belongs to its spelling is tagged whole: <w>aujourd'hui</w>,
+            <w>presqu'île</w>. Write the straight apostrophe ' throughout.
+        """.trimIndent()
+    ),
     ITALIAN("it", "Italiano", "🇮🇹", "Italian"),
     CZECH(
         "cs", "Čeština", "🇨🇿", "Czech",

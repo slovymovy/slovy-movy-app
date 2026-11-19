@@ -28,6 +28,7 @@ val LANG_TO_SOURCE_FILE: Map<String, String> = mapOf(
     "nl" to "nl-extract.jsonl",
     "pl" to "pl-extract.jsonl",
     "de" to "de-extract.jsonl",
+    "fr" to "fr-extract.jsonl",
 )
 
 /**
